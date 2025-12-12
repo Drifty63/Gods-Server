@@ -972,6 +972,7 @@ export class GameEngine {
                     if (opponent.deck.length > 0) {
                         const drawnCard = opponent.deck.shift()!;
                         drawnCard.isHiddenFromOwner = true;
+                        drawnCard.revealedToPlayerId = player.id; // Le joueur qui a lancé Nyx peut voir cette carte
                         opponent.hand.push(drawnCard);
                     }
                 }
@@ -998,6 +999,7 @@ export class GameEngine {
                     if (opponent.deck.length > 0) {
                         const drawnCard = opponent.deck.shift()!;
                         drawnCard.isHiddenFromOwner = true;
+                        drawnCard.revealedToPlayerId = player.id; // Le joueur qui a lancé Nyx peut voir cette carte
                         opponent.hand.push(drawnCard);
                     }
                 }

@@ -486,8 +486,11 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
                 {/* Main de l'adversaire (dos de cartes ou face visible si effet Nyx) */}
                 <div className={styles.opponentHand}>
-                    {opponent.hand.map((card, index) => (
-                        card.isHiddenFromOwner ? (
+                    {opponent.hand.map((card, index) => {
+                        // On peut voir la carte si elle a été révélée à notre playerId
+                        const canSeeCard = card.revealedToPlayerId === playerId;
+
+                        return canSeeCard ? (
                             // Carte visible pour nous (effet Nyx actif sur l'adversaire)
                             <div key={card.id} className={styles.revealedEnemyCard}>
                                 <SpellCard card={card} isSelected={false} />
@@ -495,12 +498,12 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             </div>
                         ) : (
                             // Dos de carte normal
-                            <div key={index} className={styles.cardBack}>
+                            <div key={card.id || index} className={styles.cardBack}>
                                 <span className={styles.cardBackIcon}>🎴</span>
                                 <span className={styles.cardBackNumber}>{index + 1}</span>
                             </div>
-                        )
-                    ))}
+                        );
+                    })}
                     {opponent.hand.length === 0 && (
                         <span className={styles.emptyHandText}>Main vide</span>
                     )}

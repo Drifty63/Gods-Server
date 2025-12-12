@@ -67,6 +67,7 @@ export interface SpellCard {
     imageUrl: string;
     description: string;    // Texte de la carte
     isHiddenFromOwner?: boolean;  // Si true, le propriétaire ne voit pas cette carte (effet Nyx)
+    revealedToPlayerId?: string;  // ID du joueur adverse qui peut voir cette carte
 }
 
 // État d'un dieu en jeu
