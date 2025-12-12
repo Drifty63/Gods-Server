@@ -1006,18 +1006,245 @@
 
 @media (max-width: 480px) {
 
+    .board {
+        padding: 8px;
+        gap: 6px;
+    }
+
+    .opponentZone,
+    .playerZone {
+        padding: 8px 10px;
+        gap: 6px;
+    }
+
     .opponentZone::before,
     .playerZone::before {
-        font-size: 0.6rem;
+        font-size: 0.55rem;
+        padding: 1px 8px;
+    }
+
+    .godsRow {
+        gap: 8px;
+    }
+
+    .playerInfo {
+        gap: 6px;
+        padding: 4px 8px;
     }
 
     .playerName {
+        font-size: 0.75rem;
+    }
+
+    .energy {
+        padding: 3px 6px;
+    }
+
+    .energyIcon {
+        font-size: 0.9rem;
+    }
+
+    .energyValue {
         font-size: 0.85rem;
     }
 
     .deckCount,
     .discardCount,
-    .handCount {
+    .handCount,
+    .fatigueCount {
+        font-size: 0.65rem;
+        padding: 3px 6px;
+    }
+
+    .discardButton {
+        font-size: 0.65rem;
+        padding: 3px 6px;
+    }
+
+    .centerZone {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .turnNumber {
+        font-size: 0.8rem;
+    }
+
+    .turnIndicator {
+        font-size: 0.85rem;
+        padding: 6px 14px;
+    }
+
+    .hand {
+        gap: 4px;
+        padding: 8px;
+    }
+
+    .opponentHand {
+        gap: 3px;
+    }
+
+    .cardBack {
+        width: 50px;
+        height: 70px;
+    }
+
+    .cardBackIcon {
+        font-size: 1.2rem;
+    }
+
+    .cardBackNumber {
+        font-size: 0.5rem;
+    }
+
+    .endTurnButton {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+
+    .targetPrompt {
+        padding: 10px 14px;
+    }
+
+    .targetText {
+        font-size: 0.85rem;
+    }
+
+    .confirmButton,
+    .cancelButton {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+
+    .gameOver {
+        padding: 20px 30px;
+    }
+
+    .gameOver h2 {
+        font-size: 1.4rem;
+    }
+
+    .gameOver p {
+        font-size: 1rem;
+    }
+}
+
+/* Très petits écrans (360px et moins) */
+@media (max-width: 380px) {
+
+    .board {
+        padding: 4px;
+        gap: 4px;
+    }
+
+    .opponentZone,
+    .playerZone {
+        padding: 6px 6px;
+        gap: 4px;
+    }
+
+    .opponentZone::before,
+    .playerZone::before {
+        font-size: 0.5rem;
+        top: -8px;
+    }
+
+    .playerZone::before {
+        bottom: -8px;
+    }
+
+    .godsRow {
+        gap: 5px;
+    }
+
+    .playerInfo {
+        gap: 4px;
+        padding: 3px 5px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .playerName {
+        font-size: 0.65rem;
+    }
+
+    .energy {
+        padding: 2px 4px;
+    }
+
+    .energyIcon {
+        font-size: 0.8rem;
+    }
+
+    .energyValue {
+        font-size: 0.75rem;
+    }
+
+    .deckCount,
+    .discardCount,
+    .handCount,
+    .fatigueCount {
+        font-size: 0.55rem;
+        padding: 2px 4px;
+    }
+
+    .discardButton {
+        font-size: 0.55rem;
+        padding: 2px 4px;
+    }
+
+    .centerZone {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .turnNumber {
         font-size: 0.7rem;
+    }
+
+    .turnIndicator {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+
+    .hand {
+        gap: 3px;
+        padding: 5px;
+    }
+
+    .opponentHand {
+        gap: 2px;
+    }
+
+    .cardBack {
+        width: 40px;
+        height: 56px;
+    }
+
+    .cardBackIcon {
+        font-size: 1rem;
+    }
+
+    .cardBackNumber {
+        font-size: 0.4rem;
+    }
+
+    .endTurnButton {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+    }
+
+    .targetPrompt {
+        padding: 8px 10px;
+    }
+
+    .targetText {
+        font-size: 0.75rem;
+    }
+
+    .confirmButton,
+    .cancelButton {
+        padding: 5px 10px;
+        font-size: 0.65rem;
     }
 }

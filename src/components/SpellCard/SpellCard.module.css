@@ -359,34 +359,111 @@
 
 @media (max-width: 480px) {
     .card {
-        width: 95px;
-        height: 135px;
+        width: 80px;
+        height: 115px;
     }
 
     .header {
-        padding: 4px 6px;
+        padding: 3px 5px;
     }
 
     .name {
-        font-size: 0.5rem;
-        max-width: 55px;
+        font-size: 0.45rem;
+        max-width: 45px;
     }
 
     .cost {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 
     .costValue {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
     }
 
-    .description {
+    .imageContainer {
         height: 40px;
     }
 
+    .imagePlaceholder {
+        font-size: 1.1rem;
+    }
+
+    .description {
+        height: 32px;
+        padding: 3px 4px;
+    }
+
     .description p {
-        font-size: 0.45rem;
-        -webkit-line-clamp: 3;
+        font-size: 0.4rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .footer {
+        padding: 2px 4px;
+    }
+
+    .godName {
+        font-size: 0.4rem;
+    }
+
+    .elementIcon {
+        font-size: 0.6rem;
+    }
+}
+
+/* Très petits écrans (360px et moins) */
+@media (max-width: 380px) {
+    .card {
+        width: 65px;
+        height: 95px;
+    }
+
+    .header {
+        padding: 2px 3px;
+    }
+
+    .name {
+        font-size: 0.4rem;
+        max-width: 35px;
+    }
+
+    .cost {
+        width: 15px;
+        height: 15px;
+    }
+
+    .costValue {
+        font-size: 0.5rem;
+    }
+
+    .imageContainer {
+        height: 30px;
+    }
+
+    .imagePlaceholder {
+        font-size: 0.9rem;
+    }
+
+    .description {
+        height: 26px;
+        padding: 2px 3px;
+    }
+
+    .description p {
+        font-size: 0.35rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .footer {
+        padding: 1px 3px;
+    }
+
+    .godName {
+        font-size: 0.35rem;
+    }
+
+    .elementIcon {
+        font-size: 0.5rem;
     }
 }

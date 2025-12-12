@@ -435,36 +435,92 @@
 
 @media (max-width: 480px) {
   .card {
-    width: 120px;
-    height: 175px;
+    width: 100px;
+    height: 145px;
   }
 
   .header {
-    padding: 6px 8px;
+    padding: 4px 6px;
   }
 
   .name {
-    font-size: 0.55rem;
-    max-width: 75px;
+    font-size: 0.5rem;
+    max-width: 65px;
   }
 
   .imageContainer {
-    height: 65px;
+    height: 55px;
   }
 
   .godInitial {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 
   .healthSection {
-    padding: 6px 8px;
+    padding: 4px 6px;
   }
 
   .healthBar {
-    height: 18px;
+    height: 16px;
+  }
+
+  .healthText {
+    font-size: 0.55rem;
   }
 
   .statusEffects {
-    padding: 0 8px 4px;
+    padding: 0 6px 3px;
+    gap: 2px;
+  }
+
+  .statusBadge {
+    font-size: 0.5rem;
+    padding: 1px 4px;
+  }
+}
+
+/* Très petits écrans (360px et moins) */
+@media (max-width: 380px) {
+  .card {
+    width: 85px;
+    height: 125px;
+  }
+
+  .header {
+    padding: 3px 4px;
+  }
+
+  .name {
+    font-size: 0.45rem;
+    max-width: 55px;
+  }
+
+  .imageContainer {
+    height: 45px;
+  }
+
+  .godInitial {
+    font-size: 1.2rem;
+  }
+
+  .healthSection {
+    padding: 3px 4px;
+  }
+
+  .healthBar {
+    height: 14px;
+  }
+
+  .healthText {
+    font-size: 0.5rem;
+  }
+
+  .statusEffects {
+    padding: 0 4px 2px;
+  }
+
+  .statusBadge {
+    font-size: 0.45rem;
+    padding: 1px 3px;
   }
 }
