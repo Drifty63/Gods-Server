@@ -3,9 +3,9 @@
 
 .card {
   position: relative;
-  width: 160px;
-  height: 230px;
-  border-radius: 12px;
+  width: 130px;
+  height: 185px;
+  border-radius: 10px;
   background:
     linear-gradient(145deg, #0d0d1f 0%, #1a1a3a 50%, #16213e 100%);
   border: 3px solid var(--element-color);
