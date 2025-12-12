@@ -25,9 +25,6 @@ export default function OnlineGamePage() {
     const {
         gameState,
         initGame,
-        playCard,
-        discardForEnergy,
-        endTurn,
     } = useGameStore();
 
     const [isInitialized, setIsInitialized] = useState(false);
@@ -118,31 +115,19 @@ export default function OnlineGamePage() {
                     }
                     break;
 
+                // Les actions play_card, discard, end_turn sont maintenant ignorées ici
+                // car on synchronise l'état complet via syncedState
+                // Cela évite les bugs où l'action est rejouée avec la mauvaise perspective
                 case 'play_card':
-                    if (gameState) {
-                        const { cardId, targetGodId, targetGodIds, lightningAction } = lastAction.payload as {
-                            cardId: string;
-                            targetGodId?: string;
-                            targetGodIds?: string[];
-                            lightningAction?: 'apply' | 'remove';
-                        };
-                        playCard(cardId, targetGodId, targetGodIds, lightningAction);
-                    }
-                    break;
                 case 'discard':
-                    if (gameState) {
-                        discardForEnergy(lastAction.payload.cardId as string);
-                    }
-                    break;
                 case 'end_turn':
-                    if (gameState) {
-                        endTurn();
-                    }
+                    // On ne fait rien ici - l'état sera synchronisé via syncedState
+                    console.log('Action received (will sync via state):', lastAction.type);
                     break;
             }
             clearLastAction();
         }
-    }, [lastAction, gameState, playCard, discardForEnergy, endTurn, clearLastAction, isHost, isInitialized, multiplayerData, sendAction]);
+    }, [lastAction, gameState, clearLastAction, isHost, isInitialized, multiplayerData, sendAction]);
 
     // Appliquer l'état synchronisé
     useEffect(() => {
