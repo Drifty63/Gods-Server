@@ -360,10 +360,10 @@
 
 .turnIndicator {
     font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
-    padding: 10px 28px;
-    border-radius: 8px;
+    padding: 8px 20px;
+    border-radius: 6px;
     letter-spacing: 1px;
 }
 
@@ -1072,17 +1072,18 @@
     }
 
     .centerZone {
-        padding: 8px;
-        gap: 8px;
+        padding: 2px;
+        gap: 2px;
     }
 
     .turnNumber {
-        font-size: 0.8rem;
+        font-size: 0.6rem;
+        letter-spacing: 1px;
     }
 
     .turnIndicator {
-        font-size: 0.85rem;
-        padding: 6px 14px;
+        font-size: 0.7rem;
+        padding: 4px 10px;
     }
 
     .hand {
@@ -1204,17 +1205,18 @@
     }
 
     .centerZone {
-        padding: 6px;
-        gap: 6px;
+        padding: 1px;
+        gap: 1px;
     }
 
     .turnNumber {
-        font-size: 0.7rem;
+        font-size: 0.5rem;
+        letter-spacing: 0.5px;
     }
 
     .turnIndicator {
-        font-size: 0.75rem;
-        padding: 4px 10px;
+        font-size: 0.6rem;
+        padding: 3px 8px;
     }
 
     .hand {
