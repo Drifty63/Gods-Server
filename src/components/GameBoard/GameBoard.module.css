@@ -33,18 +33,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
+    gap: 4px;
+    padding: 6px 10px;
     background: linear-gradient(180deg,
             rgba(220, 38, 38, 0.12) 0%,
             transparent 100%);
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid rgba(220, 38, 38, 0.2);
     border-bottom: 2px solid rgba(220, 38, 38, 0.4);
     position: relative;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .opponentZone::before {
@@ -69,18 +67,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
+    gap: 4px;
+    padding: 6px 10px;
     background: linear-gradient(0deg,
             rgba(212, 175, 55, 0.1) 0%,
             transparent 100%);
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid rgba(212, 175, 55, 0.2);
     border-top: 2px solid rgba(212, 175, 55, 0.4);
     position: relative;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .playerZone::before {
@@ -338,9 +334,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 6px;
-    flex-shrink: 0;
+    gap: 4px;
+    padding: 4px;
+    flex: 1;
+    min-height: 0;
 }
 
 .turnInfo {
