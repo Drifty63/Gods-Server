@@ -436,20 +436,20 @@
 @media (max-width: 480px) {
   .card {
     width: 90px;
-    height: 130px;
+    height: 115px;
   }
 
   .header {
-    padding: 3px 5px;
+    padding: 2px 4px;
   }
 
   .name {
-    font-size: 0.45rem;
+    font-size: 0.4rem;
     max-width: 55px;
   }
 
   .imageContainer {
-    height: 45px;
+    height: 38px;
   }
 
   .godInitial {
@@ -477,30 +477,43 @@
     font-size: 0.45rem;
     padding: 1px 3px;
   }
+
+  .weakness {
+    padding: 2px 4px;
+    gap: 3px;
+  }
+
+  .weaknessLabel {
+    font-size: 0.35rem;
+  }
+
+  .weaknessElement {
+    font-size: 0.6rem;
+  }
 }
 
 /* Très petits écrans (360px et moins) */
 @media (max-width: 380px) {
   .card {
     width: 75px;
-    height: 110px;
+    height: 95px;
   }
 
   .header {
-    padding: 2px 3px;
+    padding: 1px 2px;
   }
 
   .name {
-    font-size: 0.4rem;
+    font-size: 0.35rem;
     max-width: 45px;
   }
 
   .imageContainer {
-    height: 35px;
+    height: 28px;
   }
 
   .godInitial {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .healthSection {
@@ -508,20 +521,33 @@
   }
 
   .healthBar {
-    height: 12px;
+    height: 10px;
   }
 
   .healthText {
-    font-size: 0.45rem;
+    font-size: 0.4rem;
   }
 
   .statusEffects {
-    padding: 0 3px 1px;
+    padding: 0 2px 1px;
     gap: 1px;
   }
 
   .statusBadge {
-    font-size: 0.4rem;
+    font-size: 0.35rem;
+    padding: 0px 2px;
+  }
+
+  .weakness {
     padding: 1px 2px;
+    gap: 2px;
+  }
+
+  .weaknessLabel {
+    font-size: 0.3rem;
+  }
+
+  .weaknessElement {
+    font-size: 0.5rem;
   }
 }
