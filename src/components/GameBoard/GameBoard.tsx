@@ -284,10 +284,25 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
     };
 
-    const handleTargetSelect = (godId: string) => {
+    // Crée un ID unique pour distinguer les dieux des deux joueurs
+    const getUniqueGodId = (godId: string, isEnemy: boolean) => {
+        return isEnemy ? `opponent_${godId}` : `player_${godId}`;
+    };
+
+    // Extraire l'ID original et le propriétaire d'un ID unique
+    const parseUniqueGodId = (uniqueId: string): { godId: string; isEnemy: boolean } => {
+        if (uniqueId.startsWith('opponent_')) {
+            return { godId: uniqueId.replace('opponent_', ''), isEnemy: true };
+        }
+        return { godId: uniqueId.replace('player_', ''), isEnemy: false };
+    };
+
+    const handleTargetSelect = (uniqueGodId: string) => {
         if (!selectedCard || !isSelectingTarget) return;
 
-        const targetGod = [...opponent.gods, ...player.gods].find(g => g.card.id === godId);
+        const { godId, isEnemy } = parseUniqueGodId(uniqueGodId);
+        const godsList = isEnemy ? opponent.gods : player.gods;
+        const targetGod = godsList.find(g => g.card.id === godId);
         if (!targetGod) return;
 
         // Ajouter cette cible à la liste
@@ -385,9 +400,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         setHasDiscardedBlindThisTurn(true);
     };
 
-    // Vérifier si une cible est déjà sélectionnée
-    const isTargetSelected = (godId: string) => {
-        return selectedTargetGods.some(g => g.card.id === godId);
+    // Vérifier si une cible est déjà sélectionnée (avec ID unique)
+    const isTargetSelected = (uniqueGodId: string) => {
+        const { godId, isEnemy } = parseUniqueGodId(uniqueGodId);
+        // Vérifier en comparant l'ID ET le contexte (ennemi ou allié)
+        return selectedTargetGods.some(g => {
+            const isEnemyGod = opponent.gods.some(og => og.card.id === g.card.id);
+            return g.card.id === godId && isEnemyGod === isEnemy;
+        });
     };
 
     return (
@@ -444,15 +464,16 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         // Vérifier si c'est une cible obligatoire (provocateur)
                         const isRequiredTarget = requiredEnemyTargets.some(t => t.card.id === god.card.id);
 
+                        const uniqueId = getUniqueGodId(god.card.id, true);
                         return (
                             <GodCard
-                                key={god.card.id}
+                                key={uniqueId}
                                 god={god}
                                 isEnemy
                                 isSelectable={isSelectingTarget && isValidTarget}
-                                isSelected={isTargetSelected(god.card.id)}
+                                isSelected={isTargetSelected(uniqueId)}
                                 isRequired={isSelectingTarget && isRequiredTarget && isMultiTarget}
-                                onClick={() => handleSingleTargetSelect(god.card.id)}
+                                onClick={() => handleSingleTargetSelect(uniqueId)}
                             />
                         );
                     })}
@@ -622,13 +643,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             isValidAllyTarget = true;
                         }
 
+                        const uniqueId = getUniqueGodId(god.card.id, false);
                         return (
                             <GodCard
-                                key={god.card.id}
+                                key={uniqueId}
                                 god={god}
                                 isSelectable={isSelectingTarget && isValidAllyTarget}
-                                isSelected={isTargetSelected(god.card.id)}
-                                onClick={() => handleSingleTargetSelect(god.card.id)}
+                                isSelected={isTargetSelected(uniqueId)}
+                                onClick={() => handleSingleTargetSelect(uniqueId)}
                             />
                         );
                     })}
