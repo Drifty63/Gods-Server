@@ -1,0 +1,470 @@
+/* GODS - GodCard Divine */
+/* Style : Portraits de dieux avec cadre doré majestueux */
+
+.card {
+  position: relative;
+  width: 160px;
+  height: 230px;
+  border-radius: 12px;
+  background:
+    linear-gradient(145deg, #0d0d1f 0%, #1a1a3a 50%, #16213e 100%);
+  border: 3px solid var(--element-color);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+/* Bordure dorée supérieure */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--element-gradient);
+  z-index: 2;
+}
+
+/* Effet de brillance */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
+  pointer-events: none;
+  transition: left 0.5s ease;
+}
+
+.card:hover::after {
+  left: 100%;
+}
+
+/* ================================
+   ÉTATS DE LA CARTE
+   ================================ */
+.selectable {
+  cursor: pointer;
+  border-color: rgba(212, 175, 55, 0.6);
+}
+
+.selectable:hover {
+  transform: translateY(-6px) scale(1.03);
+  border-color: var(--gold-divine);
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.5),
+    0 0 35px var(--element-color),
+    0 0 60px rgba(212, 175, 55, 0.2);
+}
+
+.selected {
+  transform: translateY(-8px) scale(1.06);
+  border-color: var(--gold-divine) !important;
+  box-shadow:
+    0 0 40px var(--gold-divine),
+    0 0 80px rgba(212, 175, 55, 0.5);
+  animation: godSelectedPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes godSelectedPulse {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 40px var(--gold-divine),
+      0 0 80px rgba(212, 175, 55, 0.5);
+  }
+
+  50% {
+    box-shadow:
+      0 0 60px var(--gold-divine),
+      0 0 120px rgba(212, 175, 55, 0.7);
+  }
+}
+
+/* Cible obligatoire (provocateur) */
+.required {
+  border-color: #ef4444 !important;
+  animation: requiredPulse 1s ease-in-out infinite;
+}
+
+.required::before {
+  content: "⚠️ REQUIS";
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(145deg, #ef4444, #dc2626);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  font-weight: bold;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  height: auto;
+}
+
+@keyframes requiredPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+  }
+
+  50% {
+    box-shadow: 0 0 45px rgba(239, 68, 68, 0.9);
+  }
+}
+
+/* ================================
+   HEADER
+   ================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.3) 100%);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold-divine);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 115px;
+}
+
+.element {
+  font-size: 1.1rem;
+  filter: drop-shadow(0 0 6px var(--element-color));
+}
+
+/* ================================
+   ILLUSTRATION
+   ================================ */
+.imageContainer {
+  position: relative;
+  height: 100px;
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.5) 100%);
+  overflow: hidden;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--element-gradient);
+  opacity: 0.6;
+}
+
+.godInitial {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.image {
+  object-fit: cover;
+}
+
+/* ================================
+   SECTION SANTÉ
+   ================================ */
+.healthSection {
+  padding: 8px 10px;
+}
+
+.healthBar {
+  position: relative;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.healthFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a, #15803d);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 10px rgba(34, 197, 94, 0.4);
+}
+
+.healthText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 1),
+    0 0 8px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+/* ================================
+   EFFETS DE STATUT
+   ================================ */
+.statusEffects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 10px 6px;
+  min-height: 20px;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.poison {
+  background: linear-gradient(145deg, rgba(139, 69, 19, 0.8), rgba(101, 67, 33, 0.8));
+  border-color: #8b4513;
+  box-shadow: 0 0 8px rgba(139, 69, 19, 0.4);
+}
+
+.lightning {
+  background: linear-gradient(145deg, rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.8));
+  border-color: #ffd700;
+  color: #0a0a1a;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.shield {
+  background: linear-gradient(145deg, rgba(70, 130, 180, 0.8), rgba(30, 144, 255, 0.8));
+  border-color: #4682b4;
+  box-shadow: 0 0 8px rgba(70, 130, 180, 0.4);
+}
+
+.stun {
+  background: linear-gradient(145deg, rgba(135, 206, 235, 0.8), rgba(173, 216, 230, 0.8));
+  border-color: #87ceeb;
+  color: #0a0a1a;
+  box-shadow: 0 0 8px rgba(135, 206, 235, 0.4);
+}
+
+.provocation {
+  background: linear-gradient(145deg, rgba(220, 20, 60, 0.8), rgba(178, 34, 34, 0.8));
+  border-color: #dc143c;
+  box-shadow: 0 0 8px rgba(220, 20, 60, 0.4);
+  animation: provocationPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes provocationPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(220, 20, 60, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
+  }
+}
+
+/* ================================
+   FAIBLESSE
+   ================================ */
+.weakness {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px;
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.5) 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.weaknessLabel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.weaknessElement {
+  font-size: 0.95rem;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* ================================
+   ÉTAT MORT
+   ================================ */
+.dead {
+  filter: grayscale(0.85) brightness(0.6);
+}
+
+.dead .healthFill {
+  background: linear-gradient(90deg, #4a4a4a, #333, #2a2a2a);
+  box-shadow: none;
+}
+
+.dead .name {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.deadOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
+}
+
+.deadText {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #ef4444;
+  text-shadow:
+    0 0 10px rgba(239, 68, 68, 0.8),
+    0 2px 8px rgba(0, 0, 0, 0.8);
+  animation: deadPulse 2s ease-in-out infinite;
+}
+
+@keyframes deadPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+  .card {
+    width: 140px;
+    height: 200px;
+  }
+
+  .name {
+    font-size: 0.6rem;
+    max-width: 95px;
+  }
+
+  .element {
+    font-size: 1rem;
+  }
+
+  .imageContainer {
+    height: 80px;
+  }
+
+  .godInitial {
+    font-size: 2.2rem;
+  }
+
+  .healthBar {
+    height: 20px;
+  }
+
+  .healthText {
+    font-size: 0.65rem;
+  }
+
+  .statusBadge {
+    font-size: 0.55rem;
+    padding: 2px 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    width: 120px;
+    height: 175px;
+  }
+
+  .header {
+    padding: 6px 8px;
+  }
+
+  .name {
+    font-size: 0.55rem;
+    max-width: 75px;
+  }
+
+  .imageContainer {
+    height: 65px;
+  }
+
+  .godInitial {
+    font-size: 1.8rem;
+  }
+
+  .healthSection {
+    padding: 6px 8px;
+  }
+
+  .healthBar {
+    height: 18px;
+  }
+
+  .statusEffects {
+    padding: 0 8px 4px;
+  }
+}

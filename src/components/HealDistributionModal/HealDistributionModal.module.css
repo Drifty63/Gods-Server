@@ -1,0 +1,234 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal {
+    background: linear-gradient(145deg, #1a2e1a 0%, #162e16 100%);
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 700px;
+    max-height: 80vh;
+    width: 90%;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(76, 175, 80, 0.2);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.title {
+    color: #4caf50;
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+.instruction {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.remaining {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+}
+
+.remaining .positive {
+    color: #4caf50;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.remaining .zero {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.alliesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.allyCard {
+    background: linear-gradient(145deg, rgba(30, 50, 30, 0.9), rgba(20, 40, 20, 0.95));
+    border: 2px solid rgba(76, 175, 80, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.allyHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.element {
+    font-size: 1.2rem;
+}
+
+.allyName {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.allyStats {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.hp {
+    color: #ff6b6b;
+}
+
+.poison {
+    color: #9c27b0;
+}
+
+.missingHp {
+    color: #ff9800;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.decrementButton,
+.incrementButton {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.decrementButton {
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: white;
+}
+
+.incrementButton {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: white;
+}
+
+.decrementButton:hover:not(:disabled),
+.incrementButton:hover:not(:disabled) {
+    transform: scale(1.1);
+}
+
+.decrementButton:disabled,
+.incrementButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.healAmount {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4caf50;
+    min-width: 30px;
+    text-align: center;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.confirmButton,
+.cancelButton {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.confirmButton {
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+}
+
+.confirmButton:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.confirmButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancelButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.cancelButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 500px) {
+    .alliesGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}

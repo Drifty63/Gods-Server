@@ -1,0 +1,14 @@
+# Configuration Render pour le déploiement du serveur de jeu
+# https://render.com/docs/deploy-node-express-app
+
+services:
+  - type: web
+    name: gods-game-server
+    env: node
+    plan: free
+    buildCommand: npm install socket.io
+    startCommand: node server-online.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production

@@ -1,0 +1,1023 @@
+/* GODS - GameBoard Arena Divine */
+/* Style : Arène olympienne avec effets épiques */
+
+.board {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background:
+        /* Overlay sombre */
+        linear-gradient(180deg,
+            rgba(10, 10, 26, 0.95) 0%,
+            rgba(26, 26, 58, 0.9) 50%,
+            rgba(10, 10, 26, 0.95) 100%),
+        /* Texture de fond */
+        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+    overflow-x: hidden;
+}
+
+/* ================================
+   ZONE ADVERSAIRE
+   ================================ */
+.opponentZone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(180deg,
+            rgba(220, 38, 38, 0.12) 0%,
+            transparent 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-bottom: 2px solid rgba(220, 38, 38, 0.4);
+    position: relative;
+}
+
+.opponentZone::before {
+    content: '⚔️ ADVERSAIRE';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    color: rgba(220, 38, 38, 0.7);
+    background: #0a0a1a;
+    padding: 2px 12px;
+    letter-spacing: 2px;
+    border-radius: 10px;
+}
+
+/* ================================
+   ZONE DU JOUEUR
+   ================================ */
+.playerZone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(0deg,
+            rgba(212, 175, 55, 0.1) 0%,
+            transparent 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-top: 2px solid rgba(212, 175, 55, 0.4);
+    position: relative;
+}
+
+.playerZone::before {
+    content: '👑 VOUS';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    color: var(--gold-divine);
+    background: #0a0a1a;
+    padding: 2px 12px;
+    letter-spacing: 2px;
+    border-radius: 10px;
+}
+
+/* ================================
+   RANGÉE DES DIEUX
+   ================================ */
+.godsRow {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* ================================
+   MAIN DE L'ADVERSAIRE
+   ================================ */
+.opponentHand {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 0;
+    flex-wrap: wrap;
+}
+
+.cardBack {
+    width: 90px;
+    height: 126px;
+    background:
+        linear-gradient(145deg, #1e3a5f, #0f1f33),
+        repeating-linear-gradient(45deg,
+            transparent,
+            transparent 5px,
+            rgba(212, 175, 55, 0.03) 5px,
+            rgba(212, 175, 55, 0.03) 10px);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        inset 0 0 30px rgba(212, 175, 55, 0.1);
+    position: relative;
+    transition: transform 0.2s ease;
+}
+
+.cardBack::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 4px;
+}
+
+.cardBack:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.cardBackIcon {
+    font-size: 2rem;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
+}
+
+.cardBackNumber {
+    position: absolute;
+    bottom: 6px;
+    font-size: 0.75rem;
+    color: rgba(212, 175, 55, 0.5);
+    font-weight: bold;
+    font-family: 'Cinzel', serif;
+}
+
+/* ================================
+   CARTE AVEUGLE (NYX)
+   ================================ */
+.blindCard {
+    width: 90px;
+    height: 126px;
+    cursor: pointer;
+    background: linear-gradient(145deg, #4a1a4a, #2d0f2d);
+    border-color: #9333ea;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        inset 0 0 30px rgba(147, 51, 234, 0.2);
+}
+
+.blindCard:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(147, 51, 234, 0.5);
+}
+
+.blindPlayable {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: white;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.emptyHandText {
+    color: rgba(212, 175, 55, 0.4);
+    font-style: italic;
+    font-size: 0.8rem;
+    font-family: 'Cinzel', serif;
+}
+
+.blindClickable {
+    cursor: pointer;
+    animation: mysteryPulse 2s ease-in-out infinite;
+}
+
+@keyframes mysteryPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(147, 51, 234, 0.6);
+    }
+}
+
+.blindClickable:active {
+    transform: scale(0.95);
+}
+
+/* Carte révélée par effet Nyx */
+.revealedEnemyCard {
+    position: relative;
+    display: inline-block;
+}
+
+.nyxRevealBadge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(145deg, #9333ea, #7c3aed);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    box-shadow: 0 0 15px rgba(147, 51, 234, 0.6);
+    z-index: 5;
+    animation: nyxGlow 2s ease-in-out infinite;
+}
+
+@keyframes nyxGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(147, 51, 234, 0.6);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(147, 51, 234, 0.9);
+    }
+}
+
+/* ================================
+   INFOS JOUEUR
+   ================================ */
+.playerInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.playerName {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold-divine);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.energy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(145deg, #6366f1, #4f46e5);
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.energyIcon {
+    font-size: 1rem;
+}
+
+.energyValue {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.deckCount,
+.discardCount,
+.handCount {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+/* ================================
+   ZONE CENTRALE
+   ================================ */
+.centerZone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    flex: 1;
+    min-height: 100px;
+}
+
+.turnInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.turnNumber {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: rgba(212, 175, 55, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.turnIndicator {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 10px 28px;
+    border-radius: 8px;
+    letter-spacing: 1px;
+}
+
+.myTurn {
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    box-shadow:
+        0 0 30px rgba(212, 175, 55, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation: pulseGold 2s infinite;
+}
+
+.opponentTurn {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pulseGold {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(212, 175, 55, 0.7);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.fatigueCount {
+    background: rgba(220, 38, 38, 0.15);
+    color: #f87171;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* ================================
+   PROMPT DE CIBLAGE
+   ================================ */
+.targetPrompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    border-radius: 12px;
+    color: #0a0a1a;
+    font-weight: 600;
+    animation: bounceTarget 0.6s ease infinite alternate;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+}
+
+.targetPrompt p {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+}
+
+.targetPrompt strong {
+    color: #0a0a1a;
+    text-decoration: underline;
+}
+
+@keyframes bounceTarget {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-4px);
+    }
+}
+
+.targetCounter {
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    font-family: 'Cinzel', serif;
+}
+
+.confirmButton {
+    font-family: 'Cinzel', serif;
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.confirmButton:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.5);
+}
+
+.requiredWarning {
+    color: #f87171;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    background: rgba(220, 38, 38, 0.15);
+    border-radius: 8px;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.cancelButton {
+    font-family: 'Cinzel', serif;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    background: rgba(220, 38, 38, 0.4);
+    border-color: rgba(220, 38, 38, 0.5);
+    color: #fff;
+}
+
+/* ================================
+   CHOIX DE FOUDRE (ZEUS)
+   ================================ */
+.lightningChoice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.lightningChoice p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--lightning);
+}
+
+.lightningButtons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.lightningApply {
+    font-family: 'Cinzel', serif;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0a0a1a;
+    background: linear-gradient(145deg, #FFD700, #FFA500);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.lightningApply:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+}
+
+.lightningRemove {
+    font-family: 'Cinzel', serif;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(145deg, #ef4444, #dc2626);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+.lightningRemove:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+}
+
+/* ================================
+   SÉLECTEUR D'ÉLÉMENT (ARTÉMIS)
+   ================================ */
+.elementChoice {
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(45, 106, 79, 0.15);
+    border-radius: 12px;
+    border: 1px solid rgba(45, 106, 79, 0.3);
+}
+
+.elementChoice p {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    color: var(--earth);
+}
+
+.elementButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.elementButton {
+    padding: 10px 14px;
+    font-size: 1.3rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.elementButton:hover {
+    transform: scale(1.1);
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold-divine);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+/* ================================
+   BOUTON DÉFAUSSE
+   ================================ */
+.discardButton {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.discardButton:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ================================
+   MODAL DÉFAUSSE
+   ================================ */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.discardModal {
+    background: linear-gradient(145deg, #1a1a3a, #16213e);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.7),
+        0 0 60px rgba(212, 175, 55, 0.1);
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalHeader {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.modalHeader h3 {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.closeModalButton {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 4px;
+    line-height: 1;
+}
+
+.closeModalButton:hover {
+    color: var(--gold-divine);
+}
+
+.discardGrid {
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.discardCardWrapper {
+    width: 130px;
+    height: 182px;
+    transform-origin: top left;
+}
+
+.discardCardWrapper>div {
+    transform: scale(0.65);
+    transform-origin: top left;
+}
+
+.emptyMessage {
+    color: rgba(212, 175, 55, 0.5);
+    font-style: italic;
+    font-family: 'Cinzel', serif;
+    margin: 40px auto;
+}
+
+/* ================================
+   GAME OVER
+   ================================ */
+.gameOver {
+    text-align: center;
+    padding: 40px 60px;
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 20px;
+    border: 3px solid var(--gold-divine);
+    box-shadow:
+        0 0 60px rgba(212, 175, 55, 0.4),
+        inset 0 0 40px rgba(212, 175, 55, 0.1);
+    animation: victoryAppear 0.6s ease-out;
+}
+
+@keyframes victoryAppear {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.gameOver h2 {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-divine));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
+}
+
+.gameOver p {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    color: #fff;
+}
+
+/* ================================
+   MAIN DU JOUEUR
+   ================================ */
+.handContainer {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+
+.handContainer::-webkit-scrollbar {
+    height: 6px;
+}
+
+.handContainer::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.3);
+    border-radius: 3px;
+}
+
+.hand {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    min-width: min-content;
+}
+
+/* ================================
+   BOUTON FIN DE TOUR
+   ================================ */
+.endTurnButton {
+    font-family: 'Cinzel', serif;
+    padding: 14px 36px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0a0a1a;
+    background: linear-gradient(145deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
+    border: 2px solid var(--gold-divine);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow:
+        0 4px 20px rgba(212, 175, 55, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.endTurnButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.endTurnButton:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 30px rgba(212, 175, 55, 0.6),
+        0 0 50px rgba(245, 215, 110, 0.2);
+}
+
+.endTurnButton:hover::before {
+    left: 100%;
+}
+
+.endTurnButton:active {
+    transform: translateY(-1px);
+}
+
+/* ================================
+   AIDE / TOOLTIP
+   ================================ */
+.helpTooltip {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.helpTooltip p {
+    margin: 0;
+    font-size: 0.7rem;
+    color: rgba(212, 175, 55, 0.6);
+    font-family: 'Inter', sans-serif;
+}
+
+/* ================================
+   LOADING
+   ================================ */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: var(--gold-divine);
+}
+
+.loading::before {
+    content: '⚔️';
+    font-size: 3rem;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-5px);
+    }
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .board {
+        padding: 12px 8px;
+        gap: 8px;
+    }
+
+    .godsRow {
+        gap: 8px;
+    }
+
+    .playerInfo {
+        gap: 8px;
+        padding: 8px 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .energy {
+        padding: 5px 10px;
+    }
+
+    .hand {
+        justify-content: flex-start;
+        padding-left: 12px;
+    }
+
+    .cardBack {
+        width: 70px;
+        height: 98px;
+    }
+
+    .cardBackIcon {
+        font-size: 1.5rem;
+    }
+
+    .blindCard {
+        width: 70px;
+        height: 98px;
+    }
+
+    .turnIndicator {
+        font-size: 0.95rem;
+        padding: 8px 20px;
+    }
+
+    .endTurnButton {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+
+    .gameOver {
+        padding: 30px 40px;
+    }
+
+    .gameOver h2 {
+        font-size: 1.8rem;
+    }
+
+    .gameOver p {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .opponentZone::before,
+    .playerZone::before {
+        font-size: 0.6rem;
+    }
+
+    .playerName {
+        font-size: 0.85rem;
+    }
+
+    .deckCount,
+    .discardCount,
+    .handCount {
+        font-size: 0.7rem;
+    }
+}

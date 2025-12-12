@@ -1,0 +1,392 @@
+/* GODS - SpellCard Divine */
+/* Style : Cartes de sort avec encadrement doré et effets épiques */
+
+.card {
+    position: relative;
+    width: 130px;
+    height: 185px;
+    border-radius: 8px;
+    background:
+        linear-gradient(145deg, #0d0d1f 0%, #16213e 50%, #1a1a3a 100%);
+    border: 2px solid var(--element-color);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+    flex-shrink: 0;
+}
+
+/* Bordure supérieure dorée */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--element-gradient);
+    z-index: 2;
+}
+
+/* Effet de brillance au coin */
+.card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%);
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+/* ================================
+   ÉTATS DE LA CARTE
+   ================================ */
+.playable {
+    cursor: pointer;
+    border-color: rgba(212, 175, 55, 0.6);
+}
+
+.playable:hover {
+    transform: translateY(-12px) scale(1.06);
+    border-color: var(--gold-divine);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.5),
+        0 0 30px var(--element-color),
+        0 0 60px rgba(212, 175, 55, 0.2);
+    z-index: 10;
+}
+
+.unplayable {
+    filter: brightness(0.55) saturate(0.7);
+    opacity: 0.8;
+}
+
+.selected {
+    transform: translateY(-18px) scale(1.1);
+    border-color: var(--gold-divine) !important;
+    box-shadow:
+        0 0 35px var(--gold-divine),
+        0 0 70px rgba(212, 175, 55, 0.5),
+        inset 0 0 20px rgba(212, 175, 55, 0.1);
+    z-index: 20;
+    animation: selectedPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 35px var(--gold-divine),
+            0 0 70px rgba(212, 175, 55, 0.5);
+    }
+
+    50% {
+        box-shadow:
+            0 0 50px var(--gold-divine),
+            0 0 100px rgba(212, 175, 55, 0.7);
+    }
+}
+
+/* Version réduite (effet Nyx) */
+.small {
+    width: 80px;
+    height: 115px;
+    transform: scale(0.65);
+    transform-origin: top center;
+}
+
+/* ================================
+   HEADER
+   ================================ */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0.5) 0%,
+            rgba(0, 0, 0, 0.3) 100%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 85px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.element {
+    font-size: 0.95rem;
+    filter: drop-shadow(0 0 4px var(--element-color));
+}
+
+/* ================================
+   COÛT EN ÉNERGIE
+   ================================ */
+.cost {
+    position: absolute;
+    top: 28px;
+    left: 6px;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(145deg, #6366f1, #4338ca);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    box-shadow:
+        0 2px 8px rgba(99, 102, 241, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    z-index: 3;
+}
+
+.costValue {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ================================
+   IMAGE / ILLUSTRATION
+   ================================ */
+.imageContainer {
+    height: 65px;
+    background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.1) 0%,
+            rgba(0, 0, 0, 0.4) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.imagePlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--element-gradient);
+    opacity: 0.5;
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 10px var(--element-color));
+}
+
+/* ================================
+   DESCRIPTION
+   ================================ */
+.description {
+    padding: 6px 8px;
+    height: 55px;
+    overflow: hidden;
+    background: linear-gradient(180deg,
+            transparent 0%,
+            rgba(0, 0, 0, 0.2) 100%);
+}
+
+.description p {
+    font-size: 0.55rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ================================
+   FOOTER
+   ================================ */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0.3) 0%,
+            rgba(0, 0, 0, 0.5) 100%);
+    border-top: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.energyGain {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    background: linear-gradient(145deg, #22c55e, #15803d);
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.gainIcon {
+    font-size: 0.6rem;
+}
+
+.gainValue {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.type {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    color: rgba(212, 175, 55, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ================================
+   BADGE JOUABLE
+   ================================ */
+.playableBadge {
+    position: absolute;
+    top: 50%;
+    right: -4px;
+    transform: translateY(-50%) scale(0.8);
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(145deg, #22c55e, #15803d);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #fff;
+    box-shadow:
+        0 2px 10px rgba(34, 197, 94, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    transition: all 0.25s ease;
+}
+
+.playable:hover .playableBadge {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+/* ================================
+   HOVER EFFECTS
+   ================================ */
+.playable::before {
+    transition: opacity 0.3s ease;
+}
+
+.playable:hover::after {
+    animation: shimmerCard 1s ease-out;
+}
+
+@keyframes shimmerCard {
+    0% {
+        left: -50%;
+        opacity: 0.3;
+    }
+
+    100% {
+        left: 150%;
+        opacity: 0;
+    }
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .card {
+        width: 110px;
+        height: 156px;
+    }
+
+    .name {
+        font-size: 0.55rem;
+        max-width: 70px;
+    }
+
+    .element {
+        font-size: 0.85rem;
+    }
+
+    .cost {
+        width: 22px;
+        height: 22px;
+        top: 24px;
+        left: 5px;
+    }
+
+    .costValue {
+        font-size: 0.75rem;
+    }
+
+    .imageContainer {
+        height: 50px;
+    }
+
+    .imagePlaceholder {
+        font-size: 1.4rem;
+    }
+
+    .description {
+        height: 48px;
+        padding: 5px 6px;
+    }
+
+    .description p {
+        font-size: 0.5rem;
+        -webkit-line-clamp: 3;
+    }
+
+    .footer {
+        padding: 4px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        width: 95px;
+        height: 135px;
+    }
+
+    .header {
+        padding: 4px 6px;
+    }
+
+    .name {
+        font-size: 0.5rem;
+        max-width: 55px;
+    }
+
+    .cost {
+        width: 20px;
+        height: 20px;
+    }
+
+    .costValue {
+        font-size: 0.65rem;
+    }
+
+    .description {
+        height: 40px;
+    }
+
+    .description p {
+        font-size: 0.45rem;
+        -webkit-line-clamp: 3;
+    }
+}

@@ -1,0 +1,496 @@
+/* GODS - Team Selection Divine */
+/* Style : Écran de sélection des dieux olympien */
+
+.container {
+    min-height: 100vh;
+    padding: 2rem;
+    background:
+        /* Overlay */
+        linear-gradient(180deg,
+            rgba(10, 10, 26, 0.9) 0%,
+            rgba(26, 26, 58, 0.95) 50%,
+            rgba(10, 10, 26, 0.95) 100%),
+        /* Rayons divins */
+        radial-gradient(ellipse at 50% -20%,
+            rgba(212, 175, 55, 0.15) 0%,
+            transparent 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* ================================
+   TITRE
+   ================================ */
+.title {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    margin: 0;
+    text-align: center;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+/* ================================
+   INDICATEUR DE PHASE
+   ================================ */
+.phaseIndicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.phaseStep {
+    font-family: 'Cinzel', serif;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.phaseStep.active {
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.phaseStep.done {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.phaseArrow {
+    color: rgba(212, 175, 55, 0.3);
+    font-size: 1.3rem;
+}
+
+.instruction {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    font-size: 1.1rem;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
+}
+
+/* ================================
+   GRILLE DES DIEUX
+   ================================ */
+.godsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    width: 100%;
+    padding: 1rem;
+    animation: fadeInUp 0.6s ease forwards;
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+.godCard {
+    background:
+        linear-gradient(145deg,
+            rgba(16, 16, 32, 0.95) 0%,
+            rgba(26, 26, 58, 0.9) 100%);
+    border: 2px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.godCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--element-gradient);
+}
+
+.godCard::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.4s ease;
+}
+
+.godCard:hover::after {
+    left: 100%;
+}
+
+.godCard:hover:not(.disabled) {
+    transform: translateY(-6px);
+    border-color: var(--gold-divine);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+.godCard.selected {
+    border-color: #22c55e;
+    box-shadow:
+        0 0 30px rgba(34, 197, 94, 0.4),
+        inset 0 0 20px rgba(34, 197, 94, 0.1);
+    background:
+        linear-gradient(145deg,
+            rgba(34, 197, 94, 0.15) 0%,
+            rgba(26, 26, 58, 0.95) 100%);
+}
+
+.godCard.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(85%);
+}
+
+.godHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.godElement {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 0 5px var(--element-color));
+}
+
+.godName {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gold-divine);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.godImage {
+    height: 75px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.godInitial {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: var(--element-color);
+    text-shadow: 0 0 15px var(--element-color);
+}
+
+.godStats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 4px 0;
+    border-top: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.selectedOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    color: #22c55e;
+    text-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+    pointer-events: none;
+    animation: checkAppear 0.3s ease-out;
+}
+
+@keyframes checkAppear {
+    from {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.disabledOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.8rem;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* ================================
+   ÉQUIPES SÉLECTIONNÉES
+   ================================ */
+.selectedTeams {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 850px;
+    justify-content: center;
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: 0.5s;
+    opacity: 0;
+}
+
+.teamPreview {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.teamPreview h3 {
+    font-family: 'Cinzel', serif;
+    margin: 0 0 0.75rem 0;
+    color: var(--gold-divine);
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.teamGods {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.teamGod {
+    padding: 0.5rem 0.75rem;
+    background: rgba(212, 175, 55, 0.08);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.85rem;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.emptyTeam {
+    color: rgba(212, 175, 55, 0.4);
+    font-style: italic;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* ================================
+   BOUTONS D'ACTION
+   ================================ */
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: 0.6s;
+    opacity: 0;
+}
+
+.confirmButton,
+.startButton,
+.backButton,
+.randomButton {
+    font-family: 'Cinzel', serif;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.confirmButton {
+    background: linear-gradient(145deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    border: 2px solid var(--gold-divine);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.confirmButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.confirmButton:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.5);
+}
+
+.confirmButton:hover:not(:disabled)::before {
+    left: 100%;
+}
+
+.startButton {
+    background: linear-gradient(145deg, #22c55e, #16a34a, #15803d);
+    color: white;
+    border: 2px solid #22c55e;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.startButton:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
+}
+
+.backButton {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.backButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.randomButton {
+    background: linear-gradient(145deg, #6366f1, #4f46e5, #4338ca);
+    color: white;
+    border: 2px solid #6366f1;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+.randomButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+}
+
+.confirmButton:disabled,
+.startButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .godsGrid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .godCard {
+        padding: 0.6rem;
+    }
+
+    .godImage {
+        height: 60px;
+    }
+
+    .godInitial {
+        font-size: 1.8rem;
+    }
+
+    .selectedTeams {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .confirmButton,
+    .startButton,
+    .backButton,
+    .randomButton {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .phaseIndicator {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .phaseArrow {
+        display: none;
+    }
+
+    .godsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

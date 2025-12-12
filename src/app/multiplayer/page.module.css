@@ -1,0 +1,617 @@
+/* GODS - Page Multijoueur Divine */
+/* Style : Portail olympien pour le matchmaking */
+
+.container {
+    min-height: 100vh;
+    background:
+        /* Overlay */
+        linear-gradient(180deg,
+            rgba(10, 10, 26, 0.95) 0%,
+            rgba(26, 26, 58, 0.9) 50%,
+            rgba(10, 10, 26, 0.95) 100%),
+        /* Rayons divins */
+        radial-gradient(ellipse at 50% 20%,
+            rgba(212, 175, 55, 0.12) 0%,
+            transparent 60%);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ================================
+   HEADER
+   ================================ */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.title {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    margin: 0;
+    text-align: center;
+}
+
+.connectionStatus {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statusDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.connected {
+    background: #22c55e;
+    box-shadow: 0 0 12px #22c55e;
+}
+
+.disconnected {
+    background: #ef4444;
+    box-shadow: 0 0 12px #ef4444;
+    animation: none;
+}
+
+@keyframes statusPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px currentColor;
+    }
+
+    50% {
+        box-shadow: 0 0 16px currentColor;
+    }
+}
+
+.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    max-width: 500px;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ================================
+   PANELS
+   ================================ */
+.menu,
+.createView,
+.joinView,
+.waitingView,
+.selectingView {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    backdrop-filter: blur(10px);
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+    position: relative;
+}
+
+.menu::before,
+.createView::before,
+.joinView::before,
+.waitingView::before,
+.selectingView::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold-divine), transparent);
+}
+
+/* ================================
+   INPUT NOM
+   ================================ */
+.nameInput {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nameInput label {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    font-size: 0.9rem;
+}
+
+.nameInput input {
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 2px solid rgba(212, 175, 55, 0.25);
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    font-size: 1.05rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.nameInput input:focus {
+    border-color: var(--gold-divine);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.nameInput input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* ================================
+   BOUTONS MENU
+   ================================ */
+.menuButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.createButton,
+.joinButton,
+.continueButton {
+    font-family: 'Cinzel', serif;
+    padding: 16px 32px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.createButton {
+    background: linear-gradient(145deg, #22c55e, #16a34a, #15803d);
+    color: white;
+    border: 2px solid #22c55e;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.createButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.createButton:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(34, 197, 94, 0.4);
+}
+
+.createButton:hover:not(:disabled)::before {
+    left: 100%;
+}
+
+.joinButton {
+    background: linear-gradient(145deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    border: 2px solid var(--gold-divine);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.joinButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.joinButton:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(212, 175, 55, 0.4);
+}
+
+.joinButton:hover:not(:disabled)::before {
+    left: 100%;
+}
+
+.continueButton {
+    background: linear-gradient(145deg, #f59e0b, #d97706, #b45309);
+    color: white;
+    border: 2px solid #f59e0b;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.continueButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(245, 158, 11, 0.4);
+}
+
+.createButton:disabled,
+.joinButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.backButton {
+    font-family: 'Cinzel', serif;
+    padding: 10px 24px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+}
+
+.backButton:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold-divine);
+    color: var(--gold-divine);
+}
+
+/* ================================
+   REJOINDRE PAR CODE
+   ================================ */
+.joinByCode {
+    width: 100%;
+}
+
+.joinByCode h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.codeInput {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.codeInput input {
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 2px solid rgba(212, 175, 55, 0.25);
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--gold-divine);
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 6px;
+    outline: none;
+    font-family: 'Cinzel', serif;
+}
+
+.codeInput input:focus {
+    border-color: var(--gold-divine);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.codeInput button {
+    font-family: 'Cinzel', serif;
+    padding: 14px 24px;
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.codeInput button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+}
+
+.codeInput button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ================================
+   LISTE DES PARTIES
+   ================================ */
+.gamesList {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.gamesList h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.gamesList ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.gameItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    transition: all 0.3s ease;
+}
+
+.gameItem:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.gameItem span {
+    color: white;
+    font-size: 0.95rem;
+}
+
+.gameItem .gameCode {
+    font-family: 'Cinzel', serif;
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--gold-divine);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.gameItem button {
+    font-family: 'Cinzel', serif;
+    padding: 8px 18px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.gameItem button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+}
+
+.noGames {
+    color: rgba(212, 175, 55, 0.5);
+    text-align: center;
+    font-style: italic;
+    padding: 1rem;
+}
+
+.refreshButton {
+    font-family: 'Cinzel', serif;
+    padding: 12px 24px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.refreshButton:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.3);
+    color: var(--gold-divine);
+}
+
+/* ================================
+   WAITING VIEW
+   ================================ */
+.waitingView h2,
+.selectingView h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.gameCode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gameCode p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.code {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: clamp(2.5rem, 8vw, 3.5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-divine));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.5));
+    letter-spacing: 10px;
+    animation: codeGlow 2s ease-in-out infinite;
+}
+
+@keyframes codeGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.7));
+    }
+}
+
+.hint {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ================================
+   LOADER
+   ================================ */
+.loader {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(212, 175, 55, 0.2);
+    border-top-color: var(--gold-divine);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.selectingView p {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+}
+
+.opponentReady {
+    color: #22c55e !important;
+    font-weight: 600;
+    animation: readyPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes readyPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .menu,
+    .createView,
+    .joinView,
+    .waitingView,
+    .selectingView {
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+
+    .createButton,
+    .joinButton,
+    .continueButton {
+        padding: 14px 24px;
+        font-size: 0.95rem;
+    }
+
+    .codeInput {
+        flex-direction: column;
+    }
+
+    .codeInput button {
+        width: 100%;
+    }
+}
