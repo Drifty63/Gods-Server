@@ -435,59 +435,12 @@
 
 @media (max-width: 480px) {
   .card {
-    width: 100px;
-    height: 145px;
+    width: 90px;
+    height: 130px;
   }
 
   .header {
-    padding: 4px 6px;
-  }
-
-  .name {
-    font-size: 0.5rem;
-    max-width: 65px;
-  }
-
-  .imageContainer {
-    height: 55px;
-  }
-
-  .godInitial {
-    font-size: 1.5rem;
-  }
-
-  .healthSection {
-    padding: 4px 6px;
-  }
-
-  .healthBar {
-    height: 16px;
-  }
-
-  .healthText {
-    font-size: 0.55rem;
-  }
-
-  .statusEffects {
-    padding: 0 6px 3px;
-    gap: 2px;
-  }
-
-  .statusBadge {
-    font-size: 0.5rem;
-    padding: 1px 4px;
-  }
-}
-
-/* Très petits écrans (360px et moins) */
-@media (max-width: 380px) {
-  .card {
-    width: 85px;
-    height: 125px;
-  }
-
-  .header {
-    padding: 3px 4px;
+    padding: 3px 5px;
   }
 
   .name {
@@ -500,11 +453,11 @@
   }
 
   .godInitial {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   .healthSection {
-    padding: 3px 4px;
+    padding: 3px 5px;
   }
 
   .healthBar {
@@ -516,11 +469,59 @@
   }
 
   .statusEffects {
-    padding: 0 4px 2px;
+    padding: 0 5px 2px;
+    gap: 2px;
   }
 
   .statusBadge {
     font-size: 0.45rem;
     padding: 1px 3px;
+  }
+}
+
+/* Très petits écrans (360px et moins) */
+@media (max-width: 380px) {
+  .card {
+    width: 75px;
+    height: 110px;
+  }
+
+  .header {
+    padding: 2px 3px;
+  }
+
+  .name {
+    font-size: 0.4rem;
+    max-width: 45px;
+  }
+
+  .imageContainer {
+    height: 35px;
+  }
+
+  .godInitial {
+    font-size: 1rem;
+  }
+
+  .healthSection {
+    padding: 2px 3px;
+  }
+
+  .healthBar {
+    height: 12px;
+  }
+
+  .healthText {
+    font-size: 0.45rem;
+  }
+
+  .statusEffects {
+    padding: 0 3px 1px;
+    gap: 1px;
+  }
+
+  .statusBadge {
+    font-size: 0.4rem;
+    padding: 1px 2px;
   }
 }
