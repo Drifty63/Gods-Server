@@ -457,9 +457,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
                 <div className={styles.godsRow}>
                     {opponent.gods.map((god) => {
+                        // Vérifier si le sort a réellement besoin de cibler un ennemi
+                        const needsEnemyTarget = selectedCard?.effects.some(e =>
+                            e.target === 'enemy_god' || e.target === 'any_god'
+                        );
+
                         // Vérifier si ce dieu est une cible valide (en tenant compte de la provocation et du multi-ciblage)
                         const validTargets = getValidEnemyTargets(isMultiTarget);
-                        const isValidTarget = validTargets.some(t => t.card.id === god.card.id);
+                        const isValidTarget = needsEnemyTarget && validTargets.some(t => t.card.id === god.card.id);
 
                         // Vérifier si c'est une cible obligatoire (provocateur)
                         const isRequiredTarget = requiredEnemyTargets.some(t => t.card.id === god.card.id);
