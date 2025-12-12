@@ -435,24 +435,29 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             )}
             {/* Zone adversaire */}
             <div className={styles.opponentZone}>
-                <div className={styles.playerInfo}>
-                    <span className={styles.playerName}>{opponent.name}</span>
-                    <div className={styles.energy}>
-                        <span className={styles.energyIcon}>⚡</span>
-                        <span className={styles.energyValue}>{opponent.energy}</span>
-                    </div>
-                    <span className={styles.deckCount}>🎴 {opponent.deck.length}</span>
-                    {opponent.fatigueCounter > 0 && (
-                        <span className={styles.fatigueCount} title="Dégâts de la prochaine fatigue">💀 {opponent.fatigueCounter + 1}</span>
+                {/* Main de l'adversaire EN HAUT (dos de cartes ou face visible si effet Nyx) */}
+                <div className={styles.opponentHand}>
+                    {opponent.hand.map((card, index) => {
+                        // On peut voir la carte si elle a été révélée à notre playerId
+                        const canSeeCard = card.revealedToPlayerId === playerId;
+
+                        return canSeeCard ? (
+                            // Carte visible pour nous (effet Nyx actif sur l'adversaire)
+                            <div key={card.id} className={styles.revealedEnemyCard}>
+                                <SpellCard card={card} isSelected={false} />
+                                <span className={styles.nyxRevealBadge}>👁️</span>
+                            </div>
+                        ) : (
+                            // Dos de carte normal
+                            <div key={card.id || index} className={styles.cardBack}>
+                                <span className={styles.cardBackIcon}>🎴</span>
+                                <span className={styles.cardBackNumber}>{index + 1}</span>
+                            </div>
+                        );
+                    })}
+                    {opponent.hand.length === 0 && (
+                        <span className={styles.emptyHandText}>Main vide</span>
                     )}
-                    <span className={styles.handCount}>✋ {opponent.hand.length}</span>
-                    <button
-                        className={styles.discardButton}
-                        onClick={() => setViewDiscard('opponent')}
-                        title="Voir la défausse adverse"
-                    >
-                        🗑️ {opponent.discard.length}
-                    </button>
                 </div>
 
                 <div className={styles.godsRow}>
@@ -484,29 +489,24 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     })}
                 </div>
 
-                {/* Main de l'adversaire (dos de cartes ou face visible si effet Nyx) */}
-                <div className={styles.opponentHand}>
-                    {opponent.hand.map((card, index) => {
-                        // On peut voir la carte si elle a été révélée à notre playerId
-                        const canSeeCard = card.revealedToPlayerId === playerId;
-
-                        return canSeeCard ? (
-                            // Carte visible pour nous (effet Nyx actif sur l'adversaire)
-                            <div key={card.id} className={styles.revealedEnemyCard}>
-                                <SpellCard card={card} isSelected={false} />
-                                <span className={styles.nyxRevealBadge}>👁️</span>
-                            </div>
-                        ) : (
-                            // Dos de carte normal
-                            <div key={card.id || index} className={styles.cardBack}>
-                                <span className={styles.cardBackIcon}>🎴</span>
-                                <span className={styles.cardBackNumber}>{index + 1}</span>
-                            </div>
-                        );
-                    })}
-                    {opponent.hand.length === 0 && (
-                        <span className={styles.emptyHandText}>Main vide</span>
+                <div className={styles.playerInfo}>
+                    <span className={styles.playerName}>{opponent.name}</span>
+                    <div className={styles.energy}>
+                        <span className={styles.energyIcon}>⚡</span>
+                        <span className={styles.energyValue}>{opponent.energy}</span>
+                    </div>
+                    <span className={styles.deckCount}>🎴 {opponent.deck.length}</span>
+                    {opponent.fatigueCounter > 0 && (
+                        <span className={styles.fatigueCount} title="Dégâts de la prochaine fatigue">💀 {opponent.fatigueCounter + 1}</span>
                     )}
+                    <span className={styles.handCount}>✋ {opponent.hand.length}</span>
+                    <button
+                        className={styles.discardButton}
+                        onClick={() => setViewDiscard('opponent')}
+                        title="Voir la défausse adverse"
+                    >
+                        🗑️ {opponent.discard.length}
+                    </button>
                 </div>
             </div>
 
