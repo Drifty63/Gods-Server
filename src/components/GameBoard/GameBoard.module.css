@@ -1017,14 +1017,14 @@
 @media (max-width: 480px) {
 
     .board {
-        padding: 8px;
-        gap: 6px;
+        padding: 4px;
+        gap: 4px;
     }
 
     .opponentZone,
     .playerZone {
-        padding: 8px 10px;
-        gap: 6px;
+        padding: 4px 6px;
+        gap: 4px;
     }
 
     .opponentZone::before,
@@ -1038,12 +1038,12 @@
     }
 
     .playerInfo {
-        gap: 6px;
-        padding: 4px 8px;
+        gap: 4px;
+        padding: 2px 6px;
     }
 
     .playerName {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
     }
 
     .energy {
@@ -1168,14 +1168,14 @@
     }
 
     .playerInfo {
-        gap: 4px;
-        padding: 3px 5px;
+        gap: 3px;
+        padding: 2px 4px;
         flex-wrap: wrap;
         justify-content: center;
     }
 
     .playerName {
-        font-size: 0.65rem;
+        font-size: 0.55rem;
     }
 
     .energy {
