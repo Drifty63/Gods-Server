@@ -271,17 +271,31 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             // Déselectionner
             selectCard(null);
         } else {
+            // Sur mobile et PC: sélectionner la carte sans jouer automatiquement
+            // L'utilisateur doit utiliser le bouton "Jouer" ou "Défausser"
             selectCard(card);
-
-            // Si la carte ne nécessite pas de cible ET pas de choix de foudre, la jouer directement
-            const reqTargets = getRequiredTargetCount(card);
-            const needsLightning = needsLightningChoice(card);
-
-            if (reqTargets === 0 && !needsLightning && canPlayCard(card)) {
-                handlePlayCard(card.id);
-            }
-            // Si la carte nécessite un choix de foudre mais pas de cible, le modal s'affichera
         }
+    };
+
+    // Fonction pour jouer la carte sélectionnée depuis le bouton d'action
+    const handlePlaySelectedCard = () => {
+        if (!selectedCard || !isPlayerTurn) return;
+
+        const reqTargets = getRequiredTargetCount(selectedCard);
+        const needsLightning = needsLightningChoice(selectedCard);
+
+        // Si pas besoin de cible ni de choix foudre, jouer directement
+        if (reqTargets === 0 && !needsLightning && canPlayCard(selectedCard)) {
+            handlePlayCard(selectedCard.id);
+        }
+        // Sinon la carte reste sélectionnée pour permettre de choisir les cibles
+    };
+
+    // Fonction pour défausser la carte sélectionnée depuis le bouton d'action
+    const handleDiscardSelectedCard = () => {
+        if (!selectedCard || !isPlayerTurn) return;
+        handleDiscard(selectedCard.id);
+        selectCard(null);
     };
 
     // Crée un ID unique pour distinguer les dieux des deux joueurs
@@ -733,9 +747,36 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 )}
             </div>
 
-            {/* Aide */}
-            <div className={styles.helpTooltip}>
-                <p>💡 Clic gauche = Jouer • Clic droit = Défausser (+1⚡)</p>
+            {/* Barre d'action mobile - s'affiche quand une carte est sélectionnée */}
+            {selectedCard && isPlayerTurn && !isSelectingTarget && (
+                <div className={styles.mobileActionBar}>
+                    <div className={styles.selectedCardInfo}>
+                        <span className={styles.selectedCardName}>{selectedCard.name}</span>
+                        <span className={styles.selectedCardCost}>
+                            {selectedCard.energyCost > 0 ? `${selectedCard.energyCost}⚡` : `+${selectedCard.energyGain}⚡`}
+                        </span>
+                    </div>
+                    <div className={styles.actionButtons}>
+                        <button
+                            className={styles.discardButton}
+                            onClick={handleDiscardSelectedCard}
+                        >
+                            🗑️ Défausser (+1⚡)
+                        </button>
+                        <button
+                            className={`${styles.playButton} ${!canPlayCard(selectedCard) ? styles.disabled : ''}`}
+                            onClick={handlePlaySelectedCard}
+                            disabled={!canPlayCard(selectedCard)}
+                        >
+                            ▶️ Jouer
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Aide (masquée sur mobile quand une carte est sélectionnée) */}
+            <div className={`${styles.helpTooltip} ${selectedCard ? styles.hiddenOnMobile : ''}`}>
+                <p>💡 Sélectionnez une carte, puis choisissez Jouer ou Défausser</p>
             </div>
 
             {/* Modal de sélection de cartes */}
