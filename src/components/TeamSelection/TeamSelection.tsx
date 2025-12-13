@@ -84,7 +84,21 @@ export default function TeamSelection({ onTeamsSelected }: TeamSelectionProps) {
                     <span className={styles.godName}>{god.name.split(',')[0]}</span>
                 </div>
                 <div className={styles.godImage}>
-                    <span className={styles.godInitial}>{god.name.charAt(0)}</span>
+                    {god.imageUrl ? (
+                        <img
+                            src={god.imageUrl}
+                            alt={god.name}
+                            className={styles.godImageImg}
+                            onError={(e) => {
+                                // Fallback to initial if image fails to load
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove(styles.hidden);
+                            }}
+                        />
+                    ) : null}
+                    <span className={`${styles.godInitial} ${god.imageUrl ? styles.hidden : ''}`}>
+                        {god.name.charAt(0)}
+                    </span>
                 </div>
                 <div className={styles.godStats}>
                     <span className={styles.health}>❤️ {god.maxHealth}</span>
