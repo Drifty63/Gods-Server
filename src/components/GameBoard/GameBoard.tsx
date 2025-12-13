@@ -160,6 +160,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const [pendingCardForSelection, setPendingCardForSelection] = useState<import('@/types/cards').SpellCard | null>(null);
     const [pendingCardForHealDistribution, setPendingCardForHealDistribution] = useState<import('@/types/cards').SpellCard | null>(null);
     const [pendingCardForEnemySelection, setPendingCardForEnemySelection] = useState<import('@/types/cards').SpellCard | null>(null);
+    // Indique si l'utilisateur a cliqué sur "Jouer" (pour contrôler quand afficher le choix foudre)
+    const [wantsToPlay, setWantsToPlay] = useState(false);
 
     // Effet pour ouvrir le modal de sélection après avoir joué une carte qui le nécessite
     useEffect(() => {
@@ -305,10 +307,12 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         if (selectedCard?.id === card.id) {
             // Déselectionner
             selectCard(null);
+            setWantsToPlay(false);
         } else {
             // Sur mobile et PC: sélectionner la carte sans jouer automatiquement
             // L'utilisateur doit utiliser le bouton "Jouer" ou "Défausser"
             selectCard(card);
+            setWantsToPlay(false);
         }
     };
 
@@ -319,11 +323,19 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const reqTargets = getRequiredTargetCount(selectedCard);
         const needsLightning = needsLightningChoice(selectedCard);
 
-        // Si pas besoin de cible ni de choix foudre, jouer directement
-        if (reqTargets === 0 && !needsLightning) {
-            handlePlayCard(selectedCard.id);
+        // Marquer qu'on veut jouer la carte
+        setWantsToPlay(true);
+
+        // Si pas besoin de cible
+        if (reqTargets === 0) {
+            if (!needsLightning) {
+                // Pas de cible, pas de foudre → jouer directement
+                handlePlayCard(selectedCard.id);
+                setWantsToPlay(false);
+            }
+            // Si foudre mais pas de cible → le choix foudre s'affichera via wantsToPlay
         } else {
-            // Sinon, activer le mode ciblage pour permettre de choisir les cibles
+            // Besoin de cibles → activer le mode ciblage
             startTargetSelection();
         }
     };
@@ -333,6 +345,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         if (!selectedCard || !isPlayerTurn) return;
         handleDiscard(selectedCard.id);
         selectCard(null);
+        setWantsToPlay(false);
     };
 
     // Crée un ID unique pour distinguer les dieux des deux joueurs
@@ -611,6 +624,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                         onClick={() => {
                                             setLightningAction('apply');
                                             handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
+                                            setWantsToPlay(false);
                                         }}
                                     >
                                         ⚡ Appliquer des marques
@@ -620,6 +634,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                         onClick={() => {
                                             setLightningAction('remove');
                                             handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
+                                            setWantsToPlay(false);
                                         }}
                                     >
                                         💥 Retirer & infliger dégâts
@@ -659,7 +674,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 )}
 
                 {/* Choix de foudre pour les cartes sans ciblage (ex: Foudroiement all_enemies) */}
-                {selectedCard && needsLightningChoice(selectedCard) && !isSelectingTarget && (
+                {selectedCard && needsLightningChoice(selectedCard) && wantsToPlay && !isSelectingTarget && (
                     <div className={styles.targetPrompt}>
                         <p>⚡ <strong>{selectedCard.name}</strong> - Que voulez-vous faire ?</p>
                         <div className={styles.lightningButtons}>
@@ -668,6 +683,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 onClick={() => {
                                     setLightningAction('apply');
                                     handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
+                                    setWantsToPlay(false);
                                 }}
                             >
                                 ⚡ Appliquer des marques
@@ -677,12 +693,13 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 onClick={() => {
                                     setLightningAction('remove');
                                     handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
+                                    setWantsToPlay(false);
                                 }}
                             >
                                 💥 Retirer & infliger dégâts
                             </button>
                         </div>
-                        <button className={styles.cancelButton} onClick={() => selectCard(null)}>
+                        <button className={styles.cancelButton} onClick={() => { selectCard(null); setWantsToPlay(false); }}>
                             ❌ Annuler
                         </button>
                     </div>
