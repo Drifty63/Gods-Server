@@ -29,6 +29,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         selectedTargetGods,
         isSelectingTarget,
         selectCard,
+        startTargetSelection,
         addTargetGod,
         setLightningAction,
         setSelectedElement,
@@ -313,16 +314,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     // Fonction pour jouer la carte sélectionnée depuis le bouton d'action
     const handlePlaySelectedCard = () => {
-        if (!selectedCard || !isPlayerTurn) return;
+        if (!selectedCard || !isPlayerTurn || !canPlayCard(selectedCard)) return;
 
         const reqTargets = getRequiredTargetCount(selectedCard);
         const needsLightning = needsLightningChoice(selectedCard);
 
         // Si pas besoin de cible ni de choix foudre, jouer directement
-        if (reqTargets === 0 && !needsLightning && canPlayCard(selectedCard)) {
+        if (reqTargets === 0 && !needsLightning) {
             handlePlayCard(selectedCard.id);
+        } else {
+            // Sinon, activer le mode ciblage pour permettre de choisir les cibles
+            startTargetSelection();
         }
-        // Sinon la carte reste sélectionnée pour permettre de choisir les cibles
     };
 
     // Fonction pour défausser la carte sélectionnée depuis le bouton d'action

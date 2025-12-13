@@ -51,6 +51,7 @@ interface GameStore {
 
     setPlayerId: (id: string) => void;
     selectCard: (card: SpellCard | null) => void;
+    startTargetSelection: () => void;  // Activer le mode ciblage
     selectTargetGod: (god: GodState | null) => void;
     addTargetGod: (god: GodState) => void;  // Ajouter une cible à la liste
     setLightningAction: (action: 'apply' | 'remove') => void;  // Choisir l'action foudre
@@ -205,17 +206,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
             return;
         }
 
-        // Compter le nombre de cibles requises
+        // Compter le nombre de cibles requises (on le garde pour référence)
         const requiredTargets = get().getRequiredTargetCount(card);
-        const needsTarget = requiredTargets > 0;
 
+        // NE PAS passer en mode ciblage automatiquement
+        // L'utilisateur doit d'abord cliquer sur "Jouer" pour entrer en mode ciblage
         set({
             selectedCard: card,
-            isSelectingTarget: needsTarget,
+            isSelectingTarget: false, // On ne passe pas en mode ciblage tout de suite
             selectedTargetGod: null,
             selectedTargetGods: [],
             requiredTargets,
         });
+    },
+
+    // Activer le mode ciblage pour la carte sélectionnée
+    startTargetSelection: () => {
+        const { selectedCard } = get();
+        if (!selectedCard) return;
+
+        const requiredTargets = get().getRequiredTargetCount(selectedCard);
+        if (requiredTargets > 0) {
+            set({ isSelectingTarget: true });
+        }
     },
 
     selectTargetGod: (god) => {
