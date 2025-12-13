@@ -21,7 +21,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/poseidon_trident.png',
+        imageUrl: '/cards/spells/spell_poseidon_trident.png',
         description: 'Inflige 3 dégâts à une cible.',
     },
     {
@@ -37,7 +37,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'mill', value: 2 }
         ],
-        imageUrl: '/cards/spells/poseidon_colere.png',
+        imageUrl: '/cards/spells/spell_poseidon_colere.png',
         description: 'Inflige 1 dégât à deux cibles et meule 2 cartes.',
     },
 
@@ -55,7 +55,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'discard', value: 2 }
         ],
-        imageUrl: '/cards/spells/poseidon_grande_vague.png',
+        imageUrl: '/cards/spells/spell_poseidon_vague.png',
         description: 'Inflige 2 dégâts à deux cibles et défausse 2 cartes de la main de votre adversaire.',
     },
     {
@@ -70,7 +70,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'mill', value: 5, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'tsunami_damage', description: 'Inflige 3 dégâts par carte du dieu ciblé meulée' }
         ],
-        imageUrl: '/cards/spells/poseidon_tsunami.png',
+        imageUrl: '/cards/spells/spell_poseidon_tsunami.png',
         description: 'Ciblez un adversaire; Meule 5 cartes du dessus du deck (limité à un recyclage). Inflige 3 dégâts par carte du dieu ciblé.',
     },
 
@@ -87,7 +87,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'prison_mill', description: 'Meule du nombre d\'ennemis touchés' }
         ],
-        imageUrl: '/cards/spells/poseidon_prison.png',
+        imageUrl: '/cards/spells/spell_poseidon_prison.png',
         description: 'Inflige 1 dégât à toutes les cibles et meule du nombre d\'ennemis touchés.',
     },
 
@@ -108,7 +108,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/zeus_eclair.png',
+        imageUrl: '/cards/spells/spell_zeus_eclair.png',
         description: 'Inflige 3 dégâts à une cible.',
     },
     {
@@ -123,7 +123,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'conductive_lightning', value: 1, target: 'enemy_god', description: 'Inflige 1 dégât et applique 1 marque de foudre' },
             { type: 'custom', customEffectId: 'conductive_lightning', value: 1, target: 'enemy_god', description: 'Inflige 1 dégât et applique 1 marque de foudre' }
         ],
-        imageUrl: '/cards/spells/zeus_foudre_conductrice.png',
+        imageUrl: '/cards/spells/spell_zeus_conductrice.png',
         description: 'Inflige 1 dégât à deux cibles et leur applique 1 marque de foudre.',
     },
 
@@ -140,7 +140,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 5, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'lightning_toggle', description: 'Applique ou enlève ⚡ de la cible. +2 dégâts par ⚡ enlevée' }
         ],
-        imageUrl: '/cards/spells/zeus_eclair_foudroyant.png',
+        imageUrl: '/cards/spells/spell_zeus_foudroyant.png',
         description: 'Inflige 5 dégâts à une cible. Applique ou enlève ⚡ de la cible. Inflige 2 dégâts par ⚡ enlevée.',
     },
     {
@@ -155,7 +155,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'lightning_toggle_all', description: 'Applique ou enlève ⚡ de toutes les cibles. +2 dégâts par ⚡ enlevée' }
         ],
-        imageUrl: '/cards/spells/zeus_foudroiement.png',
+        imageUrl: '/cards/spells/spell_zeus_foudroiement.png',
         description: 'Inflige 3 dégâts à toutes les cibles. Applique ou enlève ⚡ des cibles. Inflige 2 dégâts par ⚡ enlevée.',
     },
 
@@ -173,7 +173,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'lightning_toggle_multi', description: 'Applique ou enlève ⚡ des cibles. +2 dégâts par ⚡ enlevée' }
         ],
-        imageUrl: '/cards/spells/zeus_chaine.png',
+        imageUrl: '/cards/spells/spell_zeus_chaine.png',
         description: 'Inflige 2 dégâts à 2 cibles. Applique ou enlève ⚡ des cibles. Inflige 2 dégâts par ⚡ enlevée.',
     },
 
@@ -194,7 +194,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/nyx_zone_vide.png',
+        imageUrl: '/cards/spells/spell_nyx_zonevide.png',
         description: 'Inflige 1 dégât à toutes les cibles.',
     },
     {
@@ -209,7 +209,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'shuffle_hand_draw_blind', description: 'Mélange 1 carte adverse dans son deck, pioche 1 à l\'envers' }
         ],
-        imageUrl: '/cards/spells/nyx_ombres.png',
+        imageUrl: '/cards/spells/spell_nyx_ombres.png',
         description: 'Inflige 2 dégâts à une cible, mélangez une carte de la main adverse dans son deck et piochez 1 à l\'envers.',
     },
 
@@ -226,7 +226,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'shuffle_hand_draw_blind_2', description: 'Mélange 2 cartes adverses dans son deck, pioche 2 à l\'envers' }
         ],
-        imageUrl: '/cards/spells/nyx_malediction.png',
+        imageUrl: '/cards/spells/spell_nyx_malediction.png',
         description: 'Inflige 3 dégâts à une cible; Choisissez 2 cartes de la main adverse, les mélange dans son deck et pioche 2 à l\'envers.',
     },
     {
@@ -240,7 +240,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'shuffle_all_hand_draw_blind', description: 'L\'adversaire mélange sa main dans son deck et pioche 5 à l\'envers' }
         ],
-        imageUrl: '/cards/spells/nyx_nuit_sans_fin.png',
+        imageUrl: '/cards/spells/spell_nyx_nuitsansfin.png',
         description: 'L\'adversaire mélange sa main dans son deck et pioche 5 cartes à l\'envers.',
     },
 
@@ -257,7 +257,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'draw', value: 3 },
             { type: 'custom', customEffectId: 'put_cards_bottom', description: 'Placez 3 cartes en dessous de votre deck' }
         ],
-        imageUrl: '/cards/spells/nyx_prophetie.png',
+        imageUrl: '/cards/spells/spell_nyx_prophetie.png',
         description: 'Piochez 3 cartes du dessus de votre deck et placez 3 cartes en dessous, gagne 1 énergie.',
     },
 
@@ -278,7 +278,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/hestia_flammes.png',
+        imageUrl: '/cards/spells/spell_hestia_flammes.png',
         description: 'Inflige 3 dégâts à une cible.',
     },
     {
@@ -293,7 +293,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'remove_weakness_1_turn', target: 'ally_god', description: 'Retire la faiblesse d\'un allié pendant 1 tour' }
         ],
-        imageUrl: '/cards/spells/hestia_fumee.png',
+        imageUrl: '/cards/spells/spell_hestia_fumee.png',
         description: 'Inflige 1 dégât à toutes les cibles et fait perdre la faiblesse d\'un de vos dieux pendant 1 tour.',
     },
 
@@ -309,7 +309,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'heal_by_energy', target: 'ally_god', description: 'Soigne un allié de la valeur totale de votre énergie' }
         ],
-        imageUrl: '/cards/spells/hestia_repas.png',
+        imageUrl: '/cards/spells/spell_hestia_repas.png',
         description: 'Donne 2 énergies et soigne un allié de la valeur totale de votre énergie.',
     },
     {
@@ -323,7 +323,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'remove_all_weakness_3_turns', description: 'Tous les alliés perdent leurs faiblesses pendant 3 tours' }
         ],
-        imageUrl: '/cards/spells/hestia_foyer.png',
+        imageUrl: '/cards/spells/spell_hestia_foyer.png',
         description: 'Tous les alliés perdent leurs faiblesses pendant 3 tours.',
     },
 
@@ -339,7 +339,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'recycle_from_discard', description: 'Choisissez 2 cartes de la défausse et remettez-les dans le deck' }
         ],
-        imageUrl: '/cards/spells/hestia_repos.png',
+        imageUrl: '/cards/spells/spell_hestia_repos.png',
         description: 'Choisissez deux cartes dans votre défausse, faites-les revenir dans votre deck puis mélangez-le.',
     },
 
@@ -527,7 +527,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_dionysos_gueule_de_bois.png',
+        imageUrl: '/cards/spells/spell_dionysos_gueule.png',
         description: 'Inflige 3 dégâts à une cible.',
     },
     {
@@ -612,7 +612,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_hades_terre_brulee.png',
+        imageUrl: '/cards/spells/spell_hades_terrebrulee.png',
         description: 'Inflige 1 dégâts à toutes les cibles.',
     },
     {
