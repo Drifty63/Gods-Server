@@ -485,7 +485,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     playCard: (cardId, targetGodId, targetGodIds, lightningAction) => {
-        const { engine, playerId, selectedTargetGods, selectedLightningAction, selectedElement } = get();
+        const { engine, playerId, selectedTargetGods, selectedLightningAction, selectedElement, isSoloMode } = get();
         if (!engine) return { success: false, message: 'Partie non initialisée' };
 
         // Utiliser les cibles multiples si disponibles
@@ -517,11 +517,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 selectedElement: null,
             });
 
-            // Fin de tour automatique après avoir joué une carte (1 carte par tour)
-            // Déclencher la fin de tour après un court délai pour laisser voir l'effet
-            setTimeout(() => {
-                get().endTurn();
-            }, 500);
+            // Fin de tour automatique UNIQUEMENT en mode solo
+            // En multijoueur, le GameBoard.onAction gère la fin de tour
+            if (isSoloMode) {
+                setTimeout(() => {
+                    get().endTurn();
+                }, 500);
+            }
         }
 
         return result;

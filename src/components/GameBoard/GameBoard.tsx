@@ -24,6 +24,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const {
         gameState,
         playerId,
+        isSoloMode,
         selectedCard,
         selectedTargetGods,
         isSelectingTarget,
@@ -260,8 +261,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 return;
             }
         }
+
         playCard(cardId, targetGodId, targetGodIds, lightningAction);
         onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
+
+        // En multijoueur, finir le tour automatiquement après avoir joué une carte
+        // (le store gère déjà ça en solo)
+        if (!isSoloMode) {
+            setTimeout(() => {
+                endTurn();
+                onAction?.({ type: 'end_turn', payload: {} });
+            }, 500);
+        }
     };
 
     const handleCardClick = (card: typeof selectedCard) => {
