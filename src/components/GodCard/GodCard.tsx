@@ -51,6 +51,22 @@ export default function GodCard({
                     {ELEMENT_SYMBOLS[card.element]}
                 </span>
 
+                {/* Effets de statut en haut à droite */}
+                {statusEffects.length > 0 && (
+                    <div className={styles.statusEffects}>
+                        {statusEffects.map((status, index) => (
+                            <div
+                                key={index}
+                                className={`${styles.statusBadge} ${styles[status.type] || ''}`}
+                                title={`${status.type}: ${status.stacks}`}
+                            >
+                                <span>{getStatusIcon(status.type)}</span>
+                                <span>{status.stacks}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 {/* Barre de vie en bas de l'image avec faiblesse */}
                 <div className={styles.healthOverlay}>
                     <div className={styles.healthBar}>
@@ -71,22 +87,6 @@ export default function GodCard({
                     </span>
                 </div>
             </div>
-
-            {/* Effets de statut */}
-            {statusEffects.length > 0 && (
-                <div className={styles.statusEffects}>
-                    {statusEffects.map((status, index) => (
-                        <div
-                            key={index}
-                            className={`${styles.statusBadge} ${styles[status.type] || ''}`}
-                            title={`${status.type}: ${status.stacks}`}
-                        >
-                            <span>{getStatusIcon(status.type)}</span>
-                            <span>{status.stacks}</span>
-                        </div>
-                    ))}
-                </div>
-            )}
 
             {/* Overlay si mort */}
             {isDead && (
