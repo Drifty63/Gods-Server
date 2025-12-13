@@ -35,15 +35,7 @@ export default function GodCard({
             } as React.CSSProperties}
             onClick={isSelectable ? onClick : undefined}
         >
-            {/* Header avec nom et élément */}
-            <div className={styles.header}>
-                <span className={styles.name}>{card.name}</span>
-                <span className={styles.element} title={ELEMENT_NAMES[card.element]}>
-                    {ELEMENT_SYMBOLS[card.element]}
-                </span>
-            </div>
-
-            {/* Image du dieu */}
+            {/* Image du dieu avec barre de vie overlay */}
             <div className={styles.imageContainer}>
                 <Image
                     src={card.imageUrl}
@@ -53,22 +45,32 @@ export default function GodCard({
                     sizes="(max-width: 768px) 150px, 200px"
                     priority
                 />
-            </div>
 
-            {/* Barre de vie */}
-            <div className={styles.healthSection}>
-                <div className={styles.healthBar}>
-                    <div
-                        className={styles.healthFill}
-                        style={{ width: `${Math.max(0, healthPercentage)}%` }}
-                    />
-                    <span className={styles.healthText}>
-                        {currentHealth} / {card.maxHealth}
+                {/* Élément en haut à gauche */}
+                <span className={styles.elementBadge} title={ELEMENT_NAMES[card.element]}>
+                    {ELEMENT_SYMBOLS[card.element]}
+                </span>
+
+                {/* Barre de vie en bas de l'image avec faiblesse */}
+                <div className={styles.healthOverlay}>
+                    <div className={styles.healthBar}>
+                        <div
+                            className={styles.healthFill}
+                            style={{ width: `${Math.max(0, healthPercentage)}%` }}
+                        />
+                        <span className={styles.healthText}>
+                            {currentHealth}/{card.maxHealth}
+                        </span>
+                    </div>
+                    <span
+                        className={styles.weaknessBadge}
+                        title={`Faiblesse: ${ELEMENT_NAMES[god.temporaryWeakness || card.weakness]}`}
+                        style={{ color: god.temporaryWeakness ? '#f59e0b' : 'inherit' }}
+                    >
+                        {ELEMENT_SYMBOLS[god.temporaryWeakness || card.weakness]}
                     </span>
                 </div>
             </div>
-
-
 
             {/* Effets de statut */}
             {statusEffects.length > 0 && (
@@ -86,18 +88,10 @@ export default function GodCard({
                 </div>
             )}
 
-            {/* Faiblesse */}
-            <div className={styles.weakness}>
-                <span className={styles.weaknessLabel}>Faiblesse:</span>
-                <span className={styles.weaknessElement} style={{ color: god.temporaryWeakness ? '#f59e0b' : 'inherit' }}>
-                    {ELEMENT_SYMBOLS[god.temporaryWeakness || card.weakness]}
-                </span>
-            </div>
-
             {/* Overlay si mort */}
             {isDead && (
                 <div className={styles.deadOverlay}>
-                    <span className={styles.deadText}>💀 MORT</span>
+                    <span className={styles.deadText}>💀</span>
                 </div>
             )}
         </div>
