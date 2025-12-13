@@ -779,7 +779,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/ares_brisee.png',
+        imageUrl: '/cards/spells/spell_ares_brisee.png',
         description: 'Inflige 1 dégâts à toutes les cibles.',
     },
     {
@@ -793,7 +793,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/ares_entrainement.png',
+        imageUrl: '/cards/spells/spell_ares_entrainement.png',
         description: 'Augmente l\'énergie de 3 et reçoit 3 dégâts.',
     },
 
@@ -810,7 +810,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 4, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/ares_saut.png',
+        imageUrl: '/cards/spells/spell_ares_saut.png',
         description: 'Inflige 4 dégâts à une cible et reçoit 2 dégâts.',
     },
     {
@@ -825,7 +825,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 5, target: 'enemy_god' },
             { type: 'damage', value: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/ares_frappe.png',
+        imageUrl: '/cards/spells/spell_ares_frappe.png',
         description: 'Inflige 5 dégâts à une cible et reçoit 3 dégâts.',
     },
 
@@ -842,7 +842,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'damage_equal_lost_health', target: 'enemy_god', description: 'Inflige des dégâts égaux aux points de vie perdus' },
             { type: 'damage', value: 5, target: 'self' }
         ],
-        imageUrl: '/cards/spells/ares_dernier.png',
+        imageUrl: '/cards/spells/spell_ares_dernier.png',
         description: 'Inflige des dégâts égaux aux points de vie perdus. Subit 5 dégâts après l\'attaque.',
     },
 
@@ -863,7 +863,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/artemis_fleches_multiples.png',
+        imageUrl: '/cards/spells/spell_artemis_fleches_multiples.png',
         description: 'Inflige 1 dégâts à toutes les cibles.',
     },
     {
@@ -878,7 +878,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/artemis_tir_bestial.png',
+        imageUrl: '/cards/spells/spell_artemis_tir_bestial.png',
         description: 'Inflige 2 dégâts à deux cibles.',
     },
 
@@ -895,7 +895,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/artemis_fleches_tracantes.png',
+        imageUrl: '/cards/spells/spell_artemis_fleches_tracantes.png',
         description: 'Inflige 3 dégâts à deux cibles.',
     },
     {
@@ -910,7 +910,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'apply_weakness', description: 'Applique une faiblesse d\'un élément voulu' }
         ],
-        imageUrl: '/cards/spells/artemis_coup_critique.png',
+        imageUrl: '/cards/spells/spell_artemis_coup_critique.png',
         description: 'Inflige 3 dégâts à une cible et lui applique une faiblesse d\'un élément voulu.',
     },
 
@@ -926,7 +926,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 10, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/artemis_execution.png',
+        imageUrl: '/cards/spells/spell_artemis_execution.png',
         description: 'Inflige 10 dégâts à une cible.',
     },
 
@@ -947,7 +947,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/aphrodite_etreinte.png',
+        imageUrl: '/cards/spells/spell_aphrodite_etreinte.png',
         description: 'Inflige 1 dégât à toutes les cibles.',
     },
     {
@@ -962,7 +962,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, description: 'Stun pendant 1 tour' }
         ],
-        imageUrl: '/cards/spells/aphrodite_coeur_brise.png',
+        imageUrl: '/cards/spells/spell_aphrodite_coeur_brise.png',
         description: 'Inflige 2 dégâts à une cible et l\'étourdit pendant 1 tour.',
     },
 
@@ -979,7 +979,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'cleanse', description: 'Enlève tous les effets négatifs' },
             { type: 'heal', value: 3, target: 'ally_god' }
         ],
-        imageUrl: '/cards/spells/aphrodite_toucher.png',
+        imageUrl: '/cards/spells/spell_aphrodite_toucher.png',
         description: 'Enlève tous les effets négatifs d\'un personnage souhaité et soigne 3 points de vie.',
     },
     {
@@ -993,7 +993,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'enemy_god', description: 'Stun pendant 2 tours' }
         ],
-        imageUrl: '/cards/spells/aphrodite_charme.png',
+        imageUrl: '/cards/spells/spell_aphrodite_charme.png',
         description: 'Étourdit une cible, l\'empêchant de jouer pendant 2 tours.',
     },
 
@@ -1010,7 +1010,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'cleanse_all_allies', description: 'Enlève tous les effets négatifs des alliés' },
             { type: 'heal', value: 3, target: 'all_allies' }
         ],
-        imageUrl: '/cards/spells/aphrodite_desir.png',
+        imageUrl: '/cards/spells/spell_aphrodite_desir.png',
         description: 'Soigne tous les alliés de 3 et enlève tous leurs effets négatifs.',
     },
 ];
