@@ -961,33 +961,6 @@
 }
 
 /* ================================
-   AIDE / TOOLTIP
-   ================================ */
-.helpTooltip {
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 8px 20px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(212, 175, 55, 0.15);
-}
-
-.helpTooltip p {
-    margin: 0;
-    font-size: 0.7rem;
-    color: rgba(212, 175, 55, 0.6);
-    font-family: 'Inter', sans-serif;
-}
-
-/* Masquer l'aide quand la barre d'action est visible */
-.helpTooltip.hiddenOnMobile {
-    display: none;
-}
-
-/* ================================
    LOADING
    ================================ */
 .loading {
