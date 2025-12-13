@@ -777,11 +777,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 </div>
             )}
 
-            {/* Aide (masquée sur mobile quand une carte est sélectionnée) */}
-            <div className={`${styles.helpTooltip} ${selectedCard ? styles.hiddenOnMobile : ''}`}>
-                <p>💡 Sélectionnez une carte, puis choisissez Jouer ou Défausser</p>
-            </div>
-
             {/* Modal de sélection de cartes */}
             <CardSelectionModal
                 isOpen={isSelectingCards}
