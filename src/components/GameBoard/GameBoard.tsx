@@ -332,15 +332,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     // Jouer automatiquement quand on a sélectionné toutes les cibles nécessaires
     // SAUF si la carte nécessite un choix de foudre
-    const handleSingleTargetSelect = (godId: string) => {
+    const handleSingleTargetSelect = (uniqueGodId: string) => {
         if (!selectedCard || !isSelectingTarget) return;
+
+        // Parser l'ID unique pour obtenir le vrai godId
+        const { godId } = parseUniqueGodId(uniqueGodId);
 
         if (requiredTargets === 1 && !needsLightningChoice(selectedCard)) {
             // Comportement classique : jouer immédiatement (cartes sans choix foudre)
             handlePlayCard(selectedCard.id, godId);
         } else {
             // Ciblage multiple OU carte avec choix foudre : ajouter la cible et attendre
-            handleTargetSelect(godId);
+            handleTargetSelect(uniqueGodId);
         }
     };
 

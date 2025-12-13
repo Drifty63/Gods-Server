@@ -28,7 +28,7 @@ export default function GodCard({
 
     return (
         <div
-            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''}`}
+            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''} ${isEnemy ? styles.enemy : ''}`}
             style={{
                 '--element-color': colors.primary,
                 '--element-gradient': colors.gradient,

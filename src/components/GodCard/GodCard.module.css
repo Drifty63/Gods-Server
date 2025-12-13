@@ -250,6 +250,13 @@
   z-index: 3;
 }
 
+/* Pour les cartes adverses, mettre les statuts en bas à droite */
+.enemy .statusEffects {
+  top: auto;
+  bottom: 32px;
+  /* Au-dessus de la barre de vie */
+}
+
 .statusBadge {
   display: flex;
   align-items: center;

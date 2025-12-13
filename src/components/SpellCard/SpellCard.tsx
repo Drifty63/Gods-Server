@@ -10,7 +10,7 @@ interface SpellCardProps {
     isSelected?: boolean;
     isSmall?: boolean; // Version réduite pour l'affichage de la main adverse
     onClick?: () => void;
-    onRightClick?: () => void; // Pour défausser
+    onRightClick?: () => void; // Pour défausser (PC only)
 }
 
 export default function SpellCard({
@@ -25,6 +25,7 @@ export default function SpellCard({
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
+        // Le clic droit reste pour PC mais n'est plus essentiel
         onRightClick?.();
     };
 
@@ -40,7 +41,7 @@ export default function SpellCard({
                 '--element-color': colors.primary,
                 '--element-gradient': colors.gradient,
             } as React.CSSProperties}
-            onClick={canPlay ? onClick : undefined}
+            onClick={onClick}
             onContextMenu={handleContextMenu}
         >
             {/* Header */}
