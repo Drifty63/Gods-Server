@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import Image from 'next/image';
 import { SpellCard as SpellCardType } from '@/types/cards';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
 import styles from './SpellCard.module.css';
@@ -22,6 +24,7 @@ export default function SpellCard({
     onRightClick
 }: SpellCardProps) {
     const colors = ELEMENT_COLORS[card.element];
+    const [imageError, setImageError] = useState(false);
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -57,11 +60,22 @@ export default function SpellCard({
                 <span className={styles.costValue}>{card.energyCost}</span>
             </div>
 
-            {/* Image placeholder */}
+            {/* Image du sort */}
             <div className={styles.imageContainer}>
-                <div className={styles.imagePlaceholder}>
-                    {getTypeIcon(card.type)}
-                </div>
+                {card.imageUrl && !imageError ? (
+                    <Image
+                        src={card.imageUrl}
+                        alt={card.name}
+                        fill
+                        className={styles.image}
+                        sizes="(max-width: 768px) 100px, 150px"
+                        onError={() => setImageError(true)}
+                    />
+                ) : (
+                    <div className={styles.imagePlaceholder}>
+                        {getTypeIcon(card.type)}
+                    </div>
+                )}
             </div>
 
             {/* Description de l'effet */}
