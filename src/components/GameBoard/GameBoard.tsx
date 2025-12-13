@@ -227,6 +227,16 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Pour l'affichage : montrer si toutes les cibles possibles sont sélectionnées
     const allTargetsSelected = selectedTargetGods.length >= maxPossibleTargets && requiredTargets > 0;
 
+    // Fonction pour finir le tour en multijoueur
+    const autoEndTurnMultiplayer = () => {
+        if (!isSoloMode) {
+            setTimeout(() => {
+                endTurn();
+                onAction?.({ type: 'end_turn', payload: {} });
+            }, 500);
+        }
+    };
+
     // Wrapper pour playCard qui gère aussi la sélection de cartes et la distribution de soins
     const handlePlayCard = (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => {
         const card = player.hand.find(c => c.id === cardId);
@@ -238,6 +248,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
                 setPendingCardForSelection(card);
+                // La fin de tour sera appelée après la confirmation du modal
                 return;
             }
 
@@ -248,6 +259,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
                 setPendingCardForHealDistribution(card);
+                // La fin de tour sera appelée après la confirmation du modal
                 return;
             }
 
@@ -258,6 +270,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
                 setPendingCardForEnemySelection(card);
+                // La fin de tour sera appelée après la confirmation du modal
                 return;
             }
         }
@@ -265,14 +278,24 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         playCard(cardId, targetGodId, targetGodIds, lightningAction);
         onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
 
-        // En multijoueur, finir le tour automatiquement après avoir joué une carte
-        // (le store gère déjà ça en solo)
-        if (!isSoloMode) {
-            setTimeout(() => {
-                endTurn();
-                onAction?.({ type: 'end_turn', payload: {} });
-            }, 500);
-        }
+        // Finir le tour automatiquement après avoir joué une carte
+        autoEndTurnMultiplayer();
+    };
+
+    // Wrappers pour les confirmations de modals qui finissent le tour en multijoueur
+    const handleConfirmCardSelection = (cards: typeof player.hand) => {
+        confirmCardSelection(cards);
+        autoEndTurnMultiplayer();
+    };
+
+    const handleConfirmHealDistribution = (distribution: { godId: string; amount: number }[]) => {
+        confirmHealDistribution(distribution);
+        autoEndTurnMultiplayer();
+    };
+
+    const handleConfirmEnemyCardSelection = (cardIds: string[]) => {
+        confirmEnemyCardSelection(cardIds);
+        autoEndTurnMultiplayer();
     };
 
     const handleCardClick = (card: typeof selectedCard) => {
@@ -794,7 +817,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 title={cardSelectionTitle}
                 cards={getCardsForSelection()}
                 requiredCount={cardSelectionCount}
-                onConfirm={confirmCardSelection}
+                onConfirm={handleConfirmCardSelection}
                 onCancel={cancelCardSelection}
             />
 
@@ -803,7 +826,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 isOpen={isDistributingHeal}
                 totalHeal={healDistributionTotal}
                 allies={player.gods.filter(g => !g.isDead)}
-                onConfirm={confirmHealDistribution}
+                onConfirm={handleConfirmHealDistribution}
                 onCancel={cancelHealDistribution}
             />
 
@@ -813,7 +836,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 title={enemyCardSelectionTitle}
                 cards={opponent.hand}
                 requiredCount={enemyCardSelectionCount}
-                onConfirm={(cards) => confirmEnemyCardSelection(cards.map(c => c.id))}
+                onConfirm={(cards) => handleConfirmEnemyCardSelection(cards.map(c => c.id))}
                 onCancel={cancelEnemyCardSelection}
                 blindMode={true}
             />
