@@ -360,7 +360,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/athena_serres.png',
+        imageUrl: '/cards/spells/spell_athena_serres.png',
         description: 'Inflige 3 dégâts à une cible.',
     },
     {
@@ -375,7 +375,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
         ],
-        imageUrl: '/cards/spells/athena_nova.png',
+        imageUrl: '/cards/spells/spell_athena_nova.png',
         description: 'Inflige 1 dégât à toutes les cibles. Provoque les attaques adverses pendant 1 tour.',
     },
 
@@ -392,7 +392,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/athena_provocation.png',
+        imageUrl: '/cards/spells/spell_athena_provocation.png',
         description: 'Gagne 3 boucliers et provoque les attaques adverses pour 3 tours.',
     },
     {
@@ -406,7 +406,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'shield', value: 5, target: 'all_allies' }
         ],
-        imageUrl: '/cards/spells/athena_rempart.png',
+        imageUrl: '/cards/spells/spell_athena_rempart.png',
         description: 'Tous les alliés gagnent 5 boucliers.',
     },
 
@@ -423,7 +423,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'shield', value: 3, target: 'ally_god' }
         ],
-        imageUrl: '/cards/spells/athena_faveur.png',
+        imageUrl: '/cards/spells/spell_athena_faveur.png',
         description: 'Donne 3 boucliers à Athéna et un allié.',
     },
 
@@ -444,7 +444,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/demeter_moisson.png',
+        imageUrl: '/cards/spells/spell_demeter_moisson.png',
         description: 'Inflige 3 dégâts à une cible.',
     },
     {
@@ -459,7 +459,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'heal', value: 2, target: 'any_god' }
         ],
-        imageUrl: '/cards/spells/demeter_secheresse.png',
+        imageUrl: '/cards/spells/spell_demeter_secheresse.png',
         description: 'Inflige 1 dégâts à toutes les cibles et soigne 2 de façon souhaitée.',
     },
 
@@ -475,7 +475,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'distribute_heal_5', description: 'Répartit 5 soins entre vos alliés' }
         ],
-        imageUrl: '/cards/spells/demeter_fertilisation.png',
+        imageUrl: '/cards/spells/spell_demeter_fertilisation.png',
         description: 'Soigne 5 de façon souhaitée.',
     },
     {
@@ -489,7 +489,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'revive_god', target: 'dead_ally_god', description: 'Fait revenir un personnage d\'entre les morts avec 8 PV' }
         ],
-        imageUrl: '/cards/spells/demeter_graine.png',
+        imageUrl: '/cards/spells/spell_demeter_graine.png',
         description: 'Fait revenir un personnage d\'entre les morts avec 8 points de vie.',
     },
 
@@ -506,7 +506,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'heal', value: 4, target: 'any_god' },
             { type: 'energy', value: 1 }
         ],
-        imageUrl: '/cards/spells/demeter_recolte.png',
+        imageUrl: '/cards/spells/spell_demeter_recolte.png',
         description: 'Soigne une cible de 4 et augmente l\'énergie de 1.',
     },
 
@@ -527,7 +527,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/dionysos_gueule_de_bois.png',
+        imageUrl: '/cards/spells/spell_dionysos_gueule_de_bois.png',
         description: 'Inflige 3 dégâts à une cible.',
     },
     {
@@ -544,7 +544,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 1 }
         ],
-        imageUrl: '/cards/spells/dionysos_ivresse.png',
+        imageUrl: '/cards/spells/spell_dionysos_ivresse.png',
         description: 'Inflige 1 dégât à deux cibles et leur inflige 1 de poison.',
     },
 
@@ -561,7 +561,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 2 }
         ],
-        imageUrl: '/cards/spells/dionysos_folie.png',
+        imageUrl: '/cards/spells/spell_dionysos_folie.png',
         description: 'Inflige 2 dégâts et inflige 2 poisons à une cible.',
     },
     {
@@ -575,7 +575,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'poison', value: 2, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/dionysos_tournee.png',
+        imageUrl: '/cards/spells/spell_dionysos_tournee.png',
         description: 'Tous les ennemis subissent 2 de poison.',
     },
 
@@ -591,7 +591,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'heal_by_poison', description: 'Soigne un personnage du nombre total de poisons sur les ennemis' }
         ],
-        imageUrl: '/cards/spells/dionysos_ambroisie.png',
+        imageUrl: '/cards/spells/spell_dionysos_ambroisie.png',
         description: 'Soigne un personnage du nombre total de poisons sur les ennemis.',
     },
 
@@ -612,7 +612,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/hades_terre_brulee.png',
+        imageUrl: '/cards/spells/spell_hades_terre_brulee.png',
         description: 'Inflige 1 dégâts à toutes les cibles.',
     },
     {
@@ -627,7 +627,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'heal', value: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/hades_purgatoire.png',
+        imageUrl: '/cards/spells/spell_hades_purgatoire.png',
         description: 'Inflige 2 dégâts à une cible et regagne 2 points de vie.',
     },
 
@@ -643,7 +643,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 6, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/hades_flammes.png',
+        imageUrl: '/cards/spells/spell_hades_flammes.png',
         description: 'Inflige 6 dégâts à une cible.',
     },
     {
@@ -658,7 +658,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'lifesteal_damage', description: 'Soigne du nombre de dégâts infligés' }
         ],
-        imageUrl: '/cards/spells/hades_syphon.png',
+        imageUrl: '/cards/spells/spell_hades_syphon.png',
         description: 'Inflige 3 dégâts à une cible; Soigne du nombre de dégâts infligés.',
     },
 
@@ -675,7 +675,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 8, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'heal_if_kill_8', description: 'Si la cible meurt, gagne 8 PV' }
         ],
-        imageUrl: '/cards/spells/hades_chemin.png',
+        imageUrl: '/cards/spells/spell_hades_chemin.png',
         description: 'Inflige 8 dégâts à une cible; Si la cible meurt de cette attaque, gagne 8 points de vie.',
     },
 
@@ -696,7 +696,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/apollon_cacophonie.png',
+        imageUrl: '/cards/spells/spell_apollon_cacophonie.png',
         description: 'Inflige 1 dégâts à toutes les cibles.',
     },
     {
@@ -711,7 +711,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'remove_energy_1', description: 'Enlève 1 énergie à l\'adversaire' }
         ],
-        imageUrl: '/cards/spells/apollon_notes.png',
+        imageUrl: '/cards/spells/spell_apollon_notes.png',
         description: 'Inflige 1 dégâts et enlève 1 énergie à votre adversaire.',
     },
 
@@ -728,7 +728,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'remove_energy_1', description: 'Fait perdre 1 énergie à l\'adversaire' }
         ],
-        imageUrl: '/cards/spells/apollon_recital.png',
+        imageUrl: '/cards/spells/spell_apollon_recital.png',
         description: 'Inflige 1 dégâts à toutes les cibles et fait perdre 1 énergie à votre adversaire.',
     },
     {
@@ -742,7 +742,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'stun', value: 1, statusDuration: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/apollon_concerto.png',
+        imageUrl: '/cards/spells/spell_apollon_concerto.png',
         description: 'Apollon ne peut plus jouer pendant les 3 prochains tours, gagne 3 énergies.',
     },
 
@@ -758,7 +758,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'remove_energy_2', description: 'Fait perdre 2 énergies à l\'adversaire' }
         ],
-        imageUrl: '/cards/spells/apollon_envole.png',
+        imageUrl: '/cards/spells/spell_apollon_envole.png',
         description: 'Gagne 1 énergie et fait perdre 2 énergies à votre adversaire.',
     },
 
