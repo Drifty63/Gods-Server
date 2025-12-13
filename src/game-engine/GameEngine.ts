@@ -658,7 +658,10 @@ export class GameEngine {
                 // Applique ou enlève ⚡ de cibles selon le choix du joueur. +2 dégâts par ⚡ enlevée
                 for (const target of targets) {
                     const lightningStacks = this.getStatusStacks(target, 'lightning');
-                    const action = lightningAction || (lightningStacks > 0 ? 'remove' : 'apply');
+                    // Respecter le choix de l'utilisateur s'il est défini
+                    const action = lightningAction !== undefined
+                        ? lightningAction
+                        : (lightningStacks > 0 ? 'remove' : 'apply');
 
                     if (action === 'remove' && lightningStacks > 0) {
                         // Calcul des dégâts bonus avec prise en compte de la faiblesse (élément Lightning)
@@ -694,6 +697,7 @@ export class GameEngine {
                     } else if (action === 'apply') {
                         this.addStatus(target, 'lightning', 1);
                     }
+                    // Si action === 'remove' mais pas de marques, ne rien faire
                 }
                 break;
 
@@ -701,7 +705,11 @@ export class GameEngine {
                 for (const god of opponent.gods) {
                     if (!god.isDead) {
                         const lightningStacks = this.getStatusStacks(god, 'lightning');
-                        const action = lightningAction || (lightningStacks > 0 ? 'remove' : 'apply');
+                        // Respecter le choix de l'utilisateur s'il est défini
+                        // Fallback auto seulement si aucune action choisie
+                        const action = lightningAction !== undefined
+                            ? lightningAction
+                            : (lightningStacks > 0 ? 'remove' : 'apply');
 
                         if (action === 'remove' && lightningStacks > 0) {
                             const defenderWeakness = god.temporaryWeakness || god.card.weakness;
@@ -734,6 +742,7 @@ export class GameEngine {
                         } else if (action === 'apply') {
                             this.addStatus(god, 'lightning', 1);
                         }
+                        // Si action === 'remove' mais pas de marques, ne rien faire
                     }
                 }
                 break;
