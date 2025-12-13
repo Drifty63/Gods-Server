@@ -194,14 +194,9 @@ export default function RulesPage() {
                             <p>Force les attaques mono-cibles à cibler ce dieu</p>
                         </div>
                         <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>❄️</span>
-                            <strong>Gel</strong>
-                            <p>Le dieu ne peut pas lancer de sorts</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>💖</span>
-                            <strong>Charme</strong>
-                            <p>Le dieu ne peut pas attaquer</p>
+                            <span className={styles.statusIcon}>😵</span>
+                            <strong>Stun</strong>
+                            <p>Le dieu ne peut pas lancer de sorts pendant la durée</p>
                         </div>
                     </div>
                 </section>
