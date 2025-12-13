@@ -1052,6 +1052,27 @@ export class GameEngine {
                 }
                 break;
 
+            // ========================================
+            // DEMETER - Distribution de soins
+            // ========================================
+            case 'distribute_heal_5':
+                // Distribue 5 soins également entre tous les alliés vivants
+                const aliveAllies = player.gods.filter(g => !g.isDead);
+                if (aliveAllies.length > 0) {
+                    const healPerAlly = Math.floor(5 / aliveAllies.length);
+                    const remainder = 5 % aliveAllies.length;
+
+                    aliveAllies.forEach((ally, index) => {
+                        // Les premiers alliés reçoivent 1 soin de plus pour distribuer le reste
+                        const healAmount = healPerAlly + (index < remainder ? 1 : 0);
+                        ally.currentHealth = Math.min(
+                            ally.currentHealth + healAmount,
+                            ally.card.maxHealth
+                        );
+                    });
+                }
+                break;
+
             default:
                 console.warn(`Effet custom non implémenté: ${effectId}`);
                 break;
