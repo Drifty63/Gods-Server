@@ -531,9 +531,22 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             <div className={styles.centerZone}>
                 <div className={styles.turnInfo}>
                     <span className={styles.turnNumber}>Tour {gameState.turnNumber}</span>
-                    <span className={`${styles.turnIndicator} ${isPlayerTurn ? styles.myTurn : styles.opponentTurn}`}>
-                        {isPlayerTurn ? '🎮 Votre tour' : '⏳ Tour adverse'}
-                    </span>
+                    <div className={styles.turnRow}>
+                        <span className={`${styles.turnIndicator} ${isPlayerTurn ? styles.myTurn : styles.opponentTurn}`}>
+                            {isPlayerTurn ? '🎮 Votre tour' : '⏳ Tour adverse'}
+                        </span>
+                        {isPlayerTurn && gameState.status === 'playing' && !isSelectingTarget && (
+                            <button
+                                className={styles.endTurnButton}
+                                onClick={() => {
+                                    endTurn();
+                                    onAction?.({ type: 'end_turn', payload: {} });
+                                }}
+                            >
+                                Fin ➡️
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {isSelectingTarget && (
@@ -735,19 +748,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         ))}
                     </div>
                 </div>
-
-                {/* Bouton fin de tour */}
-                {isPlayerTurn && gameState.status === 'playing' && !isSelectingTarget && (
-                    <button
-                        className={styles.endTurnButton}
-                        onClick={() => {
-                            endTurn();
-                            onAction?.({ type: 'end_turn', payload: {} });
-                        }}
-                    >
-                        Fin du tour ➡️
-                    </button>
-                )}
             </div>
 
             {/* Barre d'action mobile - s'affiche quand une carte est sélectionnée */}
