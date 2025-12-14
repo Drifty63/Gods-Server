@@ -540,9 +540,9 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 1 },
+            { type: 'status', status: 'poison', value: 1, target: 'enemy_god' },
             { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 1 }
+            { type: 'status', status: 'poison', value: 1, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_dionysos_ivresse.png',
         description: '1🩸 +1💀 → ⚔️⚔️',
@@ -559,7 +559,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 2 }
+            { type: 'status', status: 'poison', value: 2, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_dionysos_folie.png',
         description: '2🩸 +2💀 → ⚔️',
@@ -960,7 +960,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'status', status: 'stun', value: 1, statusDuration: 1, description: 'Stun pendant 1 tour' }
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god', description: 'Stun pendant 1 tour' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_coeur_brise.png',
         description: '2🩸 +😵1⏳ → ⚔️',
