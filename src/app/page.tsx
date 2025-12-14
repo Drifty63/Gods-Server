@@ -108,7 +108,7 @@ export default function Home() {
             <div className={styles.godCard}>
               <div className={styles.godCardInner}>
                 <Image
-                  src={currentGod.imageUrl}
+                  src={currentGod.carouselImage || currentGod.imageUrl}
                   alt={currentGod.name}
                   fill
                   className={styles.godCardImage}

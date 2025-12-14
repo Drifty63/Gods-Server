@@ -13,7 +13,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'water',
         weakness: 'lightning',
         maxHealth: 25,
-        imageUrl: '/cards/gods/poseidon.jpg',
+        imageUrl: '/cards/gods/poseidon.png',
+        carouselImage: '/cards/gods/poseidon.jpg',
         flavorText: '"Elle est douce, la terre, aux vœux des naufragés, dont Poséidon en mer, sous l\'assaut de la vague et du vent, a brisé le solide navire."',
     },
 
@@ -26,7 +27,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'lightning',
         weakness: 'earth',
         maxHealth: 25,
-        imageUrl: '/cards/gods/zeus.jpg',
+        imageUrl: '/cards/gods/zeus.png',
+        carouselImage: '/cards/gods/zeus.jpg',
         flavorText: '"Si Zeus voulait écouter les vœux des hommes, tous périraient, car ils demandent beaucoup de choses qui sont nuisibles à leurs semblables."',
     },
 
@@ -39,7 +41,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 26,
-        imageUrl: '/cards/gods/nyx.jpg',
+        imageUrl: '/cards/gods/nyx.png',
+        carouselImage: '/cards/gods/nyx.jpg',
         flavorText: '"Je suis la mère de toutes les terreurs ! La mère des Parques elles-mêmes ! D\'Hécate ! De la vieillesse ! De la Douleur ! Du Sommeil ! De la Mort ! Et de toutes les malédictions !"',
     },
 
@@ -52,7 +55,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'fire',
         weakness: 'water',
         maxHealth: 24,
-        imageUrl: '/cards/gods/hestia.jpg',
+        imageUrl: '/cards/gods/hestia.png',
+        carouselImage: '/cards/gods/hestia.jpg',
         flavorText: '"Hestia qui partout, dans toutes les hautes maisons, celles des dieux immortels, celles des hommes qui vont sur terre, as trouvé ton lieu à jamais, ton honneur est de toujours, ta part est belle et honorable."',
     },
 
@@ -65,7 +69,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'light',
         weakness: 'darkness',
         maxHealth: 30,
-        imageUrl: '/cards/gods/athena.jpg',
+        imageUrl: '/cards/gods/athena.png',
+        carouselImage: '/cards/gods/athena.jpg',
         flavorText: '"Homère nomme Athéna, la conseillère aux multiples ressources. Que signifie donner conseil ? Cela veut dire : préméditer quelque chose, y pourvoir d\'avance et par là faire qu\'elle réussisse."',
     },
 
@@ -78,7 +83,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 24,
-        imageUrl: '/cards/gods/demeter.jpg',
+        imageUrl: '/cards/gods/demeter.png',
+        carouselImage: '/cards/gods/demeter.jpg',
         flavorText: '"Va, Perséphone, va la voir, ta mère aux voiles noirs. Que ton coeur soit sage dans ta poitrine, serein ton esprit. Ne te laisse pas aller à une tristesse trop grande."',
     },
 
@@ -91,7 +97,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 22,
-        imageUrl: '/cards/gods/dionysos.jpg',
+        imageUrl: '/cards/gods/dionysos.png',
+        carouselImage: '/cards/gods/dionysos.jpg',
         flavorText: '"À la figure de Prométhée, qui fut la figure emblématique de la Modernité est en train de se substituer celle de Dionysos. Dieu chtonien, c\'est à dire dieu de cette terre-ci, dieu autochtone..."',
     },
 
@@ -104,7 +111,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'fire',
         weakness: 'water',
         maxHealth: 20,
-        imageUrl: '/cards/gods/hades.jpg',
+        imageUrl: '/cards/gods/hades.png',
+        carouselImage: '/cards/gods/hades.jpg',
         flavorText: '"Et, sous la terre, le seigneur des morts, Hadès, soudain prend peur. De peur, il saute sur son trône et crie : Poséidon, l\'Ébranleur du sol, ne va-t-il pas faire éclater la terre dans les airs..."',
     },
 
@@ -117,7 +125,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'air',
         weakness: 'fire',
         maxHealth: 22,
-        imageUrl: '/cards/gods/apollon.jpg',
+        imageUrl: '/cards/gods/apollon.png',
+        carouselImage: '/cards/gods/apollon.jpg',
         flavorText: '"Aux plus savants auteurs comme aux plus grands guerriers, Apollon ne promet qu\'un nom et des lauriers."',
     },
 
@@ -130,7 +139,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 28,
-        imageUrl: '/cards/gods/ares.jpg',
+        imageUrl: '/cards/gods/ares.png',
+        carouselImage: '/cards/gods/ares.jpg',
         flavorText: '"Ne viens pas, tête à l\'évent, gémir ici à mes pieds. Tu m\'es le plus odieux de tous les Immortels qui habitent l\'Olympe, Ton plaisir toujours, c\'est la querelle, la guerre, et les combats."',
     },
 
@@ -143,7 +153,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'air',
         weakness: 'fire',
         maxHealth: 20,
-        imageUrl: '/cards/gods/artemis.jpg',
+        imageUrl: '/cards/gods/artemis.png',
+        carouselImage: '/cards/gods/artemis.jpg',
         flavorText: '"Roses blanches, tombez! vous insultez nos dieux, Tombez, fantômes blancs, de votre ciel qui brûle; La sainte de l\'abîme est plus sainte à mes yeux!"',
     },
 
@@ -156,7 +167,8 @@ export const ALL_GODS: GodCard[] = [
         element: 'light',
         weakness: 'darkness',
         maxHealth: 25,
-        imageUrl: '/cards/gods/aphrodite.jpg',
+        imageUrl: '/cards/gods/aphrodite.png',
+        carouselImage: '/cards/gods/aphrodite.jpg',
         flavorText: '"Aucun spectacle de la nature, ni les flammes occidentales, ni la tempête dans les palmiers... ne semblent dignes d\'étonnement à ceux qui ont vu dans leur bras la transfiguration de la femme."',
     },
 ];

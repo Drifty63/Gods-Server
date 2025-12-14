@@ -41,6 +41,7 @@ export interface GodCard {
     weakness: Element;
     maxHealth: number;
     imageUrl: string;
+    carouselImage?: string; // Image spécifique pour le carrousel (optionnelle)
     flavorText: string;
 }
 
