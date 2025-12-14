@@ -526,6 +526,28 @@ export class GameEngine {
                         godToRevive.currentHealth = 8;
                         godToRevive.statusEffects = [];
                         godToRevive.temporaryWeakness = undefined;
+
+                        // Récupérer les sorts du dieu depuis la défausse et les remettre dans le deck
+                        const godId = godToRevive.card.id;
+                        const cardsToReturn: SpellCard[] = [];
+
+                        // Trouver les cartes du dieu dans la défausse
+                        player.discard = player.discard.filter(card => {
+                            if (card.godId === godId) {
+                                cardsToReturn.push(card);
+                                return false; // Retirer de la défausse
+                            }
+                            return true;
+                        });
+
+                        // Ajouter les cartes au deck
+                        player.deck.push(...cardsToReturn);
+
+                        // Mélanger le deck (Fisher-Yates)
+                        for (let i = player.deck.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [player.deck[i], player.deck[j]] = [player.deck[j], player.deck[i]];
+                        }
                     }
                 }
                 break;
