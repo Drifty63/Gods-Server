@@ -7,15 +7,18 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background:
+    /* Image de fond + overlay dégradé pour la lisibilité */
+    background-image:
         linear-gradient(180deg,
             rgba(10, 10, 26, 0.3) 0%,
-            rgba(10, 10, 26, 0.7) 50%,
+            rgba(10, 10, 26, 0.6) 40%,
             rgba(10, 10, 26, 0.95) 100%),
-        linear-gradient(180deg,
-            #2a1a0a 0%,
-            #1a0a1a 30%,
-            #0a0a1a 100%);
+        url('/backgrounds/home_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    /* Parallaxe légère */
 }
 
 /* ================================
