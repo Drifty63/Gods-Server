@@ -12,7 +12,7 @@ interface CardSelectionModalProps {
     cards: SpellCard[];
     requiredCount: number;
     onConfirm: (selectedCards: SpellCard[]) => void;
-    onCancel: () => void;
+    onCancel?: () => void;
     blindMode?: boolean; // Si true, les cartes non révélées sont affichées comme des dos
 }
 
@@ -126,12 +126,14 @@ export default function CardSelectionModal({
                 )}
 
                 <div className={styles.actions}>
-                    <button
-                        className={styles.cancelButton}
-                        onClick={onCancel}
-                    >
-                        ❌ Annuler
-                    </button>
+                    {onCancel && (
+                        <button
+                            className={styles.cancelButton}
+                            onClick={onCancel}
+                        >
+                            ❌ Annuler
+                        </button>
+                    )}
                     <button
                         className={styles.confirmButton}
                         onClick={handleConfirm}

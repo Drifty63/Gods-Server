@@ -49,6 +49,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         isSelectingCards,
         cardSelectionCount,
         cardSelectionTitle,
+        pendingCardSelectionEffect,
         startCardSelection,
         confirmCardSelection,
         cancelCardSelection,
@@ -940,7 +941,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 cards={getCardsForSelection()}
                 requiredCount={cardSelectionCount}
                 onConfirm={handleConfirmCardSelection}
-                onCancel={cancelCardSelection}
+                // Désactiver l'annulation pour les effets obligatoires comme put_cards_bottom
+                onCancel={pendingCardSelectionEffect === 'put_cards_bottom' ? undefined : cancelCardSelection}
             />
 
             {/* Modal de distribution de soins */}
