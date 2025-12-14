@@ -22,7 +22,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_poseidon_trident.png',
-        description: 'Inflige 3 dégâts à une cible.',
+        description: '3🩸 → ⚔️',
     },
     {
         id: 'poseidon_generator_2',
@@ -38,7 +38,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'mill', value: 2 }
         ],
         imageUrl: '/cards/spells/spell_poseidon_colere.png',
-        description: 'Inflige 1 dégât à deux cibles et meule 2 cartes.',
+        description: '1🩸 → ⚔️⚔️ | 2📤',
     },
 
     // --- COMPÉTENCES ---
@@ -56,7 +56,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'discard', value: 2 }
         ],
         imageUrl: '/cards/spells/spell_poseidon_vague.png',
-        description: 'Inflige 2 dégâts à deux cibles et défausse 2 cartes de la main de votre adversaire.',
+        description: '2🩸 → ⚔️⚔️ | 2🎴🃏⚔️ → 🗑️',
     },
     {
         id: 'poseidon_skill_2',
@@ -71,7 +71,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'tsunami_damage', description: 'Inflige 3 dégâts par carte du dieu ciblé meulée' }
         ],
         imageUrl: '/cards/spells/spell_poseidon_tsunami.png',
-        description: 'Ciblez un adversaire; Meule 5 cartes du dessus du deck (limité à un recyclage). Inflige 3 dégâts par carte du dieu ciblé.',
+        description: '5📤 → ⚔️ | 3🩸 ✖️ 🎴📤',
     },
 
     // --- UTILITAIRE ---
@@ -88,7 +88,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'prison_mill', description: 'Meule du nombre d\'ennemis touchés' }
         ],
         imageUrl: '/cards/spells/spell_poseidon_prison.png',
-        description: 'Inflige 1 dégât à toutes les cibles et meule du nombre d\'ennemis touchés.',
+        description: '1🩸 → 👊 | 📤 ✖️ ⚔️',
     },
 
     // =====================================================
@@ -109,7 +109,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_zeus_eclair.png',
-        description: 'Inflige 3 dégâts à une cible.',
+        description: '3🩸 → ⚔️',
     },
     {
         id: 'zeus_generator_2',
@@ -124,7 +124,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'conductive_lightning', value: 1, target: 'enemy_god', description: 'Inflige 1 dégât et applique 1 marque de foudre' }
         ],
         imageUrl: '/cards/spells/spell_zeus_conductrice.png',
-        description: 'Inflige 1 dégât à deux cibles et leur applique 1 marque de foudre.',
+        description: '1🩸 +1⚡ → ⚔️⚔️',
     },
 
     // --- COMPÉTENCES ---
@@ -141,7 +141,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'lightning_toggle', description: 'Applique ou enlève ⚡ de la cible. +2 dégâts par ⚡ enlevée' }
         ],
         imageUrl: '/cards/spells/spell_zeus_foudroyant.png',
-        description: 'Inflige 5 dégâts à une cible. Applique ou enlève ⚡ de la cible. Inflige 2 dégâts par ⚡ enlevée.',
+        description: '5🩸 → ⚔️ | ❓+⚡/-⚡ | -⚡ ✖️ 2🩸',
     },
     {
         id: 'zeus_skill_2',
@@ -156,7 +156,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'lightning_toggle_all', description: 'Applique ou enlève ⚡ de toutes les cibles. +2 dégâts par ⚡ enlevée' }
         ],
         imageUrl: '/cards/spells/spell_zeus_foudroiement.png',
-        description: 'Inflige 3 dégâts à toutes les cibles. Applique ou enlève ⚡ des cibles. Inflige 2 dégâts par ⚡ enlevée.',
+        description: '3🩸 → 👊 | ❓+⚡/-⚡ | -⚡ ✖️ 2🩸',
     },
 
     // --- UTILITAIRE ---
@@ -174,7 +174,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'lightning_toggle_multi', description: 'Applique ou enlève ⚡ des cibles. +2 dégâts par ⚡ enlevée' }
         ],
         imageUrl: '/cards/spells/spell_zeus_chaine.png',
-        description: 'Inflige 2 dégâts à 2 cibles. Applique ou enlève ⚡ des cibles. Inflige 2 dégâts par ⚡ enlevée.',
+        description: '2🩸 → ⚔️⚔️ | ❓+⚡/-⚡ | -⚡ ✖️ 2🩸',
     },
 
     // =====================================================
@@ -195,7 +195,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
         imageUrl: '/cards/spells/spell_nyx_zonevide.png',
-        description: 'Inflige 1 dégât à toutes les cibles.',
+        description: '1🩸 → 👊',
     },
     {
         id: 'nyx_generator_2',
@@ -210,7 +210,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'shuffle_hand_draw_blind', description: 'Mélange 1 carte adverse dans son deck, pioche 1 à l\'envers' }
         ],
         imageUrl: '/cards/spells/spell_nyx_ombres.png',
-        description: 'Inflige 2 dégâts à une cible, mélangez une carte de la main adverse dans son deck et piochez 1 à l\'envers.',
+        description: '2🩸 → ⚔️ | 1🎴🃏⚔️ → 🔀📚 | +1🎴👁️',
     },
 
     // --- COMPÉTENCES ---
@@ -227,7 +227,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'shuffle_hand_draw_blind_2', description: 'Mélange 2 cartes adverses dans son deck, pioche 2 à l\'envers' }
         ],
         imageUrl: '/cards/spells/spell_nyx_malediction.png',
-        description: 'Inflige 3 dégâts à une cible; Choisissez 2 cartes de la main adverse, les mélange dans son deck et pioche 2 à l\'envers.',
+        description: '3🩸 → ⚔️ | 2🎴🃏⚔️ → 🔀📚 | +2🎴👁️',
     },
     {
         id: 'nyx_skill_2',
@@ -241,7 +241,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'shuffle_all_hand_draw_blind', description: 'L\'adversaire mélange sa main dans son deck et pioche 5 à l\'envers' }
         ],
         imageUrl: '/cards/spells/spell_nyx_nuitsansfin.png',
-        description: 'L\'adversaire mélange sa main dans son deck et pioche 5 cartes à l\'envers.',
+        description: '🃏⚔️ → 🔀📚 | +5🎴👁️',
     },
 
     // --- UTILITAIRE ---
@@ -258,7 +258,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'put_cards_bottom', description: 'Placez 3 cartes en dessous de votre deck' }
         ],
         imageUrl: '/cards/spells/spell_nyx_prophetie.png',
-        description: 'Piochez 3 cartes du dessus de votre deck et placez 3 cartes en dessous, gagne 1 énergie.',
+        description: '+3🎴 | 3🎴 → 📚⬇️ | +1⚡',
     },
 
     // =====================================================
@@ -279,7 +279,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_hestia_flammes.png',
-        description: 'Inflige 3 dégâts à une cible.',
+        description: '3🩸 → ⚔️',
     },
     {
         id: 'hestia_generator_2',
@@ -294,7 +294,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'remove_weakness_1_turn', target: 'ally_god', description: 'Retire la faiblesse d\'un allié pendant 1 tour' }
         ],
         imageUrl: '/cards/spells/spell_hestia_fumee.png',
-        description: 'Inflige 1 dégât à toutes les cibles et fait perdre la faiblesse d\'un de vos dieux pendant 1 tour.',
+        description: '1🩸 → 👊 | ➖🌊1⏳ → 👤',
     },
 
     // --- COMPÉTENCES ---
@@ -310,7 +310,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'heal_by_energy', target: 'ally_god', description: 'Soigne un allié de la valeur totale de votre énergie' }
         ],
         imageUrl: '/cards/spells/spell_hestia_repas.png',
-        description: 'Donne 2 énergies et soigne un allié de la valeur totale de votre énergie.',
+        description: '+2⚡ | ⚡🔗💚 → 👤',
     },
     {
         id: 'hestia_skill_2',
@@ -324,7 +324,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'remove_all_weakness_3_turns', description: 'Tous les alliés perdent leurs faiblesses pendant 3 tours' }
         ],
         imageUrl: '/cards/spells/spell_hestia_foyer.png',
-        description: 'Tous les alliés perdent leurs faiblesses pendant 3 tours.',
+        description: '➖🌊3⏳ → 👥',
     },
 
     // --- UTILITAIRE ---
@@ -340,7 +340,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'recycle_from_discard', description: 'Choisissez 2 cartes de la défausse et remettez-les dans le deck' }
         ],
         imageUrl: '/cards/spells/spell_hestia_repos.png',
-        description: 'Choisissez deux cartes dans votre défausse, faites-les revenir dans votre deck puis mélangez-le.',
+        description: '2🎴🗑️ → 🔀📚',
     },
 
     // =====================================================
@@ -361,7 +361,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_athena_serres.png',
-        description: 'Inflige 3 dégâts à une cible.',
+        description: '3🩸 → ⚔️',
     },
     {
         id: 'athena_generator_2',
@@ -376,7 +376,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_athena_nova.png',
-        description: 'Inflige 1 dégât à toutes les cibles. Provoque les attaques adverses pendant 1 tour.',
+        description: '1🩸 → 👊 | +🗡️1⏳ → 🔄',
     },
 
     // --- COMPÉTENCES ---
@@ -393,7 +393,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'provocation', value: 1, statusDuration: 3, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_athena_provocation.png',
-        description: 'Gagne 3 boucliers et provoque les attaques adverses pour 3 tours.',
+        description: '+3🛡️🔄 | +🗡️3⏳🔄',
     },
     {
         id: 'athena_skill_2',
@@ -407,7 +407,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 5, target: 'all_allies' }
         ],
         imageUrl: '/cards/spells/spell_athena_rempart.png',
-        description: 'Tous les alliés gagnent 5 boucliers.',
+        description: '+5🛡️ → 👥',
     },
 
     // --- UTILITAIRE ---
@@ -424,7 +424,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'ally_god' }
         ],
         imageUrl: '/cards/spells/spell_athena_faveur.png',
-        description: 'Donne 3 boucliers à Athéna et un allié.',
+        description: '+3🛡️🔄 | +3🛡️ → 👤',
     },
 
     // =====================================================
@@ -445,7 +445,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_demeter_moisson.png',
-        description: 'Inflige 3 dégâts à une cible.',
+        description: '3🩸 → ⚔️',
     },
     {
         id: 'demeter_generator_2',
@@ -460,7 +460,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'heal', value: 2, target: 'any_god' }
         ],
         imageUrl: '/cards/spells/spell_demeter_secheresse.png',
-        description: 'Inflige 1 dégâts à toutes les cibles et soigne 2 de façon souhaitée.',
+        description: '1🩸 → 👊 | 2💚 → 👤',
     },
 
     // --- COMPÉTENCES ---
@@ -476,7 +476,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'distribute_heal_5', description: 'Répartit 5 soins entre vos alliés' }
         ],
         imageUrl: '/cards/spells/spell_demeter_fertilisation.png',
-        description: 'Soigne 5 de façon souhaitée.',
+        description: '5💚 → 👥 (répartir)',
     },
     {
         id: 'demeter_skill_2',
@@ -490,7 +490,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'revive_god', target: 'dead_ally_god', description: 'Fait revenir un personnage d\'entre les morts avec 8 PV' }
         ],
         imageUrl: '/cards/spells/spell_demeter_graine.png',
-        description: 'Fait revenir un personnage d\'entre les morts avec 8 points de vie.',
+        description: '❤️‍🩹 8PV → ☠️',
     },
 
     // --- UTILITAIRE ---
@@ -507,7 +507,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'energy', value: 1 }
         ],
         imageUrl: '/cards/spells/spell_demeter_recolte.png',
-        description: 'Soigne une cible de 4 et augmente l\'énergie de 1.',
+        description: '4💚 → 👤 | +1⚡',
     },
 
     // =====================================================
@@ -528,7 +528,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_dionysos_gueule.png',
-        description: 'Inflige 3 dégâts à une cible.',
+        description: '3🩸 → ⚔️',
     },
     {
         id: 'dionysos_generator_2',
@@ -545,7 +545,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'poison', value: 1 }
         ],
         imageUrl: '/cards/spells/spell_dionysos_ivresse.png',
-        description: 'Inflige 1 dégât à deux cibles et leur inflige 1 de poison.',
+        description: '1🩸 +1💀 → ⚔️⚔️',
     },
 
     // --- COMPÉTENCES ---
@@ -562,7 +562,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'poison', value: 2 }
         ],
         imageUrl: '/cards/spells/spell_dionysos_folie.png',
-        description: 'Inflige 2 dégâts et inflige 2 poisons à une cible.',
+        description: '2🩸 +2💀 → ⚔️',
     },
     {
         id: 'dionysos_skill_2',
@@ -576,7 +576,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'poison', value: 2, target: 'all_enemies' }
         ],
         imageUrl: '/cards/spells/spell_dionysos_tournee.png',
-        description: 'Tous les ennemis subissent 2 de poison.',
+        description: '+2💀 → 👊',
     },
 
     // --- UTILITAIRE ---
@@ -592,7 +592,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'heal_by_poison', description: 'Soigne un personnage du nombre total de poisons sur les ennemis' }
         ],
         imageUrl: '/cards/spells/spell_dionysos_ambroisie.png',
-        description: 'Soigne un personnage du nombre total de poisons sur les ennemis.',
+        description: '💀🔗💚 → 👤',
     },
 
     // =====================================================
@@ -613,7 +613,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
         imageUrl: '/cards/spells/spell_hades_terrebrulee.png',
-        description: 'Inflige 1 dégâts à toutes les cibles.',
+        description: '1🩸 → 👊',
     },
     {
         id: 'hades_generator_2',
@@ -628,7 +628,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'heal', value: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_hades_purgatoire.png',
-        description: 'Inflige 2 dégâts à une cible et regagne 2 points de vie.',
+        description: '2🩸 → ⚔️ | +2💚🔄',
     },
 
     // --- COMPÉTENCES ---
@@ -644,7 +644,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 6, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_hades_flammes.png',
-        description: 'Inflige 6 dégâts à une cible.',
+        description: '6🩸 → ⚔️',
     },
     {
         id: 'hades_skill_2',
@@ -659,7 +659,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'lifesteal_damage', description: 'Soigne du nombre de dégâts infligés' }
         ],
         imageUrl: '/cards/spells/spell_hades_syphon.png',
-        description: 'Inflige 3 dégâts à une cible; Soigne du nombre de dégâts infligés.',
+        description: '3🩸 → ⚔️ | 🩸🔗💚🔄',
     },
 
     // --- UTILITAIRE ---
@@ -676,7 +676,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'heal_if_kill_8', description: 'Si la cible meurt, gagne 8 PV' }
         ],
         imageUrl: '/cards/spells/spell_hades_chemin.png',
-        description: 'Inflige 8 dégâts à une cible; Si la cible meurt de cette attaque, gagne 8 points de vie.',
+        description: '8🩸 → ⚔️ | ☠️ → +8💚🔄',
     },
 
     // =====================================================
@@ -697,7 +697,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
         imageUrl: '/cards/spells/spell_apollon_cacophonie.png',
-        description: 'Inflige 1 dégâts à toutes les cibles.',
+        description: '1🩸 → 👊',
     },
     {
         id: 'apollon_generator_2',
@@ -712,7 +712,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'remove_energy_1', description: 'Enlève 1 énergie à l\'adversaire' }
         ],
         imageUrl: '/cards/spells/spell_apollon_notes.png',
-        description: 'Inflige 1 dégâts et enlève 1 énergie à votre adversaire.',
+        description: '1🩸 → ⚔️ | -1⚡⚔️',
     },
 
     // --- COMPÉTENCES ---
@@ -729,7 +729,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'remove_energy_1', description: 'Fait perdre 1 énergie à l\'adversaire' }
         ],
         imageUrl: '/cards/spells/spell_apollon_recital.png',
-        description: 'Inflige 1 dégâts à toutes les cibles et fait perdre 1 énergie à votre adversaire.',
+        description: '1🩸 → 👊 | -1⚡⚔️',
     },
     {
         id: 'apollon_skill_2',
@@ -743,7 +743,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'stun', value: 1, statusDuration: 3, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_apollon_concerto.png',
-        description: 'Apollon ne peut plus jouer pendant les 3 prochains tours, gagne 3 énergies.',
+        description: '+3⚡ | +😵 3⏳🔄',
     },
 
     // --- UTILITAIRE ---
@@ -759,7 +759,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'remove_energy_2', description: 'Fait perdre 2 énergies à l\'adversaire' }
         ],
         imageUrl: '/cards/spells/spell_apollon_envole.png',
-        description: 'Gagne 1 énergie et fait perdre 2 énergies à votre adversaire.',
+        description: '+1⚡ | -2⚡⚔️',
     },
 
     // =====================================================
@@ -780,7 +780,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
         imageUrl: '/cards/spells/spell_ares_brisee.png',
-        description: 'Inflige 1 dégâts à toutes les cibles.',
+        description: '1🩸 → 👊',
     },
     {
         id: 'ares_generator_2',
@@ -794,7 +794,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_ares_entrainement.png',
-        description: 'Augmente l\'énergie de 3 et reçoit 3 dégâts.',
+        description: '+3⚡ | 3🩸 → 🔄',
     },
 
     // --- COMPÉTENCES ---
@@ -811,7 +811,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_ares_saut.png',
-        description: 'Inflige 4 dégâts à une cible et reçoit 2 dégâts.',
+        description: '4🩸 → ⚔️ | 2🩸 → 🔄',
     },
     {
         id: 'ares_skill_2',
@@ -826,7 +826,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_ares_frappe.png',
-        description: 'Inflige 5 dégâts à une cible et reçoit 3 dégâts.',
+        description: '5🩸 → ⚔️ | 3🩸 → 🔄',
     },
 
     // --- UTILITAIRE ---
@@ -843,7 +843,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 5, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_ares_dernier.png',
-        description: 'Inflige des dégâts égaux aux points de vie perdus. Subit 5 dégâts après l\'attaque.',
+        description: 'PV➖🔗🩸 → ⚔️ | 5🩸 → 🔄',
     },
 
     // =====================================================
@@ -864,7 +864,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
         imageUrl: '/cards/spells/spell_artemis_fleches_multiples.png',
-        description: 'Inflige 1 dégâts à toutes les cibles.',
+        description: '1🩸 → 👊',
     },
     {
         id: 'artemis_generator_2',
@@ -879,7 +879,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_artemis_tir_bestial.png',
-        description: 'Inflige 2 dégâts à deux cibles.',
+        description: '2🩸 → ⚔️⚔️',
     },
 
     // --- COMPÉTENCES ---
@@ -896,7 +896,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_artemis_fleches_tracantes.png',
-        description: 'Inflige 3 dégâts à deux cibles.',
+        description: '3🩸 → ⚔️⚔️',
     },
     {
         id: 'artemis_skill_2',
@@ -911,7 +911,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'apply_weakness', description: 'Applique une faiblesse d\'un élément voulu' }
         ],
         imageUrl: '/cards/spells/spell_artemis_coup_critique.png',
-        description: 'Inflige 3 dégâts à une cible et lui applique une faiblesse d\'un élément voulu.',
+        description: '3🩸 +🌊 → ⚔️',
     },
 
     // --- UTILITAIRE ---
@@ -927,7 +927,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 10, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_artemis_execution.png',
-        description: 'Inflige 10 dégâts à une cible.',
+        description: '10🩸 → ⚔️',
     },
 
     // =====================================================
@@ -948,7 +948,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_etreinte.png',
-        description: 'Inflige 1 dégât à toutes les cibles.',
+        description: '1🩸 → 👊',
     },
     {
         id: 'aphrodite_generator_2',
@@ -963,7 +963,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, description: 'Stun pendant 1 tour' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_coeur_brise.png',
-        description: 'Inflige 2 dégâts à une cible et l\'étourdit pendant 1 tour.',
+        description: '2🩸 +😵1⏳ → ⚔️',
     },
 
     // --- COMPÉTENCES ---
@@ -980,7 +980,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'heal', value: 3, target: 'ally_god' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_toucher.png',
-        description: 'Enlève tous les effets négatifs d\'un personnage souhaité et soigne 3 points de vie.',
+        description: '➖🟠 +3💚 → 👤',
     },
     {
         id: 'aphrodite_skill_2',
@@ -994,7 +994,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'enemy_god', description: 'Stun pendant 2 tours' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_charme.png',
-        description: 'Étourdit une cible, l\'empêchant de jouer pendant 2 tours.',
+        description: '+😵2⏳ → ⚔️',
     },
 
     // --- UTILITAIRE ---
@@ -1011,7 +1011,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'heal', value: 3, target: 'all_allies' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_desir.png',
-        description: 'Soigne tous les alliés de 3 et enlève tous leurs effets négatifs.',
+        description: '➖🟠 +3💚 → 👥',
     },
 ];
 
