@@ -1,12 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
-import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
+import { ALL_GODS } from '@/data/gods';
 
 export default function Home() {
   const [showPlayModal, setShowPlayModal] = useState(false);
+  const [currentGodIndex, setCurrentGodIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [userCoins] = useState(2300); // TODO: Connecter au store utilisateur
+
+  // Carrousel automatique des dieux (15 secondes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentGodIndex((prev) => (prev + 1) % ALL_GODS.length);
+        setIsTransitioning(false);
+      }, 500);
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentGod = ALL_GODS[currentGodIndex];
 
   const handlePlayClick = () => {
     setShowPlayModal(true);
@@ -16,82 +35,121 @@ export default function Home() {
     setShowPlayModal(false);
   };
 
+  // Navigation vers le dieu précédent
+  const prevGod = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentGodIndex((prev) => (prev - 1 + ALL_GODS.length) % ALL_GODS.length);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  // Navigation vers le dieu suivant
+  const nextGod = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentGodIndex((prev) => (prev + 1) % ALL_GODS.length);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
   return (
     <main className={styles.main}>
-      {/* Background animé */}
-      <div className={styles.backgroundElements}>
-        {Object.values(ELEMENT_SYMBOLS).map((symbol, index) => (
-          <span
-            key={index}
-            className={styles.floatingElement}
-            style={{
-              left: `${10 + index * 12}%`,
-              animationDelay: `${index * 0.5}s`,
-              animationDuration: `${4 + index * 0.5}s`
-            }}
-          >
-            {symbol}
-          </span>
-        ))}
+      {/* Header avec titre et boutons */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          {/* Espace vide pour équilibrer */}
+        </div>
+        
+        <div className={styles.logoContainer}>
+          <h1 className={styles.title}>
+            <span className={styles.titleLetter}>G</span>
+            <span className={styles.titleLetter}>O</span>
+            <span className={styles.titleLetter}>D</span>
+            <span className={styles.titleLetter}>S</span>
+          </h1>
+          <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
+        </div>
+
+        <div className={styles.headerRight}>
+          <Link href="/rewards" className={styles.headerButton} title="Récompenses">
+            🎁
+          </Link>
+          <Link href="/settings" className={styles.headerButton} title="Options">
+            ⚙️
+          </Link>
+        </div>
+      </header>
+
+      {/* Affichage des pièces */}
+      <div className={styles.currencyDisplay}>
+        <span className={styles.currencyAmount}>{userCoins.toLocaleString()}</span>
+        <span className={styles.currencyIcon}>🪙</span>
       </div>
 
       {/* Contenu principal */}
       <div className={styles.content}>
-        {/* Hero Section */}
-        <section className={styles.hero}>
-          <div className={styles.logoContainer}>
-            <h1 className={styles.title}>
-              <span className={styles.titleLetter}>G</span>
-              <span className={styles.titleLetter}>O</span>
-              <span className={styles.titleLetter}>D</span>
-              <span className={styles.titleLetter}>S</span>
-            </h1>
-            <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
+        {/* Carte du dieu au centre avec carrousel */}
+        <section className={styles.godCardSection}>
+          <button className={styles.carouselArrow} onClick={prevGod} aria-label="Dieu précédent">
+            ‹
+          </button>
+          
+          <div className={`${styles.godCardWrapper} ${isTransitioning ? styles.transitioning : ''}`}>
+            <div className={styles.godCard}>
+              <div className={styles.godCardInner}>
+                <Image
+                  src={currentGod.imageUrl}
+                  alt={currentGod.name}
+                  fill
+                  className={styles.godCardImage}
+                  priority
+                />
+              </div>
+            </div>
+            <div className={styles.godCardIndicators}>
+              {ALL_GODS.map((_, index) => (
+                <button
+                  key={index}
+                  className={`${styles.indicator} ${index === currentGodIndex ? styles.activeIndicator : ''}`}
+                  onClick={() => {
+                    setIsTransitioning(true);
+                    setTimeout(() => {
+                      setCurrentGodIndex(index);
+                      setIsTransitioning(false);
+                    }, 300);
+                  }}
+                  aria-label={`Voir ${ALL_GODS[index].name}`}
+                />
+              ))}
+            </div>
           </div>
 
-          <p className={styles.description}>
-            Affrontez vos adversaires dans un duel épique entre divinités.
-          </p>
+          <button className={styles.carouselArrow} onClick={nextGod} aria-label="Dieu suivant">
+            ›
+          </button>
         </section>
 
-        {/* Features */}
-        <section className={styles.features}>
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>🎴</div>
-            <h3>12 Dieux</h3>
-            <p>Divinités uniques avec pouvoirs</p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>⚡</div>
-            <h3>7 Éléments</h3>
-            <p>Cycle de faiblesses stratégique</p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>🎯</div>
-            <h3>60 Sorts</h3>
-            <p>Générateurs et compétences</p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>🏆</div>
-            <h3>Classé</h3>
-            <p>Grimpez dans le classement</p>
-          </div>
-        </section>
-
-        {/* Actualités */}
+        {/* Section Actualités */}
         <section className={styles.newsSection}>
-          <h2>📜 Actualités</h2>
-          <div className={styles.newsCard}>
-            <span className={styles.newsTag}>Nouveau</span>
-            <h3>Saison 1 - Série GODS</h3>
-            <p>12 dieux, 60 sorts, 7 éléments. La bataille olympienne commence !</p>
+          <div className={styles.newsSectionHeader}>
+            <span className={styles.newsIcon}>📜</span>
+            <h2>Actualité :</h2>
           </div>
-          <Link href="/rules" className={styles.rulesLink}>
-            <span>📖</span> Consulter les règles du jeu
-          </Link>
+          <div className={styles.newsContent}>
+            <p className={styles.newsItem}>
+              <span className={styles.newsBullet}>-</span>
+              Patch 0.24 : Correctif des bugs sur le mode en ligne.
+            </p>
+            <p className={styles.newsItem}>
+              <span className={styles.newsBullet}>-</span>
+              Présentation de l'extension <Link href="/news/death-glory" className={styles.newsLink}>Death & Glory</Link>.
+            </p>
+            <p className={styles.newsItem}>
+              <span className={styles.newsBullet}>-</span>
+              Patch 0.23 : Sortie de l'histoire de ZEUS
+            </p>
+          </div>
         </section>
       </div>
 
@@ -102,9 +160,9 @@ export default function Home() {
           <span className={styles.navLabel}>Boutique</span>
         </Link>
 
-        <Link href="/leaderboard" className={styles.navItem}>
-          <span className={styles.navIcon}>🏆</span>
-          <span className={styles.navLabel}>Classement</span>
+        <Link href="/quests" className={styles.navItem}>
+          <span className={styles.navIcon}>📯</span>
+          <span className={styles.navLabel}>Quête</span>
         </Link>
 
         {/* Bouton central JOUER */}
@@ -116,9 +174,9 @@ export default function Home() {
           <span className={styles.playLabel}>Jouer</span>
         </button>
 
-        <Link href="/friends" className={styles.navItem}>
-          <span className={styles.navIcon}>👥</span>
-          <span className={styles.navLabel}>Amis</span>
+        <Link href="/deck" className={styles.navItem}>
+          <span className={styles.navIcon}>📦</span>
+          <span className={styles.navLabel}>Deck</span>
         </Link>
 
         <Link href="/profile" className={styles.navItem}>
