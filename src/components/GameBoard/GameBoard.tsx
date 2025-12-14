@@ -491,10 +491,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         setSelectedBlindCard(null);
     };
 
-    // Annuler le menu de carte cachée
-    const handleBlindCancel = () => {
-        setSelectedBlindCard(null);
-    };
+
 
     // Défausser une carte cachée pour de l'énergie
     // Règle : on ne peut défausser qu'UNE SEULE carte cachée à la fois
@@ -557,7 +554,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             )}
             {/* Menu de choix pour carte cachée */}
             {selectedBlindCard && (
-                <div className={styles.modalOverlay} onClick={handleBlindCancel}>
+                <div className={styles.modalOverlay}>
                     <div className={styles.blindCardMenu} onClick={e => e.stopPropagation()}>
                         <h3 className={styles.blindMenuTitle}>❓ Carte Cachée</h3>
                         <p className={styles.blindMenuSubtitle}>Que voulez-vous faire ?</p>
@@ -575,12 +572,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             >
                                 🗑️ Défausser (+1⚡)
                                 {hasDiscardedBlindThisTurn && <span className={styles.disabledNote}> (déjà fait)</span>}
-                            </button>
-                            <button
-                                className={styles.blindCancelButton}
-                                onClick={handleBlindCancel}
-                            >
-                                ❌ Annuler
                             </button>
                         </div>
                     </div>
