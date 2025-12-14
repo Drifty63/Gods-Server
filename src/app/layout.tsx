@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import GlobalAudioController from "@/components/GlobalAudioController/GlobalAudioController";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={inter.variable}>
+        <GlobalAudioController />
         {children}
       </body>
     </html>

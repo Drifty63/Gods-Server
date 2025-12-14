@@ -9,7 +9,6 @@ import SpellCard from '@/components/SpellCard/SpellCard';
 import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionModal';
 import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
 import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
-import BackgroundMusic from '@/components/BackgroundMusic/BackgroundMusic';
 import styles from './GameBoard.module.css';
 
 // Liste des éléments disponibles pour la sélection
@@ -497,7 +496,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     return (
         <div className={styles.board}>
-            <BackgroundMusic />
             {/* Modal de Défausse */}
             {viewDiscard && (
                 <div className={styles.modalOverlay} onClick={() => setViewDiscard(null)}>
