@@ -246,13 +246,16 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Wrapper pour playCard qui gère aussi la sélection de cartes et la distribution de soins
     const handlePlayCard = (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => {
         const card = player.hand.find(c => c.id === cardId);
+        // Récupérer l'élément sélectionné pour l'inclure dans les payloads
+        const currentSelectedElement = selectedElement;
+
         if (card) {
             // Vérifier si la carte nécessite une sélection de cartes
             const selection = getCardSelectionRequired(card);
             if (selection) {
                 // Jouer la carte d'abord, puis ouvrir le modal
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
-                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
+                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
                 setPendingCardForSelection(card);
                 // La fin de tour sera appelée après la confirmation du modal
                 return;
@@ -263,7 +266,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             if (healDist) {
                 // Jouer la carte d'abord, puis ouvrir le modal
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
-                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
+                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
                 setPendingCardForHealDistribution(card);
                 // La fin de tour sera appelée après la confirmation du modal
                 return;
@@ -274,7 +277,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             if (enemySel) {
                 // Jouer la carte d'abord (applique les dégâts), puis ouvrir le modal
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
-                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
+                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
                 setPendingCardForEnemySelection(card);
                 // La fin de tour sera appelée après la confirmation du modal
                 return;
@@ -282,7 +285,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
 
         playCard(cardId, targetGodId, targetGodIds, lightningAction);
-        onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction } });
+        onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
 
         // Finir le tour automatiquement après avoir joué une carte
         autoEndTurnMultiplayer();
