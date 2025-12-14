@@ -969,7 +969,15 @@ export class GameEngine {
                     opponent.deck = this.shuffleArray(opponent.deck);
                     // L'adversaire pioche 1 carte
                     if (opponent.deck.length > 0) {
-                        const drawnCard = opponent.deck.shift()!;
+                        const originalCard = opponent.deck.shift()!;
+                        // Créer une copie de l'instance pour ne pas modifier le template global
+                        // et marquer la carte comme cachée pour son propriétaire (blind mode)
+                        // mais visible par celui qui a lancé le sort (Nyx)
+                        const drawnCard = {
+                            ...originalCard,
+                            isHiddenFromOwner: true,
+                            revealedToPlayerId: player.id
+                        };
                         opponent.hand.push(drawnCard);
                     }
                 }
