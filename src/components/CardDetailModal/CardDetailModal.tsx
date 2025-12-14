@@ -10,7 +10,7 @@ import styles from './CardDetailModal.module.css';
 interface CardDetailModalProps {
     card: SpellCard | null;
     isOpen: boolean;
-    onClose: () => void;
+    onClose?: () => void;
     onPlay: () => void;
     onDiscard: () => void;
     canPlay: boolean;
@@ -159,10 +159,12 @@ export default function CardDetailModal({
     const modalContent = (
         <div className={styles.overlay} onClick={onClose}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                {/* Bouton fermer */}
-                <button className={styles.closeButton} onClick={onClose}>
-                    ✕
-                </button>
+                {/* Bouton fermer (seulement si onClose est fourni) */}
+                {onClose && (
+                    <button className={styles.closeButton} onClick={onClose}>
+                        ✕
+                    </button>
+                )}
 
                 {/* Contenu de la carte */}
                 <div className={styles.cardContent}>

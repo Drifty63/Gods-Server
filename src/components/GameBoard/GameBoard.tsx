@@ -169,6 +169,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const [wantsToPlay, setWantsToPlay] = useState(false);
     // Modal de détail de carte
     const [showCardDetail, setShowCardDetail] = useState(false);
+    const [isForcedDetail, setIsForcedDetail] = useState(false);
 
     // Effet pour ouvrir le modal de sélection après avoir joué une carte qui le nécessite
     useEffect(() => {
@@ -329,6 +330,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Jouer depuis le modal de détails
     const handlePlayFromDetail = () => {
         setShowCardDetail(false);
+        setIsForcedDetail(false);
         handlePlaySelectedCard();
     };
 
@@ -336,6 +338,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const handleDiscardFromDetail = () => {
         if (selectedCard) {
             setShowCardDetail(false);
+            setIsForcedDetail(false);
             handleDiscard(selectedCard.id);
         }
     };
@@ -461,6 +464,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         // 3. Vérifier si la carte peut être jouée (cible disponible)
         if (canPlayCard(revealedCard)) {
             // La carte peut être jouée, procéder normalement (ouvrir le modal de détails)
+            setIsForcedDetail(true); // Empêcher l'annulation du modal de détails
             handleCardClick(revealedCard);
         } else {
             // La carte ne peut PAS être jouée (pas de cible valide)
@@ -491,7 +495,10 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         setSelectedBlindCard(null);
     };
 
-
+    // Annuler le menu de carte cachée
+    const handleBlindCancel = () => {
+        setSelectedBlindCard(null);
+    };
 
     // Défausser une carte cachée pour de l'énergie
     // Règle : on ne peut défausser qu'UNE SEULE carte cachée à la fois
@@ -554,7 +561,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             )}
             {/* Menu de choix pour carte cachée */}
             {selectedBlindCard && (
-                <div className={styles.modalOverlay}>
+                <div className={styles.modalOverlay} onClick={handleBlindCancel}>
                     <div className={styles.blindCardMenu} onClick={e => e.stopPropagation()}>
                         <h3 className={styles.blindMenuTitle}>❓ Carte Cachée</h3>
                         <p className={styles.blindMenuSubtitle}>Que voulez-vous faire ?</p>
@@ -572,6 +579,12 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             >
                                 🗑️ Défausser (+1⚡)
                                 {hasDiscardedBlindThisTurn && <span className={styles.disabledNote}> (déjà fait)</span>}
+                            </button>
+                            <button
+                                className={styles.blindCancelButton}
+                                onClick={handleBlindCancel}
+                            >
+                                ❌ Annuler
                             </button>
                         </div>
                     </div>
@@ -960,7 +973,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             <CardDetailModal
                 card={selectedCard}
                 isOpen={showCardDetail}
-                onClose={handleCloseCardDetail}
+                onClose={isForcedDetail ? undefined : handleCloseCardDetail}
                 onPlay={handlePlayFromDetail}
                 onDiscard={handleDiscardFromDetail}
                 canPlay={selectedCard ? canPlayCard(selectedCard) : false}
