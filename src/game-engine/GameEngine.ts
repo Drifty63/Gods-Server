@@ -132,8 +132,12 @@ export class GameEngine {
                 this.applyEffect(effect, card, currentTarget, action.selectedElement, action.lightningAction, [currentTarget]);
                 lastUsedTargetId = currentTarget;
                 targetIndex++;
+            } else if (!effect.target && effect.type === 'custom') {
+                // Effet custom sans target explicite : passer TOUTES les cibles
+                // Cela permet à lightning_toggle_multi de toucher toutes les cibles sélectionnées
+                this.applyEffect(effect, card, action.targetGodId, action.selectedElement, action.lightningAction, targetIds.length > 0 ? targetIds : undefined);
             } else if (!effect.target && lastUsedTargetId) {
-                // Effet sans target explicite : appliquer à la dernière cible utilisée
+                // Autre effet sans target explicite : appliquer à la dernière cible utilisée
                 this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
             } else {
                 // Effet sans ciblage spécifique ou ciblage de groupe (all_enemies, all_allies, self)
