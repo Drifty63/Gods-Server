@@ -279,11 +279,23 @@ export class GameEngine {
         god.isDead = true;
         god.currentHealth = 0;
 
-        // Retirer toutes les cartes de ce dieu de la main, du deck et de la défausse
+        // Retirer toutes les cartes de ce dieu et les stocker dans removedCards
         const godId = god.card.id;
+
+        // Depuis la main
+        const handCards = player.hand.filter(c => c.godId === godId);
         player.hand = player.hand.filter(c => c.godId !== godId);
+
+        // Depuis le deck
+        const deckCards = player.deck.filter(c => c.godId === godId);
         player.deck = player.deck.filter(c => c.godId !== godId);
+
+        // Depuis la défausse
+        const discardCards = player.discard.filter(c => c.godId === godId);
         player.discard = player.discard.filter(c => c.godId !== godId);
+
+        // Stocker toutes les cartes retirées
+        player.removedCards.push(...handCards, ...deckCards, ...discardCards);
 
         // Vérifier si le joueur a perdu (tous les dieux morts)
         // IMPORTANT: Ne pas écraser le gagnant si la partie est déjà terminée
@@ -530,15 +542,15 @@ export class GameEngine {
                         godToRevive.statusEffects = [];
                         godToRevive.temporaryWeakness = undefined;
 
-                        // Récupérer les sorts du dieu depuis la défausse et les remettre dans le deck
+                        // Récupérer les sorts du dieu depuis removedCards et les remettre dans le deck
                         const godId = godToRevive.card.id;
                         const cardsToReturn: SpellCard[] = [];
 
-                        // Trouver les cartes du dieu dans la défausse
-                        player.discard = player.discard.filter(card => {
+                        // Trouver les cartes du dieu dans removedCards
+                        player.removedCards = player.removedCards.filter(card => {
                             if (card.godId === godId) {
                                 cardsToReturn.push(card);
-                                return false; // Retirer de la défausse
+                                return false; // Retirer de removedCards
                             }
                             return true;
                         });
@@ -1287,6 +1299,7 @@ export class GameEngine {
             hand: [],
             deck: GameEngine.prototype.shuffleArray(deck),
             discard: [],
+            removedCards: [],
             energy: isFirst ? 0 : 1, // Premier joueur: 0, Second: 1
             fatigueCounter: 0,
             hasPlayedCard: false,

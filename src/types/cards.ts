@@ -92,10 +92,11 @@ export interface PlayerState {
     hand: SpellCard[];
     deck: SpellCard[];
     discard: SpellCard[];
+    removedCards: SpellCard[];           // Cartes retirées du jeu (dieux morts)
     energy: number;
-    fatigueCounter: number;          // Compteur de recyclage du deck
-    hasPlayedCard: boolean;          // A joué une carte ce tour
-    hasDiscardedForEnergy: boolean;  // A défaussé pour énergie ce tour
+    fatigueCounter: number;              // Compteur de recyclage du deck
+    hasPlayedCard: boolean;              // A joué une carte ce tour
+    hasDiscardedForEnergy: boolean;      // A défaussé pour énergie ce tour
 }
 
 // État de la partie
