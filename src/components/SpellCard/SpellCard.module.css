@@ -197,10 +197,10 @@
    ================================ */
 .descriptionOverlay {
     position: absolute;
-    bottom: 2px;
+    bottom: 4px;
     left: 0;
     right: 0;
-    padding: 6px 4px 4px;
+    padding: 4px 4px 2px;
     background: linear-gradient(to top,
             rgba(0, 0, 0, 0.9) 0%,
             rgba(0, 0, 0, 0.7) 50%,
