@@ -925,22 +925,9 @@ export class GameEngine {
                 break;
 
             case 'shuffle_hand_draw_blind_2':
-                // Mélange 2 cartes adverses aléatoires dans son deck, l'adversaire pioche 2
-                for (let i = 0; i < 2; i++) {
-                    if (opponent.hand.length > 0) {
-                        const randomIndex = Math.floor(Math.random() * opponent.hand.length);
-                        const cardToShuffle = opponent.hand.splice(randomIndex, 1)[0];
-                        opponent.deck.push(cardToShuffle);
-                    }
-                }
-                opponent.deck = this.shuffleArray(opponent.deck);
-                // L'adversaire pioche 2 cartes
-                for (let i = 0; i < 2; i++) {
-                    if (opponent.deck.length > 0) {
-                        const drawnCard = opponent.deck.shift()!;
-                        opponent.hand.push(drawnCard);
-                    }
-                }
+                // Effet entièrement géré par le store via CardSelectionModal
+                // Le joueur (Nyx) choisit les cartes adverses à mélanger
+                // puis confirmEnemyCardSelection applique l'effet complet
                 break;
 
             // ========================================

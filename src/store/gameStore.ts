@@ -93,6 +93,10 @@ interface GameStore {
     startEnemyCardSelection: (count: number, title: string, effectId: string) => void;
     confirmEnemyCardSelection: (selectedCardIds: string[]) => void;
     cancelEnemyCardSelection: () => void;
+
+    // Actions pour cartes cachées (Nyx)
+    revealBlindCard: (cardId: string) => SpellCard | null;  // Révèle une carte cachée et retourne la carte
+    discardBlindCard: (cardId: string, loseEnergy: boolean) => void;  // Défausse une carte cachée
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -474,6 +478,47 @@ export const useGameStore = create<GameStore>((set, get) => ({
             enemyCardSelectionTitle: '',
             pendingEnemyCardEffect: null,
         });
+    },
+
+    revealBlindCard: (cardId: string) => {
+        const { engine, playerId } = get();
+        if (!engine) return null;
+
+        const player = engine.getState().players.find(p => p.id === playerId);
+        if (!player) return null;
+
+        const card = player.hand.find(c => c.id === cardId);
+        if (card && card.isHiddenFromOwner) {
+            card.isHiddenFromOwner = false;
+            set({ gameState: engine.getState() });
+            return card;
+        }
+        return card || null;
+    },
+
+    discardBlindCard: (cardId: string, loseEnergy: boolean) => {
+        const { engine, playerId } = get();
+        if (!engine) return;
+
+        const player = engine.getState().players.find(p => p.id === playerId);
+        if (!player) return;
+
+        const cardIndex = player.hand.findIndex(c => c.id === cardId);
+        if (cardIndex !== -1) {
+            const card = player.hand[cardIndex];
+
+            // Perdre l'énergie si demandé
+            if (loseEnergy && card.energyCost > 0) {
+                player.energy = Math.max(0, player.energy - card.energyCost);
+            }
+
+            // Retirer de la main et mettre en défausse
+            const discardedCard = player.hand.splice(cardIndex, 1)[0];
+            discardedCard.isHiddenFromOwner = false; // Reset le flag
+            player.discard.push(discardedCard);
+
+            set({ gameState: engine.getState() });
+        }
     },
 
     setLightningAction: (action) => {

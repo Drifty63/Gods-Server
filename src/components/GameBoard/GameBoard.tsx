@@ -66,6 +66,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         startEnemyCardSelection,
         confirmEnemyCardSelection,
         cancelEnemyCardSelection,
+        // Cartes cachées (Nyx)
+        revealBlindCard,
+        discardBlindCard,
     } = useGameStore();
 
     // Helper local pour la détection fiable du choix de foudre
@@ -425,39 +428,43 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     };
 
     // Jouer une carte cachée à l'aveugle
+    // Comportement :
     // 1. La carte est révélée
-    // 2. Si jouable (cible disponible) → le joueur procède normalement
-    // 3. Si non jouable (pas de cible) → perd l'énergie, carte défaussée
+    // 2. Si pas assez d'énergie → carte défaussée sans pénalité
+    // 3. Si assez d'énergie mais pas de cible valide → perd l'énergie, carte défaussée
+    // 4. Si jouable → le joueur procède normalement
     const handleBlindCardClick = (card: typeof selectedCard) => {
         if (!card || !isPlayerTurn) return;
 
-        // 1. RÉVÉLER la carte (on enlève le flag isHiddenFromOwner)
-        card.isHiddenFromOwner = false;
+        // 1. RÉVÉLER la carte via le store (persiste le changement)
+        const revealedCard = revealBlindCard(card.id);
+        if (!revealedCard) return;
 
-        // 2. Vérifier si la carte peut être jouée
-        if (canPlayCard(card)) {
+        // 2. Vérifier si le joueur a assez d'énergie
+        if (player.energy < revealedCard.energyCost) {
+            // Pas assez d'énergie → défausser simplement la carte (sans pénalité)
+            discardBlindCard(revealedCard.id, false);
+            alert(`⚠️ "${revealedCard.name}" révélée mais pas assez d'énergie (${revealedCard.energyCost}⚡ requis). Carte défaussée.`);
+
+            // Terminer le tour
+            endTurn();
+            onAction?.({ type: 'end_turn', payload: {} });
+            return;
+        }
+
+        // 3. Vérifier si la carte peut être jouée (cible disponible)
+        if (canPlayCard(revealedCard)) {
             // La carte peut être jouée, procéder normalement
-            handleCardClick(card);
+            handleCardClick(revealedCard);
         } else {
-            // La carte ne peut PAS être jouée (pas de cible valide, ou autre raison)
+            // La carte ne peut PAS être jouée (pas de cible valide)
             // Le joueur perd l'énergie de la carte et elle va à la défausse
-            const cardIndex = player.hand.findIndex(c => c.id === card.id);
-            if (cardIndex !== -1) {
-                // Déduire le coût en énergie (si le joueur a assez d'énergie)
-                player.energy = Math.max(0, player.energy - card.energyCost);
+            discardBlindCard(revealedCard.id, true);
+            alert(`⚠️ "${revealedCard.name}" ne peut pas être jouée (pas de cible valide). Vous perdez ${revealedCard.energyCost} énergie.`);
 
-                // Retirer la carte de la main
-                const discardedCard = player.hand.splice(cardIndex, 1)[0];
-                // La mettre dans la défausse
-                player.discard.push(discardedCard);
-
-                // Afficher un message pour informer le joueur
-                alert(`⚠️ "${card.name}" ne peut pas être jouée (pas de cible valide). Vous perdez ${card.energyCost} énergie.`);
-
-                // Terminer le tour
-                endTurn();
-                onAction?.({ type: 'end_turn', payload: {} });
-            }
+            // Terminer le tour
+            endTurn();
+            onAction?.({ type: 'end_turn', payload: {} });
         }
     };
 
