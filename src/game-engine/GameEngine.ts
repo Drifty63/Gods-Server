@@ -672,7 +672,26 @@ export class GameEngine {
                     const lostHealth = castingGod.card.maxHealth - castingGod.currentHealth;
                     const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
                     if (target && lostHealth > 0) {
-                        target.currentHealth -= lostHealth;
+                        // Appliquer le bonus de faiblesse (+2x dégâts si l'élément est efficace)
+                        const targetWeakness = target.temporaryWeakness || target.card.weakness;
+                        const { damage: finalDamage } = calculateDamage(lostHealth, card.element, targetWeakness);
+
+                        // Gestion du bouclier
+                        let damageToInflict = finalDamage;
+                        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
+                        if (shieldIndex !== -1) {
+                            const shield = target.statusEffects[shieldIndex];
+                            if (shield.stacks >= damageToInflict) {
+                                shield.stacks -= damageToInflict;
+                                damageToInflict = 0;
+                            } else {
+                                damageToInflict -= shield.stacks;
+                                shield.stacks = 0;
+                                target.statusEffects.splice(shieldIndex, 1);
+                            }
+                        }
+
+                        target.currentHealth -= damageToInflict;
                         if (target.currentHealth <= 0) {
                             this.handleGodDeath(opponent, target);
                         }
