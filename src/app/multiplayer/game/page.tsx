@@ -25,9 +25,6 @@ export default function MultiplayerGamePage() {
     const {
         gameState,
         initGame,
-        playCard,
-        discardForEnergy,
-        endTurn,
         playerId,
     } = useGameStore();
 
@@ -144,31 +141,19 @@ export default function MultiplayerGamePage() {
                     }
                     break;
 
+                // Les actions play_card, discard, end_turn sont ignorées ici
+                // car on synchronise l'état complet via syncedState
+                // Cela évite les bugs de double-tick des effets temporaires
                 case 'play_card':
-                    if (gameState) {
-                        const { cardId, targetGodId, targetGodIds, lightningAction } = lastAction.payload as {
-                            cardId: string;
-                            targetGodId?: string;
-                            targetGodIds?: string[];
-                            lightningAction?: 'apply' | 'remove';
-                        };
-                        playCard(cardId, targetGodId, targetGodIds, lightningAction);
-                    }
-                    break;
                 case 'discard':
-                    if (gameState) {
-                        discardForEnergy(lastAction.payload.cardId as string);
-                    }
-                    break;
                 case 'end_turn':
-                    if (gameState) {
-                        endTurn();
-                    }
+                    // On ne fait rien ici - l'état sera synchronisé via syncedState
+                    console.log('Action received (will sync via state):', lastAction.type);
                     break;
             }
             clearLastAction();
         }
-    }, [lastAction, gameState, playCard, discardForEnergy, endTurn, clearLastAction, isHost, isInitialized, multiplayerData, sendAction]);
+    }, [lastAction, gameState, clearLastAction, isHost, isInitialized, multiplayerData, sendAction]);
 
     // Appliquer l'état synchronisé reçu de l'adversaire
     useEffect(() => {
@@ -178,29 +163,7 @@ export default function MultiplayerGamePage() {
         }
     }, [syncedState, isInitialized]);
 
-    // Wrapper pour envoyer les actions au serveur
-    const handleMultiplayerAction = (action: GameAction) => {
-        sendAction(action);
 
-        // Appliquer localement aussi
-        switch (action.type) {
-            case 'play_card':
-                const { cardId, targetGodId, targetGodIds, lightningAction } = action.payload as {
-                    cardId: string;
-                    targetGodId?: string;
-                    targetGodIds?: string[];
-                    lightningAction?: 'apply' | 'remove';
-                };
-                playCard(cardId, targetGodId, targetGodIds, lightningAction);
-                break;
-            case 'discard':
-                discardForEnergy(action.payload.cardId as string);
-                break;
-            case 'end_turn':
-                endTurn();
-                break;
-        }
-    };
 
     const handleLeaveGame = () => {
         leaveGame();
