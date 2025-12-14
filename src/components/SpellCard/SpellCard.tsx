@@ -60,7 +60,7 @@ export default function SpellCard({
                 <span className={styles.costValue}>{card.energyCost}</span>
             </div>
 
-            {/* Image du sort */}
+            {/* Image du sort avec description superposée */}
             <div className={styles.imageContainer}>
                 {card.imageUrl && !imageError ? (
                     <Image
@@ -76,11 +76,10 @@ export default function SpellCard({
                         {getTypeIcon(card.type)}
                     </div>
                 )}
-            </div>
-
-            {/* Description de l'effet */}
-            <div className={styles.description}>
-                <p>{card.description}</p>
+                {/* Description superposée sur l'image */}
+                <div className={styles.descriptionOverlay}>
+                    <p>{card.description}</p>
+                </div>
             </div>
 
             {/* Footer avec gain d'énergie */}
