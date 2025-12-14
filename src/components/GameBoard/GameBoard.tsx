@@ -427,17 +427,22 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
     };
 
-    // Jouer une carte cachée à l'aveugle
-    // Comportement :
-    // 1. La carte est révélée
-    // 2. Si pas assez d'énergie → carte défaussée sans pénalité
-    // 3. Si assez d'énergie mais pas de cible valide → perd l'énergie, carte défaussée
-    // 4. Si jouable → le joueur procède normalement
+    // État pour le menu de choix d'une carte cachée
+    const [selectedBlindCard, setSelectedBlindCard] = useState<typeof selectedCard>(null);
+
+    // Cliquer sur une carte cachée → affiche le menu de choix
     const handleBlindCardClick = (card: typeof selectedCard) => {
         if (!card || !isPlayerTurn) return;
+        setSelectedBlindCard(card);
+    };
+
+    // Choisir "Jouer" depuis le menu de carte cachée
+    const handleBlindPlay = () => {
+        if (!selectedBlindCard) return;
 
         // 1. RÉVÉLER la carte via le store (persiste le changement)
-        const revealedCard = revealBlindCard(card.id);
+        const revealedCard = revealBlindCard(selectedBlindCard.id);
+        setSelectedBlindCard(null);
         if (!revealedCard) return;
 
         // 2. Vérifier si le joueur a assez d'énergie
@@ -454,7 +459,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
         // 3. Vérifier si la carte peut être jouée (cible disponible)
         if (canPlayCard(revealedCard)) {
-            // La carte peut être jouée, procéder normalement
+            // La carte peut être jouée, procéder normalement (ouvrir le modal de détails)
             handleCardClick(revealedCard);
         } else {
             // La carte ne peut PAS être jouée (pas de cible valide)
@@ -466,6 +471,28 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             endTurn();
             onAction?.({ type: 'end_turn', payload: {} });
         }
+    };
+
+    // Choisir "Défausser" depuis le menu de carte cachée
+    const handleBlindDiscardFromMenu = () => {
+        if (!selectedBlindCard) return;
+
+        if (hasDiscardedBlindThisTurn) {
+            alert("⚠️ Vous ne pouvez défausser qu'une seule carte cachée par tour !");
+            setSelectedBlindCard(null);
+            return;
+        }
+
+        // Défausser la carte pour de l'énergie (sans la révéler)
+        discardForEnergy(selectedBlindCard.id);
+        onAction?.({ type: 'discard', payload: { cardId: selectedBlindCard.id } });
+        setHasDiscardedBlindThisTurn(true);
+        setSelectedBlindCard(null);
+    };
+
+    // Annuler le menu de carte cachée
+    const handleBlindCancel = () => {
+        setSelectedBlindCard(null);
     };
 
     // Défausser une carte cachée pour de l'énergie
@@ -523,6 +550,37 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             {(viewDiscard === 'player' ? player.discard : opponent.discard).length === 0 && (
                                 <p className={styles.emptyMessage}>Aucune carte dans la défausse</p>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Menu de choix pour carte cachée */}
+            {selectedBlindCard && (
+                <div className={styles.modalOverlay} onClick={handleBlindCancel}>
+                    <div className={styles.blindCardMenu} onClick={e => e.stopPropagation()}>
+                        <h3 className={styles.blindMenuTitle}>❓ Carte Cachée</h3>
+                        <p className={styles.blindMenuSubtitle}>Que voulez-vous faire ?</p>
+                        <div className={styles.blindMenuButtons}>
+                            <button
+                                className={styles.blindPlayButton}
+                                onClick={handleBlindPlay}
+                            >
+                                🎲 Jouer à l&apos;aveugle
+                            </button>
+                            <button
+                                className={styles.blindDiscardButton}
+                                onClick={handleBlindDiscardFromMenu}
+                                disabled={hasDiscardedBlindThisTurn}
+                            >
+                                🗑️ Défausser (+1⚡)
+                                {hasDiscardedBlindThisTurn && <span className={styles.disabledNote}> (déjà fait)</span>}
+                            </button>
+                            <button
+                                className={styles.blindCancelButton}
+                                onClick={handleBlindCancel}
+                            >
+                                ❌ Annuler
+                            </button>
                         </div>
                     </div>
                 </div>
