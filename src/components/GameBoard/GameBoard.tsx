@@ -9,6 +9,7 @@ import SpellCard from '@/components/SpellCard/SpellCard';
 import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionModal';
 import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
 import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
+import BackgroundMusic from '@/components/BackgroundMusic/BackgroundMusic';
 import styles from './GameBoard.module.css';
 
 // Liste des éléments disponibles pour la sélection
@@ -496,6 +497,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     return (
         <div className={styles.board}>
+            <BackgroundMusic />
             {/* Modal de Défausse */}
             {viewDiscard && (
                 <div className={styles.modalOverlay} onClick={() => setViewDiscard(null)}>
@@ -599,7 +601,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 <div className={styles.turnInfo}>
                     <span className={styles.turnNumber}>Tour {gameState.turnNumber}</span>
                     <div className={styles.turnRow}>
-                        <span className={`${styles.turnIndicator} ${isPlayerTurn ? styles.myTurn : styles.opponentTurn}`}>
+                        <span className={`${styles.turnIndicator} ${isPlayerTurn ? styles.myTurn : styles.opponentTurn} `}>
                             {isPlayerTurn ? '🎮 Votre tour' : '⏳ Tour adverse'}
                         </span>
                         {isPlayerTurn && gameState.status === 'playing' && !isSelectingTarget && (
@@ -620,122 +622,135 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     <div className={styles.targetPrompt}>
                         <p>
                             Sélectionnez {requiredTargets > 1 ? `jusqu'à ${requiredTargets} cibles` : 'une cible'} pour <strong>{selectedCard?.name}</strong>
-                        </p>
+                        </p >
                         {requiredTargets > 1 && (
                             <p className={styles.targetCounter}>
                                 {selectedTargetGods.length} / {maxPossibleTargets} cibles sélectionnées
                                 {maxPossibleTargets < requiredTargets && ` (${maxPossibleTargets} disponibles)`}
                             </p>
-                        )}
-                        {requiredEnemyTargets.length > 0 && isMultiTarget && !allRequiredTargetsIncluded && (
-                            <p className={styles.requiredWarning}>
-                                ⚠️ Vous devez inclure le(s) provocateur(s) dans vos cibles !
-                            </p>
-                        )}
-                        {canConfirm && selectedCard && needsLightningChoice(selectedCard) && (
-                            <div className={styles.lightningChoice}>
-                                <p>⚡ Que voulez-vous faire avec les marques de foudre ?</p>
-                                <div className={styles.lightningButtons}>
-                                    <button
-                                        className={styles.lightningApply}
-                                        onClick={() => {
-                                            setLightningAction('apply');
-                                            handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
-                                            setWantsToPlay(false);
-                                        }}
-                                    >
-                                        ⚡ Appliquer des marques
-                                    </button>
-                                    <button
-                                        className={styles.lightningRemove}
-                                        onClick={() => {
-                                            setLightningAction('remove');
-                                            handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
-                                            setWantsToPlay(false);
-                                        }}
-                                    >
-                                        💥 Retirer & infliger dégâts
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        {/* Choix d'élément pour Coup Critique d'Artémis */}
-                        {canConfirm && selectedCard && needsElementChoiceLocal(selectedCard) && (
-                            <div className={styles.elementChoice}>
-                                <p>🎯 Choisissez l'élément de la faiblesse à appliquer :</p>
-                                <div className={styles.elementButtons}>
-                                    {ALL_ELEMENTS.map(element => (
+                        )
+                        }
+                        {
+                            requiredEnemyTargets.length > 0 && isMultiTarget && !allRequiredTargetsIncluded && (
+                                <p className={styles.requiredWarning}>
+                                    ⚠️ Vous devez inclure le(s) provocateur(s) dans vos cibles !
+                                </p>
+                            )
+                        }
+                        {
+                            canConfirm && selectedCard && needsLightningChoice(selectedCard) && (
+                                <div className={styles.lightningChoice}>
+                                    <p>⚡ Que voulez-vous faire avec les marques de foudre ?</p>
+                                    <div className={styles.lightningButtons}>
                                         <button
-                                            key={element}
-                                            className={styles.elementButton}
+                                            className={styles.lightningApply}
                                             onClick={() => {
-                                                setSelectedElement(element);
-                                                handlePlayCard(selectedCard.id);
+                                                setLightningAction('apply');
+                                                handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
+                                                setWantsToPlay(false);
                                             }}
                                         >
-                                            {ELEMENT_SYMBOLS[element]}
+                                            ⚡ Appliquer des marques
                                         </button>
-                                    ))}
+                                        <button
+                                            className={styles.lightningRemove}
+                                            onClick={() => {
+                                                setLightningAction('remove');
+                                                handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
+                                                setWantsToPlay(false);
+                                            }}
+                                        >
+                                            💥 Retirer & infliger dégâts
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        {canConfirm && selectedCard && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard) && (
-                            <button className={styles.confirmButton} onClick={handleConfirmPlay}>
-                                ✅ Confirmer ({selectedTargetGods.length} cible{selectedTargetGods.length > 1 ? 's' : ''})
-                            </button>
-                        )}
+                            )
+                        }
+                        {/* Choix d'élément pour Coup Critique d'Artémis */}
+                        {
+                            canConfirm && selectedCard && needsElementChoiceLocal(selectedCard) && (
+                                <div className={styles.elementChoice}>
+                                    <p>🎯 Choisissez l'élément de la faiblesse à appliquer :</p>
+                                    <div className={styles.elementButtons}>
+                                        {ALL_ELEMENTS.map(element => (
+                                            <button
+                                                key={element}
+                                                className={styles.elementButton}
+                                                onClick={() => {
+                                                    setSelectedElement(element);
+                                                    handlePlayCard(selectedCard.id);
+                                                }}
+                                            >
+                                                {ELEMENT_SYMBOLS[element]}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )
+                        }
+                        {
+                            canConfirm && selectedCard && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard) && (
+                                <button className={styles.confirmButton} onClick={handleConfirmPlay}>
+                                    ✅ Confirmer ({selectedTargetGods.length} cible{selectedTargetGods.length > 1 ? 's' : ''})
+                                </button>
+                            )
+                        }
                         <button className={styles.cancelButton} onClick={() => selectCard(null)}>
                             ❌ Annuler
                         </button>
-                    </div>
+                    </div >
                 )}
 
                 {/* Choix de foudre pour les cartes sans ciblage (ex: Foudroiement all_enemies) */}
-                {selectedCard && needsLightningChoice(selectedCard) && wantsToPlay && !isSelectingTarget && (
-                    <div className={styles.targetPrompt}>
-                        <p>⚡ <strong>{selectedCard.name}</strong> - Que voulez-vous faire ?</p>
-                        <div className={styles.lightningButtons}>
-                            <button
-                                className={styles.lightningApply}
-                                onClick={() => {
-                                    setLightningAction('apply');
-                                    handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
-                                    setWantsToPlay(false);
-                                }}
-                            >
-                                ⚡ Appliquer des marques
-                            </button>
-                            <button
-                                className={styles.lightningRemove}
-                                onClick={() => {
-                                    setLightningAction('remove');
-                                    handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
-                                    setWantsToPlay(false);
-                                }}
-                            >
-                                💥 Retirer & infliger dégâts
+                {
+                    selectedCard && needsLightningChoice(selectedCard) && wantsToPlay && !isSelectingTarget && (
+                        <div className={styles.targetPrompt}>
+                            <p>⚡ <strong>{selectedCard.name}</strong> - Que voulez-vous faire ?</p>
+                            <div className={styles.lightningButtons}>
+                                <button
+                                    className={styles.lightningApply}
+                                    onClick={() => {
+                                        setLightningAction('apply');
+                                        handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
+                                        setWantsToPlay(false);
+                                    }}
+                                >
+                                    ⚡ Appliquer des marques
+                                </button>
+                                <button
+                                    className={styles.lightningRemove}
+                                    onClick={() => {
+                                        setLightningAction('remove');
+                                        handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
+                                        setWantsToPlay(false);
+                                    }}
+                                >
+                                    💥 Retirer & infliger dégâts
+                                </button>
+                            </div>
+                            <button className={styles.cancelButton} onClick={() => { selectCard(null); setWantsToPlay(false); }}>
+                                ❌ Annuler
                             </button>
                         </div>
-                        <button className={styles.cancelButton} onClick={() => { selectCard(null); setWantsToPlay(false); }}>
-                            ❌ Annuler
-                        </button>
-                    </div>
-                )}
+                    )
+                }
 
-                {gameState.status === 'finished' && (
-                    <div className={styles.gameOver}>
-                        <h2>Partie terminée !</h2>
-                        <p>
-                            {gameState.winnerId === playerId
-                                ? '🏆 Victoire !'
-                                : '💀 Défaite...'}
-                        </p>
-                    </div>
-                )}
-            </div>
+                {
+                    gameState.status === 'finished' && (
+                        <div className={styles.gameOver}>
+                            <h2>Partie terminée !</h2>
+                            <p>
+                                {gameState.winnerId === playerId
+                                    ? '🏆 Victoire !'
+                                    : '💀 Défaite...'}
+                            </p>
+                        </div>
+                    )
+                }
+            </div >
 
             {/* Zone joueur */}
-            <div className={styles.playerZone}>
+            < div className={styles.playerZone} >
                 <div className={styles.godsRow}>
                     {player.gods.map((god) => {
                         // Déterminer si l'allié est une cible valide
@@ -819,34 +834,36 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         ))}
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* Barre d'action mobile - s'affiche quand une carte est sélectionnée */}
-            {selectedCard && isPlayerTurn && !isSelectingTarget && (
-                <div className={styles.mobileActionBar}>
-                    <div className={styles.selectedCardInfo}>
-                        <span className={styles.selectedCardName}>{selectedCard.name}</span>
-                        <span className={styles.selectedCardCost}>
-                            {selectedCard.energyCost > 0 ? `${selectedCard.energyCost}⚡` : `+${selectedCard.energyGain}⚡`}
-                        </span>
+            {
+                selectedCard && isPlayerTurn && !isSelectingTarget && (
+                    <div className={styles.mobileActionBar}>
+                        <div className={styles.selectedCardInfo}>
+                            <span className={styles.selectedCardName}>{selectedCard.name}</span>
+                            <span className={styles.selectedCardCost}>
+                                {selectedCard.energyCost > 0 ? `${selectedCard.energyCost}⚡` : `+${selectedCard.energyGain}⚡`}
+                            </span>
+                        </div>
+                        <div className={styles.actionButtons}>
+                            <button
+                                className={styles.discardButton}
+                                onClick={handleDiscardSelectedCard}
+                            >
+                                🗑️ Défausser (+1⚡)
+                            </button>
+                            <button
+                                className={`${styles.playButton} ${!canPlayCard(selectedCard) ? styles.disabled : ''}`}
+                                onClick={handlePlaySelectedCard}
+                                disabled={!canPlayCard(selectedCard)}
+                            >
+                                ▶️ Jouer
+                            </button>
+                        </div>
                     </div>
-                    <div className={styles.actionButtons}>
-                        <button
-                            className={styles.discardButton}
-                            onClick={handleDiscardSelectedCard}
-                        >
-                            🗑️ Défausser (+1⚡)
-                        </button>
-                        <button
-                            className={`${styles.playButton} ${!canPlayCard(selectedCard) ? styles.disabled : ''}`}
-                            onClick={handlePlaySelectedCard}
-                            disabled={!canPlayCard(selectedCard)}
-                        >
-                            ▶️ Jouer
-                        </button>
-                    </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Modal de sélection de cartes */}
             <CardSelectionModal
@@ -888,6 +905,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 canPlay={selectedCard ? canPlayCard(selectedCard) : false}
                 canDiscard={isPlayerTurn && !player.hasPlayedCard}
             />
-        </div>
+        </div >
     );
 }
