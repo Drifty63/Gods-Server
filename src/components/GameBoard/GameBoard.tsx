@@ -722,7 +722,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 <div className={styles.godsRow}>
                     {player.gods.map((god) => {
                         // Déterminer si l'allié est une cible valide
-                        const needsAllyTarget = selectedCard?.effects.some(e => e.target === 'ally_god');
+                        const needsAllyTarget = selectedCard?.effects.some(e => e.target === 'ally_god' || e.target === 'any_god');
                         const needsDeadAllyTarget = selectedCard?.effects.some(e => e.target === 'dead_ally_god');
                         const needsSelfTarget = selectedCard?.effects.some(e => e.target === 'self');
 
