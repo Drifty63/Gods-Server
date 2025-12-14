@@ -22,15 +22,15 @@
 .board::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-image: url('/arena_background.png');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    transform: rotate(90deg) scale(1.2);
+    transform: rotate(90deg);
     opacity: 0.6;
     z-index: 0;
 }
