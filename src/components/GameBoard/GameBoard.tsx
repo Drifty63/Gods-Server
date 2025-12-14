@@ -316,6 +316,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Fermer le modal de détails
     const handleCloseCardDetail = () => {
         setShowCardDetail(false);
+        selectCard(null); // Déselectionner la carte
     };
 
     // Jouer depuis le modal de détails
