@@ -78,13 +78,24 @@ export default function GodCard({
                             {currentHealth}/{card.maxHealth}
                         </span>
                     </div>
-                    <span
-                        className={styles.weaknessBadge}
-                        title={`Faiblesse: ${ELEMENT_NAMES[god.temporaryWeakness || card.weakness]}`}
-                        style={{ color: god.temporaryWeakness ? '#f59e0b' : 'inherit' }}
-                    >
-                        {ELEMENT_SYMBOLS[god.temporaryWeakness || card.weakness]}
-                    </span>
+                    <div className={styles.weaknessContainer}>
+                        {/* Faiblesse temporaire (si existe) */}
+                        {god.temporaryWeakness && (
+                            <span
+                                className={`${styles.weaknessBadge} ${styles.temporaryWeakness}`}
+                                title={`Faiblesse temporaire: ${ELEMENT_NAMES[god.temporaryWeakness]}`}
+                            >
+                                {ELEMENT_SYMBOLS[god.temporaryWeakness]}
+                            </span>
+                        )}
+                        {/* Faiblesse de base */}
+                        <span
+                            className={styles.weaknessBadge}
+                            title={`Faiblesse: ${ELEMENT_NAMES[card.weakness]}`}
+                        >
+                            {ELEMENT_SYMBOLS[card.weakness]}
+                        </span>
+                    </div>
                 </div>
             </div>
 

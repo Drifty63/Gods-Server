@@ -398,18 +398,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     };
 
     // Jouer automatiquement quand on a sélectionné toutes les cibles nécessaires
-    // SAUF si la carte nécessite un choix de foudre
+    // SAUF si la carte nécessite un choix de foudre ou un choix d'élément
     const handleSingleTargetSelect = (uniqueGodId: string) => {
         if (!selectedCard || !isSelectingTarget) return;
 
         // Parser l'ID unique pour obtenir le vrai godId
         const { godId } = parseUniqueGodId(uniqueGodId);
 
-        if (requiredTargets === 1 && !needsLightningChoice(selectedCard)) {
-            // Comportement classique : jouer immédiatement (cartes sans choix foudre)
+        if (requiredTargets === 1 && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard)) {
+            // Comportement classique : jouer immédiatement (cartes sans choix foudre ni élément)
             handlePlayCard(selectedCard.id, godId);
         } else {
-            // Ciblage multiple OU carte avec choix foudre : ajouter la cible et attendre
+            // Ciblage multiple OU carte avec choix foudre/élément : ajouter la cible et attendre
             handleTargetSelect(uniqueGodId);
         }
     };
@@ -676,7 +676,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                                 className={styles.elementButton}
                                                 onClick={() => {
                                                     setSelectedElement(element);
-                                                    handlePlayCard(selectedCard.id);
+                                                    // Passer la cible sélectionnée
+                                                    const targetId = selectedTargetGods[0]?.card.id;
+                                                    handlePlayCard(selectedCard.id, targetId);
                                                 }}
                                             >
                                                 {ELEMENT_SYMBOLS[element]}
