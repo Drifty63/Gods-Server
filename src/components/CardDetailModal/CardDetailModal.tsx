@@ -17,47 +17,74 @@ interface CardDetailModalProps {
     canDiscard: boolean;
 }
 
-// Descriptions explicites des effets
+// Descriptions explicites des effets (regroupe les effets identiques)
 const getExplicitDescription = (card: SpellCard): string => {
     const descriptions: string[] = [];
 
+    // Compter les effets similaires pour les regrouper
+    const effectCounts: Map<string, { count: number; value: number; effect: typeof card.effects[0] }> = new Map();
+
     for (const effect of card.effects) {
+        // Créer une clé unique pour regrouper les effets identiques
+        const key = `${effect.type}-${effect.target || 'none'}-${effect.value || 0}-${effect.status || ''}-${effect.customEffectId || ''}`;
+
+        if (effectCounts.has(key)) {
+            const existing = effectCounts.get(key)!;
+            existing.count++;
+        } else {
+            effectCounts.set(key, { count: 1, value: effect.value || 0, effect });
+        }
+    }
+
+    // Générer les descriptions groupées
+    for (const [, { count, value, effect }] of effectCounts) {
+        const targetText = count > 1 ? ` à ${count} ennemis` : ' à un ennemi';
+        const allyTargetText = count > 1 ? ` à ${count} alliés` : ' à un allié';
+
         switch (effect.type) {
             case 'damage':
                 if (effect.target === 'enemy_god') {
-                    descriptions.push(`Inflige ${effect.value} dégâts à un ennemi`);
+                    descriptions.push(`Inflige ${value} dégâts${targetText}`);
                 } else if (effect.target === 'all_enemies') {
-                    descriptions.push(`Inflige ${effect.value} dégâts à tous les ennemis`);
+                    descriptions.push(`Inflige ${value} dégâts à tous les ennemis`);
+                } else if (effect.target === 'self') {
+                    descriptions.push(`Inflige ${value} dégâts au lanceur`);
                 } else {
-                    descriptions.push(`Inflige ${effect.value} dégâts`);
+                    descriptions.push(`Inflige ${value} dégâts`);
                 }
                 break;
             case 'heal':
                 if (effect.target === 'self') {
-                    descriptions.push(`Soigne ${effect.value} PV au lanceur`);
+                    descriptions.push(`Soigne ${value} PV au lanceur`);
                 } else if (effect.target === 'ally_god') {
-                    descriptions.push(`Soigne ${effect.value} PV à un allié`);
+                    descriptions.push(`Soigne ${value} PV${allyTargetText}`);
                 } else if (effect.target === 'all_allies') {
-                    descriptions.push(`Soigne ${effect.value} PV à tous les alliés`);
+                    descriptions.push(`Soigne ${value} PV à tous les alliés`);
                 } else if (effect.target === 'any_god') {
-                    descriptions.push(`Soigne ${effect.value} PV à un dieu au choix`);
+                    descriptions.push(`Soigne ${value} PV à un dieu au choix`);
                 } else {
-                    descriptions.push(`Soigne ${effect.value} PV`);
+                    descriptions.push(`Soigne ${value} PV`);
                 }
                 break;
             case 'shield':
                 if (effect.target === 'self') {
-                    descriptions.push(`Gagne ${effect.value} bouclier`);
+                    descriptions.push(`Gagne ${value} bouclier`);
                 } else if (effect.target === 'ally_god') {
-                    descriptions.push(`Donne ${effect.value} bouclier à un allié`);
+                    descriptions.push(`Donne ${value} bouclier${allyTargetText}`);
                 } else if (effect.target === 'all_allies') {
-                    descriptions.push(`Donne ${effect.value} bouclier à tous les alliés`);
+                    descriptions.push(`Donne ${value} bouclier à tous les alliés`);
                 } else {
-                    descriptions.push(`Ajoute ${effect.value} bouclier`);
+                    descriptions.push(`Ajoute ${value} bouclier`);
                 }
                 break;
             case 'energy':
-                descriptions.push(`+${effect.value} énergie`);
+                descriptions.push(`+${value} énergie`);
+                break;
+            case 'mill':
+                descriptions.push(`Défausse ${value} carte(s) du deck adverse`);
+                break;
+            case 'discard':
+                descriptions.push(`L'adversaire défausse ${value} carte(s)`);
                 break;
             case 'status':
                 const statusNames: Record<string, string> = {
@@ -71,20 +98,31 @@ const getExplicitDescription = (card: SpellCard): string => {
                     'weakness': 'Faiblesse'
                 };
                 const statusName = effect.status ? statusNames[effect.status] || effect.status : 'effet';
-                descriptions.push(`Applique ${effect.value || 1}x ${statusName}`);
+                descriptions.push(`Applique ${value || 1}x ${statusName}`);
                 break;
             case 'draw':
-                descriptions.push(`Pioche ${effect.value} carte(s)`);
+                descriptions.push(`Pioche ${value} carte(s)`);
                 break;
             case 'custom':
                 if (effect.description) {
                     descriptions.push(effect.description);
                 } else if (effect.customEffectId) {
-                    // Descriptions par défaut pour certains effets custom
                     const customDescriptions: Record<string, string> = {
-                        'lightning_toggle': 'Ajoute/Retire une Marque Foudre',
+                        'lightning_toggle': 'Ajoute ou retire une Marque Foudre (+2 dégâts si retirée)',
+                        'lightning_toggle_all': 'Ajoute ou retire des Marques Foudre à tous (+2 dégâts par marque retirée)',
+                        'lightning_toggle_multi': 'Ajoute ou retire des Marques Foudre aux cibles (+2 dégâts par marque retirée)',
                         'revive_god': 'Ressuscite un allié mort avec 8 PV',
-                        'heal_by_poison': 'Soigne du nombre de poisons sur les ennemis'
+                        'heal_by_poison': 'Soigne du nombre total de poisons sur les ennemis',
+                        'conductive_lightning': 'Inflige des dégâts et applique une Marque Foudre',
+                        'lifesteal_damage': 'Soigne le lanceur des dégâts infligés',
+                        'remove_energy_1': "Retire 1 énergie à l'adversaire",
+                        'remove_energy_2': "Retire 2 énergie à l'adversaire",
+                        'apply_weakness': "Applique une faiblesse élémentaire au choix",
+                        'damage_equal_lost_health': 'Inflige des dégâts égaux aux PV perdus',
+                        'heal_if_kill_8': 'Si la cible meurt, soigne 8 PV',
+                        'distribute_heal_5': 'Répartit 5 soins entre vos alliés',
+                        'tsunami_damage': 'Inflige 3 dégâts par carte meulée',
+                        'prison_mill': "Défausse autant de cartes qu'il y a d'ennemis touchés"
                     };
                     descriptions.push(customDescriptions[effect.customEffectId] || 'Effet spécial');
                 }
