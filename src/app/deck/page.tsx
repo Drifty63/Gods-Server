@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
+import { ALL_GODS } from '@/data/gods';
+import { getSpellsForGod } from '@/data/mock_spells';
 
 interface Team {
     id: number;
@@ -99,9 +102,61 @@ export default function DeckPage() {
                 </button>
             </div>
 
-            {/* Contenu du Deck (Formation) - À implémenter plus tard */}
-            <div className={styles.deckContent}>
-                <p>La zone de sélection des dieux apparaîtra ici...</p>
+            {/* Bibliothèque des Dieux */}
+            <div className={styles.libraryContainer}>
+                <h2 className={styles.libraryTitle}>Bibliothèque Divine</h2>
+
+                {ALL_GODS.map((god) => {
+                    const spells = getSpellsForGod(god);
+                    return (
+                        <div key={god.id} className={styles.godRow}>
+                            <div className={styles.godHeader}>
+                                <span className={styles.godName}>{god.name}</span>
+                                <span className={styles.godElement}>{god.element}</span>
+                            </div>
+
+                            <div className={styles.cardsCarousel}>
+                                {/* 1. Carte du Dieu */}
+                                <div className={`${styles.cardWrapper} ${styles.godCardEntry}`}>
+                                    <Image
+                                        src={god.imageUrl} // Image carte jeu (.png)
+                                        alt={god.name}
+                                        fill
+                                        className={styles.godCardImage}
+                                        sizes="160px"
+                                        priority={false}
+                                    />
+                                    <div className={styles.cardOverlay}>
+                                        DIEU
+                                    </div>
+                                </div>
+
+                                {/* 2. Les 5 Cartes de Sorts */}
+                                {spells.map((spell) => (
+                                    <div key={spell.id} className={`${styles.cardWrapper} ${styles.spellCardEntry}`}>
+                                        <div className={styles.spellImageContainer}>
+                                            <Image
+                                                src={spell.imageUrl}
+                                                alt={spell.name}
+                                                fill
+                                                className={styles.godCardImage} // Réutilisation style cover
+                                                sizes="160px"
+                                            />
+                                            <div className={styles.spellCost}>{spell.energyCost}</div>
+                                        </div>
+                                        <div className={styles.spellContent}>
+                                            <div className={styles.spellName}>{spell.name}</div>
+                                            <div className={styles.spellType}>{spell.type}</div>
+                                            <div className={styles.spellDescription}>
+                                                {spell.description}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Navigation Bottom (Identique home pour consistance) */}
