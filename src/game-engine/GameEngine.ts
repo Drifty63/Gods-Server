@@ -1227,12 +1227,8 @@ export class GameEngine {
                 }
                 return true;
             });
-
-            // Si le statut weakness a expiré, on retire l'élément de faiblesse temporaire
-            const hasWeaknessStatus = god.statusEffects.some(s => s.type === 'weakness');
-            if (!hasWeaknessStatus) {
-                god.temporaryWeakness = undefined;
-            }
+            // NOTE: temporaryWeakness est permanente jusqu'à un cleanse
+            // Elle n'est plus liée au statut 'weakness' dans statusEffects
         }
     }
 
