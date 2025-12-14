@@ -20,6 +20,7 @@ export type StatusEffect =
     | 'shield'      // Bouclier
     | 'provocation' // Provocation (taunt)
     | 'stun'        // Stun (étourdi/gel)
+    | 'weakness'    // Faiblesse élémentaire temporaire
     | 'weakness_immunity'; // Immunité aux faiblesses
 
 export type TargetType =

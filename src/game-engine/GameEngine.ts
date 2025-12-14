@@ -203,16 +203,16 @@ export class GameEngine {
         nextPlayer.hasPlayedCard = false;
         nextPlayer.hasDiscardedForEnergy = false;
 
-        // Incrémenter le numéro de tour et tick les effets seulement à ce moment
-        // Ainsi les effets durent en "rounds" (1 round = 1 tour de chaque joueur)
+        // Incrémenter le numéro de tour
         if (nextIndex === 0) {
             this.state.turnNumber++;
-            // Tick les effets temporaires une fois par round
-            this.tickStatusEffects();
         }
 
         // Piocher pour le nouveau joueur actuel
         this.drawToHandLimit(this.getCurrentPlayer());
+
+        // Réduire la durée des effets temporaires du joueur qui vient de jouer
+        this.tickStatusEffects(previousPlayer);
 
         return { success: true, message: 'Tour terminé' };
     }
@@ -1112,10 +1112,13 @@ export class GameEngine {
             // ========================================
             case 'apply_weakness':
                 // Applique une faiblesse temporaire de l'élément choisi à la cible
+                // Duration 2 : survit à la fin du tour actuel de P2 (si appliqué sur P2) et au tour de P1
                 if (targetGodId && selectedElement) {
                     const target = opponent.gods.find(g => g.card.id === targetGodId);
                     if (target && !target.isDead) {
-                        // Ajouter la faiblesse temporaire
+                        this.addStatus(target, 'weakness', 1, 2);
+                        // Hack : utiliser temporaryWeakness pour stocker l'élément de la faiblesse
+                        // Idéalement on devrait pouvoir stocker des métadonnées sur le statut
                         target.temporaryWeakness = selectedElement;
                     }
                 }
@@ -1157,21 +1160,24 @@ export class GameEngine {
     }
 
     /**
-     * Réduit la durée des effets temporaires une fois par round
-     * Un round = 1 tour de chaque joueur
-     * Ainsi un effet avec duration: 2 dure 2 rounds complets
+     * Réduit la durée des effets temporaires pour le joueur qui vient de finir son tour
+     * On ne tick que les effets affectant les dieux de ce joueur.
+     * Cela assure une symétrie : un effet dure X "fins de tours" du joueur affecté.
      */
-    private tickStatusEffects(): void {
-        // Tick les effets sur tous les dieux de tous les joueurs
-        for (const player of this.state.players) {
-            for (const god of player.gods) {
-                god.statusEffects = god.statusEffects.filter(effect => {
-                    if (effect.duration !== undefined) {
-                        effect.duration--;
-                        return effect.duration > 0;
-                    }
-                    return true;
-                });
+    private tickStatusEffects(playerWhoJustFinished: PlayerState): void {
+        for (const god of playerWhoJustFinished.gods) {
+            god.statusEffects = god.statusEffects.filter(effect => {
+                if (effect.duration !== undefined) {
+                    effect.duration--;
+                    return effect.duration > 0;
+                }
+                return true;
+            });
+
+            // Si le statut weakness a expiré, on retire l'élément de faiblesse temporaire
+            const hasWeaknessStatus = god.statusEffects.some(s => s.type === 'weakness');
+            if (!hasWeaknessStatus) {
+                god.temporaryWeakness = undefined;
             }
         }
     }
