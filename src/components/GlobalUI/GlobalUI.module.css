@@ -30,7 +30,7 @@
 }
 
 /* ================================
-   MODAL OPTIONS
+   MODAL COMMUN (OPTIONS & REWARDS)
    ================================ */
 .modalOverlay {
     position: fixed;
@@ -48,7 +48,8 @@
     padding: 20px;
 }
 
-.optionsModal {
+.optionsModal,
+.rewardsModal {
     background: linear-gradient(145deg, #0d0d1f, #16213e);
     border: 2px solid rgba(212, 175, 55, 0.3);
     border-radius: 20px;
@@ -62,9 +63,12 @@
         0 25px 60px rgba(0, 0, 0, 0.6),
         0 0 80px rgba(212, 175, 55, 0.1);
     animation: modalSlideUp 0.4s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-.optionsModal::before {
+.optionsModal::before,
+.rewardsModal::before {
     content: '';
     position: absolute;
     top: 0;
@@ -74,15 +78,18 @@
     background: linear-gradient(90deg, transparent, var(--gold-divine), transparent);
 }
 
-.optionsModal h2 {
+.optionsModal h2,
+.rewardsModal h2 {
     font-family: 'Cinzel', serif;
     font-size: 1.4rem;
     color: var(--gold-divine);
     text-align: center;
     margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-.closeModal {
+.closeModalIcon {
     position: absolute;
     top: 16px;
     right: 16px;
@@ -95,13 +102,20 @@
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    /* Centrage du X */
+    align-items: center;
+    justify-content: center;
 }
 
-.closeModal:hover {
+.closeModalIcon:hover {
     background: rgba(239, 68, 68, 0.3);
     color: white;
 }
 
+/* ================================
+   CONTENU OPTIONS
+   ================================ */
 .optionsContent {
     display: flex;
     flex-direction: column;
@@ -267,6 +281,146 @@
     color: var(--gold-divine);
     font-size: 0.8rem;
     opacity: 0.8;
+}
+
+/* ================================
+   CONTENU RÉCOMPENSES
+   ================================ */
+.rewardsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.rewardItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.rewardItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.rewardIcon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.rewardInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rewardText {
+    color: #e0e0e0;
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+.rewardMetadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rewardTime {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+}
+
+.acceptButton {
+    background: linear-gradient(145deg, #ffd700, #b8860b);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: #1a0f00;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.acceptButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(212, 175, 55, 0.5);
+}
+
+.rewardsFooter {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.closeButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.acceptAllButton {
+    flex: 1;
+    background: linear-gradient(145deg, #ffd700, #b8860b);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: #1a0f00;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    transition: all 0.2s ease;
+}
+
+.acceptAllButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+}
+
+/* Scrollbar personnalisée pour la liste */
+.rewardsList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.rewardsList::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.rewardsList::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.rewardsList::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 @keyframes fadeIn {

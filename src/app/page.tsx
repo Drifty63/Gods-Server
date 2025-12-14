@@ -40,6 +40,11 @@ export default function Home() {
     window.dispatchEvent(new Event('open-options'));
   };
 
+  const handleRewardsClick = () => {
+    // Déclencher l'événement pour ouvrir le modal global
+    window.dispatchEvent(new Event('open-rewards'));
+  };
+
   // Navigation vers le dieu précédent
   const prevGod = () => {
     setIsTransitioning(true);
@@ -77,9 +82,13 @@ export default function Home() {
         </div>
 
         <div className={styles.headerRight}>
-          <Link href="/rewards" className={styles.headerButton} title="Récompenses">
+          <button
+            className={styles.headerButton}
+            onClick={handleRewardsClick}
+            title="Récompenses"
+          >
             🎁
-          </Link>
+          </button>
           <button
             className={styles.headerButton}
             onClick={handleOptionsClick}

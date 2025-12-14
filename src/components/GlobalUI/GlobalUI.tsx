@@ -5,9 +5,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './GlobalUI.module.css';
 
+// Mock data pour les récompenses
+const MOCK_REWARDS = [
+    { id: 1, text: "Remerciement des développeurs.", timeLeft: "29j restant" },
+    { id: 2, text: "Récompense défi 'Aphrodite' combat 1/5.", timeLeft: "29j restant" },
+    { id: 3, text: "Récompense défi 'Zeus' combat 3/5.", timeLeft: "29j restant" },
+    { id: 4, text: "Récompense pour retard sur la maintenance.", timeLeft: "29j restant" },
+    { id: 5, text: "Récompense 1000 téléchargements.", timeLeft: "29j restant" },
+];
+
 export default function GlobalUI() {
     const pathname = usePathname();
     const [showOptionsModal, setShowOptionsModal] = useState(false);
+    const [showRewardsModal, setShowRewardsModal] = useState(false);
 
     // Audio states
     const [menuVolume, setMenuVolume] = useState(0.3);
@@ -102,30 +112,30 @@ export default function GlobalUI() {
         localStorage.setItem('battleVolume', String(battleVolume));
     }, [battleVolume]);
 
-    // Gérer la musique en fonction de la route (TODO: Activer la musique de combat en jeu)
-    /*
-    useEffect(() => {
-        if (pathname === '/game') {
-            // Switcher vers musique combat
-        } else {
-            // Switcher vers musique menu
-        }
-    }, [pathname]);
-    */
-
     const handleOptionsClick = () => {
         setShowOptionsModal(true);
     };
 
-    // Écouter l'événement personnalisé pour ouvrir les options depuis la page d'accueil
+    // Écouter les événements personnalisés
     useEffect(() => {
         const handleOpenOptions = () => setShowOptionsModal(true);
+        const handleOpenRewards = () => setShowRewardsModal(true);
+
         window.addEventListener('open-options', handleOpenOptions);
-        return () => window.removeEventListener('open-options', handleOpenOptions);
+        window.addEventListener('open-rewards', handleOpenRewards);
+
+        return () => {
+            window.removeEventListener('open-options', handleOpenOptions);
+            window.removeEventListener('open-rewards', handleOpenRewards);
+        };
     }, []);
 
     const closeOptionsModal = () => {
         setShowOptionsModal(false);
+    };
+
+    const closeRewardsModal = () => {
+        setShowRewardsModal(false);
     };
 
     const toggleMute = () => {
@@ -157,7 +167,7 @@ export default function GlobalUI() {
             {showOptionsModal && (
                 <div className={styles.modalOverlay} onClick={closeOptionsModal}>
                     <div className={styles.optionsModal} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.closeModal} onClick={closeOptionsModal}>✕</button>
+                        <button className={styles.closeModalIcon} onClick={closeOptionsModal}>✕</button>
                         <h2>⚙️ Options</h2>
 
                         <div className={styles.optionsContent}>
@@ -237,6 +247,40 @@ export default function GlobalUI() {
                                 <p className={styles.versionText}>GODS - Série 1 • Version 0.24</p>
                                 <p className={styles.creditsText}>Développé par Aseo & Drift</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal des Récompenses */}
+            {showRewardsModal && (
+                <div className={styles.modalOverlay} onClick={closeRewardsModal}>
+                    <div className={styles.rewardsModal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.closeModalIcon} onClick={closeRewardsModal}>✕</button>
+                        <h2>Récompenses :</h2>
+
+                        <div className={styles.rewardsList}>
+                            {MOCK_REWARDS.map((reward) => (
+                                <div key={reward.id} className={styles.rewardItem}>
+                                    <span className={styles.rewardIcon}>🎁</span>
+                                    <div className={styles.rewardInfo}>
+                                        <p className={styles.rewardText}>{reward.text}</p>
+                                        <div className={styles.rewardMetadata}>
+                                            <span className={styles.rewardTime}>{reward.timeLeft}</span>
+                                            <button className={styles.acceptButton}>Accepter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className={styles.rewardsFooter}>
+                            <button className={styles.closeButton} onClick={closeRewardsModal}>
+                                Fermer
+                            </button>
+                            <button className={styles.acceptAllButton}>
+                                Tout récupérer
+                            </button>
                         </div>
                     </div>
                 </div>
