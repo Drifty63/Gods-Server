@@ -203,17 +203,16 @@ export class GameEngine {
         nextPlayer.hasPlayedCard = false;
         nextPlayer.hasDiscardedForEnergy = false;
 
-        // Incrémenter le numéro de tour
+        // Incrémenter le numéro de tour et tick les effets seulement à ce moment
+        // Ainsi les effets durent en "rounds" (1 round = 1 tour de chaque joueur)
         if (nextIndex === 0) {
             this.state.turnNumber++;
+            // Tick les effets temporaires une fois par round
+            this.tickStatusEffects();
         }
 
         // Piocher pour le nouveau joueur actuel
         this.drawToHandLimit(this.getCurrentPlayer());
-
-        // Réduire la durée des effets temporaires pour le joueur qui vient de finir
-        // (les effets sont comptés en "tours du lanceur")
-        this.tickStatusEffects(previousPlayer);
 
         return { success: true, message: 'Tour terminé' };
     }
@@ -1158,12 +1157,12 @@ export class GameEngine {
     }
 
     /**
-     * Réduit la durée des effets temporaires pour un joueur donné
-     * Les effets temporaires ne sont réduits que quand le joueur qui les a lancés finit son tour
+     * Réduit la durée des effets temporaires une fois par round
+     * Un round = 1 tour de chaque joueur
+     * Ainsi un effet avec duration: 2 dure 2 rounds complets
      */
-    private tickStatusEffects(casterPlayer: PlayerState): void {
-        // Réduire les effets sur les dieux de l'adversaire (effets lancés par casterPlayer sur lui)
-        // et sur les dieux du casterPlayer (auto-buffs)
+    private tickStatusEffects(): void {
+        // Tick les effets sur tous les dieux de tous les joueurs
         for (const player of this.state.players) {
             for (const god of player.gods) {
                 god.statusEffects = god.statusEffects.filter(effect => {
