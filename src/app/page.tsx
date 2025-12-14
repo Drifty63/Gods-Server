@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
@@ -8,99 +8,9 @@ import { ALL_GODS } from '@/data/gods';
 
 export default function Home() {
   const [showPlayModal, setShowPlayModal] = useState(false);
-  const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [currentGodIndex, setCurrentGodIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [userCoins] = useState(2300); // TODO: Connecter au store utilisateur
-
-  // Audio states
-  const [menuVolume, setMenuVolume] = useState(0.3);
-  const [battleVolume, setBattleVolume] = useState(0.3);
-  const [isMuted, setIsMuted] = useState(false);
-  const menuAudioRef = useRef<HTMLAudioElement | null>(null);
-  const battleAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [hasInteracted, setHasInteracted] = useState(false);
-
-  // Charger les volumes depuis localStorage au montage
-  useEffect(() => {
-    const savedMenuVolume = localStorage.getItem('menuVolume');
-    const savedBattleVolume = localStorage.getItem('battleVolume');
-    const savedMuted = localStorage.getItem('isMuted');
-
-    if (savedMenuVolume) setMenuVolume(parseFloat(savedMenuVolume));
-    if (savedBattleVolume) setBattleVolume(parseFloat(savedBattleVolume));
-    if (savedMuted) setIsMuted(savedMuted === 'true');
-  }, []);
-
-  // Initialiser les pistes audio
-  useEffect(() => {
-    menuAudioRef.current = new Audio('/audio/menu_theme.mp3');
-    menuAudioRef.current.loop = true;
-    menuAudioRef.current.volume = menuVolume;
-
-    battleAudioRef.current = new Audio('/audio/battle_theme.mp3');
-    battleAudioRef.current.loop = true;
-    battleAudioRef.current.volume = battleVolume;
-
-    return () => {
-      if (menuAudioRef.current) {
-        menuAudioRef.current.pause();
-        menuAudioRef.current = null;
-      }
-      if (battleAudioRef.current) {
-        battleAudioRef.current.pause();
-        battleAudioRef.current = null;
-      }
-    };
-  }, []);
-
-  // Écouter la première interaction utilisateur pour débloquer l'audio
-  useEffect(() => {
-    const handleInteraction = () => {
-      if (!hasInteracted) {
-        setHasInteracted(true);
-        // Démarrer la musique menu
-        if (menuAudioRef.current && !isMuted) {
-          menuAudioRef.current.play().catch(console.log);
-        }
-      }
-    };
-
-    document.addEventListener('click', handleInteraction);
-    document.addEventListener('keydown', handleInteraction);
-
-    return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('keydown', handleInteraction);
-    };
-  }, [hasInteracted, isMuted]);
-
-  // Appliquer le mute/unmute
-  useEffect(() => {
-    if (menuAudioRef.current) {
-      menuAudioRef.current.muted = isMuted;
-    }
-    if (battleAudioRef.current) {
-      battleAudioRef.current.muted = isMuted;
-    }
-    localStorage.setItem('isMuted', String(isMuted));
-  }, [isMuted]);
-
-  // Appliquer le volume du menu
-  useEffect(() => {
-    if (menuAudioRef.current) {
-      menuAudioRef.current.volume = menuVolume;
-    }
-    localStorage.setItem('menuVolume', String(menuVolume));
-  }, [menuVolume]);
-
-  // Appliquer le volume du combat
-  useEffect(() => {
-    if (battleAudioRef.current) {
-      battleAudioRef.current.volume = battleVolume;
-    }
-    localStorage.setItem('battleVolume', String(battleVolume));
-  }, [battleVolume]);
 
   // Carrousel automatique des dieux (10 secondes)
   useEffect(() => {
@@ -126,21 +36,8 @@ export default function Home() {
   };
 
   const handleOptionsClick = () => {
-    setShowOptionsModal(true);
-  };
-
-  const closeOptionsModal = () => {
-    setShowOptionsModal(false);
-  };
-
-  const toggleMute = () => {
-    const newMuted = !isMuted;
-    setIsMuted(newMuted);
-
-    // Si on unmute, relancer la musique menu
-    if (!newMuted && menuAudioRef.current && hasInteracted) {
-      menuAudioRef.current.play().catch(console.log);
-    }
+    // Déclencher l'événement pour ouvrir le modal global
+    window.dispatchEvent(new Event('open-options'));
   };
 
   // Navigation vers le dieu précédent
@@ -325,94 +222,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Modal des Options */}
-      {showOptionsModal && (
-        <div className={styles.modalOverlay} onClick={closeOptionsModal}>
-          <div className={styles.optionsModal} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.closeModal} onClick={closeOptionsModal}>✕</button>
-            <h2>⚙️ Options</h2>
 
-            <div className={styles.optionsContent}>
-              {/* Section Audio */}
-              <div className={styles.optionsSection}>
-                <h3 className={styles.optionsSectionTitle}>
-                  <span>🔊</span> Audio
-                </h3>
-
-                {/* Bouton Mute global */}
-                <div className={styles.muteToggle}>
-                  <span>Musique</span>
-                  <button
-                    className={`${styles.toggleButton} ${!isMuted ? styles.toggleActive : ''}`}
-                    onClick={toggleMute}
-                  >
-                    {isMuted ? '🔇 Désactivée' : '🔊 Activée'}
-                  </button>
-                </div>
-
-                {/* Volume Menu */}
-                <div className={styles.volumeControl}>
-                  <label className={styles.volumeLabel}>
-                    <span className={styles.volumeIcon}>🎵</span>
-                    Musique Menu
-                  </label>
-                  <div className={styles.volumeSliderContainer}>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={menuVolume}
-                      onChange={(e) => setMenuVolume(parseFloat(e.target.value))}
-                      className={styles.volumeSlider}
-                    />
-                    <span className={styles.volumeValue}>{Math.round(menuVolume * 100)}%</span>
-                  </div>
-                </div>
-
-                {/* Volume Combat */}
-                <div className={styles.volumeControl}>
-                  <label className={styles.volumeLabel}>
-                    <span className={styles.volumeIcon}>⚔️</span>
-                    Musique Combat
-                  </label>
-                  <div className={styles.volumeSliderContainer}>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={battleVolume}
-                      onChange={(e) => setBattleVolume(parseFloat(e.target.value))}
-                      className={styles.volumeSlider}
-                    />
-                    <span className={styles.volumeValue}>{Math.round(battleVolume * 100)}%</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section Compte */}
-              <div className={styles.optionsSection}>
-                <h3 className={styles.optionsSectionTitle}>
-                  <span>👤</span> Compte
-                </h3>
-                <Link href="/profile" className={styles.optionLink} onClick={closeOptionsModal}>
-                  Gérer mon profil
-                </Link>
-              </div>
-
-              {/* Section À propos */}
-              <div className={styles.optionsSection}>
-                <h3 className={styles.optionsSectionTitle}>
-                  <span>ℹ️</span> À propos
-                </h3>
-                <p className={styles.versionText}>GODS - Série 1 • Version 0.24</p>
-                <p className={styles.creditsText}>Développé par Aseo & Drift</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Footer discret */}
       <footer className={styles.footer}>
