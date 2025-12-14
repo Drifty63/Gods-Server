@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { GodState } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
 import styles from './HealDistributionModal.module.css';
@@ -21,6 +22,12 @@ export default function HealDistributionModal({
     onCancel
 }: HealDistributionModalProps) {
     const [distribution, setDistribution] = useState<Record<string, number>>({});
+    const [mounted, setMounted] = useState(false);
+
+    // Attendre le montage côté client pour le portal
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Reset distribution when modal opens
     useEffect(() => {
@@ -33,7 +40,7 @@ export default function HealDistributionModal({
         }
     }, [isOpen, allies]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     const totalAssigned = Object.values(distribution).reduce((sum, val) => sum + val, 0);
     const remaining = totalHeal - totalAssigned;
@@ -65,7 +72,7 @@ export default function HealDistributionModal({
 
     const livingAllies = allies.filter(a => !a.isDead);
 
-    return (
+    const modalContent = (
         <div className={styles.overlay}>
             <div className={styles.modal}>
                 <h2 className={styles.title}>💚 Répartir les soins</h2>
@@ -147,4 +154,6 @@ export default function HealDistributionModal({
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }

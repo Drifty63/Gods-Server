@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { SpellCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
 import styles from './CardSelectionModal.module.css';
@@ -25,6 +26,12 @@ export default function CardSelectionModal({
     blindMode = false
 }: CardSelectionModalProps) {
     const [selectedCards, setSelectedCards] = useState<SpellCard[]>([]);
+    const [mounted, setMounted] = useState(false);
+
+    // Attendre le montage côté client pour le portal
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Reset selection when modal opens
     useEffect(() => {
@@ -33,7 +40,7 @@ export default function CardSelectionModal({
         }
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     const handleCardClick = (card: SpellCard) => {
         if (selectedCards.some(c => c.id === card.id)) {
@@ -59,7 +66,7 @@ export default function CardSelectionModal({
         return card.isHiddenFromOwner === true; // En mode blind : seules les cartes déjà révélées sont visibles
     };
 
-    return (
+    const modalContent = (
         <div className={styles.overlay}>
             <div className={styles.modal}>
                 <h2 className={styles.title}>{title}</h2>
@@ -136,4 +143,6 @@ export default function CardSelectionModal({
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }
