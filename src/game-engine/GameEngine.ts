@@ -189,6 +189,9 @@ export class GameEngine {
      * Termine le tour actuel
      */
     private endTurn(): { success: boolean; message: string } {
+        // Récupérer le joueur qui finit son tour (avant de changer)
+        const previousPlayer = this.getCurrentPlayer();
+
         // Passer au joueur suivant
         const currentIndex = this.state.players.findIndex(p => p.id === this.state.currentPlayerId);
         const nextIndex = (currentIndex + 1) % 2;
@@ -208,8 +211,9 @@ export class GameEngine {
         // Piocher pour le nouveau joueur actuel
         this.drawToHandLimit(this.getCurrentPlayer());
 
-        // Réduire la durée des effets temporaires
-        this.tickStatusEffects();
+        // Réduire la durée des effets temporaires pour le joueur qui vient de finir
+        // (les effets sont comptés en "tours du lanceur")
+        this.tickStatusEffects(previousPlayer);
 
         return { success: true, message: 'Tour terminé' };
     }
@@ -1104,6 +1108,20 @@ export class GameEngine {
                 }
                 break;
 
+            // ========================================
+            // ARTÉMIS - Appliquer une faiblesse
+            // ========================================
+            case 'apply_weakness':
+                // Applique une faiblesse temporaire de l'élément choisi à la cible
+                if (targetGodId && selectedElement) {
+                    const target = opponent.gods.find(g => g.card.id === targetGodId);
+                    if (target && !target.isDead) {
+                        // Ajouter la faiblesse temporaire
+                        target.temporaryWeakness = selectedElement;
+                    }
+                }
+                break;
+
             default:
                 console.warn(`Effet custom non implémenté: ${effectId}`);
                 break;
@@ -1140,9 +1158,12 @@ export class GameEngine {
     }
 
     /**
-     * Réduit la durée des effets temporaires à chaque tour
+     * Réduit la durée des effets temporaires pour un joueur donné
+     * Les effets temporaires ne sont réduits que quand le joueur qui les a lancés finit son tour
      */
-    private tickStatusEffects(): void {
+    private tickStatusEffects(casterPlayer: PlayerState): void {
+        // Réduire les effets sur les dieux de l'adversaire (effets lancés par casterPlayer sur lui)
+        // et sur les dieux du casterPlayer (auto-buffs)
         for (const player of this.state.players) {
             for (const god of player.gods) {
                 god.statusEffects = god.statusEffects.filter(effect => {
