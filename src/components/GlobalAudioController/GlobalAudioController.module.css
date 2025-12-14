@@ -1,8 +1,124 @@
-.muteButton {
+.audioControllerContainer {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.volumePanel {
+    background: linear-gradient(145deg, rgba(30, 30, 50, 0.95), rgba(20, 20, 40, 0.98));
+    border-radius: 16px;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.volumePanel.expanded {
+    max-height: 200px;
+    padding: 16px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.volumeGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.volumeGroup:last-child {
+    margin-bottom: 0;
+}
+
+.volumeLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.volumeIcon {
+    font-size: 1rem;
+}
+
+.volumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 150px;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(100, 100, 255, 0.3), rgba(150, 100, 255, 0.3));
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.volumeSlider:hover {
+    background: linear-gradient(90deg, rgba(100, 100, 255, 0.5), rgba(150, 100, 255, 0.5));
+}
+
+.volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #8b7fff, #6b5fff);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(100, 100, 255, 0.5);
+    transition: all 0.2s ease;
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(100, 100, 255, 0.7);
+}
+
+.volumeSlider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #8b7fff, #6b5fff);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(100, 100, 255, 0.5);
+    transition: all 0.2s ease;
+}
+
+.volumeSlider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(100, 100, 255, 0.7);
+}
+
+.volumeValue {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+    align-self: flex-end;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 8px;
+}
+
+.muteButton,
+.settingsButton {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -19,12 +135,18 @@
     justify-content: center;
 }
 
-.muteButton:hover {
+.muteButton:hover,
+.settingsButton:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(100, 100, 255, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.muteButton:active {
+.muteButton:active,
+.settingsButton:active {
     transform: scale(0.95);
+}
+
+.settingsButton {
+    font-size: 1.3rem;
 }

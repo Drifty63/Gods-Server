@@ -10,18 +10,32 @@ export default function GlobalAudioController() {
     const [currentTrack, setCurrentTrack] = useState<'menu' | 'battle' | 'none'>('none');
     const [isMuted, setIsMuted] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [menuVolume, setMenuVolume] = useState(0.3);
+    const [battleVolume, setBattleVolume] = useState(0.3);
 
     const gameState = useGameStore(state => state.gameState);
+
+    // Charger les volumes depuis localStorage au montage
+    useEffect(() => {
+        const savedMenuVolume = localStorage.getItem('menuVolume');
+        const savedBattleVolume = localStorage.getItem('battleVolume');
+        const savedMuted = localStorage.getItem('isMuted');
+        
+        if (savedMenuVolume) setMenuVolume(parseFloat(savedMenuVolume));
+        if (savedBattleVolume) setBattleVolume(parseFloat(savedBattleVolume));
+        if (savedMuted) setIsMuted(savedMuted === 'true');
+    }, []);
 
     // Initialiser les pistes audio une seule fois
     useEffect(() => {
         menuAudioRef.current = new Audio('/audio/menu_theme.mp3');
         menuAudioRef.current.loop = true;
-        menuAudioRef.current.volume = 0.3;
+        menuAudioRef.current.volume = menuVolume;
 
         battleAudioRef.current = new Audio('/audio/battle_theme.mp3');
         battleAudioRef.current.loop = true;
-        battleAudioRef.current.volume = 0.3;
+        battleAudioRef.current.volume = battleVolume;
 
         return () => {
             if (menuAudioRef.current) {
@@ -77,7 +91,24 @@ export default function GlobalAudioController() {
         if (battleAudioRef.current) {
             battleAudioRef.current.muted = isMuted;
         }
+        localStorage.setItem('isMuted', String(isMuted));
     }, [isMuted]);
+
+    // Appliquer le volume du menu
+    useEffect(() => {
+        if (menuAudioRef.current) {
+            menuAudioRef.current.volume = menuVolume;
+        }
+        localStorage.setItem('menuVolume', String(menuVolume));
+    }, [menuVolume]);
+
+    // Appliquer le volume du combat
+    useEffect(() => {
+        if (battleAudioRef.current) {
+            battleAudioRef.current.volume = battleVolume;
+        }
+        localStorage.setItem('battleVolume', String(battleVolume));
+    }, [battleVolume]);
 
     const playTrack = (track: 'menu' | 'battle') => {
         if (isMuted) {
@@ -121,13 +152,75 @@ export default function GlobalAudioController() {
         }
     };
 
+    const toggleExpanded = () => {
+        setIsExpanded(!isExpanded);
+    };
+
+    const handleMenuVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value);
+        setMenuVolume(value);
+    };
+
+    const handleBattleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value);
+        setBattleVolume(value);
+    };
+
     return (
-        <button
-            className={styles.muteButton}
-            onClick={toggleMute}
-            title={isMuted ? 'Activer la musique' : 'Couper la musique'}
-        >
-            {isMuted ? '🔇' : '🔊'}
-        </button>
+        <div className={styles.audioControllerContainer}>
+            {/* Panneau de volume */}
+            <div className={`${styles.volumePanel} ${isExpanded ? styles.expanded : ''}`}>
+                <div className={styles.volumeGroup}>
+                    <label className={styles.volumeLabel}>
+                        <span className={styles.volumeIcon}>🎵</span>
+                        <span>Menu</span>
+                    </label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={menuVolume}
+                        onChange={handleMenuVolumeChange}
+                        className={styles.volumeSlider}
+                    />
+                    <span className={styles.volumeValue}>{Math.round(menuVolume * 100)}%</span>
+                </div>
+                <div className={styles.volumeGroup}>
+                    <label className={styles.volumeLabel}>
+                        <span className={styles.volumeIcon}>⚔️</span>
+                        <span>Combat</span>
+                    </label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={battleVolume}
+                        onChange={handleBattleVolumeChange}
+                        className={styles.volumeSlider}
+                    />
+                    <span className={styles.volumeValue}>{Math.round(battleVolume * 100)}%</span>
+                </div>
+            </div>
+
+            {/* Boutons de contrôle */}
+            <div className={styles.buttonGroup}>
+                <button
+                    className={styles.settingsButton}
+                    onClick={toggleExpanded}
+                    title={isExpanded ? 'Fermer les réglages' : 'Réglages du volume'}
+                >
+                    {isExpanded ? '✕' : '⚙️'}
+                </button>
+                <button
+                    className={styles.muteButton}
+                    onClick={toggleMute}
+                    title={isMuted ? 'Activer la musique' : 'Couper la musique'}
+                >
+                    {isMuted ? '🔇' : '🔊'}
+                </button>
+            </div>
+        </div>
     );
 }
