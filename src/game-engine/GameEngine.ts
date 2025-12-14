@@ -364,15 +364,38 @@ export class GameEngine {
             }
 
             // Si pas de cible définie dans l'effet (ex: custom effect toggle), utiliser les cibles fournies
+            // IMPORTANT: Pour éviter les bugs quand les deux joueurs ont le même dieu,
+            // on cherche d'abord chez l'adversaire (cas le plus courant pour les sorts offensifs)
             if (targetGodIds && targetGodIds.length > 0) {
-                const allGods = [...player.gods, ...opponent.gods];
-                return allGods.filter(g => targetGodIds.includes(g.card.id) && !g.isDead);
+                // Priorité: chercher d'abord chez l'adversaire
+                const opponentTargets = opponent.gods.filter(g => targetGodIds.includes(g.card.id) && !g.isDead);
+                const playerTargets = player.gods.filter(g => targetGodIds.includes(g.card.id) && !g.isDead);
+
+                // Retourner les cibles ennemies correspondantes en priorité
+                // Si on en trouve le bon nombre, on les retourne
+                // Sinon on retourne tout ce qu'on a trouvé
+                if (opponentTargets.length >= targetGodIds.length) {
+                    return opponentTargets.slice(0, targetGodIds.length);
+                }
+                if (opponentTargets.length > 0 && playerTargets.length === 0) {
+                    return opponentTargets;
+                }
+                if (playerTargets.length > 0 && opponentTargets.length === 0) {
+                    return playerTargets;
+                }
+                // Cas mixte: prendre d'abord les ennemis puis compléter avec les alliés si nécessaire
+                return [...opponentTargets, ...playerTargets].slice(0, targetGodIds.length);
             }
 
             if (targetGodId) {
-                const allGods = [...player.gods, ...opponent.gods];
-                const target = allGods.find(g => g.card.id === targetGodId && !g.isDead);
-                return target ? [target] : [];
+                // Priorité: chercher d'abord chez l'adversaire
+                const opponentTarget = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                if (opponentTarget) return [opponentTarget];
+
+                const playerTarget = player.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                if (playerTarget) return [playerTarget];
+
+                return [];
             }
 
             return [];
@@ -458,16 +481,25 @@ export class GameEngine {
 
             case 'discard':
                 // Défaussement aléatoire de cartes de la main
-                const targetPlayer = targets.some(t => player.gods.includes(t)) ? player : opponent;
-                const count = effect.value || 1;
+                // Utiliser le target de l'effet pour déterminer qui défausse
+                let discardPlayer: typeof player;
+                if (effect.target === 'enemy_god' || effect.target === 'all_enemies') {
+                    discardPlayer = opponent;
+                } else if (effect.target === 'ally_god' || effect.target === 'all_allies' || effect.target === 'self') {
+                    discardPlayer = player;
+                } else {
+                    // Fallback à l'ancienne logique si pas de target défini
+                    discardPlayer = targets.some(t => player.gods.includes(t)) ? player : opponent;
+                }
+                const discardCount = effect.value || 1;
 
-                for (let i = 0; i < count; i++) {
-                    if (targetPlayer.hand.length > 0) {
+                for (let i = 0; i < discardCount; i++) {
+                    if (discardPlayer.hand.length > 0) {
                         // Choisir une carte aléatoire à défausser
-                        const randomIndex = Math.floor(Math.random() * targetPlayer.hand.length);
-                        const card = targetPlayer.hand[randomIndex];
-                        targetPlayer.hand.splice(randomIndex, 1);
-                        targetPlayer.discard.push(card);
+                        const randomIndex = Math.floor(Math.random() * discardPlayer.hand.length);
+                        const cardToDiscard = discardPlayer.hand[randomIndex];
+                        discardPlayer.hand.splice(randomIndex, 1);
+                        discardPlayer.discard.push(cardToDiscard);
                     }
                 }
                 break;
