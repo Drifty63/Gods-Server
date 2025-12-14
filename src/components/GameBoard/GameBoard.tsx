@@ -8,6 +8,7 @@ import GodCard from '@/components/GodCard/GodCard';
 import SpellCard from '@/components/SpellCard/SpellCard';
 import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionModal';
 import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
+import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
 import styles from './GameBoard.module.css';
 
 // Liste des éléments disponibles pour la sélection
@@ -162,6 +163,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const [pendingCardForEnemySelection, setPendingCardForEnemySelection] = useState<import('@/types/cards').SpellCard | null>(null);
     // Indique si l'utilisateur a cliqué sur "Jouer" (pour contrôler quand afficher le choix foudre)
     const [wantsToPlay, setWantsToPlay] = useState(false);
+    // Modal de détail de carte
+    const [showCardDetail, setShowCardDetail] = useState(false);
 
     // Effet pour ouvrir le modal de sélection après avoir joué une carte qui le nécessite
     useEffect(() => {
@@ -304,15 +307,28 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const handleCardClick = (card: typeof selectedCard) => {
         if (!isPlayerTurn || !card) return;
 
-        if (selectedCard?.id === card.id) {
-            // Déselectionner
-            selectCard(null);
-            setWantsToPlay(false);
-        } else {
-            // Sur mobile et PC: sélectionner la carte sans jouer automatiquement
-            // L'utilisateur doit utiliser le bouton "Jouer" ou "Défausser"
-            selectCard(card);
-            setWantsToPlay(false);
+        // Sélectionner la carte et ouvrir le modal de détails
+        selectCard(card);
+        setShowCardDetail(true);
+        setWantsToPlay(false);
+    };
+
+    // Fermer le modal de détails
+    const handleCloseCardDetail = () => {
+        setShowCardDetail(false);
+    };
+
+    // Jouer depuis le modal de détails
+    const handlePlayFromDetail = () => {
+        setShowCardDetail(false);
+        handlePlaySelectedCard();
+    };
+
+    // Défausser depuis le modal de détails  
+    const handleDiscardFromDetail = () => {
+        if (selectedCard) {
+            setShowCardDetail(false);
+            handleDiscard(selectedCard.id);
         }
     };
 
@@ -859,6 +875,17 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 onConfirm={(cards) => handleConfirmEnemyCardSelection(cards.map(c => c.id))}
                 onCancel={cancelEnemyCardSelection}
                 blindMode={true}
+            />
+
+            {/* Modal de détail de carte */}
+            <CardDetailModal
+                card={selectedCard}
+                isOpen={showCardDetail}
+                onClose={handleCloseCardDetail}
+                onPlay={handlePlayFromDetail}
+                onDiscard={handleDiscardFromDetail}
+                canPlay={selectedCard ? canPlayCard(selectedCard) : false}
+                canDiscard={isPlayerTurn && !player.hasPlayedCard}
             />
         </div>
     );
