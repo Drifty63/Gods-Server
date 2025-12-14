@@ -9,21 +9,51 @@
     /* Dynamic viewport height pour mobile (évite la barre d'adresse) */
     max-height: 100vh;
     max-height: 100dvh;
-    background:
-        /* Overlay sombre */
-        linear-gradient(180deg,
-            rgba(10, 10, 26, 0.95) 0%,
-            rgba(26, 26, 58, 0.9) 50%,
-            rgba(10, 10, 26, 0.95) 100%),
-        /* Texture de fond */
-        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
+    background-color: #0a0a1a;
     display: flex;
     flex-direction: column;
     padding: 10px;
     gap: 6px;
     overflow: hidden;
     box-sizing: border-box;
+}
+
+/* Image d'arène en arrière-plan avec rotation */
+.board::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/arena_background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: rotate(90deg) scale(1.5);
+    opacity: 0.6;
+    z-index: 0;
+}
+
+/* Overlay sombre pour contraste */
+.board::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg,
+            rgba(10, 10, 26, 0.7) 0%,
+            rgba(26, 26, 58, 0.5) 50%,
+            rgba(10, 10, 26, 0.7) 100%);
+    z-index: 0;
+}
+
+/* S'assurer que le contenu est au-dessus */
+.board>* {
+    position: relative;
+    z-index: 1;
 }
 
 /* ================================
