@@ -454,9 +454,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const cardsToDraw = Math.min(selectedCardIds.length, opponent.deck.length);
         for (let i = 0; i < cardsToDraw; i++) {
             if (opponent.deck.length > 0) {
-                const drawnCard = opponent.deck.shift()!;
-                drawnCard.isHiddenFromOwner = true; // Carte visible pour nous
-                drawnCard.revealedToPlayerId = playerId; // On stocke l'ID du joueur qui peut voir
+                const originalCard = opponent.deck.shift()!;
+                const drawnCard = {
+                    ...originalCard,
+                    isHiddenFromOwner: true,
+                    revealedToPlayerId: playerId
+                };
                 opponent.hand.push(drawnCard);
             }
         }

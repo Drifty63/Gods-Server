@@ -148,6 +148,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     } | null => {
         for (const effect of card.effects) {
             if (effect.type === 'custom') {
+                if (effect.customEffectId === 'shuffle_hand_draw_blind') {
+                    return {
+                        needed: true,
+                        count: 1,
+                        title: '👁️ Choisissez 1 carte de l\'adversaire à mélanger',
+                        effectId: 'shuffle_hand_draw_blind'
+                    };
+                }
                 if (effect.customEffectId === 'shuffle_hand_draw_blind_2') {
                     return {
                         needed: true,

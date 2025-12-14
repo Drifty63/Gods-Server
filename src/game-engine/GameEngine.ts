@@ -961,28 +961,6 @@ export class GameEngine {
             // NYX - Effets de manipulation de main
             // ========================================
             case 'shuffle_hand_draw_blind':
-                // Mélange 1 carte adverse aléatoire dans son deck, l'adversaire pioche 1
-                if (opponent.hand.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * opponent.hand.length);
-                    const cardToShuffle = opponent.hand.splice(randomIndex, 1)[0];
-                    opponent.deck.push(cardToShuffle);
-                    opponent.deck = this.shuffleArray(opponent.deck);
-                    // L'adversaire pioche 1 carte
-                    if (opponent.deck.length > 0) {
-                        const originalCard = opponent.deck.shift()!;
-                        // Créer une copie de l'instance pour ne pas modifier le template global
-                        // et marquer la carte comme cachée pour son propriétaire (blind mode)
-                        // mais visible par celui qui a lancé le sort (Nyx)
-                        const drawnCard = {
-                            ...originalCard,
-                            isHiddenFromOwner: true,
-                            revealedToPlayerId: player.id
-                        };
-                        opponent.hand.push(drawnCard);
-                    }
-                }
-                break;
-
             case 'shuffle_hand_draw_blind_2':
                 // Effet entièrement géré par le store via CardSelectionModal
                 // Le joueur (Nyx) choisit les cartes adverses à mélanger
