@@ -263,9 +263,11 @@ io.on('connection', (socket) => {
         let isHost = false;
         if (game.hostName === data.playerName) {
             game.hostSocket = socket.id;
+            game.hostDisconnected = false;  // Marquer comme reconnecté
             isHost = true;
         } else if (game.guestName === data.playerName) {
             game.guestSocket = socket.id;
+            game.guestDisconnected = false;  // Marquer comme reconnecté
         } else {
             socket.emit('error', { message: 'Joueur non trouvé dans cette partie' });
             return;
@@ -282,7 +284,7 @@ io.on('connection', (socket) => {
         });
 
         socket.to(data.gameId).emit('opponent_reconnected');
-        console.log(`${data.playerName} reconnecté à la partie ${data.gameId}`);
+        console.log(`${data.playerName} reconnecté à la partie ${data.gameId}`)
     });
 
     // =====================================
@@ -301,18 +303,41 @@ io.on('connection', (socket) => {
         if (gameId) {
             const game = games.get(gameId);
             if (game) {
+                // Marquer le joueur comme déconnecté dans la partie
+                const isHost = game.hostSocket === socket.id;
+                if (isHost) {
+                    game.hostDisconnected = true;
+                    game.hostDisconnectedAt = Date.now();
+                } else {
+                    game.guestDisconnected = true;
+                    game.guestDisconnectedAt = Date.now();
+                }
+
                 socket.to(gameId).emit('player_disconnected');
 
-                // Supprimer la partie après un délai (5 minutes pour permettre la reconnection)
+                // Supprimer la partie après un délai SEULEMENT si les deux joueurs sont déconnectés
+                // ou si un seul joueur reste déconnecté après 5 minutes
                 setTimeout(() => {
                     const currentGame = games.get(gameId);
-                    if (currentGame && currentGame.status !== 'finished') {
-                        games.delete(gameId);
-                        console.log(`Partie ${gameId} supprimée (timeout après déconnexion)`);
+                    if (!currentGame) return; // Déjà supprimée
+
+                    // Vérifier si le joueur est toujours déconnecté
+                    const stillDisconnected = isHost ? currentGame.hostDisconnected : currentGame.guestDisconnected;
+
+                    if (stillDisconnected && currentGame.status !== 'finished') {
+                        // Si les DEUX joueurs sont déconnectés, supprimer
+                        if (currentGame.hostDisconnected && currentGame.guestDisconnected) {
+                            games.delete(gameId);
+                            console.log(`Partie ${gameId} supprimée (les deux joueurs déconnectés depuis 5min)`);
+                        } else {
+                            // Si un seul joueur reste déconnecté après 5min, considérer comme abandon
+                            games.delete(gameId);
+                            console.log(`Partie ${gameId} supprimée (joueur ${isHost ? 'host' : 'guest'} déconnecté trop longtemps)`);
+                        }
                     }
                 }, 300000); // 5 minutes
             }
-            playerSockets.delete(socket.id);
+            // NE PAS supprimer playerSockets ici - on le fait dans rejoin ou leave
         }
 
         console.log(`Joueur déconnecté: ${socket.id}`);
