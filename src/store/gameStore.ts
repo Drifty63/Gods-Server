@@ -377,11 +377,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     confirmHealDistribution: (distribution) => {
-        const { engine, playerId } = get();
+        const { engine, playerId, healDistributionTotal } = get();
         if (!engine) return;
 
         const player = engine.getState().players.find(p => p.id === playerId);
         if (!player) return;
+
+        // Valider que le total distribué ne dépasse pas le total autorisé
+        const totalDistributed = distribution.reduce((sum, d) => sum + d.amount, 0);
+        if (totalDistributed > healDistributionTotal) {
+            console.warn(`Heal distribution exceeds allowed total: ${totalDistributed} > ${healDistributionTotal}`);
+            return; // Rejeter la distribution invalide
+        }
 
         // Appliquer les soins à chaque dieu selon la distribution
         for (const { godId, amount } of distribution) {

@@ -46,12 +46,16 @@ export default function HealDistributionModal({
     const remaining = totalHeal - totalAssigned;
 
     const handleIncrement = (godId: string) => {
-        if (remaining > 0) {
-            setDistribution(prev => ({
+        setDistribution(prev => {
+            // Recalculer le remaining avec le state le plus récent
+            const currentTotal = Object.values(prev).reduce((sum, val) => sum + val, 0);
+            const currentRemaining = totalHeal - currentTotal;
+            if (currentRemaining <= 0) return prev; // Ne rien faire si plus de soins disponibles
+            return {
                 ...prev,
                 [godId]: (prev[godId] || 0) + 1
-            }));
-        }
+            };
+        });
     };
 
     const handleDecrement = (godId: string) => {
