@@ -361,6 +361,17 @@ export class GameEngine {
                             return deadTarget ? [deadTarget] : [];
                         }
                         return [];
+                    case 'any_god':
+                        // Pour any_god, chercher d'abord chez le JOUEUR (alliés) pour les heals
+                        // puis chez l'adversaire si pas trouvé
+                        // Cela évite le bug en match miroir où on soignerait l'ennemi
+                        if (targetGodId) {
+                            const allyTarget = player.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                            if (allyTarget) return [allyTarget];
+                            const enemyTarget = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                            if (enemyTarget) return [enemyTarget];
+                        }
+                        return [];
                 }
             }
 
