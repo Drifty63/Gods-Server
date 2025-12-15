@@ -540,9 +540,9 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 1, target: 'enemy_god' },
+            { type: 'status', status: 'poison', value: 1 }, // S'applique à la même cible
             { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 1, target: 'enemy_god' }
+            { type: 'status', status: 'poison', value: 1 }  // S'applique à la même cible
         ],
         imageUrl: '/cards/spells/spell_dionysos_ivresse.png',
         description: '1🩸 +1💀 → ⚔️⚔️',
@@ -559,7 +559,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 2, target: 'enemy_god' }
+            { type: 'status', status: 'poison', value: 2 } // S'applique à la même cible
         ],
         imageUrl: '/cards/spells/spell_dionysos_folie.png',
         description: '2🩸 +2💀 → ⚔️',
