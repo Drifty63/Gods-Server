@@ -421,14 +421,14 @@ export class GameEngine {
                     // Vérifier si la cible a l'immunité aux faiblesses
                     const hasWeaknessImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
                     // Utiliser la faiblesse temporaire si elle existe, sinon la faiblesse naturelle
-                    // Si immunité, utiliser l'élément d'attaque comme "faiblesse" pour éviter le bonus
+                    // Si immunité, passer undefined pour éviter tout bonus de faiblesse
                     const weakness = hasWeaknessImmunity
-                        ? card.element  // Pas de bonus (même élément = multiplicateur 1)
+                        ? undefined  // Pas de faiblesse = pas de bonus (multiplicateur 1)
                         : (target.temporaryWeakness || target.card.weakness);
                     const { damage, isWeakness } = calculateDamage(
                         effect.value || 0,
                         card.element,
-                        weakness
+                        weakness as any  // undefined sera différent de card.element donc pas de bonus
                     );
 
                     let damageToInflict = damage;
@@ -675,10 +675,10 @@ export class GameEngine {
                         // Vérifier si le dieu a l'immunité aux faiblesses
                         const hasWeaknessImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
                         const weakness = hasWeaknessImmunity
-                            ? card.element
+                            ? undefined  // Pas de faiblesse = pas de bonus
                             : (target.temporaryWeakness || target.card.weakness);
                         // Calculer les dégâts réels (base 3 pour Syphon d'âme)
-                        const { damage } = calculateDamage(3, card.element, weakness);
+                        const { damage } = calculateDamage(3, card.element, weakness as any);
 
                         // 1. Retirer le poison (min entre heal et stacks de poison)
                         const poisonIndex = castingGod.statusEffects.findIndex(s => s.type === 'poison');
