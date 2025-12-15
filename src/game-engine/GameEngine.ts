@@ -986,20 +986,20 @@ export class GameEngine {
             // ========================================
             case 'remove_weakness_1_turn':
                 // Retire la faiblesse d'un allié pendant 1 tour
+                // Durée 2 car tick immédiat à la fin du tour de lancement
                 for (const target of targets) {
                     if (player.gods.includes(target) && !target.isDead) {
-                        // Sauvegarder la faiblesse naturelle et la remplacer temporairement par "none"
-                        // On utilise un status effect spécial pour tracker ça
-                        this.addStatus(target, 'weakness_immunity', 1, 1);
+                        this.addStatus(target, 'weakness_immunity', 1, 2);
                     }
                 }
                 break;
 
             case 'remove_all_weakness_3_turns':
                 // Tous les alliés perdent leur faiblesse pendant 3 tours
+                // Durée 4 car tick immédiat à la fin du tour de lancement
                 for (const god of player.gods) {
                     if (!god.isDead) {
-                        this.addStatus(god, 'weakness_immunity', 1, 3);
+                        this.addStatus(god, 'weakness_immunity', 1, 4);
                     }
                 }
                 break;
