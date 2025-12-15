@@ -6,7 +6,7 @@ services:
     name: gods-game-server
     env: node
     plan: free
-    buildCommand: npm install socket.io
+    buildCommand: npm install
     startCommand: node server-online.js
     healthCheckPath: /health
     envVars:
