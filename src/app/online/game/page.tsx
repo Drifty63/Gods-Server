@@ -15,6 +15,8 @@ export default function OnlineGamePage() {
         lastAction,
         syncedState,
         opponentDisconnected,
+        error,
+        clearError,
         sendAction,
         syncState,
         clearLastAction,
@@ -174,6 +176,27 @@ export default function OnlineGamePage() {
         router.push('/online');
     };
 
+    // Overlay d'erreur (partie introuvable après reconnection)
+    if (error && error.includes('introuvable')) {
+        return (
+            <div className={styles.disconnectedOverlay}>
+                <div className={styles.disconnectedModal}>
+                    <h2>❌ Partie introuvable</h2>
+                    <p>La partie a expiré ou n'existe plus.</p>
+                    <p style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '1rem' }}>
+                        Cela peut arriver si la déconnexion a duré trop longtemps.
+                    </p>
+                    <button onClick={() => {
+                        clearError();
+                        handleLeaveGame();
+                    }}>
+                        Retour au lobby
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     // Overlay de reconnection (micro-déconnexion)
     if (isReconnecting) {
         return (
@@ -181,11 +204,11 @@ export default function OnlineGamePage() {
                 <div className={styles.disconnectedModal}>
                     <div className={styles.spinner}></div>
                     <h2>🔄 Reconnection en cours...</h2>
-                    <p>Tentative {reconnectAttempts}/10</p>
+                    <p>Tentative {reconnectAttempts}/20</p>
                     <p style={{ fontSize: '0.8em', opacity: 0.7 }}>
                         Votre partie sera restaurée automatiquement
                     </p>
-                    {reconnectAttempts >= 5 && (
+                    {reconnectAttempts >= 10 && (
                         <button onClick={handleLeaveGame} style={{ marginTop: '1rem' }}>
                             Abandonner et quitter
                         </button>
