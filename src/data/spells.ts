@@ -589,7 +589,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 1,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'heal_by_poison', description: 'Soigne un personnage du nombre total de poisons sur les ennemis' }
+            { type: 'custom', customEffectId: 'heal_by_poison', target: 'ally_god', description: 'Soigne un personnage du nombre total de poisons sur les ennemis' }
         ],
         imageUrl: '/cards/spells/spell_dionysos_ambroisie.png',
         description: '💀🔗💚 → 👤',

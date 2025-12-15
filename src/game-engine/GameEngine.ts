@@ -628,6 +628,18 @@ export class GameEngine {
                 }
                 if (totalPoisonStacks > 0 && targets.length > 0) {
                     const healTarget = targets[0];
+
+                    // 1. Retirer le poison du dieu soigné (min entre heal et stacks de poison)
+                    const poisonIndex = healTarget.statusEffects.findIndex(s => s.type === 'poison');
+                    if (poisonIndex !== -1) {
+                        const poisonToRemove = Math.min(totalPoisonStacks, healTarget.statusEffects[poisonIndex].stacks);
+                        healTarget.statusEffects[poisonIndex].stacks -= poisonToRemove;
+                        if (healTarget.statusEffects[poisonIndex].stacks <= 0) {
+                            healTarget.statusEffects.splice(poisonIndex, 1);
+                        }
+                    }
+
+                    // 2. Soigner
                     healTarget.currentHealth = Math.min(
                         healTarget.currentHealth + totalPoisonStacks,
                         healTarget.card.maxHealth
