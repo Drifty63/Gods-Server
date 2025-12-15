@@ -68,6 +68,204 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
         ];
     }
 
+    // Spécifique pour Zeus - Cartes Officielles
+    if (god.id === 'zeus') {
+        return [
+            {
+                id: 'zeus_s1',
+                name: 'Foudre Conductrice',
+                element: 'lightning',
+                godId: 'zeus',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Dégâts et Marque" }],
+                imageUrl: '/cards/spells/zeus/conductive_lightning.png',
+                description: "Inflige 1 dégâts à deux cibles et leurs applique 1 marque de foudre."
+            },
+            {
+                id: 'zeus_s2',
+                name: "Chaîne d'éclair",
+                element: 'lightning',
+                godId: 'zeus',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Multi-cible et Explosion Marque" }],
+                imageUrl: '/cards/spells/zeus/chain_lightning.png',
+                description: "Inflige 2 dégâts à 2 cibles. Applique ou enlève ⚡. Inflige 2 dégâts par ⚡ enlevée."
+            },
+            {
+                id: 'zeus_s3',
+                name: 'Éclair de Zeus',
+                element: 'lightning',
+                godId: 'zeus',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 3 }],
+                imageUrl: '/cards/spells/zeus/zeus_bolt.png',
+                description: "Inflige 3 dégâts à une cible."
+            },
+            {
+                id: 'zeus_s4',
+                name: 'Éclair foudroyant',
+                element: 'lightning',
+                godId: 'zeus',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 5 }, { type: 'custom', description: "Explosion Marque" }],
+                imageUrl: '/cards/spells/zeus/lightning_bolt.png',
+                description: "Inflige 5 dégâts à une cible. Applique ou enlève ⚡. Inflige 2 dégâts par ⚡ enlevée."
+            },
+            {
+                id: 'zeus_s5',
+                name: 'Foudroiement',
+                element: 'lightning',
+                godId: 'zeus',
+                type: 'competence',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 3, target: 'all_enemies' }, { type: 'custom', description: "AOE et Explosion Marque" }],
+                imageUrl: '/cards/spells/zeus/thunderstruck.png',
+                description: "Inflige 3 dégâts à toutes les cibles. Applique ou enlève ⚡. Inflige 2 dégâts par ⚡ enlevée."
+            }
+        ];
+    }
+
+    // Spécifique pour Nyx - Cartes Officielles
+    if (god.id === 'nyx') {
+        return [
+            {
+                id: 'nyx_s1',
+                name: 'Ombres dévorantes',
+                element: 'darkness',
+                godId: 'nyx',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Dégâts et Perturbation Main" }],
+                imageUrl: '/cards/spells/nyx/devouring_shadows.png',
+                description: "Inflige 2 dégâts à une cible, mélangez une carte de la main de votre adversaire dans son deck et piochez 1 à l'envers."
+            },
+            {
+                id: 'nyx_s2',
+                name: "Prophétie",
+                element: 'darkness',
+                godId: 'nyx',
+                type: 'utility',
+                energyCost: 1,
+                energyGain: 1,
+                effects: [{ type: 'custom', description: "Manipulation Deck et Gain Energie" }],
+                imageUrl: '/cards/spells/nyx/prophecy.png',
+                description: "Piochez 3 cartes du dessus de votre deck et placez 3 cartes en dessous, gagne 1 d'énergie."
+            },
+            {
+                id: 'nyx_s3',
+                name: 'Zone de vide',
+                element: 'darkness',
+                godId: 'nyx',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 1, target: 'all_enemies' }],
+                imageUrl: '/cards/spells/nyx/void_zone.png',
+                description: "Inflige 1 dégâts à toutes les cibles."
+            },
+            {
+                id: 'nyx_s4',
+                name: 'Nuit Sans Fin',
+                element: 'darkness',
+                godId: 'nyx',
+                type: 'competence',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Reset Main Adversaire" }],
+                imageUrl: '/cards/spells/nyx/endless_night.png',
+                description: "L'adversaire mélange sa main dans son deck et pioche 5 cartes à l'envers"
+            },
+            {
+                id: 'nyx_s5',
+                name: 'Malédiction',
+                element: 'darkness',
+                godId: 'nyx',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 3 }, { type: 'custom', description: "Perturbation Ciblée" }],
+                imageUrl: '/cards/spells/nyx/curse.png',
+                description: "Inflige 3 dégâts à une cible; Choisissez 2 cartes de la main de votre adversaire, les mélange dans son deck et pioche 2 à l'envers."
+            }
+        ];
+    }
+
+    // Spécifique pour Hestia - Cartes Officielles
+    if (god.id === 'hestia') {
+        return [
+            {
+                id: 'hestia_s1',
+                name: 'Repos mérité',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'utility',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Recyclage Défausse" }],
+                imageUrl: '/cards/spells/hestia/deserved_rest.png',
+                description: "Choisissez deux cartes dans votre défausse, faite les revenir dans votre deck puis mélangez le."
+            },
+            {
+                id: 'hestia_s2',
+                name: 'Foyer protecteur',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'utility',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Purification Faiblesses Global" }],
+                imageUrl: '/cards/spells/hestia/protective_hearth.png',
+                description: "Tout les alliées perdent leurs faiblesses pendant 3 tours."
+            },
+            {
+                id: 'hestia_s3',
+                name: 'Repas reconfortant',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'utility',
+                energyCost: 1, // Supposition basée sur l'icone gauche "1"
+                energyGain: 2,
+                effects: [{ type: 'heal', value: 0 }, { type: 'energy', value: 2 }], // Heal dynamique
+                imageUrl: '/cards/spells/hestia/comfort_meal.png',
+                description: "Donne 2 énergies et soigne un allié de la valeur total de votre énergie."
+            },
+            {
+                id: 'hestia_s4',
+                name: 'Flammes intérieur',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 3 }],
+                imageUrl: '/cards/spells/hestia/inner_flames.png',
+                description: "Inflige 3 dégâts à une cible."
+            },
+            {
+                id: 'hestia_s5',
+                name: 'Fumée cendrée',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 1, target: 'all_enemies' }, { type: 'custom', description: "Purification Ciblée" }],
+                imageUrl: '/cards/spells/hestia/ash_smoke.png',
+                description: "Inflige 1 dégâts à toutes les cibles et fait perdre la faiblesse d'un de vos dieux pendant 1 tour."
+            }
+        ];
+    }
+
     const spells: SpellCard[] = [
         // Carte 1 : Générateur d'énergie (Coût 0)
         {
