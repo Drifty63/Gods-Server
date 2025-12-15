@@ -444,7 +444,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     // Cliquer sur une carte cachée → affiche le menu de choix
     const handleBlindCardClick = (card: typeof selectedCard) => {
-        if (!card || !isPlayerTurn) return;
+        // Ne pas permettre si le joueur a déjà défaussé pour de l'énergie (son tour est "utilisé")
+        if (!card || !isPlayerTurn || player.hasDiscardedForEnergy) return;
         setSelectedBlindCard(card);
     };
 
@@ -888,17 +889,17 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 // Carte cachée par effet Nyx - le joueur ne la voit pas
                                 <div
                                     key={card.id}
-                                    className={`${styles.cardBack} ${styles.blindCard} ${isPlayerTurn ? styles.blindClickable : ''}`}
-                                    onClick={() => isPlayerTurn && handleBlindCardClick(card)}
+                                    className={`${styles.cardBack} ${styles.blindCard} ${isPlayerTurn && !player.hasDiscardedForEnergy ? styles.blindClickable : ''}`}
+                                    onClick={() => isPlayerTurn && !player.hasDiscardedForEnergy && handleBlindCardClick(card)}
                                     onContextMenu={(e) => {
                                         e.preventDefault();
-                                        if (isPlayerTurn) handleBlindDiscard(card.id);
+                                        if (isPlayerTurn && !player.hasDiscardedForEnergy) handleBlindDiscard(card.id);
                                     }}
-                                    title="Carte inconnue (effet Nyx) - Clic gauche = Jouer à l'aveugle • Clic droit = Défausser"
+                                    title={player.hasDiscardedForEnergy ? "Vous avez déjà utilisé votre action ce tour" : "Carte inconnue (effet Nyx) - Clic gauche = Jouer à l'aveugle • Clic droit = Défausser"}
                                 >
                                     <span className={styles.cardBackIcon}>❓</span>
                                     <span className={styles.cardBackNumber}>{index + 1}</span>
-                                    {isPlayerTurn && (
+                                    {isPlayerTurn && !player.hasDiscardedForEnergy && (
                                         <span className={styles.blindPlayable}>⚠️</span>
                                     )}
                                 </div>
