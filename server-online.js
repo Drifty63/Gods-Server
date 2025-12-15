@@ -1,31 +1,188 @@
 // Serveur Socket.IO pour GODS - Mode En Ligne
 // Ce serveur est conçu pour être déployé séparément (Render, Railway, Fly.io, etc.)
+// Avec validation des actions et persistance Firebase
 
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const admin = require('firebase-admin');
+const path = require('path');
 
 const port = process.env.PORT || 3001;
 
-// Stockage des parties en cours
-const games = new Map();
-const playerSockets = new Map();
+// =====================================
+// FIREBASE ADMIN SDK - Initialisation
+// =====================================
+
+let db = null;
+let firebaseEnabled = false;
+
+try {
+    // Essayer de charger les credentials depuis un fichier local (dev)
+    // ou depuis les variables d'environnement (prod sur Render)
+    let serviceAccount;
+
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        // En production : credentials depuis variable d'environnement
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        console.log('📦 Firebase: Credentials chargées depuis variable d\'environnement');
+    } else {
+        // En développement : credentials depuis fichier local
+        const keyPath = path.join(__dirname, 'firebase-admin-key.json');
+        serviceAccount = require(keyPath);
+        console.log('📦 Firebase: Credentials chargées depuis fichier local');
+    }
+
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id
+    });
+
+    db = admin.firestore();
+    firebaseEnabled = true;
+    console.log('✅ Firebase Admin SDK initialisé avec succès');
+} catch (error) {
+    console.warn('⚠️ Firebase non configuré:', error.message);
+    console.warn('🔄 Le serveur fonctionnera sans persistance');
+}
+
+// =====================================
+// STOCKAGE (mémoire + Firebase)
+// =====================================
+
+const games = new Map();           // Cache mémoire pour les parties actives
+const playerSockets = new Map();   // socket.id -> gameId
 const matchmakingQueue = [];
 
+// =====================================
+// HELPERS FIREBASE
+// =====================================
+
+async function saveGameToFirebase(game) {
+    if (!firebaseEnabled || !db) return;
+
+    try {
+        await db.collection('games').doc(game.id).set({
+            ...game,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    } catch (error) {
+        console.error('Erreur sauvegarde Firebase:', error.message);
+    }
+}
+
+async function loadGameFromFirebase(gameId) {
+    if (!firebaseEnabled || !db) return null;
+
+    try {
+        const doc = await db.collection('games').doc(gameId).get();
+        if (doc.exists) {
+            return doc.data();
+        }
+    } catch (error) {
+        console.error('Erreur chargement Firebase:', error.message);
+    }
+    return null;
+}
+
+async function deleteGameFromFirebase(gameId) {
+    if (!firebaseEnabled || !db) return;
+
+    try {
+        await db.collection('games').doc(gameId).delete();
+    } catch (error) {
+        console.error('Erreur suppression Firebase:', error.message);
+    }
+}
+
+// =====================================
+// VALIDATION DES ACTIONS
+// =====================================
+
+/**
+ * Valide une action de jeu côté serveur
+ * Retourne { valid: true, newState: ... } ou { valid: false, reason: ... }
+ */
+function validateGameAction(game, action, socketId) {
+    if (!game || !game.gameState) {
+        return { valid: false, reason: 'Partie non trouvée ou pas encore démarrée' };
+    }
+
+    const gameState = game.gameState;
+    const isHost = game.hostSocket === socketId;
+    const playerId = isHost ? gameState.players[0].id : gameState.players[1].id;
+
+    // Vérifier que c'est bien le tour du joueur
+    if (gameState.currentPlayerId !== playerId) {
+        return { valid: false, reason: 'Ce n\'est pas votre tour' };
+    }
+
+    // Vérifications spécifiques selon le type d'action
+    switch (action.type) {
+        case 'play_card': {
+            const player = gameState.players.find(p => p.id === playerId);
+            if (!player) return { valid: false, reason: 'Joueur introuvable' };
+
+            // Vérifier que la carte existe dans la main
+            const card = player.hand.find(c => c.id === action.payload.cardId);
+            if (!card) return { valid: false, reason: 'Carte introuvable dans votre main' };
+
+            // Vérifier l'énergie
+            if (player.energy < card.energyCost) {
+                return { valid: false, reason: 'Pas assez d\'énergie' };
+            }
+
+            // Vérifier si déjà joué une carte
+            if (player.hasPlayedCard) {
+                return { valid: false, reason: 'Vous avez déjà joué une carte ce tour' };
+            }
+
+            break;
+        }
+
+        case 'discard': {
+            const player = gameState.players.find(p => p.id === playerId);
+            if (!player) return { valid: false, reason: 'Joueur introuvable' };
+
+            // Vérifier que la carte existe
+            const card = player.hand.find(c => c.id === action.payload.cardId);
+            if (!card) return { valid: false, reason: 'Carte introuvable' };
+
+            break;
+        }
+
+        case 'end_turn': {
+            // Toujours valide si c'est notre tour
+            break;
+        }
+
+        default:
+            // Les autres actions (select_target, etc.) sont acceptées
+            break;
+    }
+
+    return { valid: true };
+}
+
+// =====================================
+// SERVEUR HTTP + SOCKET.IO
+// =====================================
+
 const httpServer = createServer((req, res) => {
-    // Simple health check endpoint
+    // Health check endpoint
     if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             status: 'ok',
             games: games.size,
             players: playerSockets.size,
-            queue: matchmakingQueue.length
+            queue: matchmakingQueue.length,
+            firebase: firebaseEnabled
         }));
         return;
     }
 
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('GODS Game Server');
+    res.end('GODS Game Server v2.0 - With Firebase & Validation');
 });
 
 const io = new Server(httpServer, {
@@ -49,7 +206,6 @@ function tryMatchmaking() {
 
         // Vérifier que les deux joueurs sont encore connectés
         if (!player1.socket.connected || !player2.socket.connected) {
-            // Remettre les joueurs connectés dans la queue
             if (player1.socket.connected) matchmakingQueue.unshift(player1);
             if (player2.socket.connected) matchmakingQueue.unshift(player2);
             continue;
@@ -65,9 +221,11 @@ function tryMatchmaking() {
             guestName: player2.playerName,
             hostGods: null,
             guestGods: null,
-            status: 'selecting', // Passe directement à la sélection
+            status: 'selecting',
             gameState: null,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            hostDisconnected: false,
+            guestDisconnected: false
         };
 
         games.set(gameId, game);
@@ -89,6 +247,9 @@ function tryMatchmaking() {
             opponentName: player1.playerName
         });
 
+        // Sauvegarder dans Firebase
+        saveGameToFirebase(game);
+
         console.log(`Match trouvé: ${player1.playerName} vs ${player2.playerName} (${gameId})`);
     }
 }
@@ -101,14 +262,12 @@ io.on('connection', (socket) => {
     // =====================================
 
     socket.on('join_queue', (data) => {
-        // Vérifier si le joueur n'est pas déjà dans la queue
         const existingIndex = matchmakingQueue.findIndex(p => p.socket.id === socket.id);
         if (existingIndex !== -1) {
             socket.emit('queue_status', { position: existingIndex + 1, total: matchmakingQueue.length });
             return;
         }
 
-        // Ajouter à la file d'attente
         matchmakingQueue.push({
             socket,
             playerName: data.playerName,
@@ -123,7 +282,6 @@ io.on('connection', (socket) => {
             total: matchmakingQueue.length
         });
 
-        // Tenter un match
         tryMatchmaking();
     });
 
@@ -153,24 +311,46 @@ io.on('connection', (socket) => {
             status: 'waiting',
             gameState: null,
             isPrivate: true,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            hostDisconnected: false,
+            guestDisconnected: false
         };
 
         games.set(gameId, game);
         playerSockets.set(socket.id, gameId);
         socket.join(gameId);
 
+        saveGameToFirebase(game);
+
         socket.emit('game_created', { gameId, isHost: true });
         console.log(`Partie privée créée: ${gameId} par ${data.playerName}`);
     });
 
     socket.on('join_private_game', (data) => {
-        const game = games.get(data.gameId);
+        let game = games.get(data.gameId);
+
+        // Si pas en mémoire, essayer de charger depuis Firebase
+        if (!game && firebaseEnabled) {
+            loadGameFromFirebase(data.gameId).then(firebaseGame => {
+                if (firebaseGame) {
+                    games.set(data.gameId, firebaseGame);
+                    handleJoinPrivate(socket, data, firebaseGame);
+                } else {
+                    socket.emit('error', { message: 'Partie introuvable' });
+                }
+            });
+            return;
+        }
+
         if (!game) {
             socket.emit('error', { message: 'Partie introuvable' });
             return;
         }
 
+        handleJoinPrivate(socket, data, game);
+    });
+
+    function handleJoinPrivate(socket, data, game) {
         if (game.status !== 'waiting') {
             socket.emit('error', { message: 'Cette partie a déjà commencé' });
             return;
@@ -189,8 +369,10 @@ io.on('connection', (socket) => {
             status: 'selecting'
         });
 
+        saveGameToFirebase(game);
+
         console.log(`${data.playerName} a rejoint la partie privée ${data.gameId}`);
-    });
+    }
 
     // =====================================
     // SÉLECTION DES DIEUX
@@ -208,7 +390,6 @@ io.on('connection', (socket) => {
             game.guestGods = data.gods;
         }
 
-        // Notifier l'adversaire
         socket.to(gameId).emit('opponent_selected');
 
         // Si les deux joueurs ont sélectionné
@@ -224,17 +405,33 @@ io.on('connection', (socket) => {
                 firstPlayer
             });
 
+            saveGameToFirebase(game);
+
             console.log(`Partie ${gameId} démarrée - Premier joueur: ${firstPlayer}`);
         }
     });
 
     // =====================================
-    // ACTIONS DE JEU
+    // ACTIONS DE JEU (avec validation)
     // =====================================
 
     socket.on('game_action', (data) => {
         const gameId = playerSockets.get(socket.id);
         if (!gameId) return;
+
+        const game = games.get(gameId);
+        if (!game) return;
+
+        // Valider l'action
+        const validation = validateGameAction(game, data, socket.id);
+
+        if (!validation.valid) {
+            console.log(`Action refusée pour ${socket.id}: ${validation.reason}`);
+            socket.emit('action_rejected', { reason: validation.reason });
+            return;
+        }
+
+        // Action valide - transmettre à l'adversaire
         socket.to(gameId).emit('game_action', data);
     });
 
@@ -246,6 +443,11 @@ io.on('connection', (socket) => {
         if (game) {
             game.gameState = data.gameState;
             socket.to(gameId).emit('sync_state', data);
+
+            // Sauvegarder l'état périodiquement (pas à chaque sync pour éviter trop d'écritures)
+            if (Math.random() < 0.1) { // 10% des syncs
+                saveGameToFirebase(game);
+            }
         }
     });
 
@@ -253,8 +455,18 @@ io.on('connection', (socket) => {
     // RECONNEXION
     // =====================================
 
-    socket.on('rejoin_game', (data) => {
-        const game = games.get(data.gameId);
+    socket.on('rejoin_game', async (data) => {
+        let game = games.get(data.gameId);
+
+        // Si pas en mémoire, essayer de charger depuis Firebase
+        if (!game && firebaseEnabled) {
+            game = await loadGameFromFirebase(data.gameId);
+            if (game) {
+                games.set(data.gameId, game);
+                console.log(`Partie ${data.gameId} restaurée depuis Firebase`);
+            }
+        }
+
         if (!game) {
             socket.emit('error', { message: 'Partie introuvable' });
             return;
@@ -263,11 +475,11 @@ io.on('connection', (socket) => {
         let isHost = false;
         if (game.hostName === data.playerName) {
             game.hostSocket = socket.id;
-            game.hostDisconnected = false;  // Marquer comme reconnecté
+            game.hostDisconnected = false;
             isHost = true;
         } else if (game.guestName === data.playerName) {
             game.guestSocket = socket.id;
-            game.guestDisconnected = false;  // Marquer comme reconnecté
+            game.guestDisconnected = false;
         } else {
             socket.emit('error', { message: 'Joueur non trouvé dans cette partie' });
             return;
@@ -284,7 +496,10 @@ io.on('connection', (socket) => {
         });
 
         socket.to(data.gameId).emit('opponent_reconnected');
-        console.log(`${data.playerName} reconnecté à la partie ${data.gameId}`)
+
+        saveGameToFirebase(game);
+
+        console.log(`${data.playerName} reconnecté à la partie ${data.gameId}`);
     });
 
     // =====================================
@@ -303,7 +518,6 @@ io.on('connection', (socket) => {
         if (gameId) {
             const game = games.get(gameId);
             if (game) {
-                // Marquer le joueur comme déconnecté dans la partie
                 const isHost = game.hostSocket === socket.id;
                 if (isHost) {
                     game.hostDisconnected = true;
@@ -315,29 +529,29 @@ io.on('connection', (socket) => {
 
                 socket.to(gameId).emit('player_disconnected');
 
-                // Supprimer la partie après un délai SEULEMENT si les deux joueurs sont déconnectés
-                // ou si un seul joueur reste déconnecté après 5 minutes
+                // Sauvegarder l'état avant potentielle suppression
+                saveGameToFirebase(game);
+
+                // Supprimer après 5 minutes si toujours déconnecté
                 setTimeout(() => {
                     const currentGame = games.get(gameId);
-                    if (!currentGame) return; // Déjà supprimée
+                    if (!currentGame) return;
 
-                    // Vérifier si le joueur est toujours déconnecté
                     const stillDisconnected = isHost ? currentGame.hostDisconnected : currentGame.guestDisconnected;
 
                     if (stillDisconnected && currentGame.status !== 'finished') {
-                        // Si les DEUX joueurs sont déconnectés, supprimer
                         if (currentGame.hostDisconnected && currentGame.guestDisconnected) {
                             games.delete(gameId);
-                            console.log(`Partie ${gameId} supprimée (les deux joueurs déconnectés depuis 5min)`);
+                            deleteGameFromFirebase(gameId);
+                            console.log(`Partie ${gameId} supprimée (les deux joueurs déconnectés)`);
                         } else {
-                            // Si un seul joueur reste déconnecté après 5min, considérer comme abandon
                             games.delete(gameId);
+                            deleteGameFromFirebase(gameId);
                             console.log(`Partie ${gameId} supprimée (joueur ${isHost ? 'host' : 'guest'} déconnecté trop longtemps)`);
                         }
                     }
                 }, 300000); // 5 minutes
             }
-            // NE PAS supprimer playerSockets ici - on le fait dans rejoin ou leave
         }
 
         console.log(`Joueur déconnecté: ${socket.id}`);
@@ -350,10 +564,41 @@ io.on('connection', (socket) => {
     socket.on('leave_game', () => {
         const gameId = playerSockets.get(socket.id);
         if (gameId) {
+            const game = games.get(gameId);
+            if (game) {
+                game.status = 'finished';
+                saveGameToFirebase(game);
+            }
+
             socket.to(gameId).emit('opponent_left');
             socket.leave(gameId);
             playerSockets.delete(socket.id);
         }
+    });
+
+    // =====================================
+    // FIN DE PARTIE
+    // =====================================
+
+    socket.on('game_over', (data) => {
+        const gameId = playerSockets.get(socket.id);
+        if (!gameId) return;
+
+        const game = games.get(gameId);
+        if (game) {
+            game.status = 'finished';
+            game.winnerId = data.winnerId;
+            game.finishedAt = Date.now();
+
+            saveGameToFirebase(game);
+
+            // Supprimer de la mémoire après un délai
+            setTimeout(() => {
+                games.delete(gameId);
+            }, 60000); // 1 minute
+        }
+
+        socket.to(gameId).emit('game_over', data);
     });
 });
 
@@ -365,12 +610,14 @@ setInterval(() => {
     games.forEach((game, gameId) => {
         if (now - game.createdAt > timeout && game.status !== 'playing') {
             games.delete(gameId);
+            deleteGameFromFirebase(gameId);
             console.log(`Partie ${gameId} nettoyée (inactive)`);
         }
     });
 }, 60000); // Vérifier toutes les minutes
 
 httpServer.listen(port, () => {
-    console.log(`🎮 GODS Game Server démarré sur le port ${port}`);
+    console.log(`🎮 GODS Game Server v2.0 démarré sur le port ${port}`);
     console.log(`📡 En attente de connexions...`);
+    console.log(`🔥 Firebase: ${firebaseEnabled ? 'Activé' : 'Désactivé'}`);
 });
