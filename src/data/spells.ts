@@ -53,7 +53,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'discard', value: 2, target: 'enemy_god' }
+            { type: 'discard', value: 2 } // Cible implicite : adversaire (via la logique discard)
         ],
         imageUrl: '/cards/spells/spell_poseidon_vague.png',
         description: '2🩸 → ⚔️⚔️ | 2🎴🃏⚔️ → 🗑️',
