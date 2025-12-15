@@ -303,14 +303,14 @@ io.on('connection', (socket) => {
             if (game) {
                 socket.to(gameId).emit('player_disconnected');
 
-                // Supprimer la partie après un délai
+                // Supprimer la partie après un délai (5 minutes pour permettre la reconnection)
                 setTimeout(() => {
                     const currentGame = games.get(gameId);
                     if (currentGame && currentGame.status !== 'finished') {
                         games.delete(gameId);
-                        console.log(`Partie ${gameId} supprimée (timeout)`);
+                        console.log(`Partie ${gameId} supprimée (timeout après déconnexion)`);
                     }
-                }, 60000); // 60 secondes
+                }, 300000); // 5 minutes
             }
             playerSockets.delete(socket.id);
         }

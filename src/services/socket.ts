@@ -31,9 +31,10 @@ export const getSocket = (): Socket => {
         socket = io(serverUrl, {
             autoConnect: true,
             reconnection: true,
-            reconnectionAttempts: 10,
-            reconnectionDelay: 1000,
-            timeout: 10000,
+            reconnectionAttempts: 20,        // Plus de tentatives
+            reconnectionDelay: 500,           // Démarrer plus vite
+            reconnectionDelayMax: 5000,       // Max 5 secondes entre tentatives
+            timeout: 15000,                   // Plus de temps pour la connexion initiale
             transports: ['websocket', 'polling'],
         });
 

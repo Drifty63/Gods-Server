@@ -48,17 +48,46 @@ export default function OnlineGamePage() {
         setIsHost(host);
     }, [router]);
 
-    // Reconnexion au socket après un refresh
+    // Reconnexion au socket après un refresh ou une micro-déconnexion
     useEffect(() => {
         if (isConnected && multiplayerData) {
             const gameId = sessionStorage.getItem('gameId');
             const playerName = sessionStorage.getItem('playerName');
 
             if (gameId && playerName) {
+                console.log('Attempting to rejoin game:', gameId);
                 rejoinGame(gameId, playerName);
             }
         }
     }, [isConnected, multiplayerData, rejoinGame]);
+
+    // État pour l'overlay de reconnection
+    const [isReconnecting, setIsReconnecting] = useState(false);
+    const [reconnectAttempts, setReconnectAttempts] = useState(0);
+
+    // Gérer les micro-déconnexions
+    useEffect(() => {
+        if (!isConnected && isInitialized) {
+            // On vient de perdre la connexion en pleine partie
+            setIsReconnecting(true);
+            setReconnectAttempts(prev => prev + 1);
+        } else if (isConnected && isReconnecting) {
+            // Reconnection réussie !
+            const gameId = sessionStorage.getItem('gameId');
+            const playerName = sessionStorage.getItem('playerName');
+
+            if (gameId && playerName) {
+                console.log('Reconnected! Rejoining game...');
+                rejoinGame(gameId, playerName);
+            }
+
+            // Attendre un peu que le serveur nous renvoie l'état
+            setTimeout(() => {
+                setIsReconnecting(false);
+                setReconnectAttempts(0);
+            }, 1000);
+        }
+    }, [isConnected, isInitialized, isReconnecting, rejoinGame]);
 
     // Initialiser la partie
     useEffect(() => {
@@ -145,12 +174,36 @@ export default function OnlineGamePage() {
         router.push('/online');
     };
 
+    // Overlay de reconnection (micro-déconnexion)
+    if (isReconnecting) {
+        return (
+            <div className={styles.disconnectedOverlay}>
+                <div className={styles.disconnectedModal}>
+                    <div className={styles.spinner}></div>
+                    <h2>🔄 Reconnection en cours...</h2>
+                    <p>Tentative {reconnectAttempts}/10</p>
+                    <p style={{ fontSize: '0.8em', opacity: 0.7 }}>
+                        Votre partie sera restaurée automatiquement
+                    </p>
+                    {reconnectAttempts >= 5 && (
+                        <button onClick={handleLeaveGame} style={{ marginTop: '1rem' }}>
+                            Abandonner et quitter
+                        </button>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     if (opponentDisconnected) {
         return (
             <div className={styles.disconnectedOverlay}>
                 <div className={styles.disconnectedModal}>
                     <h2>😢 Adversaire déconnecté</h2>
-                    <p>Votre adversaire a quitté la partie</p>
+                    <p>Votre adversaire a quitté la partie ou a été déconnecté.</p>
+                    <p style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '1rem' }}>
+                        Attendez qu'il se reconnecte ou quittez la partie.
+                    </p>
                     <button onClick={handleLeaveGame}>
                         Retour au lobby
                     </button>
