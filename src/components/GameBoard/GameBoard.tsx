@@ -985,7 +985,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 onPlay={handlePlayFromDetail}
                 onDiscard={handleDiscardFromDetail}
                 canPlay={selectedCard ? canPlayCard(selectedCard) : false}
-                canDiscard={isPlayerTurn && !player.hasPlayedCard}
+                canDiscard={isPlayerTurn && !player.hasPlayedCard && !isForcedDetail}
             />
         </div >
     );
