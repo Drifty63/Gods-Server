@@ -119,11 +119,11 @@ export default function DeckPage() {
                                 {/* 1. Carte du Dieu */}
                                 <div className={`${styles.cardWrapper} ${styles.godCardEntry}`}>
                                     <Image
-                                        src={god.imageUrl} // Image carte jeu (.png)
+                                        src={god.carouselImage || god.imageUrl}
                                         alt={god.name}
                                         fill
                                         className={styles.godCardImage}
-                                        sizes="160px"
+                                        sizes="(max-width: 768px) 100vw, 300px"
                                         priority={false}
                                     />
                                     <div className={styles.cardOverlay}>

@@ -225,7 +225,9 @@
 }
 
 /* Carte Dieu (Premier item) */
+/* Carte Dieu (Premier item) - Format Paysage */
 .godCardEntry {
+    width: 360px;
     border-color: var(--gold-divine);
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
