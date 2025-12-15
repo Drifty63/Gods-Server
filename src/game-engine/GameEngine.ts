@@ -644,13 +644,23 @@ export class GameEngine {
             // HADÈS - Vol de vie
             // ========================================
             case 'lifesteal_damage':
-                // Soigne du nombre de dégâts infligés (déjà appliqués par l'effet damage)
-                // Note: On prend la valeur de dégâts de l'effet damage précédent (3)
-                if (castingGod) {
-                    castingGod.currentHealth = Math.min(
-                        castingGod.currentHealth + 3,
-                        castingGod.card.maxHealth
-                    );
+                // Soigne du nombre de dégâts réellement infligés (avec bonus faiblesse)
+                // Utilise la dernière cible utilisée (targetGodId) et recalcule les dégâts
+                if (castingGod && targetGodId) {
+                    const target = opponent.gods.find(g => g.card.id === targetGodId);
+                    if (target) {
+                        // Vérifier si le dieu a l'immunité aux faiblesses
+                        const hasWeaknessImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
+                        const weakness = hasWeaknessImmunity
+                            ? card.element
+                            : (target.temporaryWeakness || target.card.weakness);
+                        // Calculer les dégâts réels (base 3 pour Syphon d'âme)
+                        const { damage } = calculateDamage(3, card.element, weakness);
+                        castingGod.currentHealth = Math.min(
+                            castingGod.currentHealth + damage,
+                            castingGod.card.maxHealth
+                        );
+                    }
                 }
                 break;
 
