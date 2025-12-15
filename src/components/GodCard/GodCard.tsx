@@ -82,16 +82,20 @@ export default function GodCard({
                         {/* Faiblesse temporaire (si existe) */}
                         {god.temporaryWeakness && (
                             <span
-                                className={`${styles.weaknessBadge} ${styles.temporaryWeakness}`}
-                                title={`Faiblesse temporaire: ${ELEMENT_NAMES[god.temporaryWeakness]}`}
+                                className={`${styles.weaknessBadge} ${styles.temporaryWeakness} ${statusEffects.some(s => s.type === 'weakness_immunity') ? styles.immuneWeakness : ''}`}
+                                title={statusEffects.some(s => s.type === 'weakness_immunity')
+                                    ? `Faiblesse immunisée: ${ELEMENT_NAMES[god.temporaryWeakness]}`
+                                    : `Faiblesse temporaire: ${ELEMENT_NAMES[god.temporaryWeakness]}`}
                             >
                                 {ELEMENT_SYMBOLS[god.temporaryWeakness]}
                             </span>
                         )}
                         {/* Faiblesse de base */}
                         <span
-                            className={styles.weaknessBadge}
-                            title={`Faiblesse: ${ELEMENT_NAMES[card.weakness]}`}
+                            className={`${styles.weaknessBadge} ${statusEffects.some(s => s.type === 'weakness_immunity') ? styles.immuneWeakness : ''}`}
+                            title={statusEffects.some(s => s.type === 'weakness_immunity')
+                                ? `Faiblesse immunisée: ${ELEMENT_NAMES[card.weakness]}`
+                                : `Faiblesse: ${ELEMENT_NAMES[card.weakness]}`}
                         >
                             {ELEMENT_SYMBOLS[card.weakness]}
                         </span>
