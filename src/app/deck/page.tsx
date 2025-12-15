@@ -22,6 +22,22 @@ const DEFAULT_TEAMS: Team[] = [
     { id: 5, name: 'Formation Omega', gods: [null, null, null] },
 ];
 
+// Mapping des éléments vers leurs symboles emoji
+const ELEMENT_SYMBOLS: Record<string, string> = {
+    fire: '🔥',
+    air: '💨',
+    earth: '🌿',
+    lightning: '⚡',
+    water: '💧',
+    light: '☀️',
+    darkness: '💀',
+};
+
+// Fonction pour obtenir le symbole d'un élément
+const getElementSymbol = (element: string): string => {
+    return ELEMENT_SYMBOLS[element] || element;
+};
+
 // Type pour la carte sélectionnée dans le modal
 interface SelectedCard {
     type: 'god' | 'spell';
@@ -150,7 +166,7 @@ export default function DeckPage() {
                         <div key={god.id} className={styles.godRow}>
                             <div className={styles.godHeader}>
                                 <span className={styles.godName}>{god.name}</span>
-                                <span className={styles.godElement}>{god.element}</span>
+                                <span className={styles.godElement}>{getElementSymbol(god.element)}</span>
                             </div>
 
                             <div className={styles.cardsCarousel}>
@@ -275,7 +291,7 @@ export default function DeckPage() {
                                 </>
                             )}
                             {selectedCard.type === 'god' && selectedCard.god && (
-                                <span className={styles.cardModalElement}>{selectedCard.god.element}</span>
+                                <span className={styles.cardModalElement}>{getElementSymbol(selectedCard.god.element)}</span>
                             )}
                         </div>
                     </div>
