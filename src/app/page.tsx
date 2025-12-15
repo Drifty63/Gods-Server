@@ -235,7 +235,7 @@ export default function Home() {
 
       {/* Footer discret */}
       <footer className={styles.footer}>
-        <p>2025 GODS SERIE 1 • Aseo & Drift</p>
+        <p>2025 GODS SERIE 1 • Aseo, Drift & Zedycuss</p>
       </footer>
     </main>
   );

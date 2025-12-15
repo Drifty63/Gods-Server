@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "GODS - Le Jeu de Cartes des Dieux",
   description: "Affrontez vos adversaires dans un duel épique entre divinités. Maîtrisez les éléments, gérez votre énergie et terrassez les dieux ennemis !",
   keywords: ["jeu de cartes", "TCG", "mythologie", "dieux", "stratégie", "multijoueur"],
-  authors: [{ name: "Aseo & Drift" }],
+  authors: [{ name: "Aseo, Drift & Zedycuss" }],
   openGraph: {
     title: "GODS - Le Jeu de Cartes des Dieux",
     description: "Affrontez vos adversaires dans un duel épique entre divinités.",

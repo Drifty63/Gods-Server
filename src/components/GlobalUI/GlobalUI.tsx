@@ -255,7 +255,7 @@ export default function GlobalUI() {
                                     <span>ℹ️</span> À propos
                                 </h3>
                                 <p className={styles.versionText}>GODS - Série 1 • Version 0.24</p>
-                                <p className={styles.creditsText}>Développé par Aseo & Drift</p>
+                                <p className={styles.creditsText}>Développé par Aseo, Drift & Zedycuss</p>
                             </div>
                         </div>
                     </div>
