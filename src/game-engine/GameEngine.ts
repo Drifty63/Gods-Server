@@ -215,8 +215,9 @@ export class GameEngine {
         // Piocher pour le nouveau joueur actuel
         this.drawToHandLimit(this.getCurrentPlayer());
 
-        // Réduire la durée des effets temporaires du joueur qui vient de jouer
-        this.tickStatusEffects(previousPlayer);
+        // Réduire la durée des effets temporaires de l'ADVERSAIRE du joueur qui vient de jouer
+        // Logique : "3 tours" = 3 tours où l'adversaire joue = tick après chaque tour adverse
+        this.tickStatusEffects(nextPlayer);
 
         return { success: true, message: 'Tour terminé' };
     }
@@ -985,21 +986,19 @@ export class GameEngine {
             // ATHÉNA - Effets de protection contre faiblesse
             // ========================================
             case 'remove_weakness_1_turn':
-                // Retire la faiblesse d'un allié pendant 1 tour
-                // Durée 2 car tick immédiat à la fin du tour de lancement
+                // Retire la faiblesse d'un allié pendant 1 tour adverse
                 for (const target of targets) {
                     if (player.gods.includes(target) && !target.isDead) {
-                        this.addStatus(target, 'weakness_immunity', 1, 2);
+                        this.addStatus(target, 'weakness_immunity', 1, 1);
                     }
                 }
                 break;
 
             case 'remove_all_weakness_3_turns':
-                // Tous les alliés perdent leur faiblesse pendant 3 tours
-                // Durée 4 car tick immédiat à la fin du tour de lancement
+                // Tous les alliés perdent leur faiblesse pendant 3 tours adverses
                 for (const god of player.gods) {
                     if (!god.isDead) {
-                        this.addStatus(god, 'weakness_immunity', 1, 4);
+                        this.addStatus(god, 'weakness_immunity', 1, 3);
                     }
                 }
                 break;
