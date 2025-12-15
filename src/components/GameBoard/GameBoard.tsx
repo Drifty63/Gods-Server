@@ -444,8 +444,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     // Cliquer sur une carte cachée → affiche le menu de choix
     const handleBlindCardClick = (card: typeof selectedCard) => {
-        // Ne pas permettre si le joueur a déjà défaussé pour de l'énergie (son tour est "utilisé")
-        if (!card || !isPlayerTurn || player.hasDiscardedForEnergy) return;
+        // Permettre le clic même après défausse (pour défausser une carte cachée)
+        if (!card || !isPlayerTurn) return;
         setSelectedBlindCard(card);
     };
 
@@ -578,8 +578,10 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             <button
                                 className={styles.blindPlayButton}
                                 onClick={handleBlindPlay}
+                                disabled={player.hasDiscardedForEnergy}
                             >
                                 🎲 Jouer à l&apos;aveugle
+                                {player.hasDiscardedForEnergy && <span className={styles.disabledNote}> (déjà utilisé)</span>}
                             </button>
                             <button
                                 className={styles.blindDiscardButton}
@@ -889,17 +891,17 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 // Carte cachée par effet Nyx - le joueur ne la voit pas
                                 <div
                                     key={card.id}
-                                    className={`${styles.cardBack} ${styles.blindCard} ${isPlayerTurn && !player.hasDiscardedForEnergy ? styles.blindClickable : ''}`}
-                                    onClick={() => isPlayerTurn && !player.hasDiscardedForEnergy && handleBlindCardClick(card)}
+                                    className={`${styles.cardBack} ${styles.blindCard} ${isPlayerTurn ? styles.blindClickable : ''}`}
+                                    onClick={() => isPlayerTurn && handleBlindCardClick(card)}
                                     onContextMenu={(e) => {
                                         e.preventDefault();
-                                        if (isPlayerTurn && !player.hasDiscardedForEnergy) handleBlindDiscard(card.id);
+                                        if (isPlayerTurn) handleBlindDiscard(card.id);
                                     }}
-                                    title={player.hasDiscardedForEnergy ? "Vous avez déjà utilisé votre action ce tour" : "Carte inconnue (effet Nyx) - Clic gauche = Jouer à l'aveugle • Clic droit = Défausser"}
+                                    title="Carte inconnue (effet Nyx) - Clic gauche = Menu • Clic droit = Défausser"
                                 >
                                     <span className={styles.cardBackIcon}>❓</span>
                                     <span className={styles.cardBackNumber}>{index + 1}</span>
-                                    {isPlayerTurn && !player.hasDiscardedForEnergy && (
+                                    {isPlayerTurn && (
                                         <span className={styles.blindPlayable}>⚠️</span>
                                     )}
                                 </div>
