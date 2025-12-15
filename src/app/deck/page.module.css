@@ -224,12 +224,17 @@
     z-index: 10;
 }
 
-/* Carte Dieu (Premier item) */
-/* Carte Dieu (Premier item) - Format Paysage */
+/* Carte Dieu (Premier item) - Même taille que les sorts */
 .godCardEntry {
-    width: 360px;
+    width: 160px;
     border-color: var(--gold-divine);
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    background: linear-gradient(135deg, #1a1a2e 0%, #0a0a15 100%);
+}
+
+/* Image du dieu - affiche l'entièreté de l'image */
+.godCardEntry .godCardImage {
+    object-fit: contain;
 }
 
 .godCardImage {
