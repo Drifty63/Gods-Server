@@ -2,6 +2,72 @@ import { SpellCard, GodCard } from '@/types/cards';
 
 // Fonction utilitaire pour générer des sorts factices pour l'interface
 export function getSpellsForGod(god: GodCard): SpellCard[] {
+    // Spécifique pour Poséidon - Cartes Officielles
+    if (god.id === 'poseidon') {
+        return [
+            {
+                id: 'poseidon_s1',
+                name: 'Grande Vague',
+                element: 'water',
+                godId: 'poseidon',
+                type: 'competence', // ou 'utility' selon logique jeu, mais competence pour dégâts
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Dégâts et Défausse" }],
+                imageUrl: '/cards/spells/poseidon/grand_wave.png',
+                description: "Inflige 2 dégâts à deux cibles et défausse 2 cartes de la main de votre adversaire."
+            },
+            {
+                id: 'poseidon_s2',
+                name: 'Trident de Poséidon',
+                element: 'water',
+                godId: 'poseidon',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 3 }],
+                imageUrl: '/cards/spells/poseidon/trident.png',
+                description: "Inflige 3 dégâts à une cible."
+            },
+            {
+                id: 'poseidon_s3',
+                name: 'Prison Aquatique',
+                element: 'water',
+                godId: 'poseidon',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "AOE et Meule" }],
+                imageUrl: '/cards/spells/poseidon/water_prison.png',
+                description: "Inflige 1 dégât à toutes les cibles et meule du nombre d'ennemis touchés."
+            },
+            {
+                id: 'poseidon_s4',
+                name: 'Colère de Poséidon',
+                element: 'water',
+                godId: 'poseidon',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Multi-cible et Meule" }],
+                imageUrl: '/cards/spells/poseidon/wrath.png',
+                description: "Inflige 1 dégâts à deux cibles et meule 2 cartes."
+            },
+            {
+                id: 'poseidon_s5',
+                name: 'Tsunami',
+                element: 'water',
+                godId: 'poseidon',
+                type: 'competence',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Grosse Meule et Dégâts" }],
+                imageUrl: '/cards/spells/poseidon/tsunami.png',
+                description: "Ciblez un adversaire; Meule 5 cartes du dessus du deck... Inflige 3 dégâts par carte du dieu ciblé."
+            }
+        ];
+    }
+
     const spells: SpellCard[] = [
         // Carte 1 : Générateur d'énergie (Coût 0)
         {

@@ -132,27 +132,44 @@ export default function DeckPage() {
                                 </div>
 
                                 {/* 2. Les 5 Cartes de Sorts */}
-                                {spells.map((spell) => (
-                                    <div key={spell.id} className={`${styles.cardWrapper} ${styles.spellCardEntry}`}>
-                                        <div className={styles.spellImageContainer}>
-                                            <Image
-                                                src={spell.imageUrl}
-                                                alt={spell.name}
-                                                fill
-                                                className={styles.godCardImage} // Réutilisation style cover
-                                                sizes="160px"
-                                            />
-                                            <div className={styles.spellCost}>{spell.energyCost}</div>
+                                {spells.map((spell) => {
+                                    // Si c'est une image de sort "officielle" (comme Poséidon), on affiche juste l'image
+                                    const isFullArt = spell.imageUrl.includes('/cards/spells/');
+
+                                    return (
+                                        <div key={spell.id} className={`${styles.cardWrapper} ${styles.spellCardEntry}`}>
+                                            {isFullArt ? (
+                                                <Image
+                                                    src={spell.imageUrl}
+                                                    alt={spell.name}
+                                                    fill
+                                                    className={styles.godCardImage}
+                                                    sizes="160px"
+                                                />
+                                            ) : (
+                                                <>
+                                                    <div className={styles.spellImageContainer}>
+                                                        <Image
+                                                            src={spell.imageUrl}
+                                                            alt={spell.name}
+                                                            fill
+                                                            className={styles.godCardImage} // Réutilisation style cover
+                                                            sizes="160px"
+                                                        />
+                                                        <div className={styles.spellCost}>{spell.energyCost}</div>
+                                                    </div>
+                                                    <div className={styles.spellContent}>
+                                                        <div className={styles.spellName}>{spell.name}</div>
+                                                        <div className={styles.spellType}>{spell.type}</div>
+                                                        <div className={styles.spellDescription}>
+                                                            {spell.description}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
-                                        <div className={styles.spellContent}>
-                                            <div className={styles.spellName}>{spell.name}</div>
-                                            <div className={styles.spellType}>{spell.type}</div>
-                                            <div className={styles.spellDescription}>
-                                                {spell.description}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     );
