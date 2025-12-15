@@ -656,6 +656,18 @@ export class GameEngine {
                             : (target.temporaryWeakness || target.card.weakness);
                         // Calculer les dégâts réels (base 3 pour Syphon d'âme)
                         const { damage } = calculateDamage(3, card.element, weakness);
+
+                        // 1. Retirer le poison (min entre heal et stacks de poison)
+                        const poisonIndex = castingGod.statusEffects.findIndex(s => s.type === 'poison');
+                        if (poisonIndex !== -1) {
+                            const poisonToRemove = Math.min(damage, castingGod.statusEffects[poisonIndex].stacks);
+                            castingGod.statusEffects[poisonIndex].stacks -= poisonToRemove;
+                            if (castingGod.statusEffects[poisonIndex].stacks <= 0) {
+                                castingGod.statusEffects.splice(poisonIndex, 1);
+                            }
+                        }
+
+                        // 2. Soigner (limité au max HP)
                         castingGod.currentHealth = Math.min(
                             castingGod.currentHealth + damage,
                             castingGod.card.maxHealth
