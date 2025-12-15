@@ -239,6 +239,16 @@ export default function GlobalUI() {
                                 </Link>
                             </div>
 
+                            {/* Section Règles du jeu */}
+                            <div className={styles.optionsSection}>
+                                <h3 className={styles.optionsSectionTitle}>
+                                    <span>📖</span> Règles du jeu
+                                </h3>
+                                <Link href="/rules" className={styles.optionLink} onClick={closeOptionsModal}>
+                                    Consulter les règles
+                                </Link>
+                            </div>
+
                             {/* Section À propos */}
                             <div className={styles.optionsSection}>
                                 <h3 className={styles.optionsSectionTitle}>
