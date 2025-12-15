@@ -522,9 +522,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 player.energy = Math.max(0, player.energy - card.energyCost);
             }
 
-            // Retirer de la main et mettre en défausse
+            // Retirer de la main et mettre en défausse (nettoyer les propriétés "blind")
             const discardedCard = player.hand.splice(cardIndex, 1)[0];
-            discardedCard.isHiddenFromOwner = false; // Reset le flag
+            delete discardedCard.isHiddenFromOwner;
+            delete discardedCard.revealedToPlayerId;
             player.discard.push(discardedCard);
 
             set({ gameState: engine.getState() });

@@ -145,8 +145,9 @@ export class GameEngine {
             }
         }
 
-        // Déplacer la carte vers la défausse
+        // Déplacer la carte vers la défausse (nettoyer les propriétés "blind" d'abord)
         player.hand.splice(cardIndex, 1);
+        this.cleanBlindCard(card);
         player.discard.push(card);
 
         // Marquer que le joueur a joué une carte ce tour
@@ -175,8 +176,9 @@ export class GameEngine {
 
         const card = player.hand[cardIndex];
 
-        // Retirer de la main et ajouter à la défausse
+        // Retirer de la main et ajouter à la défausse (nettoyer les propriétés "blind")
         player.hand.splice(cardIndex, 1);
+        this.cleanBlindCard(card);
         player.discard.push(card);
 
         // Gagner 1 énergie SEULEMENT si c'est la première défausse du tour
@@ -511,6 +513,7 @@ export class GameEngine {
                         const randomIndex = Math.floor(Math.random() * discardPlayer.hand.length);
                         const cardToDiscard = discardPlayer.hand[randomIndex];
                         discardPlayer.hand.splice(randomIndex, 1);
+                        this.cleanBlindCard(cardToDiscard);
                         discardPlayer.discard.push(cardToDiscard);
                     }
                 }
@@ -534,6 +537,7 @@ export class GameEngine {
                 for (let i = 0; i < (effect.value || 1); i++) {
                     if (opponent.deck.length > 0) {
                         const card = opponent.deck.shift()!;
+                        this.cleanBlindCard(card);
                         opponent.discard.push(card);
                     }
                 }
@@ -966,6 +970,7 @@ export class GameEngine {
                 for (let i = 0; i < livingEnemies; i++) {
                     if (opponent.deck.length > 0) {
                         const card = opponent.deck.shift()!;
+                        this.cleanBlindCard(card);
                         opponent.discard.push(card);
                     }
                 }
@@ -1165,6 +1170,7 @@ export class GameEngine {
                 for (let i = 0; i < enemyCount; i++) {
                     if (opponent.deck.length > 0) {
                         const milledCard = opponent.deck.shift()!;
+                        this.cleanBlindCard(milledCard);
                         opponent.discard.push(milledCard);
                     }
                 }
@@ -1232,6 +1238,15 @@ export class GameEngine {
      */
     private removeStatus(god: GodState, status: StatusEffect): void {
         god.statusEffects = god.statusEffects.filter(s => s.type !== status);
+    }
+
+    /**
+     * Nettoie les propriétés "blind" d'une carte (utilisé quand elle va à la défausse)
+     * Cela garantit que les cartes repioché après mélange de la défausse ne sont pas cachées
+     */
+    private cleanBlindCard(card: SpellCard): void {
+        delete card.isHiddenFromOwner;
+        delete card.revealedToPlayerId;
     }
 
     /**
