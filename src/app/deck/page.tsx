@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { ALL_GODS } from '@/data/gods';
-import { getSpellsForGod } from '@/data/mock_spells';
+import { getSpellsForGod, SpellCard } from '@/data/mock_spells';
+import { God } from '@/data/gods';
 
 interface Team {
     id: number;
@@ -21,10 +22,22 @@ const DEFAULT_TEAMS: Team[] = [
     { id: 5, name: 'Formation Omega', gods: [null, null, null] },
 ];
 
+// Type pour la carte sélectionnée dans le modal
+interface SelectedCard {
+    type: 'god' | 'spell';
+    imageUrl: string;
+    name: string;
+    spell?: SpellCard;
+    god?: God;
+}
+
 export default function DeckPage() {
     // État des équipes (chargé depuis localStorage idéalement, ici state local pour démo)
     const [teams, setTeams] = useState<Team[]>(DEFAULT_TEAMS);
     const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
+
+    // État pour le modal de carte agrandie
+    const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
 
     // Charger les équipes depuis localStorage au montage
     useEffect(() => {
@@ -60,6 +73,31 @@ export default function DeckPage() {
             name: newName
         };
         setTeams(updatedTeams);
+    };
+
+    // Ouvrir le modal avec une carte de dieu
+    const openGodCard = (god: God) => {
+        setSelectedCard({
+            type: 'god',
+            imageUrl: god.carouselImage || god.imageUrl,
+            name: god.name,
+            god: god
+        });
+    };
+
+    // Ouvrir le modal avec une carte de sort
+    const openSpellCard = (spell: SpellCard) => {
+        setSelectedCard({
+            type: 'spell',
+            imageUrl: spell.imageUrl,
+            name: spell.name,
+            spell: spell
+        });
+    };
+
+    // Fermer le modal
+    const closeCardModal = () => {
+        setSelectedCard(null);
     };
 
     return (
@@ -117,7 +155,10 @@ export default function DeckPage() {
 
                             <div className={styles.cardsCarousel}>
                                 {/* 1. Carte du Dieu */}
-                                <div className={`${styles.cardWrapper} ${styles.godCardEntry}`}>
+                                <div
+                                    className={`${styles.cardWrapper} ${styles.godCardEntry}`}
+                                    onClick={() => openGodCard(god)}
+                                >
                                     <Image
                                         src={god.carouselImage || god.imageUrl}
                                         alt={god.name}
@@ -126,9 +167,6 @@ export default function DeckPage() {
                                         sizes="(max-width: 768px) 100vw, 300px"
                                         priority={false}
                                     />
-                                    <div className={styles.cardOverlay}>
-                                        DIEU
-                                    </div>
                                 </div>
 
                                 {/* 2. Les 5 Cartes de Sorts */}
@@ -137,7 +175,11 @@ export default function DeckPage() {
                                     const isFullArt = spell.imageUrl.includes('/cards/spells/');
 
                                     return (
-                                        <div key={spell.id} className={`${styles.cardWrapper} ${styles.spellCardEntry}`}>
+                                        <div
+                                            key={spell.id}
+                                            className={`${styles.cardWrapper} ${styles.spellCardEntry}`}
+                                            onClick={() => openSpellCard(spell)}
+                                        >
                                             {isFullArt ? (
                                                 <Image
                                                     src={spell.imageUrl}
@@ -205,6 +247,40 @@ export default function DeckPage() {
                     </Link>
                 </nav>
             </div>
+
+            {/* Modal pour afficher la carte en grand */}
+            {selectedCard && (
+                <div className={styles.cardModalOverlay} onClick={closeCardModal}>
+                    <div className={styles.cardModalContent} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.cardModalClose} onClick={closeCardModal}>✕</button>
+                        <div className={styles.cardModalImageWrapper}>
+                            <Image
+                                src={selectedCard.imageUrl}
+                                alt={selectedCard.name}
+                                fill
+                                className={styles.cardModalImage}
+                                sizes="(max-width: 768px) 90vw, 400px"
+                                priority
+                            />
+                        </div>
+                        <div className={styles.cardModalInfo}>
+                            <h3 className={styles.cardModalName}>{selectedCard.name}</h3>
+                            {selectedCard.type === 'spell' && selectedCard.spell && (
+                                <>
+                                    <span className={styles.cardModalType}>{selectedCard.spell.type}</span>
+                                    <p className={styles.cardModalDescription}>{selectedCard.spell.description}</p>
+                                    <div className={styles.cardModalStats}>
+                                        <span className={styles.cardModalCost}>⚡ {selectedCard.spell.energyCost}</span>
+                                    </div>
+                                </>
+                            )}
+                            {selectedCard.type === 'god' && selectedCard.god && (
+                                <span className={styles.cardModalElement}>{selectedCard.god.element}</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

@@ -2,6 +2,7 @@
 // Mise à jour progressive avec les cartes fournies
 
 import { GodCard } from '@/types/cards';
+export type { GodCard as God } from '@/types/cards';
 
 export const ALL_GODS: GodCard[] = [
     // =====================

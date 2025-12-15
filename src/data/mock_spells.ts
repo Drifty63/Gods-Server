@@ -1,4 +1,5 @@
 import { SpellCard, GodCard } from '@/types/cards';
+export type { SpellCard } from '@/types/cards';
 
 // Fonction utilitaire pour générer des sorts factices pour l'interface
 export function getSpellsForGod(god: GodCard): SpellCard[] {
