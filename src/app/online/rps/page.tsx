@@ -47,17 +47,26 @@ export default function OnlineRpsPage() {
         }
     }, [isConnected, hasRejoined, rejoinGame, router]);
 
+    const [isRedirecting, setIsRedirecting] = useState(false);
+
     // Rediriger vers le jeu quand la partie commence
     useEffect(() => {
-        if (gameStartData) {
+        if (gameStartData && !isRedirecting) {
+            setIsRedirecting(true);
+
             // S'assurer que isHost est bien sauvegardé avant la redirection
             if (currentGame?.isHost !== undefined) {
                 sessionStorage.setItem('isHost', String(currentGame.isHost));
             }
             sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
-            router.push('/online/game');
+
+            // Délai pour laisser le socket se synchroniser avant la redirection
+            console.log('Game start received, redirecting in 1s...');
+            setTimeout(() => {
+                router.push('/online/game');
+            }, 1000);
         }
-    }, [gameStartData, router, currentGame?.isHost]);
+    }, [gameStartData, router, currentGame?.isHost, isRedirecting]);
 
     // Réinitialiser après une égalité
     useEffect(() => {
