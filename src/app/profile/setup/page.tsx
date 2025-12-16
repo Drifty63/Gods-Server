@@ -38,7 +38,10 @@ export default function ProfileSetupPage() {
     useEffect(() => {
         if (profile) {
             if (profile.username) setUsername(profile.username);
-            if (profile.avatar) setSelectedAvatar(profile.avatar);
+            // Ne pas utiliser l'avatar si c'est une URL (photo Google)
+            if (profile.avatar && !profile.avatar.startsWith('http')) {
+                setSelectedAvatar(profile.avatar);
+            }
         } else if (user?.displayName) {
             setUsername(user.displayName);
         } else if (user?.email) {
