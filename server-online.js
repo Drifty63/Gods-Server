@@ -392,24 +392,123 @@ io.on('connection', (socket) => {
 
         socket.to(gameId).emit('opponent_selected');
 
-        // Si les deux joueurs ont sélectionné
+        // Si les deux joueurs ont sélectionné -> passer au Pierre-Feuille-Ciseaux
         if (game.hostGods && game.guestGods) {
-            game.status = 'playing';
-            const firstPlayer = Math.random() < 0.5 ? 'host' : 'guest';
+            game.status = 'rps'; // Nouvelle phase : Rock-Paper-Scissors
+            game.rpsHostChoice = null;
+            game.rpsGuestChoice = null;
 
-            io.to(gameId).emit('game_start', {
-                hostGods: game.hostGods,
-                guestGods: game.guestGods,
+            io.to(gameId).emit('rps_start', {
                 hostName: game.hostName,
-                guestName: game.guestName,
-                firstPlayer
+                guestName: game.guestName
             });
 
             saveGameToFirebase(game);
 
-            console.log(`Partie ${gameId} démarrée - Premier joueur: ${firstPlayer}`);
+            console.log(`Partie ${gameId} - Phase Pierre-Feuille-Ciseaux`);
         }
     });
+
+    // =====================================
+    // PIERRE-FEUILLE-CISEAUX
+    // =====================================
+
+    socket.on('rps_choice', (data) => {
+        const gameId = playerSockets.get(socket.id);
+        const game = games.get(gameId);
+        if (!game || game.status !== 'rps') return;
+
+        const isHost = game.hostSocket === socket.id;
+        const choice = data.choice; // 'rock', 'paper', ou 'scissors'
+
+        if (isHost) {
+            game.rpsHostChoice = choice;
+        } else {
+            game.rpsGuestChoice = choice;
+        }
+
+        // Notifier l'adversaire que le joueur a fait son choix (sans révéler)
+        socket.to(gameId).emit('rps_opponent_chose');
+
+        // Si les deux joueurs ont choisi
+        if (game.rpsHostChoice && game.rpsGuestChoice) {
+            const result = getRpsResult(game.rpsHostChoice, game.rpsGuestChoice);
+
+            // Envoyer le résultat aux deux joueurs
+            io.to(gameId).emit('rps_result', {
+                hostChoice: game.rpsHostChoice,
+                guestChoice: game.rpsGuestChoice,
+                result: result // 'host_wins', 'guest_wins', 'draw'
+            });
+
+            if (result === 'draw') {
+                // Égalité - recommencer
+                game.rpsHostChoice = null;
+                game.rpsGuestChoice = null;
+                console.log(`Partie ${gameId} - RPS égalité, on recommence`);
+            } else {
+                // Un gagnant ! Attendre son choix
+                game.rpsWinner = result === 'host_wins' ? 'host' : 'guest';
+                game.status = 'rps_deciding';
+                console.log(`Partie ${gameId} - RPS gagnant: ${game.rpsWinner}`);
+            }
+
+            saveGameToFirebase(game);
+        }
+    });
+
+    // Le gagnant du RPS choisit qui commence
+    socket.on('rps_decide', (data) => {
+        const gameId = playerSockets.get(socket.id);
+        const game = games.get(gameId);
+        if (!game || game.status !== 'rps_deciding') return;
+
+        const isHost = game.hostSocket === socket.id;
+        const isWinner = (isHost && game.rpsWinner === 'host') ||
+            (!isHost && game.rpsWinner === 'guest');
+
+        if (!isWinner) {
+            socket.emit('error', { message: 'Seul le gagnant peut décider' });
+            return;
+        }
+
+        // data.goFirst = true si le gagnant veut jouer en premier
+        let firstPlayer;
+        if (data.goFirst) {
+            firstPlayer = game.rpsWinner; // Le gagnant joue en premier
+        } else {
+            firstPlayer = game.rpsWinner === 'host' ? 'guest' : 'host'; // L'autre joue en premier
+        }
+
+        game.status = 'playing';
+
+        io.to(gameId).emit('game_start', {
+            hostGods: game.hostGods,
+            guestGods: game.guestGods,
+            hostName: game.hostName,
+            guestName: game.guestName,
+            firstPlayer,
+            rpsWinner: game.rpsWinner
+        });
+
+        saveGameToFirebase(game);
+
+        console.log(`Partie ${gameId} démarrée - Premier joueur: ${firstPlayer}`);
+    });
+
+    // Helper pour déterminer le gagnant du RPS
+    function getRpsResult(hostChoice, guestChoice) {
+        if (hostChoice === guestChoice) return 'draw';
+
+        if (
+            (hostChoice === 'rock' && guestChoice === 'scissors') ||
+            (hostChoice === 'paper' && guestChoice === 'rock') ||
+            (hostChoice === 'scissors' && guestChoice === 'paper')
+        ) {
+            return 'host_wins';
+        }
+        return 'guest_wins';
+    }
 
     // =====================================
     // ACTIONS DE JEU (avec validation)

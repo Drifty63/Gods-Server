@@ -11,7 +11,7 @@ import styles from './page.module.css';
 
 export default function OnlineSelectPage() {
     const router = useRouter();
-    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, rejoinGame, opponentName } = useMultiplayer();
+    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, rejoinGame, opponentName, rpsPhase } = useMultiplayer();
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [hasRejoined, setHasRejoined] = useState(false);
@@ -33,7 +33,15 @@ export default function OnlineSelectPage() {
         }
     }, [isConnected, hasRejoined, rejoinGame, router]);
 
-    // Rediriger vers le jeu quand la partie démarre
+    // Rediriger vers RPS quand les deux joueurs ont sélectionné
+    useEffect(() => {
+        if (rpsPhase && hasSubmitted) {
+            console.log('Both players selected, moving to RPS');
+            router.push('/online/rps');
+        }
+    }, [rpsPhase, hasSubmitted, router]);
+
+    // Rediriger vers le jeu si gameStartData arrive (fallback ou reconnexion)
     useEffect(() => {
         if (gameStartData && hasSubmitted) {
             sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));

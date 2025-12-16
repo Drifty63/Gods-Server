@@ -9,7 +9,7 @@ export interface MultiplayerGame {
     gameId: string;
     hostName: string;
     guestName?: string;
-    status: 'waiting' | 'selecting' | 'playing' | 'finished';
+    status: 'waiting' | 'selecting' | 'rps' | 'rps_deciding' | 'playing' | 'finished';
     isHost: boolean;
 }
 
@@ -24,11 +24,20 @@ export interface GameStartData {
     hostName: string;
     guestName: string;
     firstPlayer: 'host' | 'guest';
+    rpsWinner?: 'host' | 'guest';
 }
 
 export interface GameAction {
     type: 'play_card' | 'discard' | 'end_turn' | 'select_target' | 'select_element' | 'confirm_selection' | 'sync_initial_state' | 'ask_initial_state';
     payload: Record<string, unknown>;
+}
+
+export type RpsChoice = 'rock' | 'paper' | 'scissors';
+
+export interface RpsResult {
+    hostChoice: RpsChoice;
+    guestChoice: RpsChoice;
+    result: 'host_wins' | 'guest_wins' | 'draw';
 }
 
 export function useMultiplayer() {
@@ -47,6 +56,12 @@ export function useMultiplayer() {
     const [isInQueue, setIsInQueue] = useState(false);
     const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
     const [opponentName, setOpponentName] = useState<string | null>(null);
+
+    // États pour Pierre-Feuille-Ciseaux
+    const [rpsPhase, setRpsPhase] = useState<'waiting' | 'choosing' | 'result' | 'deciding' | null>(null);
+    const [rpsResult, setRpsResult] = useState<RpsResult | null>(null);
+    const [opponentChoseRps, setOpponentChoseRps] = useState(false);
+    const [isRpsWinner, setIsRpsWinner] = useState(false);
 
     // Connexion au serveur
     useEffect(() => {
@@ -160,6 +175,49 @@ export function useMultiplayer() {
             setError(data.message);
         };
 
+        // ===== ÉVÉNEMENTS RPS =====
+        const onRpsStart = () => {
+            console.log('RPS Start!');
+            setRpsPhase('choosing');
+            setRpsResult(null);
+            setOpponentChoseRps(false);
+            setIsRpsWinner(false);
+            setCurrentGame(prev => prev ? { ...prev, status: 'rps' } : null);
+        };
+
+        const onRpsOpponentChose = () => {
+            setOpponentChoseRps(true);
+        };
+
+        const onRpsResult = (data: RpsResult) => {
+            console.log('RPS Result:', data);
+            setRpsResult(data);
+            setRpsPhase('result');
+            setOpponentChoseRps(false);
+
+            // Déterminer si on est le gagnant
+            if (data.result !== 'draw') {
+                const isHost = currentGame?.isHost ?? false;
+                const weWon = (isHost && data.result === 'host_wins') ||
+                    (!isHost && data.result === 'guest_wins');
+                setIsRpsWinner(weWon);
+
+                if (weWon) {
+                    // On a gagné, on passe en phase de décision
+                    setTimeout(() => {
+                        setRpsPhase('deciding');
+                        setCurrentGame(prev => prev ? { ...prev, status: 'rps_deciding' } : null);
+                    }, 2500);
+                }
+            } else {
+                // Égalité - recommencer après un délai
+                setTimeout(() => {
+                    setRpsPhase('choosing');
+                    setRpsResult(null);
+                }, 2500);
+            }
+        };
+
         const onRejoined = (data: { gameId: string; isHost: boolean; status: string; gameState?: Record<string, unknown> }) => {
             console.log('Rejoined game:', data);
             setCurrentGame({
@@ -193,6 +251,10 @@ export function useMultiplayer() {
         socket.on('games_list', onGamesList);
         socket.on('error', onError);
         socket.on('rejoined', onRejoined);
+        // RPS events
+        socket.on('rps_start', onRpsStart);
+        socket.on('rps_opponent_chose', onRpsOpponentChose);
+        socket.on('rps_result', onRpsResult);
 
         return () => {
             socket.off('connect', onConnect);
@@ -214,8 +276,12 @@ export function useMultiplayer() {
             socket.off('games_list', onGamesList);
             socket.off('error', onError);
             socket.off('rejoined', onRejoined);
+            // RPS cleanup
+            socket.off('rps_start', onRpsStart);
+            socket.off('rps_opponent_chose', onRpsOpponentChose);
+            socket.off('rps_result', onRpsResult);
         };
-    }, []);
+    }, [currentGame?.isHost]);
 
     // =====================================
     // MATCHMAKING
@@ -320,6 +386,22 @@ export function useMultiplayer() {
         setError(null);
     }, []);
 
+    // =====================================
+    // PIERRE-FEUILLE-CISEAUX
+    // =====================================
+
+    const sendRpsChoice = useCallback((choice: RpsChoice) => {
+        if (socketRef.current) {
+            socketRef.current.emit('rps_choice', { choice });
+        }
+    }, []);
+
+    const sendRpsDecision = useCallback((goFirst: boolean) => {
+        if (socketRef.current) {
+            socketRef.current.emit('rps_decide', { goFirst });
+        }
+    }, []);
+
     return {
         // États de connexion
         isConnected,
@@ -341,6 +423,14 @@ export function useMultiplayer() {
         syncedState,
         opponentDisconnected,
 
+        // RPS
+        rpsPhase,
+        rpsResult,
+        opponentChoseRps,
+        isRpsWinner,
+        sendRpsChoice,
+        sendRpsDecision,
+
         // Actions
         createGame,
         createPrivateGame,
@@ -356,3 +446,4 @@ export function useMultiplayer() {
         clearLastAction,
     };
 }
+
