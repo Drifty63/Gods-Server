@@ -592,3 +592,160 @@
     padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* ================================
+   MODAL RÈGLES DU JEU
+   ================================ */
+.rulesModal {
+    background: linear-gradient(145deg, #0d0d1f, #16213e);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.6),
+        0 0 80px rgba(212, 175, 55, 0.1);
+    animation: modalSlideUp 0.4s ease;
+}
+
+.rulesModal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold-divine), transparent);
+}
+
+.rulesModal h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--gold-divine);
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.rulesContent {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    max-height: 55vh;
+    padding-right: 8px;
+}
+
+.rulesSection {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.rulesSection h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold-divine);
+    margin-bottom: 10px;
+}
+
+.rulesSection p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.rulesSection p:last-child {
+    margin-bottom: 0;
+}
+
+.rulesInfoGrid {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.rulesInfoCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 15px;
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 10px;
+}
+
+.rulesInfoNumber {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--gold-divine);
+}
+
+.rulesInfoCard span:last-child {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.rulesList {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding-left: 20px;
+    margin: 8px 0;
+}
+
+.rulesList li {
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.cycleText {
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.highlight {
+    background: rgba(212, 175, 55, 0.15);
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 3px solid var(--gold-divine);
+}
+
+.rulesFooter {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar pour le contenu des règles */
+.rulesContent::-webkit-scrollbar {
+    width: 6px;
+}
+
+.rulesContent::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.rulesContent::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.3);
+    border-radius: 3px;
+}
+
+.rulesContent::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.5);
+}

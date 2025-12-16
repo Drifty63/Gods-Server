@@ -27,6 +27,7 @@ export default function GlobalUI() {
     const [showOptionsModal, setShowOptionsModal] = useState(false);
     const [showRewardsModal, setShowRewardsModal] = useState(false);
     const [showQuestsModal, setShowQuestsModal] = useState(false);
+    const [showRulesModal, setShowRulesModal] = useState(false);
 
     // Chrono de réinitialisation des quêtes (temps jusqu'à minuit)
     const [timeUntilReset, setTimeUntilReset] = useState('');
@@ -179,6 +180,15 @@ export default function GlobalUI() {
         setShowRewardsModal(false);
     };
 
+    const openRulesModal = () => {
+        setShowOptionsModal(false); // Fermer les options
+        setShowRulesModal(true);
+    };
+
+    const closeRulesModal = () => {
+        setShowRulesModal(false);
+    };
+
     const closeQuestsModal = () => {
         setShowQuestsModal(false);
     };
@@ -289,9 +299,9 @@ export default function GlobalUI() {
                                 <h3 className={styles.optionsSectionTitle}>
                                     <span>📖</span> Règles du jeu
                                 </h3>
-                                <Link href="/rules" className={styles.optionLink} onClick={closeOptionsModal}>
+                                <button className={styles.optionLink} onClick={openRulesModal}>
                                     Consulter les règles
-                                </Link>
+                                </button>
                             </div>
 
                             {/* Section À propos */}
@@ -391,6 +401,107 @@ export default function GlobalUI() {
 
                         <div className={styles.questsFooter}>
                             <button className={styles.closeButton} onClick={closeQuestsModal}>
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal des Règles du Jeu */}
+            {showRulesModal && (
+                <div className={styles.modalOverlay} onClick={closeRulesModal}>
+                    <div className={styles.rulesModal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.closeModalIcon} onClick={closeRulesModal}>✕</button>
+                        <h2>📖 Règles du Jeu</h2>
+
+                        <div className={styles.rulesContent}>
+                            {/* But du Jeu */}
+                            <div className={styles.rulesSection}>
+                                <h3>🎯 But du Jeu</h3>
+                                <p>
+                                    Le but de <strong>GODS</strong> est de <strong>vaincre tous les dieux adverses</strong> en
+                                    optimisant la gestion d'énergie et en exploitant les interactions élémentaires.
+                                </p>
+                            </div>
+
+                            {/* Deck & Dieux */}
+                            <div className={styles.rulesSection}>
+                                <h3>🎴 Deck & Dieux</h3>
+                                <div className={styles.rulesInfoGrid}>
+                                    <div className={styles.rulesInfoCard}>
+                                        <span className={styles.rulesInfoNumber}>20</span>
+                                        <span>Cartes par deck</span>
+                                    </div>
+                                    <div className={styles.rulesInfoCard}>
+                                        <span className={styles.rulesInfoNumber}>4</span>
+                                        <span>Dieux par joueur</span>
+                                    </div>
+                                    <div className={styles.rulesInfoCard}>
+                                        <span className={styles.rulesInfoNumber}>5</span>
+                                        <span>Cartes par dieu</span>
+                                    </div>
+                                </div>
+                                <p><strong>Composition par dieu :</strong></p>
+                                <ul className={styles.rulesList}>
+                                    <li>2 cartes Générateur - Produisent de l'énergie</li>
+                                    <li>2 cartes Compétence - Attaques et effets offensifs</li>
+                                    <li>1 carte Utilitaire - Effets spéciaux et support</li>
+                                </ul>
+                            </div>
+
+                            {/* Cycle Élémentaire */}
+                            <div className={styles.rulesSection}>
+                                <h3>🔄 Cycle Élémentaire</h3>
+                                <p><strong>Cycle Principal :</strong></p>
+                                <p className={styles.cycleText}>🔥 Feu → 💨 Air → 🌿 Terre → ⚡ Foudre → 💧 Eau → 🔥 Feu</p>
+                                <p><strong>Cycle Parallèle :</strong></p>
+                                <p className={styles.cycleText}>☀️ Lumière ⚔️ 💀 Ténèbres</p>
+                                <p className={styles.highlight}>💥 <strong>Bonus de faiblesse :</strong> Frapper sur la faiblesse d'un dieu inflige des dégâts doublés !</p>
+                            </div>
+
+                            {/* Système d'Énergie */}
+                            <div className={styles.rulesSection}>
+                                <h3>⚡ Système d'Énergie</h3>
+                                <ul className={styles.rulesList}>
+                                    <li><strong>Premier joueur :</strong> Commence avec 0 énergie</li>
+                                    <li><strong>Second joueur :</strong> Commence avec 1 énergie</li>
+                                    <li><strong>Jouer une carte générateur :</strong> Gagne l'énergie indiquée</li>
+                                    <li><strong>Défausser une carte :</strong> Gagne +1 énergie</li>
+                                </ul>
+                            </div>
+
+                            {/* Déroulement d'un Tour */}
+                            <div className={styles.rulesSection}>
+                                <h3>🔁 Déroulement d'un Tour</h3>
+                                <ol className={styles.rulesList}>
+                                    <li><strong>Phase de Pioche :</strong> Piochez jusqu'à avoir 5 cartes en main</li>
+                                    <li><strong>Phase d'Action :</strong> Jouez une carte OU défaussez une carte (+1 énergie)</li>
+                                    <li><strong>Fin du Tour :</strong> Le tour passe à l'adversaire</li>
+                                </ol>
+                            </div>
+
+                            {/* Mort d'un Dieu */}
+                            <div className={styles.rulesSection}>
+                                <h3>💀 Mort d'un Dieu</h3>
+                                <p>
+                                    Lorsque les PV d'un dieu tombent à 0 ou moins, il est mort.
+                                    Toutes ses cartes sont <strong>retirées du jeu</strong>.
+                                </p>
+                            </div>
+
+                            {/* Fatigue */}
+                            <div className={styles.rulesSection}>
+                                <h3>😫 Fatigue</h3>
+                                <p>
+                                    Quand votre deck est vide, la défausse est recyclée.
+                                    À chaque recyclage, tous vos dieux subissent des <strong>dégâts croissants</strong> (+1, +2, +3...).
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className={styles.rulesFooter}>
+                            <button className={styles.closeButton} onClick={closeRulesModal}>
                                 Fermer
                             </button>
                         </div>
