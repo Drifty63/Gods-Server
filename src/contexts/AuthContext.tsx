@@ -3,7 +3,7 @@
 // Contexte d'authentification React
 // Fournit l'état de l'utilisateur connecté à toute l'application
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import {
     auth,
     onAuthStateChanged,
@@ -22,6 +22,7 @@ interface AuthContextType {
     user: User | null;
     profile: UserProfile | null;
     loading: boolean;
+    profileLoading: boolean;
     error: string | null;
 
     // Actions
@@ -40,21 +41,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [profileLoading, setProfileLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Charger le profil
+    const loadProfile = useCallback(async (uid: string) => {
+        setProfileLoading(true);
+        try {
+            const userProfile = await getUserProfile(uid);
+            setProfile(userProfile);
+            console.log('Profil chargé:', userProfile);
+        } catch (err) {
+            console.error('Erreur chargement profil:', err);
+            setProfile(null);
+        } finally {
+            setProfileLoading(false);
+        }
+    }, []);
 
     // Écouter les changements d'état d'authentification
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            console.log('Auth state changed:', firebaseUser?.email);
             setUser(firebaseUser);
 
             if (firebaseUser) {
-                // Charger le profil
-                try {
-                    const userProfile = await getUserProfile(firebaseUser.uid);
-                    setProfile(userProfile);
-                } catch (err) {
-                    console.error('Erreur chargement profil:', err);
-                }
+                await loadProfile(firebaseUser.uid);
             } else {
                 setProfile(null);
             }
@@ -63,14 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [loadProfile]);
 
     // Connexion avec email
     const login = async (email: string, password: string) => {
         setError(null);
         setLoading(true);
         try {
-            await loginWithEmail(email, password);
+            const user = await loginWithEmail(email, password);
+            // Charger le profil après connexion
+            await loadProfile(user.uid);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
             setError(translateFirebaseError(errorMessage));
@@ -85,7 +99,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError(null);
         setLoading(true);
         try {
-            await loginWithGoogle();
+            const user = await loginWithGoogle();
+            // Charger le profil après connexion
+            await loadProfile(user.uid);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion Google';
             setError(translateFirebaseError(errorMessage));
@@ -100,7 +116,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError(null);
         setLoading(true);
         try {
-            await registerWithEmail(email, password, username);
+            const user = await registerWithEmail(email, password, username);
+            // Charger le profil après inscription
+            await loadProfile(user.uid);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur d\'inscription';
             setError(translateFirebaseError(errorMessage));
@@ -124,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     // Mise à jour du profil
-    const updateProfile = async (username: string, avatar: string) => {
+    const updateProfileFn = async (username: string, avatar: string) => {
         if (!user) return;
 
         setError(null);
@@ -133,26 +151,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await updateAvatar(user.uid, avatar);
 
             // Rafraîchir le profil
-            const updatedProfile = await getUserProfile(user.uid);
-            setProfile(updatedProfile);
+            await loadProfile(user.uid);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur de mise à jour';
-            setError(errorMessage);
+            setError(translateFirebaseError(errorMessage));
             throw err;
         }
     };
 
     // Rafraîchir le profil
-    const refreshProfile = async () => {
+    const refreshProfile = useCallback(async () => {
         if (!user) return;
-
-        try {
-            const updatedProfile = await getUserProfile(user.uid);
-            setProfile(updatedProfile);
-        } catch (err) {
-            console.error('Erreur rafraîchissement profil:', err);
-        }
-    };
+        await loadProfile(user.uid);
+    }, [user, loadProfile]);
 
     // Effacer les erreurs
     const clearError = () => setError(null);
@@ -162,12 +173,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user,
             profile,
             loading,
+            profileLoading,
             error,
             login,
             loginGoogle,
             register,
             signOut,
-            updateProfile,
+            updateProfile: updateProfileFn,
             refreshProfile,
             clearError,
         }}>
@@ -213,6 +225,9 @@ function translateFirebaseError(errorMessage: string): string {
     }
     if (errorMessage.includes('auth/invalid-credential')) {
         return 'Email ou mot de passe incorrect.';
+    }
+    if (errorMessage.includes('permission-denied') || errorMessage.includes('PERMISSION_DENIED')) {
+        return 'Accès refusé. Vérifie les règles Firestore.';
     }
     return errorMessage;
 }

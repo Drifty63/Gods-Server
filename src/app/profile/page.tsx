@@ -27,12 +27,14 @@ function getXpToNext(level: number): number {
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, profile, loading, signOut, updateProfile, refreshProfile } = useAuth();
+    const { user, profile, loading, profileLoading, signOut, updateProfile, refreshProfile } = useAuth();
 
     useEffect(() => {
-        // Rafraîchir le profil au chargement
-        refreshProfile();
-    }, [refreshProfile]);
+        // Rafraîchir le profil au chargement si user existe mais pas de profil
+        if (user && !profile && !profileLoading) {
+            refreshProfile();
+        }
+    }, [user, profile, profileLoading, refreshProfile]);
 
     // Rediriger si non connecté
     useEffect(() => {
@@ -51,8 +53,8 @@ export default function ProfilePage() {
         await updateProfile(profile.username, newAvatar);
     };
 
-    // Affichage de chargement
-    if (loading) {
+    // Affichage de chargement initial
+    if (loading || profileLoading) {
         return (
             <main className={styles.main}>
                 <div className={styles.loadingContainer}>
@@ -63,13 +65,33 @@ export default function ProfilePage() {
         );
     }
 
-    // Si pas de profil après chargement
+    // Redirection en cours
+    if (!user) {
+        return (
+            <main className={styles.main}>
+                <div className={styles.loadingContainer}>
+                    <div className={styles.spinner}>⏳</div>
+                    <p>Redirection...</p>
+                </div>
+            </main>
+        );
+    }
+
+    // Si pas de profil après chargement (problème Firestore)
     if (!profile) {
         return (
             <main className={styles.main}>
                 <div className={styles.loadingContainer}>
-                    <p>Profil introuvable.</p>
-                    <Link href="/auth" className={styles.linkButton}>Se connecter</Link>
+                    <p>⚠️ Profil introuvable dans la base de données.</p>
+                    <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginTop: '10px' }}>
+                        Il peut y avoir un problème avec les règles Firestore.
+                    </p>
+                    <button onClick={() => refreshProfile()} className={styles.linkButton} style={{ marginTop: '15px' }}>
+                        🔄 Réessayer
+                    </button>
+                    <button onClick={handleSignOut} className={styles.logoutButton} style={{ marginTop: '10px' }}>
+                        🚪 Se déconnecter
+                    </button>
                 </div>
             </main>
         );
