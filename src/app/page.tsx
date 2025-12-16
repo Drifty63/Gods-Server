@@ -191,7 +191,7 @@ export default function Home() {
         </Link>
 
         <Link href="/deck" className={styles.navItem}>
-          <span className={styles.navIcon}>�</span>
+          <span className={styles.navIcon}>🎴</span>
           <span className={styles.navLabel}>Deck</span>
         </Link>
 
@@ -205,12 +205,12 @@ export default function Home() {
         </button>
 
         <Link href="/social" className={styles.navItem}>
-          <span className={styles.navIcon}>�</span>
+          <span className={styles.navIcon}>💬</span>
           <span className={styles.navLabel}>Social</span>
         </Link>
 
         <Link href="/profile" className={styles.navItem}>
-          <span className={styles.navIcon}>👤</span>
+          <span className={styles.navIcon}>�</span>
           <span className={styles.navLabel}>Profil</span>
         </Link>
       </nav>
