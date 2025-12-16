@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { Element } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
@@ -178,6 +178,11 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Modal de détail de carte
     const [showCardDetail, setShowCardDetail] = useState(false);
     const [isForcedDetail, setIsForcedDetail] = useState(false);
+
+    // Chronomètre de tour (60 secondes par tour)
+    const TURN_TIME_LIMIT = 60;
+    const [turnTimer, setTurnTimer] = useState(TURN_TIME_LIMIT);
+    const turnTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Effet pour ouvrir le modal de sélection après avoir joué une carte qui le nécessite
     useEffect(() => {
@@ -520,6 +525,42 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
     }, [isPlayerTurn, gameState?.turnNumber]);
 
+    // Chronomètre de tour - Reset et démarrage à chaque changement de tour
+    useEffect(() => {
+        // Nettoyer le timer précédent
+        if (turnTimerRef.current) {
+            clearInterval(turnTimerRef.current);
+        }
+
+        // Reset le timer à 60 secondes au début de chaque tour
+        setTurnTimer(TURN_TIME_LIMIT);
+
+        // Démarrer le compte à rebours seulement si c'est notre tour et le jeu est en cours
+        if (isPlayerTurn && gameState?.status === 'playing') {
+            turnTimerRef.current = setInterval(() => {
+                setTurnTimer(prev => {
+                    if (prev <= 1) {
+                        // Temps écoulé - fin de tour automatique
+                        if (turnTimerRef.current) {
+                            clearInterval(turnTimerRef.current);
+                        }
+                        // Forcer la fin du tour
+                        endTurn();
+                        onAction?.({ type: 'end_turn', payload: {} });
+                        return TURN_TIME_LIMIT;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (turnTimerRef.current) {
+                clearInterval(turnTimerRef.current);
+            }
+        };
+    }, [isPlayerTurn, gameState?.turnNumber, gameState?.status, endTurn, onAction]);
+
     const handleBlindDiscard = (cardId: string) => {
         if (!isPlayerTurn) return;
 
@@ -686,6 +727,12 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         <span className={`${styles.turnIndicator} ${isPlayerTurn ? styles.myTurn : styles.opponentTurn} `}>
                             {isPlayerTurn ? '🎮 Votre tour' : '⏳ Tour adverse'}
                         </span>
+                        {/* Chronomètre de tour */}
+                        {gameState.status === 'playing' && (
+                            <span className={`${styles.turnTimer} ${turnTimer <= 10 ? styles.timerWarning : ''} ${turnTimer <= 5 ? styles.timerCritical : ''}`}>
+                                ⏱️ {turnTimer}s
+                            </span>
+                        )}
                         {isPlayerTurn && gameState.status === 'playing' && !isSelectingTarget && (
                             <button
                                 className={styles.endTurnButton}
