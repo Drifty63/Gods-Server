@@ -77,9 +77,13 @@ function AuthContent() {
         clearError();
 
         try {
-            await loginGoogle();
-            // Pour Google, vérifier si le profil est nouveau (rediriger vers setup)
-            router.push('/profile/setup');
+            const isNewUser = await loginGoogle();
+            // Rediriger vers setup si nouveau compte, sinon vers accueil
+            if (isNewUser) {
+                router.push('/profile/setup');
+            } else {
+                router.push('/');
+            }
         } catch {
             // L'erreur est gérée par le contexte
         }

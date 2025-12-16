@@ -45,6 +45,7 @@ export interface UserProfile {
         spellsOwned: string[];
     };
     achievements: string[];
+    needsSetup?: boolean; // True si le profil nécessite une configuration initiale
     createdAt: Date;
     lastLoginAt: Date;
 }
@@ -138,16 +139,17 @@ export async function loginWithEmail(email: string, password: string): Promise<U
     return userCredential.user;
 }
 
-// Connexion avec Google
-export async function loginWithGoogle(): Promise<User> {
+// Connexion avec Google - Retourne l'utilisateur ET si c'est un nouveau compte
+export async function loginWithGoogle(): Promise<{ user: User; isNewUser: boolean }> {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
     // Vérifier si le profil existe déjà
     const profileDoc = await getDoc(doc(db, 'users', user.uid));
+    const isNewUser = !profileDoc.exists();
 
-    if (!profileDoc.exists()) {
-        // Générer un pseudo unique basé sur le nom Google
+    if (isNewUser) {
+        // Générer un pseudo temporaire basé sur le nom Google
         let baseUsername = user.displayName || user.email?.split('@')[0] || 'Joueur';
         let username = baseUsername;
         let counter = 1;
@@ -158,11 +160,12 @@ export async function loginWithGoogle(): Promise<User> {
             counter++;
         }
 
-        // Créer le profil
+        // Créer le profil avec un flag "needsSetup" pour indiquer que le profil n'est pas configuré
         const profileData = createDefaultProfile(user.uid, user.email || '', username);
         await setDoc(doc(db, 'users', user.uid), {
             ...profileData,
             avatar: user.photoURL || '⚡',
+            needsSetup: true, // Flag pour indiquer qu'il faut passer par le setup
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp(),
         });
@@ -179,7 +182,7 @@ export async function loginWithGoogle(): Promise<User> {
         });
     }
 
-    return user;
+    return { user, isNewUser };
 }
 
 // Déconnexion
@@ -233,10 +236,11 @@ export async function updateUsername(uid: string, newUsername: string): Promise<
         throw new Error('auth/username-already-in-use');
     }
 
-    // Mettre à jour le profil
+    // Mettre à jour le profil et marquer comme configuré
     await updateDoc(doc(db, 'users', uid), {
         username: newUsername,
-        usernameLower: newUsername.toLowerCase()
+        usernameLower: newUsername.toLowerCase(),
+        needsSetup: false // Marquer le profil comme configuré
     });
 
     // Mettre à jour la réservation de pseudo

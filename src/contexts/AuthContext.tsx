@@ -9,7 +9,7 @@ import {
     onAuthStateChanged,
     getUserProfile,
     loginWithEmail,
-    loginWithGoogle,
+    loginWithGoogle as loginWithGoogleFn,
     registerWithEmail,
     logout,
     updateUsername,
@@ -27,7 +27,7 @@ interface AuthContextType {
 
     // Actions
     login: (email: string, password: string) => Promise<void>;
-    loginGoogle: () => Promise<void>;
+    loginGoogle: () => Promise<boolean>; // Retourne true si nouveau compte (pour rediriger vers setup)
     register: (email: string, password: string, username: string) => Promise<void>;
     signOut: () => Promise<void>;
     updateProfile: (username: string, avatar: string) => Promise<void>;
@@ -94,14 +94,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    // Connexion avec Google
-    const loginGoogle = async () => {
+    // Connexion avec Google - Retourne isNewUser pour rediriger vers setup si besoin
+    const loginGoogle = async (): Promise<boolean> => {
         setError(null);
         setLoading(true);
         try {
-            const user = await loginWithGoogle();
+            const { user, isNewUser } = await loginWithGoogleFn();
             // Charger le profil après connexion
             await loadProfile(user.uid);
+            return isNewUser;
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion Google';
             setError(translateFirebaseError(errorMessage));

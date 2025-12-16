@@ -27,9 +27,9 @@ export default function ProfileSetupPage() {
         }
     }, [user, loading, router]);
 
-    // Si le profil existe déjà et est complet, rediriger vers l'accueil
+    // Si le profil existe et n'a pas besoin de setup, rediriger vers l'accueil
     useEffect(() => {
-        if (!loading && profile && profile.username) {
+        if (!loading && profile && profile.needsSetup === false) {
             router.push('/');
         }
     }, [profile, loading, router]);
