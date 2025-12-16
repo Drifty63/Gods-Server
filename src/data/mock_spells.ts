@@ -8,18 +8,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
         return [
             {
                 id: 'poseidon_s1',
-                name: 'Grande Vague',
-                element: 'water',
-                godId: 'poseidon',
-                type: 'competence', // ou 'utility' selon logique jeu, mais competence pour dégâts
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "Dégâts et Défausse" }],
-                imageUrl: '/cards/spells/poseidon/grand_wave.png',
-                description: "Inflige 2 dégâts à deux cibles et défausse 2 cartes de la main de votre adversaire."
-            },
-            {
-                id: 'poseidon_s2',
                 name: 'Trident de Poséidon',
                 element: 'water',
                 godId: 'poseidon',
@@ -31,19 +19,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 description: "Inflige 3 dégâts à une cible."
             },
             {
-                id: 'poseidon_s3',
-                name: 'Prison Aquatique',
-                element: 'water',
-                godId: 'poseidon',
-                type: 'competence',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "AOE et Meule" }],
-                imageUrl: '/cards/spells/poseidon/water_prison.png',
-                description: "Inflige 1 dégât à toutes les cibles et meule du nombre d'ennemis touchés."
-            },
-            {
-                id: 'poseidon_s4',
+                id: 'poseidon_s2',
                 name: 'Colère de Poséidon',
                 element: 'water',
                 godId: 'poseidon',
@@ -53,6 +29,30 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'custom', description: "Multi-cible et Meule" }],
                 imageUrl: '/cards/spells/poseidon/wrath.png',
                 description: "Inflige 1 dégâts à deux cibles et meule 2 cartes."
+            },
+            {
+                id: 'poseidon_s3',
+                name: 'Grande Vague',
+                element: 'water',
+                godId: 'poseidon',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Dégâts et Défausse" }],
+                imageUrl: '/cards/spells/poseidon/grand_wave.png',
+                description: "Inflige 2 dégâts à deux cibles et défausse 2 cartes de la main de votre adversaire."
+            },
+            {
+                id: 'poseidon_s4',
+                name: 'Prison Aquatique',
+                element: 'water',
+                godId: 'poseidon',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "AOE et Meule" }],
+                imageUrl: '/cards/spells/poseidon/water_prison.png',
+                description: "Inflige 1 dégât à toutes les cibles et meule du nombre d'ennemis touchés."
             },
             {
                 id: 'poseidon_s5',
@@ -74,30 +74,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
         return [
             {
                 id: 'zeus_s1',
-                name: 'Foudre Conductrice',
-                element: 'lightning',
-                godId: 'zeus',
-                type: 'competence',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "Dégâts et Marque" }],
-                imageUrl: '/cards/spells/zeus/conductive_lightning.png',
-                description: "Inflige 1 dégâts à deux cibles et leurs applique 1 marque de foudre."
-            },
-            {
-                id: 'zeus_s2',
-                name: "Chaîne d'éclair",
-                element: 'lightning',
-                godId: 'zeus',
-                type: 'competence',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "Multi-cible et Explosion Marque" }],
-                imageUrl: '/cards/spells/zeus/chain_lightning.png',
-                description: "Inflige 2 dégâts à 2 cibles. Applique ou enlève ⚡. Inflige 2 dégâts par ⚡ enlevée."
-            },
-            {
-                id: 'zeus_s3',
                 name: 'Éclair de Zeus',
                 element: 'lightning',
                 godId: 'zeus',
@@ -109,7 +85,19 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 description: "Inflige 3 dégâts à une cible."
             },
             {
-                id: 'zeus_s4',
+                id: 'zeus_s2',
+                name: 'Foudre Conductrice',
+                element: 'lightning',
+                godId: 'zeus',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Dégâts et Marque" }],
+                imageUrl: '/cards/spells/zeus/conductive_lightning.png',
+                description: "Inflige 1 dégâts à deux cibles et leurs applique 1 marque de foudre."
+            },
+            {
+                id: 'zeus_s3',
                 name: 'Éclair foudroyant',
                 element: 'lightning',
                 godId: 'zeus',
@@ -119,6 +107,18 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'damage', value: 5 }, { type: 'custom', description: "Explosion Marque" }],
                 imageUrl: '/cards/spells/zeus/lightning_bolt.png',
                 description: "Inflige 5 dégâts à une cible. Applique ou enlève ⚡. Inflige 2 dégâts par ⚡ enlevée."
+            },
+            {
+                id: 'zeus_s4',
+                name: "Chaîne d'éclair",
+                element: 'lightning',
+                godId: 'zeus',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Multi-cible et Explosion Marque" }],
+                imageUrl: '/cards/spells/zeus/chain_lightning.png',
+                description: "Inflige 2 dégâts à 2 cibles. Applique ou enlève ⚡. Inflige 2 dégâts par ⚡ enlevée."
             },
             {
                 id: 'zeus_s5',
@@ -152,18 +152,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
             },
             {
                 id: 'nyx_s2',
-                name: "Prophétie",
-                element: 'darkness',
-                godId: 'nyx',
-                type: 'utility',
-                energyCost: 1,
-                energyGain: 1,
-                effects: [{ type: 'custom', description: "Manipulation Deck et Gain Energie" }],
-                imageUrl: '/cards/spells/nyx/prophecy.png',
-                description: "Piochez 3 cartes du dessus de votre deck et placez 3 cartes en dessous, gagne 1 d'énergie."
-            },
-            {
-                id: 'nyx_s3',
                 name: 'Zone de vide',
                 element: 'darkness',
                 godId: 'nyx',
@@ -175,19 +163,19 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 description: "Inflige 1 dégâts à toutes les cibles."
             },
             {
-                id: 'nyx_s4',
-                name: 'Nuit Sans Fin',
+                id: 'nyx_s3',
+                name: "Prophétie",
                 element: 'darkness',
                 godId: 'nyx',
-                type: 'competence',
-                energyCost: 3,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "Reset Main Adversaire" }],
-                imageUrl: '/cards/spells/nyx/endless_night.png',
-                description: "L'adversaire mélange sa main dans son deck et pioche 5 cartes à l'envers"
+                type: 'utility',
+                energyCost: 1,
+                energyGain: 1,
+                effects: [{ type: 'custom', description: "Manipulation Deck et Gain Energie" }],
+                imageUrl: '/cards/spells/nyx/prophecy.png',
+                description: "Piochez 3 cartes du dessus de votre deck et placez 3 cartes en dessous, gagne 1 d'énergie."
             },
             {
-                id: 'nyx_s5',
+                id: 'nyx_s4',
                 name: 'Malédiction',
                 element: 'darkness',
                 godId: 'nyx',
@@ -197,6 +185,18 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'damage', value: 3 }, { type: 'custom', description: "Perturbation Ciblée" }],
                 imageUrl: '/cards/spells/nyx/curse.png',
                 description: "Inflige 3 dégâts à une cible; Choisissez 2 cartes de la main de votre adversaire, les mélange dans son deck et pioche 2 à l'envers."
+            },
+            {
+                id: 'nyx_s5',
+                name: 'Nuit Sans Fin',
+                element: 'darkness',
+                godId: 'nyx',
+                type: 'competence',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Reset Main Adversaire" }],
+                imageUrl: '/cards/spells/nyx/endless_night.png',
+                description: "L'adversaire mélange sa main dans son deck et pioche 5 cartes à l'envers"
             }
         ];
     }
@@ -206,42 +206,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
         return [
             {
                 id: 'hestia_s1',
-                name: 'Repos mérité',
-                element: 'fire',
-                godId: 'hestia',
-                type: 'utility',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "Recyclage Défausse" }],
-                imageUrl: '/cards/spells/hestia/deserved_rest.png',
-                description: "Choisissez deux cartes dans votre défausse, faite les revenir dans votre deck puis mélangez le."
-            },
-            {
-                id: 'hestia_s2',
-                name: 'Foyer protecteur',
-                element: 'fire',
-                godId: 'hestia',
-                type: 'utility',
-                energyCost: 3,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "Purification Faiblesses Global" }],
-                imageUrl: '/cards/spells/hestia/protective_hearth.png',
-                description: "Tout les alliées perdent leurs faiblesses pendant 3 tours."
-            },
-            {
-                id: 'hestia_s3',
-                name: 'Repas reconfortant',
-                element: 'fire',
-                godId: 'hestia',
-                type: 'utility',
-                energyCost: 1, // Supposition basée sur l'icone gauche "1"
-                energyGain: 2,
-                effects: [{ type: 'heal', value: 0 }, { type: 'energy', value: 2 }], // Heal dynamique
-                imageUrl: '/cards/spells/hestia/comfort_meal.png',
-                description: "Donne 2 énergies et soigne un allié de la valeur total de votre énergie."
-            },
-            {
-                id: 'hestia_s4',
                 name: 'Flammes intérieur',
                 element: 'fire',
                 godId: 'hestia',
@@ -253,7 +217,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 description: "Inflige 3 dégâts à une cible."
             },
             {
-                id: 'hestia_s5',
+                id: 'hestia_s2',
                 name: 'Fumée cendrée',
                 element: 'fire',
                 godId: 'hestia',
@@ -263,6 +227,42 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'damage', value: 1, target: 'all_enemies' }, { type: 'custom', description: "Purification Ciblée" }],
                 imageUrl: '/cards/spells/hestia/ash_smoke.png',
                 description: "Inflige 1 dégâts à toutes les cibles et fait perdre la faiblesse d'un de vos dieux pendant 1 tour."
+            },
+            {
+                id: 'hestia_s3',
+                name: 'Repas reconfortant',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'utility',
+                energyCost: 1,
+                energyGain: 2,
+                effects: [{ type: 'heal', value: 0 }, { type: 'energy', value: 2 }],
+                imageUrl: '/cards/spells/hestia/comfort_meal.png',
+                description: "Donne 2 énergies et soigne un allié de la valeur total de votre énergie."
+            },
+            {
+                id: 'hestia_s4',
+                name: 'Repos mérité',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'utility',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Recyclage Défausse" }],
+                imageUrl: '/cards/spells/hestia/deserved_rest.png',
+                description: "Choisissez deux cartes dans votre défausse, faite les revenir dans votre deck puis mélangez le."
+            },
+            {
+                id: 'hestia_s5',
+                name: 'Foyer protecteur',
+                element: 'fire',
+                godId: 'hestia',
+                type: 'utility',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Purification Faiblesses Global" }],
+                imageUrl: '/cards/spells/hestia/protective_hearth.png',
+                description: "Tout les alliées perdent leurs faiblesses pendant 3 tours."
             }
         ];
     }
@@ -284,18 +284,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
             },
             {
                 id: 'athena_s2',
-                name: 'Faveur divine',
-                element: 'light',
-                godId: 'athena',
-                type: 'utility',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'shield', value: 3 }],
-                imageUrl: '/cards/spells/athena/divine_favor.png',
-                description: "Donne 3 boucliers à elle et un allié."
-            },
-            {
-                id: 'athena_s3',
                 name: 'Nova protectrice',
                 element: 'light',
                 godId: 'athena',
@@ -305,6 +293,18 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'damage', value: 1, target: 'all_enemies' }, { type: 'custom', description: "Provocation 1 tour" }],
                 imageUrl: '/cards/spells/athena/protective_nova.png',
                 description: "Inflige 1 dégâts à toutes les cibles. Provoque les attaques adverses pendant 1 tour."
+            },
+            {
+                id: 'athena_s3',
+                name: 'Faveur divine',
+                element: 'light',
+                godId: 'athena',
+                type: 'utility',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'shield', value: 3 }],
+                imageUrl: '/cards/spells/athena/divine_favor.png',
+                description: "Donne 3 boucliers à elle et un allié."
             },
             {
                 id: 'athena_s4',
@@ -350,15 +350,15 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
             },
             {
                 id: 'demeter_s2',
-                name: 'Récolte',
+                name: 'Sècheresse',
                 element: 'earth',
                 godId: 'demeter',
-                type: 'utility',
+                type: 'competence',
                 energyCost: 1,
-                energyGain: 1,
+                energyGain: 0,
                 effects: [],
-                imageUrl: '/cards/spells/demeter/recolte.png',
-                description: "Soigne une cible de 4 et augmente l'énergie de 1"
+                imageUrl: '/cards/spells/demeter/drought.png',
+                description: "Inflige 1 dégâts à toutes les cibles et soigne 2 de façon souhaitée."
             },
             {
                 id: 'demeter_s3',
@@ -374,15 +374,15 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
             },
             {
                 id: 'demeter_s4',
-                name: 'Sècheresse',
+                name: 'Récolte',
                 element: 'earth',
                 godId: 'demeter',
-                type: 'competence',
+                type: 'utility',
                 energyCost: 1,
-                energyGain: 0,
+                energyGain: 1,
                 effects: [],
-                imageUrl: '/cards/spells/demeter/drought.png',
-                description: "Inflige 1 dégâts à toutes les cibles et soigne 2 de façon souhaitée."
+                imageUrl: '/cards/spells/demeter/recolte.png',
+                description: "Soigne une cible de 4 et augmente l'énergie de 1"
             },
             {
                 id: 'demeter_s5',
@@ -428,18 +428,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
             },
             {
                 id: 'dionysos_s3',
-                name: 'Tournée Générale',
-                element: 'earth',
-                godId: 'dionysos',
-                type: 'utility',
-                energyCost: 3,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "2 poisons à tous les ennemis" }],
-                imageUrl: '/cards/spells/dionysos/rounds_on_me.png',
-                description: "Tous les ennemis subissent 2 de poison."
-            },
-            {
-                id: 'dionysos_s4',
                 name: 'Folie',
                 element: 'earth',
                 godId: 'dionysos',
@@ -451,7 +439,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 description: "Inflige 2 dégâts et inflige 2 poison à une cible."
             },
             {
-                id: 'dionysos_s5',
+                id: 'dionysos_s4',
                 name: 'Ambroisie',
                 element: 'earth',
                 godId: 'dionysos',
@@ -461,6 +449,18 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'heal', value: 0 }, { type: 'custom', description: "Soin = Total Poisons" }],
                 imageUrl: '/cards/spells/dionysos/ambrosia.png',
                 description: "Soigne un personnage du nombre total de poisons sur les ennemis."
+            },
+            {
+                id: 'dionysos_s5',
+                name: 'Tournée Générale',
+                element: 'earth',
+                godId: 'dionysos',
+                type: 'utility',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "2 poisons à tous les ennemis" }],
+                imageUrl: '/cards/spells/dionysos/rounds_on_me.png',
+                description: "Tous les ennemis subissent 2 de poison."
             }
         ];
     }
@@ -470,30 +470,18 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
         return [
             {
                 id: 'hades_s1',
-                name: 'Syphon d\'âme',
+                name: 'Purgatoire',
                 element: 'fire',
                 godId: 'hades',
                 type: 'competence',
                 energyCost: 1,
                 energyGain: 0,
-                effects: [{ type: 'damage', value: 3 }, { type: 'heal', value: 3, target: 'self' }],
-                imageUrl: '/cards/spells/hades/soul_siphon.png',
-                description: "Inflige 3 dégâts à une cible ; Soigne du nombre de dégâts infligés"
+                effects: [{ type: 'damage', value: 2 }, { type: 'heal', value: 2, target: 'self' }],
+                imageUrl: '/cards/spells/hades/purgatory.png',
+                description: "Inflige 2 dégâts à une cible et regagne 2 points de vie."
             },
             {
                 id: 'hades_s2',
-                name: 'Flammes infernales',
-                element: 'fire',
-                godId: 'hades',
-                type: 'competence',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'damage', value: 6 }],
-                imageUrl: '/cards/spells/hades/hellfire.png',
-                description: "Inflige 6 dégâts à une cible"
-            },
-            {
-                id: 'hades_s3',
                 name: 'Terre brulée',
                 element: 'fire',
                 godId: 'hades',
@@ -505,16 +493,28 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 description: "Inflige 1 dégâts à toutes les cibles."
             },
             {
-                id: 'hades_s4',
-                name: 'Purgatoire',
+                id: 'hades_s3',
+                name: 'Flammes infernales',
                 element: 'fire',
                 godId: 'hades',
                 type: 'competence',
                 energyCost: 1,
                 energyGain: 0,
-                effects: [{ type: 'damage', value: 2 }, { type: 'heal', value: 2, target: 'self' }],
-                imageUrl: '/cards/spells/hades/purgatory.png',
-                description: "Inflige 2 dégâts à une cible et regagne 2 points de vie."
+                effects: [{ type: 'damage', value: 6 }],
+                imageUrl: '/cards/spells/hades/hellfire.png',
+                description: "Inflige 6 dégâts à une cible"
+            },
+            {
+                id: 'hades_s4',
+                name: 'Syphon d\'âme',
+                element: 'fire',
+                godId: 'hades',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 3 }, { type: 'heal', value: 3, target: 'self' }],
+                imageUrl: '/cards/spells/hades/soul_siphon.png',
+                description: "Inflige 3 dégâts à une cible ; Soigne du nombre de dégâts infligés"
             },
             {
                 id: 'hades_s5',
@@ -602,15 +602,15 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
         return [
             {
                 id: 'ares_s1',
-                name: 'Frappe sauvage',
+                name: 'Saut bestial',
                 element: 'earth',
                 godId: 'ares',
                 type: 'competence',
                 energyCost: 1,
                 energyGain: 0,
-                effects: [{ type: 'damage', value: 5 }, { type: 'damage', value: 3, target: 'self' }],
-                imageUrl: '/cards/spells/ares/savage_strike.png',
-                description: "Inflige 5 dégâts à une cible et reçoit 3 dégâts."
+                effects: [{ type: 'damage', value: 4 }, { type: 'damage', value: 2, target: 'self' }],
+                imageUrl: '/cards/spells/ares/bestial_leap.png',
+                description: "Inflige 4 dégâts à une cible et reçoit 2 dégâts."
             },
             {
                 id: 'ares_s2',
@@ -626,30 +626,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
             },
             {
                 id: 'ares_s3',
-                name: 'Saut bestial',
-                element: 'earth',
-                godId: 'ares',
-                type: 'competence',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'damage', value: 4 }, { type: 'damage', value: 2, target: 'self' }],
-                imageUrl: '/cards/spells/ares/bestial_leap.png',
-                description: "Inflige 4 dégâts à une cible et reçoit 2 dégâts."
-            },
-            {
-                id: 'ares_s4',
-                name: 'Dernier recours',
-                element: 'earth',
-                godId: 'ares',
-                type: 'competence',
-                energyCost: 3,
-                energyGain: 0,
-                effects: [{ type: 'custom', description: "Dégâts = PV perdus" }, { type: 'damage', value: 5, target: 'self' }],
-                imageUrl: '/cards/spells/ares/last_resort.png',
-                description: "Inflige des dégâts égaux aux points de vie perdus. Subit 5 dégâts après l'attaque."
-            },
-            {
-                id: 'ares_s5',
                 name: 'Entrainement martial',
                 element: 'earth',
                 godId: 'ares',
@@ -659,6 +635,30 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'damage', value: 3, target: 'self' }],
                 imageUrl: '/cards/spells/ares/martial_training.png',
                 description: "Augmente l'énergie de 3 et reçoit 3 dégâts."
+            },
+            {
+                id: 'ares_s4',
+                name: 'Frappe sauvage',
+                element: 'earth',
+                godId: 'ares',
+                type: 'competence',
+                energyCost: 1,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 5 }, { type: 'damage', value: 3, target: 'self' }],
+                imageUrl: '/cards/spells/ares/savage_strike.png',
+                description: "Inflige 5 dégâts à une cible et reçoit 3 dégâts."
+            },
+            {
+                id: 'ares_s5',
+                name: 'Dernier recours',
+                element: 'earth',
+                godId: 'ares',
+                type: 'competence',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'custom', description: "Dégâts = PV perdus" }, { type: 'damage', value: 5, target: 'self' }],
+                imageUrl: '/cards/spells/ares/last_resort.png',
+                description: "Inflige des dégâts égaux aux points de vie perdus. Subit 5 dégâts après l'attaque."
             }
         ];
     }
@@ -668,15 +668,15 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
         return [
             {
                 id: 'artemis_s1',
-                name: 'Flèche d\'exécution',
+                name: 'Tir bestial',
                 element: 'air',
                 godId: 'artemis',
                 type: 'competence',
-                energyCost: 3,
+                energyCost: 1,
                 energyGain: 0,
-                effects: [{ type: 'damage', value: 10 }],
-                imageUrl: '/cards/spells/artemis/execution_arrow.png',
-                description: "Inflige 10 dégâts à une cible."
+                effects: [{ type: 'damage', value: 2 }, { type: 'custom', description: "2 cibles" }],
+                imageUrl: '/cards/spells/artemis/bestial_shot.png',
+                description: "Inflige 2 dégâts à deux cibles."
             },
             {
                 id: 'artemis_s2',
@@ -704,18 +704,6 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
             },
             {
                 id: 'artemis_s4',
-                name: 'Tir bestial',
-                element: 'air',
-                godId: 'artemis',
-                type: 'competence',
-                energyCost: 1,
-                energyGain: 0,
-                effects: [{ type: 'damage', value: 2 }, { type: 'custom', description: "2 cibles" }],
-                imageUrl: '/cards/spells/artemis/bestial_shot.png',
-                description: "Inflige 2 dégâts à deux cibles."
-            },
-            {
-                id: 'artemis_s5',
                 name: 'Flèches traçantes',
                 element: 'air',
                 godId: 'artemis',
@@ -725,6 +713,18 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 effects: [{ type: 'damage', value: 3 }, { type: 'custom', description: "2 cibles" }],
                 imageUrl: '/cards/spells/artemis/seeking_arrows.png',
                 description: "Inflige 3 dégâts à deux cibles."
+            },
+            {
+                id: 'artemis_s5',
+                name: 'Flèche d\'exécution',
+                element: 'air',
+                godId: 'artemis',
+                type: 'competence',
+                energyCost: 3,
+                energyGain: 0,
+                effects: [{ type: 'damage', value: 10 }],
+                imageUrl: '/cards/spells/artemis/execution_arrow.png',
+                description: "Inflige 10 dégâts à une cible."
             }
         ];
     }
