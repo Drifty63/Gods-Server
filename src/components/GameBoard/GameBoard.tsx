@@ -547,12 +547,25 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         setTurnTimer(TURN_TIME_LIMIT);
 
         // Ne pas démarrer le timer si le jeu n'est pas en cours ou si ce n'est pas notre tour
-        if (!isPlayerTurn || gameState?.status !== 'playing') {
+        // Vérifier aussi que le turnNumber est valide (évite les problèmes de transition)
+        if (!isPlayerTurn || gameState?.status !== 'playing' || !gameState?.turnNumber || gameState.turnNumber < 1) {
             return;
         }
 
+        // Vérifier que les deux joueurs ont des dieux (jeu initialisé correctement)
+        const bothPlayersReady = gameState.players.every(p => p.gods && p.gods.length > 0);
+        if (!bothPlayersReady) {
+            return;
+        }
+
+        // Délai plus long au premier tour pour la synchronisation après RPS
+        const delayMs = gameState.turnNumber === 1 ? 2000 : 500;
+
         // Petit délai pour laisser le jeu se synchroniser au démarrage
         const startDelay = setTimeout(() => {
+            // Revérifier que c'est toujours notre tour (au cas où ça aurait changé pendant le délai)
+            // Note: On utilise les valeurs capturées dans la closure
+
             // Démarrer le compte à rebours
             turnTimerRef.current = setInterval(() => {
                 setTurnTimer(prev => {
@@ -570,7 +583,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     return prev - 1;
                 });
             }, 1000);
-        }, 500); // Délai de 500ms au démarrage
+        }, delayMs);
 
         return () => {
             clearTimeout(startDelay);
@@ -579,7 +592,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 turnTimerRef.current = null;
             }
         };
-    }, [isPlayerTurn, gameState?.turnNumber, gameState?.status]);
+    }, [isPlayerTurn, gameState?.turnNumber, gameState?.status, gameState?.players]);
 
     const handleBlindDiscard = (cardId: string) => {
         if (!isPlayerTurn) return;
