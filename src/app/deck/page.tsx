@@ -161,7 +161,7 @@ export default function DeckPage() {
 
             {/* Bibliothèque des Dieux */}
             <div className={styles.libraryContainer}>
-                <h2 className={styles.libraryTitle}>Bibliothèque Divine</h2>
+                <h2 className={styles.libraryTitle}>Bibliothèque</h2>
 
                 {/* Saison 1 : Set de base - Volet déroulant */}
                 <div className={styles.seasonAccordion}>
@@ -171,7 +171,7 @@ export default function DeckPage() {
                     >
                         <span className={styles.seasonIcon}>⭐</span>
                         <span className={styles.seasonTitle}>Saison 1 : Set de base</span>
-                        <span className={styles.seasonCount}>{ALL_GODS.length} dieux</span>
+                        <span className={styles.seasonCount}>{ALL_GODS.length} / {ALL_GODS.length} dieux</span>
                         <span className={styles.seasonArrow}>{isSeason1Open ? '▼' : '▶'}</span>
                     </button>
 
@@ -253,35 +253,6 @@ export default function DeckPage() {
                         </div>
                     )}
                 </div>
-            </div>
-            {/* Navigation Bottom (Identique home pour consistance) */}
-            <div className={styles.bottomNavWrapper}>
-                <nav className={styles.bottomNav}>
-                    <Link href="/shop" className={styles.navItem}>
-                        <span className={styles.navIcon}>🏛️</span>
-                        <span className={styles.navLabel}>Boutique</span>
-                    </Link>
-
-                    <Link href="/quests" className={styles.navItem}>
-                        <span className={styles.navIcon}>📯</span>
-                        <span className={styles.navLabel}>Quête</span>
-                    </Link>
-
-                    <Link href="/" className={styles.navItem}>
-                        <span className={styles.navIcon}>⚔️</span>
-                        <span className={styles.navLabel}>Jouer</span>
-                    </Link>
-
-                    <Link href="/deck" className={`${styles.navItem} ${styles.active}`}>
-                        <span className={styles.navIcon}>📦</span>
-                        <span className={styles.navLabel}>Deck</span>
-                    </Link>
-
-                    <Link href="/profile" className={styles.navItem}>
-                        <span className={styles.navIcon}>👤</span>
-                        <span className={styles.navLabel}>Profil</span>
-                    </Link>
-                </nav>
             </div>
 
             {/* Modal pour afficher la carte en grand */}
