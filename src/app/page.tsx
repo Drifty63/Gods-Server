@@ -5,12 +5,24 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { ALL_GODS } from '@/data/gods';
+import { RequireAuth } from '@/components/Auth/RequireAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
+  return (
+    <RequireAuth>
+      <HomeContent />
+    </RequireAuth>
+  );
+}
+
+function HomeContent() {
+  const { profile } = useAuth();
   const [showPlayModal, setShowPlayModal] = useState(false);
   const [currentGodIndex, setCurrentGodIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [userCoins] = useState(2300); // TODO: Connecter au store utilisateur
+  // Utiliser les coins du profil ou 0 par défaut
+  const userCoins = 2300; // TODO: Ajouter coins au profil
 
   // Carrousel automatique des dieux (10 secondes)
   useEffect(() => {
@@ -252,3 +264,4 @@ export default function Home() {
     </main>
   );
 }
+

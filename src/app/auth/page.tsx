@@ -4,11 +4,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { RequireGuest } from '@/components/Auth/RequireAuth';
 import styles from './page.module.css';
 
 type AuthMode = 'login' | 'register';
 
 export default function AuthPage() {
+    return (
+        <RequireGuest>
+            <AuthContent />
+        </RequireGuest>
+    );
+}
+
+function AuthContent() {
     const router = useRouter();
     const { login, loginGoogle, register, error, loading, clearError } = useAuth();
 
