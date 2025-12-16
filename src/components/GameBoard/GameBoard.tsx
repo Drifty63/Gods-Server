@@ -526,40 +526,60 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     }, [isPlayerTurn, gameState?.turnNumber]);
 
     // Chronomètre de tour - Reset et démarrage à chaque changement de tour
+    // Utiliser des refs pour éviter les problèmes de dépendances
+    const endTurnRef = useRef(endTurn);
+    const onActionRef = useRef(onAction);
+
+    // Mettre à jour les refs quand les fonctions changent
+    useEffect(() => {
+        endTurnRef.current = endTurn;
+        onActionRef.current = onAction;
+    }, [endTurn, onAction]);
+
     useEffect(() => {
         // Nettoyer le timer précédent
         if (turnTimerRef.current) {
             clearInterval(turnTimerRef.current);
+            turnTimerRef.current = null;
         }
 
         // Reset le timer à 60 secondes au début de chaque tour
         setTurnTimer(TURN_TIME_LIMIT);
 
-        // Démarrer le compte à rebours seulement si c'est notre tour et le jeu est en cours
-        if (isPlayerTurn && gameState?.status === 'playing') {
+        // Ne pas démarrer le timer si le jeu n'est pas en cours ou si ce n'est pas notre tour
+        if (!isPlayerTurn || gameState?.status !== 'playing') {
+            return;
+        }
+
+        // Petit délai pour laisser le jeu se synchroniser au démarrage
+        const startDelay = setTimeout(() => {
+            // Démarrer le compte à rebours
             turnTimerRef.current = setInterval(() => {
                 setTurnTimer(prev => {
                     if (prev <= 1) {
                         // Temps écoulé - fin de tour automatique
                         if (turnTimerRef.current) {
                             clearInterval(turnTimerRef.current);
+                            turnTimerRef.current = null;
                         }
-                        // Forcer la fin du tour
-                        endTurn();
-                        onAction?.({ type: 'end_turn', payload: {} });
+                        // Forcer la fin du tour via les refs
+                        endTurnRef.current();
+                        onActionRef.current?.({ type: 'end_turn', payload: {} });
                         return TURN_TIME_LIMIT;
                     }
                     return prev - 1;
                 });
             }, 1000);
-        }
+        }, 500); // Délai de 500ms au démarrage
 
         return () => {
+            clearTimeout(startDelay);
             if (turnTimerRef.current) {
                 clearInterval(turnTimerRef.current);
+                turnTimerRef.current = null;
             }
         };
-    }, [isPlayerTurn, gameState?.turnNumber, gameState?.status, endTurn, onAction]);
+    }, [isPlayerTurn, gameState?.turnNumber, gameState?.status]);
 
     const handleBlindDiscard = (cardId: string) => {
         if (!isPlayerTurn) return;
