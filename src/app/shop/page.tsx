@@ -183,14 +183,26 @@ export default function ShopPage() {
                                     <h3 className={styles.coffretName} style={{ color: coffret.color }}>
                                         {coffret.name}
                                     </h3>
-                                    <div className={styles.coffretGodsImages}>
-                                        {coffretGods.map((god) => god && (
-                                            <div key={god.id} className={styles.coffretGodImage}>
+                                    {/* Dieu principal - plus gros et seul */}
+                                    {coffretGods[0] && (
+                                        <div className={styles.coffretMainGod}>
+                                            <Image
+                                                src={coffretGods[0].imageUrl}
+                                                alt={coffretGods[0].name}
+                                                width={70}
+                                                height={70}
+                                            />
+                                        </div>
+                                    )}
+                                    {/* 3 autres dieux - plus petits et alignés */}
+                                    <div className={styles.coffretSecondaryGods}>
+                                        {coffretGods.slice(1).map((god) => god && (
+                                            <div key={god.id} className={styles.coffretSecondaryGodImage}>
                                                 <Image
                                                     src={god.imageUrl}
                                                     alt={god.name}
-                                                    width={50}
-                                                    height={50}
+                                                    width={40}
+                                                    height={40}
                                                 />
                                             </div>
                                         ))}
