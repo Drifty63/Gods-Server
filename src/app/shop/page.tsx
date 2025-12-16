@@ -4,13 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ShopPage() {
+    const { profile } = useAuth();
     const [activeTab, setActiveTab] = useState<'all' | 'gods' | 'spells' | 'cosmetics' | 'offers'>('all');
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
-    // Données placeholder
-    const userAmbroisie = 1250;
+    // Utiliser l'ambroisie du profil ou 0 par défaut
+    const userAmbroisie = profile?.ambroisie ?? 0;
 
     const gods = [
         { id: 1, name: 'Arès', element: '🔥', elementName: 'Feu', pv: 160, price: 500, owned: false, rarity: 'epic' },

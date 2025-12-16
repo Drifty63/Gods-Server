@@ -66,8 +66,12 @@
    LOGO / TITRE
    ================================ */
 .logoContainer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
     animation: fadeInDown 0.8s ease forwards;
+    z-index: 5;
 }
 
 .title {

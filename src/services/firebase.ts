@@ -31,6 +31,7 @@ export interface UserProfile {
     avatar: string;
     level: number;
     xp: number;
+    ambroisie: number; // Monnaie du jeu
     rank: string;
     stats: {
         victories: number;
@@ -60,6 +61,7 @@ function createDefaultProfile(uid: string, email: string, username: string): Omi
         avatar: '⚡',
         level: 1,
         xp: 0,
+        ambroisie: 0, // Début à 0 Ambroisie
         rank: 'Novice',
         stats: {
             victories: 0,

@@ -22,7 +22,7 @@ function HomeContent() {
   const [currentGodIndex, setCurrentGodIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   // Utiliser l'ambroisie du profil ou 0 par défaut
-  const userAmbroisie = 2300; // TODO: Ajouter ambroisie au profil
+  const userAmbroisie = profile?.ambroisie ?? 0;
 
   // Carrousel automatique des dieux (10 secondes)
   useEffect(() => {
