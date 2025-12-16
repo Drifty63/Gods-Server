@@ -62,6 +62,25 @@ export default function ShopPage() {
     // Utiliser l'ambroisie du profil ou 0 par défaut
     const userAmbroisie = profile?.ambroisie ?? 0;
 
+    // Fonction pour obtenir la couleur de fond selon le dieu
+    const getGodBgColor = (godId: string) => {
+        switch (godId) {
+            case 'poseidon': return 'rgba(59, 130, 246, 0.25)'; // Bleu
+            case 'zeus': return 'rgba(251, 191, 36, 0.25)'; // Jaune
+            case 'nyx': return 'rgba(139, 92, 246, 0.25)'; // Violet
+            case 'hestia': return 'rgba(239, 68, 68, 0.25)'; // Rouge
+            case 'athena': return 'rgba(212, 175, 55, 0.25)'; // Dorée
+            case 'demeter': return 'rgba(34, 197, 94, 0.25)'; // Vert
+            case 'dionysos': return 'rgba(34, 197, 94, 0.25)'; // Vert
+            case 'hades': return 'rgba(239, 68, 68, 0.25)'; // Rouge
+            case 'apollon': return 'rgba(255, 255, 255, 0.2)'; // Blanc
+            case 'ares': return 'rgba(34, 197, 94, 0.25)'; // Vert
+            case 'artemis': return 'rgba(255, 255, 255, 0.2)'; // Blanc
+            case 'aphrodite': return 'rgba(212, 175, 55, 0.25)'; // Dorée
+            default: return 'rgba(0, 0, 0, 0.4)';
+        }
+    };
+
     // Obtenir le dieu du mois actuel
     const currentMonth = new Date().getMonth();
     const currentGodId = MONTHLY_GODS[currentMonth];
@@ -276,7 +295,11 @@ export default function ShopPage() {
                     <h3 className={styles.subSectionTitle}>Tous les Dieux</h3>
                     <div className={styles.godsGrid}>
                         {ALL_GODS.map((god) => (
-                            <div key={god.id} className={styles.godCard}>
+                            <div
+                                key={god.id}
+                                className={styles.godCard}
+                                style={{ background: getGodBgColor(god.id) }}
+                            >
                                 <div className={styles.godImageWrapper}>
                                     <Image
                                         src={god.imageUrl}
