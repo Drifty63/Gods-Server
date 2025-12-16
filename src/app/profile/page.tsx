@@ -1,47 +1,86 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import styles from './page.module.css';
 
+// Liste des avatars disponibles
+const AVATARS = ['⚡', '🔥', '💧', '🌿', '☀️', '💀', '💨', '🌙', '⭐', '👑', '🦅', '🐍'];
+
+// Rangs selon le niveau
+function getRank(level: number): string {
+    if (level < 5) return 'Novice';
+    if (level < 10) return 'Apprenti';
+    if (level < 20) return 'Guerrier';
+    if (level < 35) return 'Héros';
+    if (level < 50) return 'Champion';
+    if (level < 75) return 'Légende';
+    return 'Dieu';
+}
+
+// XP requis pour le niveau suivant
+function getXpToNext(level: number): number {
+    return level * 500;
+}
+
 export default function ProfilePage() {
-    // Données de profil placeholder
-    const profile = {
-        username: 'OlympianWarrior',
-        level: 12,
-        xp: 2450,
-        xpToNext: 3000,
-        rank: 'Héros',
-        avatar: '⚡',
-        stats: {
-            victories: 47,
-            defeats: 23,
-            winRate: 67.1,
-            currentStreak: 5,
-            bestStreak: 12,
-            totalGames: 70,
-        },
-        favoriteGod: {
-            name: 'Zeus',
-            element: '⚡',
-            games: 28,
-        },
-        collection: {
-            godsOwned: 8,
-            godsTotal: 12,
-            spellsOwned: 45,
-            spellsTotal: 60,
-        },
-        achievements: [
-            { id: 1, icon: '⚔️', name: 'Premier Combat', unlocked: true },
-            { id: 2, icon: '🏆', name: '10 Victoires', unlocked: true },
-            { id: 3, icon: '🔥', name: 'Maître du Feu', unlocked: true },
-            { id: 4, icon: '💀', name: 'Exterminateur', unlocked: false },
-            { id: 5, icon: '👑', name: 'Roi de l\'Olympe', unlocked: false },
-            { id: 6, icon: '⭐', name: 'Collectionneur', unlocked: false },
-        ],
+    const router = useRouter();
+    const { user, profile, loading, signOut, updateProfile, refreshProfile } = useAuth();
+
+    useEffect(() => {
+        // Rafraîchir le profil au chargement
+        refreshProfile();
+    }, [refreshProfile]);
+
+    // Rediriger si non connecté
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/auth');
+        }
+    }, [user, loading, router]);
+
+    const handleSignOut = async () => {
+        await signOut();
+        router.push('/');
     };
 
-    const xpProgress = (profile.xp / profile.xpToNext) * 100;
+    const handleAvatarChange = async (newAvatar: string) => {
+        if (!profile) return;
+        await updateProfile(profile.username, newAvatar);
+    };
+
+    // Affichage de chargement
+    if (loading) {
+        return (
+            <main className={styles.main}>
+                <div className={styles.loadingContainer}>
+                    <div className={styles.spinner}>⏳</div>
+                    <p>Chargement du profil...</p>
+                </div>
+            </main>
+        );
+    }
+
+    // Si pas de profil après chargement
+    if (!profile) {
+        return (
+            <main className={styles.main}>
+                <div className={styles.loadingContainer}>
+                    <p>Profil introuvable.</p>
+                    <Link href="/auth" className={styles.linkButton}>Se connecter</Link>
+                </div>
+            </main>
+        );
+    }
+
+    const xpToNext = getXpToNext(profile.level);
+    const xpProgress = Math.min((profile.xp / xpToNext) * 100, 100);
+    const rank = getRank(profile.level);
+    const winRate = profile.stats.totalGames > 0
+        ? ((profile.stats.victories / profile.stats.totalGames) * 100).toFixed(1)
+        : '0.0';
 
     return (
         <main className={styles.main}>
@@ -49,7 +88,7 @@ export default function ProfilePage() {
             <header className={styles.header}>
                 <Link href="/" className={styles.backButton}>← Retour</Link>
                 <h1 className={styles.title}>Profil</h1>
-                <button className={styles.settingsButton}>⚙️</button>
+                <button className={styles.settingsButton} onClick={handleSignOut}>🚪</button>
             </header>
 
             <div className={styles.content}>
@@ -57,17 +96,34 @@ export default function ProfilePage() {
                 <section className={styles.profileCard}>
                     <div className={styles.avatarContainer}>
                         <div className={styles.avatar}>{profile.avatar}</div>
-                        <div className={styles.rankBadge}>{profile.rank}</div>
+                        <div className={styles.rankBadge}>{rank}</div>
                     </div>
                     <div className={styles.profileInfo}>
                         <h2 className={styles.username}>{profile.username}</h2>
+                        <p className={styles.email}>{profile.email}</p>
                         <div className={styles.levelInfo}>
                             <span className={styles.level}>Niveau {profile.level}</span>
                             <div className={styles.xpBar}>
                                 <div className={styles.xpFill} style={{ width: `${xpProgress}%` }} />
                             </div>
-                            <span className={styles.xpText}>{profile.xp} / {profile.xpToNext} XP</span>
+                            <span className={styles.xpText}>{profile.xp} / {xpToNext} XP</span>
                         </div>
+                    </div>
+                </section>
+
+                {/* Changer d'avatar */}
+                <section className={styles.section}>
+                    <h3 className={styles.sectionTitle}>🎭 Changer d&apos;avatar</h3>
+                    <div className={styles.avatarGrid}>
+                        {AVATARS.map((avatar) => (
+                            <button
+                                key={avatar}
+                                className={`${styles.avatarOption} ${profile.avatar === avatar ? styles.selected : ''}`}
+                                onClick={() => handleAvatarChange(avatar)}
+                            >
+                                {avatar}
+                            </button>
+                        ))}
                     </div>
                 </section>
 
@@ -84,24 +140,20 @@ export default function ProfilePage() {
                             <span className={styles.statLabel}>Défaites</span>
                         </div>
                         <div className={styles.statCard}>
-                            <span className={styles.statValue}>{profile.stats.winRate}%</span>
+                            <span className={styles.statValue}>{winRate}%</span>
                             <span className={styles.statLabel}>Ratio</span>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statValue}>{profile.stats.currentStreak}</span>
                             <span className={styles.statLabel}>Série actuelle</span>
                         </div>
-                    </div>
-                </section>
-
-                {/* Dieu favori */}
-                <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>⭐ Dieu Favori</h3>
-                    <div className={styles.favoriteGod}>
-                        <span className={styles.godIcon}>{profile.favoriteGod.element}</span>
-                        <div className={styles.godInfo}>
-                            <span className={styles.godName}>{profile.favoriteGod.name}</span>
-                            <span className={styles.godGames}>{profile.favoriteGod.games} parties jouées</span>
+                        <div className={styles.statCard}>
+                            <span className={styles.statValue}>{profile.stats.bestStreak}</span>
+                            <span className={styles.statLabel}>Meilleure série</span>
+                        </div>
+                        <div className={styles.statCard}>
+                            <span className={styles.statValue}>{profile.stats.totalGames}</span>
+                            <span className={styles.statLabel}>Total parties</span>
                         </div>
                     </div>
                 </section>
@@ -114,38 +166,28 @@ export default function ProfilePage() {
                             <div className={styles.collectionBar}>
                                 <div
                                     className={styles.collectionFill}
-                                    style={{ width: `${(profile.collection.godsOwned / profile.collection.godsTotal) * 100}%` }}
+                                    style={{ width: `${(profile.collection.godsOwned.length / 12) * 100}%` }}
                                 />
                             </div>
-                            <span>Dieux: {profile.collection.godsOwned}/{profile.collection.godsTotal}</span>
+                            <span>Dieux: {profile.collection.godsOwned.length}/12</span>
                         </div>
                         <div className={styles.collectionItem}>
                             <div className={styles.collectionBar}>
                                 <div
                                     className={styles.collectionFill}
-                                    style={{ width: `${(profile.collection.spellsOwned / profile.collection.spellsTotal) * 100}%` }}
+                                    style={{ width: `${(profile.collection.spellsOwned.length / 60) * 100}%` }}
                                 />
                             </div>
-                            <span>Sorts: {profile.collection.spellsOwned}/{profile.collection.spellsTotal}</span>
+                            <span>Sorts: {profile.collection.spellsOwned.length}/60</span>
                         </div>
                     </div>
                 </section>
 
-                {/* Succès */}
+                {/* Bouton de déconnexion */}
                 <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>🏅 Succès</h3>
-                    <div className={styles.achievementsGrid}>
-                        {profile.achievements.map((achievement) => (
-                            <div
-                                key={achievement.id}
-                                className={`${styles.achievement} ${!achievement.unlocked ? styles.locked : ''}`}
-                            >
-                                <span className={styles.achievementIcon}>{achievement.icon}</span>
-                                <span className={styles.achievementName}>{achievement.name}</span>
-                                {!achievement.unlocked && <span className={styles.lockIcon}>🔒</span>}
-                            </div>
-                        ))}
-                    </div>
+                    <button className={styles.logoutButton} onClick={handleSignOut}>
+                        🚪 Se déconnecter
+                    </button>
                 </section>
             </div>
         </main>

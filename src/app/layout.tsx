@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 import GlobalUI from "@/components/GlobalUI/GlobalUI";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,8 +30,10 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={inter.variable}>
-        <GlobalUI />
-        {children}
+        <AuthProvider>
+          <GlobalUI />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
