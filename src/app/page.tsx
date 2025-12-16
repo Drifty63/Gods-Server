@@ -82,20 +82,21 @@ function HomeContent() {
 
   return (
     <main className={styles.main}>
-      {/* Header avec titre et boutons */}
+      {/* Titre centré sur la page */}
+      <div className={styles.logoContainer}>
+        <h1 className={styles.title}>
+          <span className={styles.titleLetter}>G</span>
+          <span className={styles.titleLetter}>O</span>
+          <span className={styles.titleLetter}>D</span>
+          <span className={styles.titleLetter}>S</span>
+        </h1>
+        <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
+      </div>
+
+      {/* Header avec boutons */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           {/* Espace vide pour équilibrer */}
-        </div>
-
-        <div className={styles.logoContainer}>
-          <h1 className={styles.title}>
-            <span className={styles.titleLetter}>G</span>
-            <span className={styles.titleLetter}>O</span>
-            <span className={styles.titleLetter}>D</span>
-            <span className={styles.titleLetter}>S</span>
-          </h1>
-          <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
         </div>
 
         <div className={styles.headerRight}>
