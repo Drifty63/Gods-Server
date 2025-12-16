@@ -70,7 +70,58 @@
     margin: 0 auto;
 }
 
-/* Tabs */
+/* Quick Navigation - 4 boutons carrés */
+.quickNav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.quickNavButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quickNavButton:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateY(-3px);
+}
+
+.quickNavButton.active {
+    background: linear-gradient(145deg, rgba(212, 175, 55, 0.3), rgba(0, 0, 0, 0.5));
+    border-color: var(--gold-divine);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.quickNavIcon {
+    font-size: 1.8rem;
+}
+
+.quickNavLabel {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.quickNavButton.active .quickNavLabel {
+    color: var(--gold-divine);
+}
+
+/* Legacy tabs (kept for compatibility) */
 .tabs {
     display: flex;
     gap: 8px;

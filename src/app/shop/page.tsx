@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function ShopPage() {
     const { profile } = useAuth();
-    const [activeTab, setActiveTab] = useState<'all' | 'gods' | 'spells' | 'cosmetics' | 'offers'>('all');
+    const [activeTab, setActiveTab] = useState<'coffret' | 'gods' | 'cosmetics' | 'ambroisie'>('coffret');
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
     // Utiliser l'ambroisie du profil ou 0 par défaut
@@ -66,38 +66,42 @@ export default function ShopPage() {
             </header>
 
             <div className={styles.content}>
-                {/* Onglets */}
-                <div className={styles.tabs}>
+                {/* Navigation rapide - 4 boutons */}
+                <div className={styles.quickNav}>
                     <button
-                        className={`${styles.tab} ${activeTab === 'all' ? styles.active : ''}`}
-                        onClick={() => setActiveTab('all')}
+                        className={`${styles.quickNavButton} ${activeTab === 'coffret' ? styles.active : ''}`}
+                        onClick={() => setActiveTab('coffret')}
                     >
-                        Tout
+                        <span className={styles.quickNavIcon}>🎁</span>
+                        <span className={styles.quickNavLabel}>Coffret</span>
                     </button>
                     <button
-                        className={`${styles.tab} ${activeTab === 'gods' ? styles.active : ''}`}
+                        className={`${styles.quickNavButton} ${activeTab === 'gods' ? styles.active : ''}`}
                         onClick={() => setActiveTab('gods')}
                     >
-                        Dieux
+                        <span className={styles.quickNavIcon}>⚡</span>
+                        <span className={styles.quickNavLabel}>Dieux</span>
                     </button>
                     <button
-                        className={`${styles.tab} ${activeTab === 'cosmetics' ? styles.active : ''}`}
+                        className={`${styles.quickNavButton} ${activeTab === 'cosmetics' ? styles.active : ''}`}
                         onClick={() => setActiveTab('cosmetics')}
                     >
-                        Cosmétiques
+                        <span className={styles.quickNavIcon}>✨</span>
+                        <span className={styles.quickNavLabel}>Cosmétiques</span>
                     </button>
                     <button
-                        className={`${styles.tab} ${activeTab === 'offers' ? styles.active : ''}`}
-                        onClick={() => setActiveTab('offers')}
+                        className={`${styles.quickNavButton} ${activeTab === 'ambroisie' ? styles.active : ''}`}
+                        onClick={() => setActiveTab('ambroisie')}
                     >
-                        Offres 🔥
+                        <span className={styles.quickNavIcon}>🍯</span>
+                        <span className={styles.quickNavLabel}>Ambroisie</span>
                     </button>
                 </div>
 
-                {/* Offres spéciales */}
-                {(activeTab === 'all' || activeTab === 'offers') && (
+                {/* Section Coffrets */}
+                {activeTab === 'coffret' && (
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>🔥 Offres Limitées</h2>
+                        <h2 className={styles.sectionTitle}>🎁 Coffrets</h2>
                         <div className={styles.offersGrid}>
                             {specialOffers.map((offer) => (
                                 <div key={offer.id} className={styles.offerCard}>
@@ -119,10 +123,10 @@ export default function ShopPage() {
                     </section>
                 )}
 
-                {/* Dieux disponibles */}
-                {(activeTab === 'all' || activeTab === 'gods') && (
+                {/* Section Dieux */}
+                {activeTab === 'gods' && (
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>⚔️ Dieux</h2>
+                        <h2 className={styles.sectionTitle}>⚡ Dieux</h2>
                         <div className={styles.godsGrid}>
                             {gods.map((god) => (
                                 <div
@@ -154,8 +158,8 @@ export default function ShopPage() {
                     </section>
                 )}
 
-                {/* Cosmétiques */}
-                {(activeTab === 'all' || activeTab === 'cosmetics') && (
+                {/* Section Cosmétiques */}
+                {activeTab === 'cosmetics' && (
                     <section className={styles.section}>
                         <h2 className={styles.sectionTitle}>✨ Cosmétiques</h2>
                         <div className={styles.cosmeticsGrid}>
@@ -174,25 +178,27 @@ export default function ShopPage() {
                     </section>
                 )}
 
-                {/* Acheter de l'Ambroisie */}
-                <section className={styles.buyGoldSection}>
-                    <h2 className={styles.sectionTitle}>🍯 Acheter de l'Ambroisie</h2>
-                    <div className={styles.goldPacksGrid}>
-                        <div className={styles.goldPack}>
-                            <span className={styles.goldAmount}>500</span>
-                            <span className={styles.goldRealPrice}>0,99 €</span>
+                {/* Section Ambroisie */}
+                {activeTab === 'ambroisie' && (
+                    <section className={styles.buyGoldSection}>
+                        <h2 className={styles.sectionTitle}>🍯 Acheter de l'Ambroisie</h2>
+                        <div className={styles.goldPacksGrid}>
+                            <div className={styles.goldPack}>
+                                <span className={styles.goldAmount}>500</span>
+                                <span className={styles.goldRealPrice}>0,99 €</span>
+                            </div>
+                            <div className={`${styles.goldPack} ${styles.popular}`}>
+                                <span className={styles.popularBadge}>Populaire</span>
+                                <span className={styles.goldAmount}>1500</span>
+                                <span className={styles.goldRealPrice}>2,49 €</span>
+                            </div>
+                            <div className={styles.goldPack}>
+                                <span className={styles.goldAmount}>5000</span>
+                                <span className={styles.goldRealPrice}>7,99 €</span>
+                            </div>
                         </div>
-                        <div className={`${styles.goldPack} ${styles.popular}`}>
-                            <span className={styles.popularBadge}>Populaire</span>
-                            <span className={styles.goldAmount}>1500</span>
-                            <span className={styles.goldRealPrice}>2,49 €</span>
-                        </div>
-                        <div className={styles.goldPack}>
-                            <span className={styles.goldAmount}>5000</span>
-                            <span className={styles.goldRealPrice}>7,99 €</span>
-                        </div>
-                    </div>
-                </section>
+                    </section>
+                )}
             </div>
 
             {/* Modal de détail */}
