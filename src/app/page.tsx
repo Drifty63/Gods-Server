@@ -205,12 +205,12 @@ function HomeContent() {
       {/* Barre de navigation en bas */}
       <nav className={styles.bottomNav}>
         <Link href="/shop" className={styles.navItem}>
-          <span className={styles.navIcon}>🏛️</span>
+          <Image src="/shop_icon.png" alt="Boutique" width={32} height={32} className={styles.navIconImage} />
           <span className={styles.navLabel}>Boutique</span>
         </Link>
 
         <Link href="/deck" className={styles.navItem}>
-          <span className={styles.navIcon}>🎴</span>
+          <Image src="/deck_icon.png" alt="Deck" width={32} height={32} className={styles.navIconImage} />
           <span className={styles.navLabel}>Deck</span>
         </Link>
 

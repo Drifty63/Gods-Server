@@ -9,6 +9,7 @@ import SpellCard from '@/components/SpellCard/SpellCard';
 import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionModal';
 import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
 import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
+import Image from 'next/image';
 import styles from './GameBoard.module.css';
 
 // Liste des éléments disponibles pour la sélection
@@ -731,7 +732,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         <span className={styles.energyIcon}>⚡</span>
                         <span className={styles.energyValue}>{opponent.energy}</span>
                     </div>
-                    <span className={styles.deckCount}>🎴 {opponent.deck.length}</span>
+                    <span className={styles.deckCount}><Image src="/deck_icon.png" alt="Deck" width={18} height={18} className={styles.deckIcon} /> {opponent.deck.length}</span>
                     {opponent.fatigueCounter > 0 && (
                         <span className={styles.fatigueCount} title="Dégâts de la prochaine fatigue">💀 {opponent.fatigueCounter + 1}</span>
                     )}
@@ -944,7 +945,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         <span className={styles.energyIcon}>⚡</span>
                         <span className={styles.energyValue}>{player.energy}</span>
                     </div>
-                    <span className={styles.deckCount}>🎴 {player.deck.length}</span>
+                    <span className={styles.deckCount}><Image src="/deck_icon.png" alt="Deck" width={18} height={18} className={styles.deckIcon} /> {player.deck.length}</span>
                     {player.fatigueCounter > 0 && (
                         <span className={styles.fatigueCount} title="Dégâts de la prochaine fatigue">💀 {player.fatigueCounter + 1}</span>
                     )}

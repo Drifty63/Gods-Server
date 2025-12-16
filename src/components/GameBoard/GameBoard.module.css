@@ -354,6 +354,13 @@
     padding: 4px 8px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.deckIcon {
+    object-fit: contain;
 }
 
 /* ================================

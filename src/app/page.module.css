@@ -384,6 +384,18 @@
     transition: all 0.3s ease;
 }
 
+.navIconImage {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    transition: all 0.3s ease;
+}
+
+.navItem:hover .navIconImage {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
+}
+
 .navLabel {
     font-family: 'Cinzel', serif;
     font-size: 0.6rem;
