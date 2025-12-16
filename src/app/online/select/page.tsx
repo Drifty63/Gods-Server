@@ -37,9 +37,13 @@ export default function OnlineSelectPage() {
     useEffect(() => {
         if (rpsPhase && hasSubmitted) {
             console.log('Both players selected, moving to RPS');
+            // Sauvegarder isHost avant la redirection
+            if (currentGame?.isHost !== undefined) {
+                sessionStorage.setItem('isHost', String(currentGame.isHost));
+            }
             router.push('/online/rps');
         }
-    }, [rpsPhase, hasSubmitted, router]);
+    }, [rpsPhase, hasSubmitted, router, currentGame?.isHost]);
 
     // Rediriger vers le jeu si gameStartData arrive (fallback ou reconnexion)
     useEffect(() => {

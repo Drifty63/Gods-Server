@@ -195,11 +195,11 @@ export function useMultiplayer() {
             setRpsPhase('result');
             setOpponentChoseRps(false);
 
-            // Déterminer si on est le gagnant
+            // Déterminer si on est le gagnant (récupérer isHost depuis sessionStorage pour éviter les closures obsolètes)
             if (data.result !== 'draw') {
-                const isHost = currentGame?.isHost ?? false;
-                const weWon = (isHost && data.result === 'host_wins') ||
-                    (!isHost && data.result === 'guest_wins');
+                const isHostFromStorage = typeof window !== 'undefined' && sessionStorage.getItem('isHost') === 'true';
+                const weWon = (isHostFromStorage && data.result === 'host_wins') ||
+                    (!isHostFromStorage && data.result === 'guest_wins');
                 setIsRpsWinner(weWon);
 
                 if (weWon) {
@@ -281,7 +281,8 @@ export function useMultiplayer() {
             socket.off('rps_opponent_chose', onRpsOpponentChose);
             socket.off('rps_result', onRpsResult);
         };
-    }, [currentGame?.isHost]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // =====================================
     // MATCHMAKING

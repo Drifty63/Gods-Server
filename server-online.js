@@ -594,6 +594,25 @@ io.on('connection', (socket) => {
             gameState: game.gameState
         });
 
+        // Si la partie est en phase RPS, renvoyer l'événement rps_start
+        if (game.status === 'rps' || game.status === 'rps_deciding') {
+            socket.emit('rps_start', {
+                hostName: game.hostName,
+                guestName: game.guestName
+            });
+
+            // Si le joueur avait déjà fait son choix, ne pas le perdre
+            // Et si on est en phase deciding, informer qui a gagné
+            if (game.status === 'rps_deciding' && game.rpsWinner) {
+                // Renvoyer le résultat
+                socket.emit('rps_result', {
+                    hostChoice: game.rpsHostChoice,
+                    guestChoice: game.rpsGuestChoice,
+                    result: game.rpsWinner === 'host' ? 'host_wins' : 'guest_wins'
+                });
+            }
+        }
+
         socket.to(data.gameId).emit('opponent_reconnected');
 
         saveGameToFirebase(game);
