@@ -547,8 +547,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         setTurnTimer(TURN_TIME_LIMIT);
 
         // Ne pas démarrer le timer si le jeu n'est pas en cours ou si ce n'est pas notre tour
-        // Vérifier aussi que le turnNumber est valide (évite les problèmes de transition)
-        if (!isPlayerTurn || gameState?.status !== 'playing' || !gameState?.turnNumber || gameState.turnNumber < 1) {
+        // Le timer ne démarre qu'à partir du tour 2 (après la première carte jouée)
+        // Cela évite les problèmes de synchronisation au démarrage de la partie
+        if (!isPlayerTurn || gameState?.status !== 'playing' || !gameState?.turnNumber || gameState.turnNumber < 2) {
             return;
         }
 
@@ -558,14 +559,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             return;
         }
 
-        // Délai plus long au premier tour pour la synchronisation après RPS
-        const delayMs = gameState.turnNumber === 1 ? 2000 : 500;
-
-        // Petit délai pour laisser le jeu se synchroniser au démarrage
+        // Délai de 500ms pour laisser la synchronisation se faire
         const startDelay = setTimeout(() => {
-            // Revérifier que c'est toujours notre tour (au cas où ça aurait changé pendant le délai)
-            // Note: On utilise les valeurs capturées dans la closure
-
             // Démarrer le compte à rebours
             turnTimerRef.current = setInterval(() => {
                 setTurnTimer(prev => {
@@ -583,7 +578,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     return prev - 1;
                 });
             }, 1000);
-        }, delayMs);
+        }, 500);
 
         return () => {
             clearTimeout(startDelay);
