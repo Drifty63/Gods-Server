@@ -546,12 +546,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         // Reset le timer à 60 secondes au début de chaque tour
         setTurnTimer(TURN_TIME_LIMIT);
 
-        // DÉSACTIVÉ EN MULTIJOUEUR pour éviter les problèmes de synchronisation
-        // Le timer automatique ne fonctionne qu'en mode solo pour l'instant
-        if (!isSoloMode) {
-            return;
-        }
-
         // Ne pas démarrer le timer si le jeu n'est pas en cours ou si ce n'est pas notre tour
         // Le timer ne démarre qu'à partir du tour 2 (après la première carte jouée)
         if (!isPlayerTurn || gameState?.status !== 'playing' || !gameState?.turnNumber || gameState.turnNumber < 2) {
