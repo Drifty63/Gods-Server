@@ -28,6 +28,9 @@ export default function GlobalUI() {
     const [showRewardsModal, setShowRewardsModal] = useState(false);
     const [showQuestsModal, setShowQuestsModal] = useState(false);
 
+    // Chrono de réinitialisation des quêtes (temps jusqu'à minuit)
+    const [timeUntilReset, setTimeUntilReset] = useState('');
+
     // Audio states
     const [menuVolume, setMenuVolume] = useState(0.3);
     const [battleVolume, setBattleVolume] = useState(0.3);
@@ -37,6 +40,32 @@ export default function GlobalUI() {
     const [hasInteracted, setHasInteracted] = useState(false);
 
     const isHomePage = pathname === '/';
+
+    // Calculer le temps restant jusqu'à minuit
+    const calculateTimeUntilMidnight = () => {
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0); // Minuit du jour suivant
+
+        const diff = midnight.getTime() - now.getTime();
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}min ${seconds.toString().padStart(2, '0')}s`;
+    };
+
+    // Mettre à jour le chrono chaque seconde
+    useEffect(() => {
+        setTimeUntilReset(calculateTimeUntilMidnight());
+
+        const interval = setInterval(() => {
+            setTimeUntilReset(calculateTimeUntilMidnight());
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     // Charger les volumes depuis localStorage au montage
     useEffect(() => {
@@ -321,7 +350,7 @@ export default function GlobalUI() {
 
                         <div className={styles.questsTimerInfo}>
                             <span className={styles.timerIcon}>⏰</span>
-                            <span>Réinitialisation dans 18h 42min</span>
+                            <span>Réinitialisation dans {timeUntilReset}</span>
                         </div>
 
                         <div className={styles.questsList}>
