@@ -539,17 +539,35 @@ io.on('connection', (socket) => {
         const game = games.get(gameId);
         if (!game) return;
 
-        // Valider l'action
-        const validation = validateGameAction(game, data, socket.id);
+        // Les actions de synchronisation initiale ne nécessitent pas de validation
+        // car elles sont envoyées avant que gameState soit défini
+        const isInitialSyncAction = data.type === 'sync_initial_state' || data.type === 'ask_initial_state';
 
-        if (!validation.valid) {
-            console.log(`Action refusée pour ${socket.id}: ${validation.reason}`);
-            socket.emit('action_rejected', { reason: validation.reason });
-            return;
+        if (!isInitialSyncAction) {
+            // Valider l'action
+            const validation = validateGameAction(game, data, socket.id);
+
+            if (!validation.valid) {
+                console.log(`Action refusée pour ${socket.id}: ${validation.reason}`);
+                socket.emit('action_rejected', { reason: validation.reason });
+                return;
+            }
         }
 
         // Action valide - transmettre à l'adversaire
-        socket.to(gameId).emit('game_action', data);
+        // Utiliser l'envoi direct aux sockets pour éviter les problèmes de rooms
+        const hostSocket = io.sockets.sockets.get(game.hostSocket);
+        const guestSocket = io.sockets.sockets.get(game.guestSocket);
+        const isHost = game.hostSocket === socket.id;
+
+        // Envoyer à l'autre joueur
+        const targetSocket = isHost ? guestSocket : hostSocket;
+        if (targetSocket) {
+            targetSocket.emit('game_action', data);
+            console.log(`Action ${data.type} transmise de ${isHost ? 'host' : 'guest'} à ${isHost ? 'guest' : 'host'}`);
+        } else {
+            console.warn(`Target socket introuvable pour action ${data.type}`);
+        }
     });
 
     socket.on('sync_state', (data) => {
