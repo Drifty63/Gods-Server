@@ -62,10 +62,11 @@ function AuthContent() {
         try {
             if (mode === 'login') {
                 await login(email, password);
+                router.push('/');
             } else {
                 await register(email, password, username);
+                router.push('/profile/setup'); // Nouvelle redirection vers la page de setup
             }
-            router.push('/');
         } catch {
             // L'erreur est gérée par le contexte
         }
@@ -77,7 +78,8 @@ function AuthContent() {
 
         try {
             await loginGoogle();
-            router.push('/');
+            // Pour Google, vérifier si le profil est nouveau (rediriger vers setup)
+            router.push('/profile/setup');
         } catch {
             // L'erreur est gérée par le contexte
         }
