@@ -14,10 +14,18 @@ const MOCK_REWARDS = [
     { id: 5, text: "Récompense 1000 téléchargements.", timeLeft: "29j restant" },
 ];
 
+// Mock data pour les quêtes journalières
+const MOCK_QUESTS = [
+    { id: 1, name: "Jouer 1 partie", progress: 0, target: 1, reward: 50, completed: false },
+    { id: 2, name: "Jouer 3 parties", progress: 1, target: 3, reward: 50, completed: false },
+    { id: 3, name: "Gagner 3 parties", progress: 2, target: 3, reward: 50, completed: false },
+];
+
 export default function GlobalUI() {
     const pathname = usePathname();
     const [showOptionsModal, setShowOptionsModal] = useState(false);
     const [showRewardsModal, setShowRewardsModal] = useState(false);
+    const [showQuestsModal, setShowQuestsModal] = useState(false);
 
     // Audio states
     const [menuVolume, setMenuVolume] = useState(0.3);
@@ -120,13 +128,16 @@ export default function GlobalUI() {
     useEffect(() => {
         const handleOpenOptions = () => setShowOptionsModal(true);
         const handleOpenRewards = () => setShowRewardsModal(true);
+        const handleOpenQuests = () => setShowQuestsModal(true);
 
         window.addEventListener('open-options', handleOpenOptions);
         window.addEventListener('open-rewards', handleOpenRewards);
+        window.addEventListener('open-quests', handleOpenQuests);
 
         return () => {
             window.removeEventListener('open-options', handleOpenOptions);
             window.removeEventListener('open-rewards', handleOpenRewards);
+            window.removeEventListener('open-quests', handleOpenQuests);
         };
     }, []);
 
@@ -136,6 +147,10 @@ export default function GlobalUI() {
 
     const closeRewardsModal = () => {
         setShowRewardsModal(false);
+    };
+
+    const closeQuestsModal = () => {
+        setShowQuestsModal(false);
     };
 
     const toggleMute = () => {
@@ -290,6 +305,57 @@ export default function GlobalUI() {
                             </button>
                             <button className={styles.acceptAllButton}>
                                 Tout récupérer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal des Quêtes Journalières */}
+            {showQuestsModal && (
+                <div className={styles.modalOverlay} onClick={closeQuestsModal}>
+                    <div className={styles.questsModal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.closeModalIcon} onClick={closeQuestsModal}>✕</button>
+                        <h2>📜 Quêtes Journalières</h2>
+
+                        <div className={styles.questsTimerInfo}>
+                            <span className={styles.timerIcon}>⏰</span>
+                            <span>Réinitialisation dans 18h 42min</span>
+                        </div>
+
+                        <div className={styles.questsList}>
+                            {MOCK_QUESTS.map((quest) => (
+                                <div key={quest.id} className={`${styles.questItem} ${quest.completed ? styles.questCompleted : ''}`}>
+                                    <div className={styles.questInfo}>
+                                        <span className={styles.questName}>{quest.name}</span>
+                                        <div className={styles.questProgressContainer}>
+                                            <div className={styles.questProgressBar}>
+                                                <div
+                                                    className={styles.questProgressFill}
+                                                    style={{ width: `${(quest.progress / quest.target) * 100}%` }}
+                                                />
+                                            </div>
+                                            <span className={styles.questProgressText}>
+                                                {quest.progress}/{quest.target}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className={styles.questReward}>
+                                        <span className={styles.ambroisieIcon}>🍯</span>
+                                        <span className={styles.ambroisieAmount}>{quest.reward}</span>
+                                        {quest.progress >= quest.target ? (
+                                            <button className={styles.claimButton}>Récupérer</button>
+                                        ) : (
+                                            <button className={styles.claimButtonDisabled} disabled>Récupérer</button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className={styles.questsFooter}>
+                            <button className={styles.closeButton} onClick={closeQuestsModal}>
+                                Fermer
                             </button>
                         </div>
                     </div>

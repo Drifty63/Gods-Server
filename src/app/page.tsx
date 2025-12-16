@@ -45,6 +45,11 @@ export default function Home() {
     window.dispatchEvent(new Event('open-rewards'));
   };
 
+  const handleQuestsClick = () => {
+    // Déclencher l'événement pour ouvrir le modal des quêtes
+    window.dispatchEvent(new Event('open-quests'));
+  };
+
   // Navigation vers le dieu précédent
   const prevGod = () => {
     setIsTransitioning(true);
@@ -82,6 +87,13 @@ export default function Home() {
         </div>
 
         <div className={styles.headerRight}>
+          <button
+            className={styles.headerButton}
+            onClick={handleQuestsClick}
+            title="Quêtes"
+          >
+            📜
+          </button>
           <button
             className={styles.headerButton}
             onClick={handleRewardsClick}
@@ -178,9 +190,9 @@ export default function Home() {
           <span className={styles.navLabel}>Boutique</span>
         </Link>
 
-        <Link href="/quests" className={styles.navItem}>
-          <span className={styles.navIcon}>📯</span>
-          <span className={styles.navLabel}>Quête</span>
+        <Link href="/deck" className={styles.navItem}>
+          <span className={styles.navIcon}>�</span>
+          <span className={styles.navLabel}>Deck</span>
         </Link>
 
         {/* Bouton central JOUER */}
@@ -192,9 +204,9 @@ export default function Home() {
           <span className={styles.playLabel}>Jouer</span>
         </button>
 
-        <Link href="/deck" className={styles.navItem}>
-          <span className={styles.navIcon}>📦</span>
-          <span className={styles.navLabel}>Deck</span>
+        <Link href="/social" className={styles.navItem}>
+          <span className={styles.navIcon}>�</span>
+          <span className={styles.navLabel}>Social</span>
         </Link>
 
         <Link href="/profile" className={styles.navItem}>
