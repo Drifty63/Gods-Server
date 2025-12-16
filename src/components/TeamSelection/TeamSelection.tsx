@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { GodCard } from '@/types/cards';
 import { ALL_GODS } from '@/data/gods';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
@@ -114,7 +115,14 @@ export default function TeamSelection({ onTeamsSelected }: TeamSelectionProps) {
 
     return (
         <div className={styles.container}>
-            <h1 className={styles.title}>⚔️ Sélection des Équipes</h1>
+            {/* Header avec bouton retour */}
+            <header className={styles.header}>
+                <Link href="/" className={styles.backLink}>
+                    ← Retour
+                </Link>
+                <h1 className={styles.title}>⚔️ Sélection des Équipes</h1>
+                <div className={styles.headerSpacer}></div>
+            </header>
 
             <div className={styles.phaseIndicator}>
                 <div className={`${styles.phaseStep} ${phase === 'player' ? styles.active : styles.done}`}>

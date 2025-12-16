@@ -21,6 +21,40 @@
 }
 
 /* ================================
+   HEADER
+   ================================ */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1100px;
+    padding: 0 1rem;
+}
+
+.backLink {
+    font-family: 'Cinzel', serif;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 8px;
+    color: var(--gold-divine);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.backLink:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--gold-divine);
+}
+
+.headerSpacer {
+    width: 90px;
+    /* Même largeur que le bouton retour pour centrer le titre */
+}
+
+/* ================================
    TITRE
    ================================ */
 .title {
