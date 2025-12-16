@@ -482,14 +482,32 @@ io.on('connection', (socket) => {
 
         game.status = 'playing';
 
-        io.to(gameId).emit('game_start', {
+        const gameStartPayload = {
             hostGods: game.hostGods,
             guestGods: game.guestGods,
             hostName: game.hostName,
             guestName: game.guestName,
             firstPlayer,
             rpsWinner: game.rpsWinner
-        });
+        };
+
+        // Envoyer directement aux deux sockets pour éviter les problèmes de rooms
+        const hostSocket = io.sockets.sockets.get(game.hostSocket);
+        const guestSocket = io.sockets.sockets.get(game.guestSocket);
+
+        if (hostSocket) {
+            hostSocket.emit('game_start', gameStartPayload);
+            console.log(`game_start envoyé au host ${game.hostSocket}`);
+        } else {
+            console.warn(`host socket ${game.hostSocket} introuvable !`);
+        }
+
+        if (guestSocket) {
+            guestSocket.emit('game_start', gameStartPayload);
+            console.log(`game_start envoyé au guest ${game.guestSocket}`);
+        } else {
+            console.warn(`guest socket ${game.guestSocket} introuvable !`);
+        }
 
         saveGameToFirebase(game);
 
