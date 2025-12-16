@@ -243,7 +243,10 @@ export default function ShopPage() {
 
                     {/* Dieu du mois en vedette */}
                     {currentGod && (
-                        <div className={styles.featuredGod}>
+                        <div
+                            className={styles.featuredGod}
+                            style={{ background: `linear-gradient(145deg, ${getGodBgColor(currentGod.id)}, rgba(0, 0, 0, 0.5))` }}
+                        >
                             <div className={styles.featuredBadge}>🌟 Dieu du Mois</div>
                             <div className={styles.featuredContent}>
                                 <div className={styles.featuredImageWrapper}>
