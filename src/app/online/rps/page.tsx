@@ -50,10 +50,14 @@ export default function OnlineRpsPage() {
     // Rediriger vers le jeu quand la partie commence
     useEffect(() => {
         if (gameStartData) {
+            // S'assurer que isHost est bien sauvegardé avant la redirection
+            if (currentGame?.isHost !== undefined) {
+                sessionStorage.setItem('isHost', String(currentGame.isHost));
+            }
             sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
             router.push('/online/game');
         }
-    }, [gameStartData, router]);
+    }, [gameStartData, router, currentGame?.isHost]);
 
     // Réinitialiser après une égalité
     useEffect(() => {
@@ -184,7 +188,7 @@ export default function OnlineRpsPage() {
                         </div>
 
                         <div className={`${styles.resultBanner} ${rpsResult.result === 'draw' ? styles.draw :
-                                isRpsWinner ? styles.win : styles.lose
+                            isRpsWinner ? styles.win : styles.lose
                             }`}>
                             {getResultText()}
                         </div>
