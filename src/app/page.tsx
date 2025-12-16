@@ -210,7 +210,7 @@ export default function Home() {
         </Link>
 
         <Link href="/profile" className={styles.navItem}>
-          <span className={styles.navIcon}>�</span>
+          <span className={styles.navIcon}>👤</span>
           <span className={styles.navLabel}>Profil</span>
         </Link>
       </nav>
