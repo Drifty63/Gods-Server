@@ -3,7 +3,7 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, User, deleteUser } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 
 // Configuration Firebase (côté client - ces clés sont publiques)
 const firebaseConfig = {
@@ -243,9 +243,16 @@ export async function updateUsername(uid: string, newUsername: string): Promise<
         needsSetup: false // Marquer le profil comme configuré
     });
 
-    // Mettre à jour la réservation de pseudo
-    // Supprimer l'ancien
-    // (Note: on pourrait aussi garder un historique)
+    // Supprimer l'ancien pseudo de la collection usernames (libérer pour d'autres)
+    if (oldUsername && oldUsername.length > 0) {
+        try {
+            await deleteDoc(doc(db, 'usernames', oldUsername.toLowerCase()));
+        } catch (err) {
+            console.warn('Impossible de supprimer l\'ancien username:', err);
+        }
+    }
+
+    // Réserver le nouveau pseudo
     await setDoc(doc(db, 'usernames', newUsername.toLowerCase()), {
         uid: uid,
         createdAt: serverTimestamp(),
