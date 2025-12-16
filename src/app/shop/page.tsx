@@ -28,23 +28,23 @@ const COFFRETS = [
     {
         id: 'poseidon',
         name: 'Coffret Poséidon',
-        gods: ['Poséidon', 'Artémis', 'Athéna', 'Déméter'],
+        godIds: ['poseidon', 'artemis', 'athena', 'demeter'],
         price: 10000,
         color: '#3b82f6' // Bleu
     },
     {
         id: 'hades',
         name: 'Coffret Hadès',
-        gods: ['Hadès', 'Nyx', 'Apollon', 'Arès'],
+        godIds: ['hades', 'nyx', 'apollon', 'ares'],
         price: 10000,
-        color: '#7c3aed' // Violet
+        color: '#ef4444' // Rouge
     },
     {
         id: 'zeus',
         name: 'Coffret Zeus',
-        gods: ['Zeus', 'Hestia', 'Aphrodite', 'Dionysos'],
+        godIds: ['zeus', 'hestia', 'aphrodite', 'dionysos'],
         price: 10000,
-        color: '#f59e0b' // Doré
+        color: '#fbbf24' // Jaune
     }
 ];
 
@@ -149,19 +149,19 @@ export default function ShopPage() {
                         <div className={styles.subscriptionBenefits}>
                             <div className={styles.benefitItem}>
                                 <span className={styles.benefitIcon}>🎁</span>
-                                <span>500 Ambroisie offerts immédiatement</span>
+                                <span>1 000 Ambroisie offerts immédiatement</span>
                             </div>
                             <div className={styles.benefitItem}>
                                 <span className={styles.benefitIcon}>📅</span>
-                                <span>100 Ambroisie par jour pendant 30 jours</span>
+                                <span>150 Ambroisie par jour pendant 30 jours</span>
                             </div>
                             <div className={styles.benefitItem}>
                                 <span className={styles.benefitIcon}>💰</span>
-                                <span>Total : 3 500 Ambroisie !</span>
+                                <span>Total : 5 500 Ambroisie !</span>
                             </div>
                         </div>
                         <div className={styles.subscriptionPrice}>
-                            <span className={styles.priceValue}>7,99 €</span>
+                            <span className={styles.priceValue}>4,99 €</span>
                             <span className={styles.priceLabel}>/ mois</span>
                         </div>
                         <button className={styles.buyButton}>S'abonner</button>
@@ -172,27 +172,37 @@ export default function ShopPage() {
                 <section id="section-coffrets" className={styles.section}>
                     <h2 className={styles.sectionTitle}>🎁 Coffrets</h2>
                     <div className={styles.coffretsGrid}>
-                        {COFFRETS.map((coffret) => (
-                            <div
-                                key={coffret.id}
-                                className={styles.coffretCard}
-                                style={{ borderColor: coffret.color }}
-                            >
-                                <h3 className={styles.coffretName} style={{ color: coffret.color }}>
-                                    {coffret.name}
-                                </h3>
-                                <div className={styles.coffretGods}>
-                                    {coffret.gods.map((god, idx) => (
-                                        <span key={idx} className={styles.coffretGod}>• {god}</span>
-                                    ))}
+                        {COFFRETS.map((coffret) => {
+                            const coffretGods = coffret.godIds.map(id => ALL_GODS.find(g => g.id === id)).filter(Boolean);
+                            return (
+                                <div
+                                    key={coffret.id}
+                                    className={styles.coffretCard}
+                                    style={{ borderColor: coffret.color }}
+                                >
+                                    <h3 className={styles.coffretName} style={{ color: coffret.color }}>
+                                        {coffret.name}
+                                    </h3>
+                                    <div className={styles.coffretGodsImages}>
+                                        {coffretGods.map((god) => god && (
+                                            <div key={god.id} className={styles.coffretGodImage}>
+                                                <Image
+                                                    src={god.imageUrl}
+                                                    alt={god.name}
+                                                    width={50}
+                                                    height={50}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className={styles.coffretPrice}>
+                                        <Image src="/icons/ambroisie.png" alt="Ambroisie" width={18} height={18} />
+                                        <span>{coffret.price.toLocaleString()}</span>
+                                    </div>
+                                    <button className={styles.buyButton}>Acheter</button>
                                 </div>
-                                <div className={styles.coffretPrice}>
-                                    <Image src="/icons/ambroisie.png" alt="Ambroisie" width={18} height={18} />
-                                    <span>{coffret.price.toLocaleString()}</span>
-                                </div>
-                                <button className={styles.buyButton}>Acheter</button>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
 
@@ -207,7 +217,7 @@ export default function ShopPage() {
                             <div className={styles.featuredContent}>
                                 <div className={styles.featuredImageWrapper}>
                                     <Image
-                                        src={`/gods/${currentGod.id}.png`}
+                                        src={currentGod.imageUrl}
                                         alt={currentGod.name}
                                         width={120}
                                         height={120}
@@ -257,7 +267,7 @@ export default function ShopPage() {
                             <div key={god.id} className={styles.godCard}>
                                 <div className={styles.godImageWrapper}>
                                     <Image
-                                        src={`/gods/${god.id}.png`}
+                                        src={god.imageUrl}
                                         alt={god.name}
                                         width={80}
                                         height={80}
