@@ -55,6 +55,9 @@ export default function DeckPage() {
     // État pour le modal de carte agrandie
     const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
 
+    // État pour les volets déroulants des saisons
+    const [isSeason1Open, setIsSeason1Open] = useState(true);
+
     // Charger les équipes depuis localStorage au montage
     useEffect(() => {
         const savedTeams = localStorage.getItem('gods_teams');
@@ -160,80 +163,97 @@ export default function DeckPage() {
             <div className={styles.libraryContainer}>
                 <h2 className={styles.libraryTitle}>Bibliothèque Divine</h2>
 
-                {ALL_GODS.map((god) => {
-                    const spells = getSpellsForGod(god);
-                    return (
-                        <div key={god.id} className={styles.godRow}>
-                            <div className={styles.godHeader}>
-                                <span className={styles.godName}>{god.name}</span>
-                                <span className={styles.godElement}>{getElementSymbol(god.element)}</span>
-                            </div>
+                {/* Saison 1 : Set de base - Volet déroulant */}
+                <div className={styles.seasonAccordion}>
+                    <button
+                        className={`${styles.seasonHeader} ${isSeason1Open ? styles.seasonHeaderOpen : ''}`}
+                        onClick={() => setIsSeason1Open(!isSeason1Open)}
+                    >
+                        <span className={styles.seasonIcon}>⭐</span>
+                        <span className={styles.seasonTitle}>Saison 1 : Set de base</span>
+                        <span className={styles.seasonCount}>{ALL_GODS.length} dieux</span>
+                        <span className={styles.seasonArrow}>{isSeason1Open ? '▼' : '▶'}</span>
+                    </button>
 
-                            <div className={styles.cardsCarousel}>
-                                {/* 1. Carte du Dieu */}
-                                <div
-                                    className={`${styles.cardWrapper} ${styles.godCardEntry}`}
-                                    onClick={() => openGodCard(god)}
-                                >
-                                    <Image
-                                        src={god.carouselImage || god.imageUrl}
-                                        alt={god.name}
-                                        fill
-                                        className={styles.godCardImage}
-                                        sizes="(max-width: 768px) 100vw, 300px"
-                                        priority={false}
-                                    />
-                                </div>
+                    {isSeason1Open && (
+                        <div className={styles.seasonContent}>
 
-                                {/* 2. Les 5 Cartes de Sorts */}
-                                {spells.map((spell) => {
-                                    // Si c'est une image de sort "officielle" (comme Poséidon), on affiche juste l'image
-                                    const isFullArt = spell.imageUrl.includes('/cards/spells/');
+                            {ALL_GODS.map((god) => {
+                                const spells = getSpellsForGod(god);
+                                return (
+                                    <div key={god.id} className={styles.godRow}>
+                                        <div className={styles.godHeader}>
+                                            <span className={styles.godName}>{god.name}</span>
+                                            <span className={styles.godElement}>{getElementSymbol(god.element)}</span>
+                                        </div>
 
-                                    return (
-                                        <div
-                                            key={spell.id}
-                                            className={`${styles.cardWrapper} ${styles.spellCardEntry}`}
-                                            onClick={() => openSpellCard(spell)}
-                                        >
-                                            {isFullArt ? (
+                                        <div className={styles.cardsCarousel}>
+                                            {/* 1. Carte du Dieu */}
+                                            <div
+                                                className={`${styles.cardWrapper} ${styles.godCardEntry}`}
+                                                onClick={() => openGodCard(god)}
+                                            >
                                                 <Image
-                                                    src={spell.imageUrl}
-                                                    alt={spell.name}
+                                                    src={god.carouselImage || god.imageUrl}
+                                                    alt={god.name}
                                                     fill
                                                     className={styles.godCardImage}
-                                                    sizes="160px"
+                                                    sizes="(max-width: 768px) 100vw, 300px"
+                                                    priority={false}
                                                 />
-                                            ) : (
-                                                <>
-                                                    <div className={styles.spellImageContainer}>
-                                                        <Image
-                                                            src={spell.imageUrl}
-                                                            alt={spell.name}
-                                                            fill
-                                                            className={styles.godCardImage} // Réutilisation style cover
-                                                            sizes="160px"
-                                                        />
-                                                        <div className={styles.spellCost}>{spell.energyCost}</div>
-                                                    </div>
-                                                    <div className={styles.spellContent}>
-                                                        <div className={styles.spellName}>{spell.name}</div>
-                                                        <div className={styles.spellType}>{spell.type}</div>
-                                                        <div className={styles.spellDescription}>
-                                                            {spell.description}
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                                            </div>
 
+                                            {/* 2. Les 5 Cartes de Sorts */}
+                                            {spells.map((spell) => {
+                                                // Si c'est une image de sort "officielle" (comme Poséidon), on affiche juste l'image
+                                                const isFullArt = spell.imageUrl.includes('/cards/spells/');
+
+                                                return (
+                                                    <div
+                                                        key={spell.id}
+                                                        className={`${styles.cardWrapper} ${styles.spellCardEntry}`}
+                                                        onClick={() => openSpellCard(spell)}
+                                                    >
+                                                        {isFullArt ? (
+                                                            <Image
+                                                                src={spell.imageUrl}
+                                                                alt={spell.name}
+                                                                fill
+                                                                className={styles.godCardImage}
+                                                                sizes="160px"
+                                                            />
+                                                        ) : (
+                                                            <>
+                                                                <div className={styles.spellImageContainer}>
+                                                                    <Image
+                                                                        src={spell.imageUrl}
+                                                                        alt={spell.name}
+                                                                        fill
+                                                                        className={styles.godCardImage} // Réutilisation style cover
+                                                                        sizes="160px"
+                                                                    />
+                                                                    <div className={styles.spellCost}>{spell.energyCost}</div>
+                                                                </div>
+                                                                <div className={styles.spellContent}>
+                                                                    <div className={styles.spellName}>{spell.name}</div>
+                                                                    <div className={styles.spellType}>{spell.type}</div>
+                                                                    <div className={styles.spellDescription}>
+                                                                        {spell.description}
+                                                                    </div>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
             {/* Navigation Bottom (Identique home pour consistance) */}
             <div className={styles.bottomNavWrapper}>
                 <nav className={styles.bottomNav}>

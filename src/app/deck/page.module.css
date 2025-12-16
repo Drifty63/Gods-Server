@@ -143,6 +143,84 @@
     padding-bottom: 10px;
 }
 
+/* ===============================
+   Volet déroulant Saison (Accordion)
+   =============================== */
+.seasonAccordion {
+    margin-bottom: 20px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.seasonHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.seasonHeader:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+.seasonHeaderOpen {
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.seasonIcon {
+    font-size: 1.3rem;
+}
+
+.seasonTitle {
+    flex: 1;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--gold-divine);
+    text-align: left;
+    letter-spacing: 1px;
+}
+
+.seasonCount {
+    padding: 4px 12px;
+    background: rgba(212, 175, 55, 0.15);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--gold-divine);
+}
+
+.seasonArrow {
+    color: var(--gold-divine);
+    font-size: 0.9rem;
+    transition: transform 0.3s ease;
+}
+
+.seasonContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Une rangée par dieu */
 .godRow {
     display: flex;
