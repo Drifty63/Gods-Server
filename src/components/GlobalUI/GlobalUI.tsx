@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import styles from './GlobalUI.module.css';
 
@@ -341,7 +342,13 @@ export default function GlobalUI() {
                                         </div>
                                     </div>
                                     <div className={styles.questReward}>
-                                        <span className={styles.ambroisieIcon}>🍯</span>
+                                        <Image
+                                            src="/icons/ambroisie.png"
+                                            alt="Ambroisie"
+                                            width={20}
+                                            height={20}
+                                            className={styles.ambroisieIcon}
+                                        />
                                         <span className={styles.ambroisieAmount}>{quest.reward}</span>
                                         {quest.progress >= quest.target ? (
                                             <button className={styles.claimButton}>Récupérer</button>

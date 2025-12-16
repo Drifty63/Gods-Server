@@ -21,8 +21,8 @@ function HomeContent() {
   const [showPlayModal, setShowPlayModal] = useState(false);
   const [currentGodIndex, setCurrentGodIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  // Utiliser les coins du profil ou 0 par défaut
-  const userCoins = 2300; // TODO: Ajouter coins au profil
+  // Utiliser l'ambroisie du profil ou 0 par défaut
+  const userAmbroisie = 2300; // TODO: Ajouter ambroisie au profil
 
   // Carrousel automatique des dieux (10 secondes)
   useEffect(() => {
@@ -123,10 +123,16 @@ function HomeContent() {
         </div>
       </header>
 
-      {/* Affichage des pièces */}
+      {/* Affichage de l'Ambroisie */}
       <div className={styles.currencyDisplay}>
-        <span className={styles.currencyAmount}>{userCoins.toLocaleString()}</span>
-        <span className={styles.currencyIcon}>🪙</span>
+        <Image
+          src="/icons/ambroisie.png"
+          alt="Ambroisie"
+          width={24}
+          height={24}
+          className={styles.currencyIcon}
+        />
+        <span className={styles.currencyAmount}>{userAmbroisie.toLocaleString()}</span>
       </div>
 
       {/* Contenu principal */}

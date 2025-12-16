@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
 
 export default function ShopPage() {
@@ -9,7 +10,7 @@ export default function ShopPage() {
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
     // Données placeholder
-    const userGold = 1250;
+    const userAmbroisie = 1250;
 
     const gods = [
         { id: 1, name: 'Arès', element: '🔥', elementName: 'Feu', pv: 160, price: 500, owned: false, rarity: 'epic' },
@@ -25,8 +26,8 @@ export default function ShopPage() {
     ];
 
     const specialOffers = [
-        { id: 1, name: 'Pack de Démarrage', originalPrice: 1500, price: 750, items: ['2 Dieux aléatoires', '500 Or'], discount: 50 },
-        { id: 2, name: 'Pack Élémentaire', originalPrice: 2000, price: 1200, items: ['1 Dieu au choix', '1000 Or', '1 Cosmétique'], discount: 40 },
+        { id: 1, name: 'Pack de Démarrage', originalPrice: 1500, price: 750, items: ['2 Dieux aléatoires', '500 Ambroisie'], discount: 50 },
+        { id: 2, name: 'Pack Élémentaire', originalPrice: 2000, price: 1200, items: ['1 Dieu au choix', '1000 Ambroisie', '1 Cosmétique'], discount: 40 },
     ];
 
     const getRarityClass = (rarity: string) => {
@@ -52,8 +53,13 @@ export default function ShopPage() {
                 <Link href="/" className={styles.backButton}>← Retour</Link>
                 <h1 className={styles.title}>🏛️ Boutique</h1>
                 <div className={styles.goldBalance}>
-                    <span className={styles.goldIcon}>🪙</span>
-                    <span>{userGold.toLocaleString()}</span>
+                    <Image
+                        src="/icons/ambroisie.png"
+                        alt="Ambroisie"
+                        width={20}
+                        height={20}
+                    />
+                    <span>{userAmbroisie.toLocaleString()}</span>
                 </div>
             </header>
 
@@ -101,8 +107,8 @@ export default function ShopPage() {
                                         ))}
                                     </ul>
                                     <div className={styles.offerPrice}>
-                                        <span className={styles.originalPrice}>{offer.originalPrice} 🪙</span>
-                                        <span className={styles.discountedPrice}>{offer.price} 🪙</span>
+                                        <span className={styles.originalPrice}>{offer.originalPrice}</span>
+                                        <span className={styles.discountedPrice}>{offer.price}</span>
                                     </div>
                                     <button className={styles.buyButton}>Acheter</button>
                                 </div>
@@ -137,7 +143,7 @@ export default function ShopPage() {
                                         <div className={styles.ownedBadge}>✓ Possédé</div>
                                     ) : (
                                         <div className={styles.godPrice}>
-                                            <span>{god.price} 🪙</span>
+                                            <span>{god.price}</span>
                                         </div>
                                     )}
                                 </div>
@@ -157,7 +163,7 @@ export default function ShopPage() {
                                     <h3 className={styles.cosmeticName}>{item.name}</h3>
                                     <span className={styles.cosmeticType}>{item.type}</span>
                                     <div className={styles.cosmeticPrice}>
-                                        <span>{item.price} 🪙</span>
+                                        <span>{item.price}</span>
                                     </div>
                                     <button className={styles.buySmallButton}>Acheter</button>
                                 </div>
@@ -166,21 +172,21 @@ export default function ShopPage() {
                     </section>
                 )}
 
-                {/* Acheter de l'or */}
+                {/* Acheter de l'Ambroisie */}
                 <section className={styles.buyGoldSection}>
-                    <h2 className={styles.sectionTitle}>💰 Acheter de l'Or</h2>
+                    <h2 className={styles.sectionTitle}>🍯 Acheter de l'Ambroisie</h2>
                     <div className={styles.goldPacksGrid}>
                         <div className={styles.goldPack}>
-                            <span className={styles.goldAmount}>500 🪙</span>
+                            <span className={styles.goldAmount}>500</span>
                             <span className={styles.goldRealPrice}>0,99 €</span>
                         </div>
                         <div className={`${styles.goldPack} ${styles.popular}`}>
                             <span className={styles.popularBadge}>Populaire</span>
-                            <span className={styles.goldAmount}>1500 🪙</span>
+                            <span className={styles.goldAmount}>1500</span>
                             <span className={styles.goldRealPrice}>2,49 €</span>
                         </div>
                         <div className={styles.goldPack}>
-                            <span className={styles.goldAmount}>5000 🪙</span>
+                            <span className={styles.goldAmount}>5000</span>
                             <span className={styles.goldRealPrice}>7,99 €</span>
                         </div>
                     </div>
@@ -205,13 +211,13 @@ export default function ShopPage() {
                                 Débloquez ce dieu pour l'ajouter à votre collection et l'utiliser en combat !
                             </p>
                             <div className={styles.modalPrice}>
-                                <span>{selectedItem.price} 🪙</span>
+                                <span>{selectedItem.price}</span>
                             </div>
                             <button
                                 className={styles.confirmBuyButton}
-                                disabled={userGold < selectedItem.price}
+                                disabled={userAmbroisie < selectedItem.price}
                             >
-                                {userGold >= selectedItem.price ? 'Acheter maintenant' : 'Or insuffisant'}
+                                {userAmbroisie >= selectedItem.price ? 'Acheter maintenant' : 'Ambroisie insuffisante'}
                             </button>
                         </div>
                     </div>
