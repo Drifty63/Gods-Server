@@ -1,59 +1,99 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
+import { ALL_GODS } from '@/data/gods';
+
+// Cycle annuel des dieux en promo
+const MONTHLY_GODS: { [key: number]: string } = {
+    0: 'hestia',      // Janvier
+    1: 'hades',       // Février
+    2: 'ares',        // Mars
+    3: 'aphrodite',   // Avril
+    4: 'demeter',     // Mai
+    5: 'apollon',     // Juin
+    6: 'poseidon',    // Juillet
+    7: 'artemis',     // Août
+    8: 'dionysos',    // Septembre
+    9: 'athena',      // Octobre
+    10: 'zeus',       // Novembre
+    11: 'nyx',        // Décembre
+};
+
+// Coffrets
+const COFFRETS = [
+    {
+        id: 'poseidon',
+        name: 'Coffret Poséidon',
+        gods: ['Poséidon', 'Artémis', 'Athéna', 'Déméter'],
+        price: 10000,
+        color: '#3b82f6' // Bleu
+    },
+    {
+        id: 'hades',
+        name: 'Coffret Hadès',
+        gods: ['Hadès', 'Nyx', 'Apollon', 'Arès'],
+        price: 10000,
+        color: '#7c3aed' // Violet
+    },
+    {
+        id: 'zeus',
+        name: 'Coffret Zeus',
+        gods: ['Zeus', 'Hestia', 'Aphrodite', 'Dionysos'],
+        price: 10000,
+        color: '#f59e0b' // Doré
+    }
+];
+
+// Packs d'Ambroisie
+const AMBROISIE_PACKS = [
+    { id: 1, amount: 500, bonus: 0, price: 0.99 },
+    { id: 2, amount: 2500, bonus: 0, price: 2.99 },
+    { id: 3, amount: 10000, bonus: 1000, price: 9.99 }
+];
 
 export default function ShopPage() {
     const { profile } = useAuth();
-    const [activeTab, setActiveTab] = useState<'coffret' | 'gods' | 'cosmetics' | 'ambroisie'>('coffret');
-    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     // Utiliser l'ambroisie du profil ou 0 par défaut
     const userAmbroisie = profile?.ambroisie ?? 0;
 
-    const gods = [
-        { id: 1, name: 'Arès', element: '🔥', elementName: 'Feu', pv: 160, price: 500, owned: false, rarity: 'epic' },
-        { id: 2, name: 'Hadès', element: '💀', elementName: 'Ténèbres', pv: 180, price: 750, owned: false, rarity: 'legendary' },
-        { id: 3, name: 'Dionysos', element: '🌿', elementName: 'Terre', pv: 140, price: 400, owned: true, rarity: 'rare' },
-        { id: 4, name: 'Hermès', element: '💨', elementName: 'Air', pv: 120, price: 350, owned: false, rarity: 'rare' },
-    ];
+    // Obtenir le dieu du mois actuel
+    const currentMonth = new Date().getMonth();
+    const currentGodId = MONTHLY_GODS[currentMonth];
+    const currentGod = ALL_GODS.find(g => g.id === currentGodId);
 
-    const cosmetics = [
-        { id: 1, name: 'Dos de Carte Olympien', type: 'dos', price: 200, preview: '🏛️' },
-        { id: 2, name: 'Cadre Doré', type: 'cadre', price: 300, preview: '✨' },
-        { id: 3, name: 'Effet de Victoire', type: 'effet', price: 500, preview: '🎆' },
-    ];
+    // Countdown jusqu'au prochain mois
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const now = new Date();
+            const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const diff = nextMonth.getTime() - now.getTime();
 
-    const specialOffers = [
-        { id: 1, name: 'Pack de Démarrage', originalPrice: 1500, price: 750, items: ['2 Dieux aléatoires', '500 Ambroisie'], discount: 50 },
-        { id: 2, name: 'Pack Élémentaire', originalPrice: 2000, price: 1200, items: ['1 Dieu au choix', '1000 Ambroisie', '1 Cosmétique'], discount: 40 },
-    ];
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    const getRarityClass = (rarity: string) => {
-        switch (rarity) {
-            case 'legendary': return styles.legendary;
-            case 'epic': return styles.epic;
-            default: return styles.rare;
-        }
-    };
+            setCountdown({ days, hours, minutes, seconds });
+        };
 
-    const getRarityLabel = (rarity: string) => {
-        switch (rarity) {
-            case 'legendary': return 'Légendaire';
-            case 'epic': return 'Épique';
-            default: return 'Rare';
-        }
-    };
+        calculateTimeLeft();
+        const timer = setInterval(calculateTimeLeft, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
 
     return (
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
                 <Link href="/" className={styles.backButton}>← Retour</Link>
-                <h1 className={styles.title}>🏛️ Boutique</h1>
+                <h1 className={styles.title}>Boutique</h1>
                 <div className={styles.goldBalance}>
                     <Image
                         src="/icons/ambroisie.png"
@@ -66,171 +106,213 @@ export default function ShopPage() {
             </header>
 
             <div className={styles.content}>
-                {/* Navigation rapide - 4 boutons */}
-                <div className={styles.quickNav}>
+                {/* Onglets de navigation */}
+                <div className={styles.navTabs}>
                     <button
-                        className={`${styles.quickNavButton} ${activeTab === 'coffret' ? styles.active : ''}`}
-                        onClick={() => setActiveTab('coffret')}
+                        className={styles.navTab}
+                        onClick={() => document.getElementById('section-offre')?.scrollIntoView({ behavior: 'smooth' })}
                     >
-                        <span className={styles.quickNavIcon}>🎁</span>
-                        <span className={styles.quickNavLabel}>Coffret</span>
+                        Offre
                     </button>
                     <button
-                        className={`${styles.quickNavButton} ${activeTab === 'gods' ? styles.active : ''}`}
-                        onClick={() => setActiveTab('gods')}
+                        className={styles.navTab}
+                        onClick={() => document.getElementById('section-coffrets')?.scrollIntoView({ behavior: 'smooth' })}
                     >
-                        <span className={styles.quickNavIcon}>⚡</span>
-                        <span className={styles.quickNavLabel}>Dieux</span>
+                        Coffrets
                     </button>
                     <button
-                        className={`${styles.quickNavButton} ${activeTab === 'cosmetics' ? styles.active : ''}`}
-                        onClick={() => setActiveTab('cosmetics')}
+                        className={styles.navTab}
+                        onClick={() => document.getElementById('section-dieux')?.scrollIntoView({ behavior: 'smooth' })}
                     >
-                        <span className={styles.quickNavIcon}>✨</span>
-                        <span className={styles.quickNavLabel}>Cosmétiques</span>
+                        Dieux
                     </button>
                     <button
-                        className={`${styles.quickNavButton} ${activeTab === 'ambroisie' ? styles.active : ''}`}
-                        onClick={() => setActiveTab('ambroisie')}
+                        className={styles.navTab}
+                        onClick={() => document.getElementById('section-cosmetiques')?.scrollIntoView({ behavior: 'smooth' })}
                     >
-                        <span className={styles.quickNavIcon}>🍯</span>
-                        <span className={styles.quickNavLabel}>Ambroisie</span>
+                        Cosmétiques
+                    </button>
+                    <button
+                        className={styles.navTab}
+                        onClick={() => document.getElementById('section-ambroisie')?.scrollIntoView({ behavior: 'smooth' })}
+                    >
+                        Ambroisie
                     </button>
                 </div>
+
+                {/* Section Offre - Abonnement */}
+                <section id="section-offre" className={styles.section}>
+                    <h2 className={styles.sectionTitle}>⭐ Offre Spéciale</h2>
+                    <div className={styles.subscriptionCard}>
+                        <div className={styles.subscriptionBadge}>Abonnement</div>
+                        <h3 className={styles.subscriptionTitle}>Pass Divin Mensuel</h3>
+                        <div className={styles.subscriptionBenefits}>
+                            <div className={styles.benefitItem}>
+                                <span className={styles.benefitIcon}>🎁</span>
+                                <span>500 Ambroisie offerts immédiatement</span>
+                            </div>
+                            <div className={styles.benefitItem}>
+                                <span className={styles.benefitIcon}>📅</span>
+                                <span>100 Ambroisie par jour pendant 30 jours</span>
+                            </div>
+                            <div className={styles.benefitItem}>
+                                <span className={styles.benefitIcon}>💰</span>
+                                <span>Total : 3 500 Ambroisie !</span>
+                            </div>
+                        </div>
+                        <div className={styles.subscriptionPrice}>
+                            <span className={styles.priceValue}>7,99 €</span>
+                            <span className={styles.priceLabel}>/ mois</span>
+                        </div>
+                        <button className={styles.buyButton}>S'abonner</button>
+                    </div>
+                </section>
 
                 {/* Section Coffrets */}
-                {activeTab === 'coffret' && (
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>🎁 Coffrets</h2>
-                        <div className={styles.offersGrid}>
-                            {specialOffers.map((offer) => (
-                                <div key={offer.id} className={styles.offerCard}>
-                                    <div className={styles.discountBadge}>-{offer.discount}%</div>
-                                    <h3 className={styles.offerName}>{offer.name}</h3>
-                                    <ul className={styles.offerItems}>
-                                        {offer.items.map((item, idx) => (
-                                            <li key={idx}>✓ {item}</li>
-                                        ))}
-                                    </ul>
-                                    <div className={styles.offerPrice}>
-                                        <span className={styles.originalPrice}>{offer.originalPrice}</span>
-                                        <span className={styles.discountedPrice}>{offer.price}</span>
-                                    </div>
-                                    <button className={styles.buyButton}>Acheter</button>
+                <section id="section-coffrets" className={styles.section}>
+                    <h2 className={styles.sectionTitle}>🎁 Coffrets</h2>
+                    <div className={styles.coffretsGrid}>
+                        {COFFRETS.map((coffret) => (
+                            <div
+                                key={coffret.id}
+                                className={styles.coffretCard}
+                                style={{ borderColor: coffret.color }}
+                            >
+                                <h3 className={styles.coffretName} style={{ color: coffret.color }}>
+                                    {coffret.name}
+                                </h3>
+                                <div className={styles.coffretGods}>
+                                    {coffret.gods.map((god, idx) => (
+                                        <span key={idx} className={styles.coffretGod}>• {god}</span>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
+                                <div className={styles.coffretPrice}>
+                                    <Image src="/icons/ambroisie.png" alt="Ambroisie" width={18} height={18} />
+                                    <span>{coffret.price.toLocaleString()}</span>
+                                </div>
+                                <button className={styles.buyButton}>Acheter</button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
                 {/* Section Dieux */}
-                {activeTab === 'gods' && (
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>⚡ Dieux</h2>
-                        <div className={styles.godsGrid}>
-                            {gods.map((god) => (
-                                <div
-                                    key={god.id}
-                                    className={`${styles.godCard} ${getRarityClass(god.rarity)} ${god.owned ? styles.owned : ''}`}
-                                    onClick={() => !god.owned && setSelectedItem(god)}
-                                >
-                                    <div className={`${styles.rarityBadge} ${getRarityClass(god.rarity)}`}>
-                                        {getRarityLabel(god.rarity)}
-                                    </div>
-                                    <div className={styles.godImage}>
-                                        <span className={styles.godElement}>{god.element}</span>
-                                    </div>
-                                    <h3 className={styles.godName}>{god.name}</h3>
-                                    <div className={styles.godStats}>
-                                        <span>{god.elementName}</span>
-                                        <span>❤️ {god.pv}</span>
-                                    </div>
-                                    {god.owned ? (
-                                        <div className={styles.ownedBadge}>✓ Possédé</div>
-                                    ) : (
-                                        <div className={styles.godPrice}>
-                                            <span>{god.price}</span>
-                                        </div>
-                                    )}
+                <section id="section-dieux" className={styles.section}>
+                    <h2 className={styles.sectionTitle}>⚡ Dieux</h2>
+
+                    {/* Dieu du mois en vedette */}
+                    {currentGod && (
+                        <div className={styles.featuredGod}>
+                            <div className={styles.featuredBadge}>🌟 Dieu du Mois</div>
+                            <div className={styles.featuredContent}>
+                                <div className={styles.featuredImageWrapper}>
+                                    <Image
+                                        src={`/gods/${currentGod.id}.png`}
+                                        alt={currentGod.name}
+                                        width={120}
+                                        height={120}
+                                        className={styles.featuredImage}
+                                    />
                                 </div>
-                            ))}
+                                <div className={styles.featuredInfo}>
+                                    <h3 className={styles.featuredName}>{currentGod.name}</h3>
+                                    <div className={styles.featuredPriceRow}>
+                                        <span className={styles.originalGodPrice}>3 000</span>
+                                        <div className={styles.featuredPrice}>
+                                            <Image src="/icons/ambroisie.png" alt="Ambroisie" width={20} height={20} />
+                                            <span>2 000</span>
+                                        </div>
+                                    </div>
+                                    <button className={styles.buyButtonSmall}>Acheter</button>
+                                </div>
+                            </div>
+                            <div className={styles.countdown}>
+                                <span className={styles.countdownLabel}>Temps restant :</span>
+                                <div className={styles.countdownTimer}>
+                                    <div className={styles.countdownBlock}>
+                                        <span className={styles.countdownValue}>{countdown.days}</span>
+                                        <span className={styles.countdownUnit}>j</span>
+                                    </div>
+                                    <div className={styles.countdownBlock}>
+                                        <span className={styles.countdownValue}>{countdown.hours.toString().padStart(2, '0')}</span>
+                                        <span className={styles.countdownUnit}>h</span>
+                                    </div>
+                                    <div className={styles.countdownBlock}>
+                                        <span className={styles.countdownValue}>{countdown.minutes.toString().padStart(2, '0')}</span>
+                                        <span className={styles.countdownUnit}>m</span>
+                                    </div>
+                                    <div className={styles.countdownBlock}>
+                                        <span className={styles.countdownValue}>{countdown.seconds.toString().padStart(2, '0')}</span>
+                                        <span className={styles.countdownUnit}>s</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </section>
-                )}
+                    )}
+
+                    {/* Tous les dieux */}
+                    <h3 className={styles.subSectionTitle}>Tous les Dieux</h3>
+                    <div className={styles.godsGrid}>
+                        {ALL_GODS.map((god) => (
+                            <div key={god.id} className={styles.godCard}>
+                                <div className={styles.godImageWrapper}>
+                                    <Image
+                                        src={`/gods/${god.id}.png`}
+                                        alt={god.name}
+                                        width={80}
+                                        height={80}
+                                        className={styles.godImage}
+                                    />
+                                </div>
+                                <h4 className={styles.godName}>{god.name}</h4>
+                                <div className={styles.godPrice}>
+                                    <Image src="/icons/ambroisie.png" alt="Ambroisie" width={14} height={14} />
+                                    <span>3 000</span>
+                                </div>
+                                <button className={styles.buyButtonMini}>Acheter</button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
                 {/* Section Cosmétiques */}
-                {activeTab === 'cosmetics' && (
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>✨ Cosmétiques</h2>
-                        <div className={styles.cosmeticsGrid}>
-                            {cosmetics.map((item) => (
-                                <div key={item.id} className={styles.cosmeticCard}>
-                                    <div className={styles.cosmeticPreview}>{item.preview}</div>
-                                    <h3 className={styles.cosmeticName}>{item.name}</h3>
-                                    <span className={styles.cosmeticType}>{item.type}</span>
-                                    <div className={styles.cosmeticPrice}>
-                                        <span>{item.price}</span>
-                                    </div>
-                                    <button className={styles.buySmallButton}>Acheter</button>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
+                <section id="section-cosmetiques" className={styles.section}>
+                    <h2 className={styles.sectionTitle}>✨ Cosmétiques</h2>
+                    <div className={styles.comingSoon}>
+                        <span className={styles.comingSoonIcon}>🚧</span>
+                        <p className={styles.comingSoonText}>Cette section n'est pas encore disponible.</p>
+                        <p className={styles.comingSoonSubtext}>Les cosmétiques arrivent bientôt !</p>
+                    </div>
+                </section>
 
                 {/* Section Ambroisie */}
-                {activeTab === 'ambroisie' && (
-                    <section className={styles.buyGoldSection}>
-                        <h2 className={styles.sectionTitle}>🍯 Acheter de l'Ambroisie</h2>
-                        <div className={styles.goldPacksGrid}>
-                            <div className={styles.goldPack}>
-                                <span className={styles.goldAmount}>500</span>
-                                <span className={styles.goldRealPrice}>0,99 €</span>
-                            </div>
-                            <div className={`${styles.goldPack} ${styles.popular}`}>
-                                <span className={styles.popularBadge}>Populaire</span>
-                                <span className={styles.goldAmount}>1500</span>
-                                <span className={styles.goldRealPrice}>2,49 €</span>
-                            </div>
-                            <div className={styles.goldPack}>
-                                <span className={styles.goldAmount}>5000</span>
-                                <span className={styles.goldRealPrice}>7,99 €</span>
-                            </div>
-                        </div>
-                    </section>
-                )}
-            </div>
-
-            {/* Modal de détail */}
-            {selectedItem && (
-                <div className={styles.modalOverlay} onClick={() => setSelectedItem(null)}>
-                    <div className={styles.detailModal} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.closeModal} onClick={() => setSelectedItem(null)}>✕</button>
-                        <div className={styles.modalContent}>
-                            <div className={styles.modalImage}>
-                                <span className={styles.modalElement}>{selectedItem.element}</span>
-                            </div>
-                            <h2 className={styles.modalName}>{selectedItem.name}</h2>
-                            <div className={styles.modalStats}>
-                                <span>Élément: {selectedItem.elementName}</span>
-                                <span>PV: {selectedItem.pv}</span>
-                            </div>
-                            <p className={styles.modalDescription}>
-                                Débloquez ce dieu pour l'ajouter à votre collection et l'utiliser en combat !
-                            </p>
-                            <div className={styles.modalPrice}>
-                                <span>{selectedItem.price}</span>
-                            </div>
-                            <button
-                                className={styles.confirmBuyButton}
-                                disabled={userAmbroisie < selectedItem.price}
+                <section id="section-ambroisie" className={styles.section}>
+                    <h2 className={styles.sectionTitle}>🍯 Acheter de l'Ambroisie</h2>
+                    <div className={styles.ambroisieGrid}>
+                        {AMBROISIE_PACKS.map((pack) => (
+                            <div
+                                key={pack.id}
+                                className={`${styles.ambroisiePack} ${pack.bonus > 0 ? styles.bestValue : ''}`}
                             >
-                                {userAmbroisie >= selectedItem.price ? 'Acheter maintenant' : 'Ambroisie insuffisante'}
-                            </button>
-                        </div>
+                                {pack.bonus > 0 && (
+                                    <div className={styles.bonusBadge}>+{pack.bonus.toLocaleString()} offerts</div>
+                                )}
+                                <div className={styles.ambroisieAmount}>
+                                    <Image src="/icons/ambroisie.png" alt="Ambroisie" width={24} height={24} />
+                                    <span>{pack.amount.toLocaleString()}</span>
+                                </div>
+                                {pack.bonus > 0 && (
+                                    <div className={styles.totalAmount}>
+                                        Total : {(pack.amount + pack.bonus).toLocaleString()}
+                                    </div>
+                                )}
+                                <div className={styles.realPrice}>{pack.price.toFixed(2).replace('.', ',')} €</div>
+                                <button className={styles.buyButton}>Acheter</button>
+                            </div>
+                        ))}
                     </div>
-                </div>
-            )}
+                </section>
+            </div>
         </main>
     );
 }

@@ -70,54 +70,32 @@
     margin: 0 auto;
 }
 
-/* Quick Navigation - 4 boutons carrés */
-.quickNav {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+/* Navigation Tabs - Onglets compacts */
+.navTabs {
+    display: flex;
+    gap: 8px;
     margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 8px;
 }
 
-.quickNavButton {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 16px 8px;
+.navTab {
+    padding: 10px 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
     background: rgba(0, 0, 0, 0.4);
-    border: 2px solid rgba(212, 175, 55, 0.2);
-    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
     transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
-.quickNavButton:hover {
+.navTab:hover {
     background: rgba(212, 175, 55, 0.15);
     border-color: rgba(212, 175, 55, 0.4);
-    transform: translateY(-3px);
-}
-
-.quickNavButton.active {
-    background: linear-gradient(145deg, rgba(212, 175, 55, 0.3), rgba(0, 0, 0, 0.5));
-    border-color: var(--gold-divine);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-}
-
-.quickNavIcon {
-    font-size: 1.8rem;
-}
-
-.quickNavLabel {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.quickNavButton.active .quickNavLabel {
     color: var(--gold-divine);
 }
 
@@ -620,5 +598,478 @@
 
     .godsGrid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ================================
+   NOUVELLES SECTIONS BOUTIQUE
+   ================================ */
+
+/* Subscription / Abonnement */
+.subscriptionCard {
+    position: relative;
+    padding: 24px;
+    background: linear-gradient(145deg, rgba(147, 51, 234, 0.2), rgba(0, 0, 0, 0.5));
+    border: 2px solid rgba(147, 51, 234, 0.4);
+    border-radius: 20px;
+    text-align: center;
+}
+
+.subscriptionBadge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 20px;
+    background: linear-gradient(145deg, #9333ea, #7c3aed);
+    color: white;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 20px;
+}
+
+.subscriptionTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: white;
+    margin: 16px 0;
+}
+
+.subscriptionBenefits {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.benefitItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.benefitIcon {
+    font-size: 1.2rem;
+}
+
+.subscriptionPrice {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.priceValue {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold-divine);
+}
+
+.priceLabel {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Coffrets */
+.coffretsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.coffretCard {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.coffretCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.coffretName {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+.coffretGods {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.coffretGod {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.coffretPrice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold-divine);
+    margin-bottom: 12px;
+}
+
+/* Featured God / Dieu du mois */
+.featuredGod {
+    position: relative;
+    padding: 20px;
+    background: linear-gradient(145deg, rgba(212, 175, 55, 0.15), rgba(0, 0, 0, 0.5));
+    border: 2px solid var(--gold-divine);
+    border-radius: 20px;
+    margin-bottom: 24px;
+}
+
+.featuredBadge {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    padding: 6px 16px;
+    background: linear-gradient(145deg, var(--gold-divine), #b8860b);
+    color: #0a0a1a;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 20px;
+}
+
+.featuredContent {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.featuredImageWrapper {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.featuredImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.featuredInfo {
+    flex: 1;
+}
+
+.featuredName {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.featuredPriceRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.originalGodPrice {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 1rem;
+}
+
+.featuredPrice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold-divine);
+}
+
+/* Countdown */
+.countdown {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.countdownLabel {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 8px;
+}
+
+.countdownTimer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.countdownBlock {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.countdownValue {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold-divine);
+}
+
+.countdownUnit {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Sub section title */
+.subSectionTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 16px;
+}
+
+/* Gods Grid (new) */
+.godsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.godCard {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.godCard:hover {
+    border-color: var(--gold-divine);
+    transform: translateY(-3px);
+}
+
+.godImageWrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 8px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.1);
+    overflow: hidden;
+}
+
+.godImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.godName {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: white;
+    margin-bottom: 6px;
+}
+
+.godPrice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gold-divine);
+    margin-bottom: 8px;
+}
+
+/* Buy buttons */
+.buyButton {
+    width: 100%;
+    padding: 12px 24px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.buyButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+}
+
+.buyButtonSmall {
+    padding: 8px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.buyButtonSmall:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.buyButtonMini {
+    width: 100%;
+    padding: 6px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.buyButtonMini:hover {
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Coming Soon */
+.comingSoon {
+    padding: 40px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px dashed rgba(212, 175, 55, 0.3);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.comingSoonIcon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.comingSoonText {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+}
+
+.comingSoonSubtext {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Ambroisie Packs */
+.ambroisieGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.ambroisiePack {
+    position: relative;
+    padding: 24px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.ambroisiePack:hover {
+    border-color: var(--gold-divine);
+    transform: translateY(-3px);
+}
+
+.ambroisiePack.bestValue {
+    border-color: var(--gold-divine);
+    background: linear-gradient(145deg, rgba(212, 175, 55, 0.15), rgba(0, 0, 0, 0.5));
+}
+
+.bonusBadge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 12px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.ambroisieAmount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold-divine);
+    margin-bottom: 8px;
+}
+
+.totalAmount {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 8px;
+}
+
+.realPrice {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 600px) {
+    .ambroisieGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .coffretsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .featuredContent {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .godsGrid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
