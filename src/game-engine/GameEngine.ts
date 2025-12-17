@@ -1088,7 +1088,7 @@ export class GameEngine {
                 break;
 
             // ========================================
-            // DEMETER - Soins basés sur l'énergie
+            // HESTIA - Soins basés sur l'énergie
             // ========================================
             case 'heal_by_energy':
                 // Soigne un allié de la valeur totale de l'énergie
