@@ -589,9 +589,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
             // Fin de tour automatique UNIQUEMENT en mode solo
             // En multijoueur, le GameBoard.onAction gère la fin de tour
             if (isSoloMode) {
-                setTimeout(() => {
-                    get().endTurn();
-                }, 500);
+                // Vérifier si le tour n'a pas déjà changé (ex: mort par poison)
+                const currentState = engine.getState();
+                if (currentState.currentPlayerId === playerId && currentState.status === 'playing') {
+                    setTimeout(() => {
+                        get().endTurn();
+                    }, 500);
+                }
             }
         }
 
