@@ -186,6 +186,85 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const [toast, setToast] = useState<{ message: string; type: 'warning' | 'error' | 'info' } | null>(null);
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Musique de combat
+    const battleAudioRef = useRef<HTMLAudioElement | null>(null);
+    const [battleVolume, setBattleVolume] = useState(0.3);
+    const [isMuted, setIsMuted] = useState(false);
+
+    // Charger les paramètres audio depuis localStorage
+    useEffect(() => {
+        const savedBattleVolume = localStorage.getItem('battleVolume');
+        const savedMuted = localStorage.getItem('isMuted');
+
+        if (savedBattleVolume) setBattleVolume(parseFloat(savedBattleVolume));
+        if (savedMuted) setIsMuted(savedMuted === 'true');
+    }, []);
+
+    // Écouter les changements de localStorage (quand l'utilisateur modifie dans les options)
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const savedBattleVolume = localStorage.getItem('battleVolume');
+            const savedMuted = localStorage.getItem('isMuted');
+
+            if (savedBattleVolume) setBattleVolume(parseFloat(savedBattleVolume));
+            if (savedMuted) setIsMuted(savedMuted === 'true');
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Aussi vérifier périodiquement (pour les changements dans le même onglet)
+        const interval = setInterval(() => {
+            const savedBattleVolume = localStorage.getItem('battleVolume');
+            const savedMuted = localStorage.getItem('isMuted');
+
+            if (savedBattleVolume) {
+                const vol = parseFloat(savedBattleVolume);
+                if (vol !== battleVolume) setBattleVolume(vol);
+            }
+            if (savedMuted) {
+                const muted = savedMuted === 'true';
+                if (muted !== isMuted) setIsMuted(muted);
+            }
+        }, 1000);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(interval);
+        };
+    }, [battleVolume, isMuted]);
+
+    // Gérer la musique de combat
+    useEffect(() => {
+        if (!battleAudioRef.current) {
+            battleAudioRef.current = new Audio('/audio/battle_theme.mp3');
+            battleAudioRef.current.loop = true;
+        }
+
+        const audio = battleAudioRef.current;
+        audio.volume = isMuted ? 0 : battleVolume;
+
+        // Jouer la musique si le jeu est en cours
+        if (gameState && !gameState.winnerId) {
+            audio.play().catch(() => {
+                // Autoplay bloqué, on réessaie après interaction utilisateur
+            });
+        }
+
+        return () => {
+            if (battleAudioRef.current) {
+                battleAudioRef.current.pause();
+                battleAudioRef.current.currentTime = 0;
+            }
+        };
+    }, [gameState?.winnerId]);
+
+    // Mettre à jour le volume en temps réel
+    useEffect(() => {
+        if (battleAudioRef.current) {
+            battleAudioRef.current.volume = isMuted ? 0 : battleVolume;
+        }
+    }, [battleVolume, isMuted]);
+
     const showToast = useCallback((message: string, type: 'warning' | 'error' | 'info' = 'warning') => {
         // Annuler le timeout précédent
         if (toastTimeoutRef.current) {
