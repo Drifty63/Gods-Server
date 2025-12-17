@@ -85,6 +85,44 @@ export default function ShopPage() {
         }
     };
 
+    // Fonction pour obtenir le symbole d'élément
+    const getElementSymbol = (element: string) => {
+        switch (element) {
+            case 'water': return '💧';
+            case 'lightning': return '⚡';
+            case 'darkness': return '💀';
+            case 'fire': return '🔥';
+            case 'earth': return '🌿';
+            case 'light': return '☀️';
+            case 'nature': return '🌿';
+            case 'wind': return '💨';
+            case 'love': return '💕';
+            case 'wine': return '🍷';
+            case 'hunt': return '🏹';
+            case 'war': return '⚔️';
+            default: return '✨';
+        }
+    };
+
+    // Fonction pour obtenir le type de jeu par dieu
+    const getGodPlaystyle = (godId: string) => {
+        switch (godId) {
+            case 'poseidon': return 'Contrôle';
+            case 'zeus': return 'Dégâts';
+            case 'hades': return 'Dégâts';
+            case 'nyx': return 'Contrôle';
+            case 'ares': return 'Tank';
+            case 'athena': return 'Tank';
+            case 'dionysos': return 'Support';
+            case 'artemis': return 'Dégâts';
+            case 'aphrodite': return 'Support';
+            case 'demeter': return 'Support';
+            case 'hestia': return 'Support';
+            case 'apollon': return 'Contrôle';
+            default: return 'Hybride';
+        }
+    };
+
     // Obtenir le dieu du mois actuel
     const currentMonth = new Date().getMonth();
     const currentGodId = MONTHLY_GODS[currentMonth];
@@ -442,11 +480,11 @@ export default function ShopPage() {
                             </div>
                             <div className={styles.modalGodStat}>
                                 <span className={styles.statLabel}>Élément</span>
-                                <span className={styles.statValue}>{selectedGod.element}</span>
+                                <span className={styles.statValue}>{getElementSymbol(selectedGod.element)}</span>
                             </div>
                             <div className={styles.modalGodStat}>
-                                <span className={styles.statLabel}>Faiblesse</span>
-                                <span className={styles.statValue}>{selectedGod.weakness}</span>
+                                <span className={styles.statLabel}>Type</span>
+                                <span className={styles.statValue}>{getGodPlaystyle(selectedGod.id)}</span>
                             </div>
                         </div>
 
