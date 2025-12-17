@@ -24,6 +24,9 @@ export default function ProfileSetupPage() {
     const [checkingUsername, setCheckingUsername] = useState(false);
     const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
 
+    // Déterminer si c'est un utilisateur existant (a déjà un pseudo mais pas de dieux)
+    const isExistingUser = profile && profile.username && profile.collection.godsOwned.length === 0;
+
     // Rediriger si pas connecté
     useEffect(() => {
         if (!loading && !user) {
@@ -31,17 +34,27 @@ export default function ProfileSetupPage() {
         }
     }, [user, loading, router]);
 
-    // Si le profil existe et n'a pas besoin de setup, rediriger vers l'accueil
+    // Si le profil a déjà des dieux, rediriger vers l'accueil
     useEffect(() => {
-        if (!loading && profile && profile.needsSetup === false) {
+        if (!loading && profile && profile.collection.godsOwned.length > 0) {
             router.push('/');
         }
     }, [profile, loading, router]);
 
+    // Pour les utilisateurs existants, passer directement à l'étape 2 (choix du coffret)
+    useEffect(() => {
+        if (isExistingUser && step === 1) {
+            setStep(2);
+        }
+    }, [isExistingUser, step]);
+
     // Pré-remplir avec les données existantes si disponibles
     useEffect(() => {
         if (profile) {
-            if (profile.username) setUsername(profile.username);
+            if (profile.username) {
+                setUsername(profile.username);
+                setUsernameAvailable(true); // Son propre pseudo est toujours disponible
+            }
             // Ne pas utiliser l'avatar si c'est une URL (photo Google)
             if (profile.avatar && !profile.avatar.startsWith('http')) {
                 setSelectedAvatar(profile.avatar);
@@ -118,14 +131,16 @@ export default function ProfileSetupPage() {
 
         try {
             if (user) {
-                // 1. Mettre à jour username et avatar
-                await updateUsername(user.uid, username);
-                await updateAvatar(user.uid, selectedAvatar);
+                // Pour les nouveaux utilisateurs, mettre à jour le pseudo et l'avatar
+                if (!isExistingUser) {
+                    await updateUsername(user.uid, username);
+                    await updateAvatar(user.uid, selectedAvatar);
+                }
 
-                // 2. Attribuer le pack starter
+                // Attribuer le pack starter
                 await claimStarterPack(user.uid, selectedPack);
 
-                // 3. Rafraîchir le profil et rediriger
+                // Rafraîchir le profil et rediriger
                 await refreshProfile();
                 router.push('/');
             }

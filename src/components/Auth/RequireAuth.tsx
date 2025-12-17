@@ -2,9 +2,10 @@
 
 // Composant pour protéger les routes qui nécessitent une connexion
 // Redirige vers /auth si l'utilisateur n'est pas connecté
+// Redirige vers /profile/setup si l'utilisateur n'a pas de dieux
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface RequireAuthProps {
@@ -13,17 +14,33 @@ interface RequireAuthProps {
 }
 
 export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps) {
-    const { user, loading } = useAuth();
+    const { user, profile, loading, profileLoading } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
-        if (!loading && !user) {
+        // Attendre que le chargement soit terminé
+        if (loading || profileLoading) return;
+
+        // Rediriger vers auth si pas connecté
+        if (!user) {
             router.push(redirectTo);
+            return;
         }
-    }, [user, loading, router, redirectTo]);
+
+        // Si on est sur la page de setup, ne pas rediriger (éviter boucle infinie)
+        if (pathname === '/profile/setup') return;
+
+        // Rediriger vers setup si l'utilisateur n'a pas de dieux (nouvel utilisateur ou ancien sans coffret)
+        if (profile && profile.collection.godsOwned.length === 0) {
+            console.log('⚠️ Utilisateur sans dieux, redirection vers /profile/setup');
+            router.push('/profile/setup');
+            return;
+        }
+    }, [user, profile, loading, profileLoading, router, redirectTo, pathname]);
 
     // Afficher un loader pendant la vérification
-    if (loading) {
+    if (loading || profileLoading) {
         return (
             <div style={{
                 display: 'flex',
@@ -42,6 +59,11 @@ export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps
 
     // Ne rien afficher si pas connecté (en attente de redirection)
     if (!user) {
+        return null;
+    }
+
+    // Ne rien afficher si redirection vers setup en cours
+    if (profile && profile.collection.godsOwned.length === 0 && pathname !== '/profile/setup') {
         return null;
     }
 
