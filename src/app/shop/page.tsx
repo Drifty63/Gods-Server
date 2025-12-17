@@ -133,7 +133,7 @@ export default function ShopPage() {
                         className={styles.navTab}
                         onClick={() => document.getElementById('section-offre')?.scrollIntoView({ behavior: 'smooth' })}
                     >
-                        Offre
+                        Offres
                     </button>
                     <button
                         className={styles.navTab}
@@ -169,12 +169,12 @@ export default function ShopPage() {
                         <h3 className={styles.subscriptionTitle}>Pass Divin Mensuel</h3>
                         <div className={styles.subscriptionBenefits}>
                             <div className={styles.benefitItem}>
-                                <span className={styles.benefitIcon}>🎁</span>
-                                <span>1 000 Ambroisie offerts immédiatement</span>
-                            </div>
-                            <div className={styles.benefitItem}>
                                 <span className={styles.benefitIcon}>📅</span>
                                 <span>150 Ambroisie par jour pendant 30 jours</span>
+                            </div>
+                            <div className={styles.benefitItem}>
+                                <span className={styles.benefitIcon}>🎁</span>
+                                <span>1 000 Ambroisie offerts immédiatement</span>
                             </div>
                             <div className={styles.benefitItem}>
                                 <span className={styles.benefitIcon}>💰</span>
