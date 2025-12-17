@@ -1100,14 +1100,14 @@ export class GameEngine {
                         if (poisonIndex !== -1) {
                             const poisonToRemove = Math.min(healAmount, target.statusEffects[poisonIndex].stacks);
                             target.statusEffects[poisonIndex].stacks -= poisonToRemove;
-                            const remainingHeal = healAmount - poisonToRemove;
-                            target.currentHealth = Math.min(target.currentHealth + remainingHeal, target.card.maxHealth);
+
                             if (target.statusEffects[poisonIndex].stacks <= 0) {
                                 target.statusEffects.splice(poisonIndex, 1);
                             }
-                        } else {
-                            target.currentHealth = Math.min(target.currentHealth + healAmount, target.card.maxHealth);
                         }
+
+                        // Soigner de la valeur totale (indépendamment du poison retiré)
+                        target.currentHealth = Math.min(target.currentHealth + healAmount, target.card.maxHealth);
                     }
                 }
                 break;
