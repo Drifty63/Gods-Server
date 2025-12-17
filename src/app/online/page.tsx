@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
+import { useAuth } from '@/contexts/AuthContext';
 import styles from './page.module.css';
 
 export default function OnlinePage() {
     const router = useRouter();
+    const { profile } = useAuth();
     const {
         isConnected,
         error,
@@ -28,12 +30,17 @@ export default function OnlinePage() {
     const [searchTime, setSearchTime] = useState(0);
 
     // Charger le nom sauvegardé
+    // Charger le nom sauvegardé ou le profil connecté
     useEffect(() => {
-        const savedName = localStorage.getItem('playerName');
-        if (savedName) {
-            setPlayerName(savedName);
+        if (profile?.username) {
+            setPlayerName(profile.username);
+        } else {
+            const savedName = localStorage.getItem('playerName');
+            if (savedName) {
+                setPlayerName(savedName);
+            }
         }
-    }, []);
+    }, [profile]);
 
     // Timer de recherche
     useEffect(() => {
@@ -126,14 +133,18 @@ export default function OnlinePage() {
                 {mode === 'menu' && (
                     <>
                         <section className={styles.nameSection}>
-                            <label className={styles.label}>Votre pseudonyme</label>
+                            <label className={styles.label}>
+                                {profile ? '👤 Connecté en tant que' : 'Votre pseudonyme'}
+                            </label>
                             <input
                                 type="text"
                                 value={playerName}
-                                onChange={(e) => setPlayerName(e.target.value)}
+                                onChange={(e) => !profile && setPlayerName(e.target.value)}
                                 placeholder="Entrez votre pseudo..."
                                 className={styles.input}
                                 maxLength={20}
+                                disabled={!!profile}
+                                style={profile ? { cursor: 'not-allowed', opacity: 0.8, backgroundColor: 'rgba(255,255,255,0.1)' } : undefined}
                             />
                         </section>
 
