@@ -15,6 +15,7 @@ interface CardDetailModalProps {
     onDiscard: () => void;
     canPlay: boolean;
     canDiscard: boolean;
+    readOnly?: boolean;
 }
 
 // Descriptions explicites des effets (regroupe les effets identiques)
@@ -139,7 +140,8 @@ export default function CardDetailModal({
     onPlay,
     onDiscard,
     canPlay,
-    canDiscard
+    canDiscard,
+    readOnly = false
 }: CardDetailModalProps) {
     const [mounted, setMounted] = useState(false);
 
@@ -217,22 +219,24 @@ export default function CardDetailModal({
                 </div>
 
                 {/* Boutons d'action */}
-                <div className={styles.actions}>
-                    <button
-                        className={styles.discardButton}
-                        onClick={onDiscard}
-                        disabled={!canDiscard}
-                    >
-                        🗑️ Défausser
-                    </button>
-                    <button
-                        className={styles.playButton}
-                        onClick={onPlay}
-                        disabled={!canPlay}
-                    >
-                        ▶️ Jouer
-                    </button>
-                </div>
+                {!readOnly && (
+                    <div className={styles.actions}>
+                        <button
+                            className={styles.discardButton}
+                            onClick={onDiscard}
+                            disabled={!canDiscard}
+                        >
+                            🗑️ Défausser
+                        </button>
+                        <button
+                            className={styles.playButton}
+                            onClick={onPlay}
+                            disabled={!canPlay}
+                        >
+                            ▶️ Jouer
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -172,6 +172,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     };
 
     const [viewDiscard, setViewDiscard] = useState<'player' | 'opponent' | null>(null);
+    const [previewCard, setPreviewCard] = useState<import('@/types/cards').SpellCard | null>(null);
     const [pendingCardForSelection, setPendingCardForSelection] = useState<import('@/types/cards').SpellCard | null>(null);
     const [pendingCardForHealDistribution, setPendingCardForHealDistribution] = useState<import('@/types/cards').SpellCard | null>(null);
     const [pendingCardForEnemySelection, setPendingCardForEnemySelection] = useState<import('@/types/cards').SpellCard | null>(null);
@@ -643,7 +644,13 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         </div>
                         <div className={styles.discardGrid}>
                             {(viewDiscard === 'player' ? player.discard : opponent.discard).map((card, index) => (
-                                <div key={index} className={styles.discardCardWrapper}>
+                                <div
+                                    key={index}
+                                    className={styles.discardCardWrapper}
+                                    onClick={() => setPreviewCard(card)}
+                                    title="Cliquez pour voir les détails"
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <SpellCard card={card} isSelected={false} />
                                 </div>
                             ))}
@@ -1101,6 +1108,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 onDiscard={handleDiscardFromDetail}
                 canPlay={selectedCard ? canPlayCard(selectedCard) : false}
                 canDiscard={isPlayerTurn && !player.hasPlayedCard && !isForcedDetail}
+            />
+
+            {/* Modal de détail pour la preview de défausse (lecture seule) */}
+            <CardDetailModal
+                card={previewCard}
+                isOpen={!!previewCard}
+                onClose={() => setPreviewCard(null)}
+                onPlay={() => { }}
+                onDiscard={() => { }}
+                canPlay={false}
+                canDiscard={false}
+                readOnly={true}
             />
 
             {/* Toast de notification */}
