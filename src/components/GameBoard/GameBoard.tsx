@@ -332,15 +332,19 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         if (gameState.status === 'finished' && gameState.winnerId && user) {
             const isVictory = gameState.winnerId === playerId;
 
+            // Vérifier si c'est une partie classée ou amicale
+            const gameMode = sessionStorage.getItem('gameMode') || 'ranked';
+            const isRanked = gameMode === 'ranked';
+
             // Enregistrer le résultat
             const recordResult = async () => {
                 try {
                     if (isVictory) {
-                        await recordVictory(user.uid);
-                        console.log('✅ Victoire enregistrée, quêtes mises à jour');
+                        await recordVictory(user.uid, isRanked);
+                        console.log(`✅ Victoire enregistrée (${isRanked ? 'classée' : 'amicale'}), quêtes mises à jour`);
                     } else {
-                        await recordDefeat(user.uid);
-                        console.log('📝 Défaite enregistrée, quêtes mises à jour');
+                        await recordDefeat(user.uid, isRanked);
+                        console.log(`📝 Défaite enregistrée (${isRanked ? 'classée' : 'amicale'}), quêtes mises à jour`);
                     }
                     // Rafraîchir le profil pour mettre à jour l'affichage
                     await refreshProfile();

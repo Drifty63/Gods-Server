@@ -70,12 +70,13 @@ export default function OnlinePage() {
         }
     }, [currentGame, playerName, opponentName, router]);
 
-    const handleJoinQueue = () => {
+    const handleJoinQueue = (ranked: boolean = true) => {
         if (!playerName.trim()) {
             alert('Veuillez entrer un nom de joueur');
             return;
         }
         localStorage.setItem('playerName', playerName);
+        sessionStorage.setItem('gameMode', ranked ? 'ranked' : 'casual');
         setMode('matchmaking');
         joinQueue(playerName);
     };
@@ -153,12 +154,24 @@ export default function OnlinePage() {
 
                             <div
                                 className={`${styles.modeCard} ${!isConnected ? styles.disabled : ''}`}
-                                onClick={isConnected ? handleJoinQueue : undefined}
+                                onClick={isConnected ? () => handleJoinQueue(true) : undefined}
                             >
                                 <div className={styles.modeIcon}>⚔️</div>
                                 <div className={styles.modeInfo}>
                                     <h3>Partie Classée</h3>
                                     <p>Trouvez automatiquement un adversaire et grimpez dans le classement</p>
+                                </div>
+                                <span className={styles.modeArrow}>→</span>
+                            </div>
+
+                            <div
+                                className={`${styles.modeCard} ${!isConnected ? styles.disabled : ''}`}
+                                onClick={isConnected ? () => handleJoinQueue(false) : undefined}
+                            >
+                                <div className={styles.modeIcon}>🎯</div>
+                                <div className={styles.modeInfo}>
+                                    <h3>Partie Amicale</h3>
+                                    <p>Affrontez un adversaire aléatoire sans impact sur le classement</p>
                                 </div>
                                 <span className={styles.modeArrow}>→</span>
                             </div>

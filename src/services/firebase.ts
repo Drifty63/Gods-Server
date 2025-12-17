@@ -297,39 +297,47 @@ export async function updateAvatar(uid: string, avatar: string): Promise<void> {
 // =====================================
 
 // Enregistrer une victoire
-export async function recordVictory(uid: string): Promise<void> {
+// updateStats: true pour les parties classées, false pour les parties amicales
+export async function recordVictory(uid: string, updateStats: boolean = true): Promise<void> {
     const profile = await getUserProfile(uid);
     if (!profile) return;
 
-    const newStreak = profile.stats.currentStreak + 1;
-    const bestStreak = Math.max(newStreak, profile.stats.bestStreak);
+    // Mettre à jour les stats seulement en mode classé
+    if (updateStats) {
+        const newStreak = profile.stats.currentStreak + 1;
+        const bestStreak = Math.max(newStreak, profile.stats.bestStreak);
 
-    await updateDoc(doc(db, 'users', uid), {
-        'stats.victories': profile.stats.victories + 1,
-        'stats.totalGames': profile.stats.totalGames + 1,
-        'stats.currentStreak': newStreak,
-        'stats.bestStreak': bestStreak,
-        xp: profile.xp + 100, // +100 XP par victoire
-    });
+        await updateDoc(doc(db, 'users', uid), {
+            'stats.victories': profile.stats.victories + 1,
+            'stats.totalGames': profile.stats.totalGames + 1,
+            'stats.currentStreak': newStreak,
+            'stats.bestStreak': bestStreak,
+            xp: profile.xp + 100, // +100 XP par victoire
+        });
+    }
 
-    // Mettre à jour les quêtes journalières (une partie jouée + une victoire)
+    // Mettre à jour les quêtes journalières dans tous les cas
     await updateQuestProgress(uid, 'play');
     await updateQuestProgress(uid, 'win');
 }
 
 // Enregistrer une défaite
-export async function recordDefeat(uid: string): Promise<void> {
+// updateStats: true pour les parties classées, false pour les parties amicales
+export async function recordDefeat(uid: string, updateStats: boolean = true): Promise<void> {
     const profile = await getUserProfile(uid);
     if (!profile) return;
 
-    await updateDoc(doc(db, 'users', uid), {
-        'stats.defeats': profile.stats.defeats + 1,
-        'stats.totalGames': profile.stats.totalGames + 1,
-        'stats.currentStreak': 0,
-        xp: profile.xp + 25, // +25 XP par défaite
-    });
+    // Mettre à jour les stats seulement en mode classé
+    if (updateStats) {
+        await updateDoc(doc(db, 'users', uid), {
+            'stats.defeats': profile.stats.defeats + 1,
+            'stats.totalGames': profile.stats.totalGames + 1,
+            'stats.currentStreak': 0,
+            xp: profile.xp + 25, // +25 XP par défaite
+        });
+    }
 
-    // Mettre à jour les quêtes journalières (une partie jouée)
+    // Mettre à jour les quêtes journalières dans tous les cas
     await updateQuestProgress(uid, 'play');
 }
 
