@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { GodState } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
@@ -30,15 +30,20 @@ export default function HealDistributionModal({
     }, []);
 
     // Reset distribution when modal opens
+    // Utiliser une ref pour tracker si c'est la première ouverture
+    const prevIsOpen = useRef(false);
+
     useEffect(() => {
-        if (isOpen) {
+        // Si la modale vient de s'ouvrir (passer de false à true)
+        if (isOpen && !prevIsOpen.current) {
             const initial: Record<string, number> = {};
             allies.forEach(ally => {
                 initial[ally.card.id] = 0;
             });
             setDistribution(initial);
         }
-    }, [isOpen, allies]);
+        prevIsOpen.current = isOpen;
+    }, [isOpen, allies]); // On garde allies pour initialiser correctement, mais on protège avec prevIsOpen
 
     if (!isOpen || !mounted) return null;
 
