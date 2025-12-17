@@ -58,6 +58,8 @@ const AMBROISIE_PACKS = [
 export default function ShopPage() {
     const { profile } = useAuth();
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const [selectedCoffret, setSelectedCoffret] = useState<typeof COFFRETS[0] | null>(null);
+    const [selectedGod, setSelectedGod] = useState<ReturnType<typeof getGodById> | null>(null);
 
     // Utiliser l'ambroisie du profil ou 0 par défaut
     const userAmbroisie = profile?.ambroisie ?? 0;
@@ -183,9 +185,8 @@ export default function ShopPage() {
                         </div>
                         <div className={styles.subscriptionPrice}>
                             <span className={styles.priceValue}>4,99 €</span>
-                            <span className={styles.priceLabel}>/ mois</span>
                         </div>
-                        <button className={styles.buyButton}>S'abonner</button>
+                        <button className={styles.buyButton}>Acheter</button>
                     </div>
                 </section>
 
@@ -200,6 +201,7 @@ export default function ShopPage() {
                                     key={coffret.id}
                                     className={styles.coffretCard}
                                     style={{ borderColor: coffret.color }}
+                                    onClick={() => setSelectedCoffret(coffret)}
                                 >
                                     <h3 className={styles.coffretName} style={{ color: coffret.color }}>
                                         {coffret.name}
@@ -232,7 +234,7 @@ export default function ShopPage() {
                                         <Image src="/icons/ambroisie.png" alt="Ambroisie" width={18} height={18} />
                                         <span>{coffret.price.toLocaleString()}</span>
                                     </div>
-                                    <button className={styles.buyButton}>Acheter</button>
+                                    <button className={styles.viewButton}>Voir le contenu</button>
                                 </div>
                             );
                         })}
@@ -247,7 +249,8 @@ export default function ShopPage() {
                     {currentGod && (
                         <div
                             className={styles.featuredGod}
-                            style={{ background: `linear-gradient(145deg, ${getGodBgColor(currentGod.id)}, rgba(0, 0, 0, 0.5))` }}
+                            style={{ background: `linear-gradient(145deg, ${getGodBgColor(currentGod.id)}, rgba(0, 0, 0, 0.5))`, cursor: 'pointer' }}
+                            onClick={() => setSelectedGod(currentGod)}
                         >
                             <div className={styles.featuredBadge}>🌟 Dieu du Mois</div>
                             <div className={styles.featuredContent}>
@@ -269,7 +272,7 @@ export default function ShopPage() {
                                             <span>2 000</span>
                                         </div>
                                     </div>
-                                    <button className={styles.buyButtonSmall}>Acheter</button>
+                                    <button className={styles.viewButtonSmall}>Voir les détails</button>
                                 </div>
                             </div>
                             <div className={styles.countdown}>
@@ -304,6 +307,7 @@ export default function ShopPage() {
                                 key={god.id}
                                 className={styles.godCard}
                                 style={{ background: getGodBgColor(god.id) }}
+                                onClick={() => setSelectedGod(god)}
                             >
                                 <div className={styles.godImageWrapper}>
                                     <Image
@@ -319,7 +323,7 @@ export default function ShopPage() {
                                     <Image src="/icons/ambroisie.png" alt="Ambroisie" width={14} height={14} />
                                     <span>3 000</span>
                                 </div>
-                                <button className={styles.buyButtonMini}>Acheter</button>
+                                <button className={styles.viewButtonMini}>Voir</button>
                             </div>
                         ))}
                     </div>
@@ -363,6 +367,99 @@ export default function ShopPage() {
                     </div>
                 </section>
             </div>
+
+            {/* Modal Coffret */}
+            {selectedCoffret && (
+                <div className={styles.modalOverlay} onClick={() => setSelectedCoffret(null)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.modalClose} onClick={() => setSelectedCoffret(null)}>✕</button>
+
+                        <h2 className={styles.modalTitle} style={{ color: selectedCoffret.color }}>
+                            {selectedCoffret.name}
+                        </h2>
+
+                        <p className={styles.modalSubtitle}>Contient 4 dieux exclusifs</p>
+
+                        <div className={styles.modalGodsGrid}>
+                            {selectedCoffret.godIds.map(id => {
+                                const god = getGodById(id);
+                                if (!god) return null;
+                                return (
+                                    <div key={god.id} className={styles.modalGodCard}>
+                                        <div className={styles.modalGodImage}>
+                                            <Image
+                                                src={god.imageUrl}
+                                                alt={god.name}
+                                                width={100}
+                                                height={100}
+                                            />
+                                        </div>
+                                        <span className={styles.modalGodName}>{god.name.split(',')[0]}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className={styles.modalPrice}>
+                            <Image src="/icons/ambroisie.png" alt="Ambroisie" width={24} height={24} />
+                            <span>{selectedCoffret.price.toLocaleString()}</span>
+                        </div>
+
+                        <button className={styles.buyButton}>Acheter ce coffret</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Dieu */}
+            {selectedGod && (
+                <div className={styles.modalOverlay} onClick={() => setSelectedGod(null)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.modalClose} onClick={() => setSelectedGod(null)}>✕</button>
+
+                        <div className={styles.modalGodHero}>
+                            <div className={styles.modalGodHeroImage}>
+                                <Image
+                                    src={selectedGod.imageUrl}
+                                    alt={selectedGod.name}
+                                    width={150}
+                                    height={150}
+                                />
+                            </div>
+                        </div>
+
+                        <h2 className={styles.modalTitle}>{selectedGod.name}</h2>
+
+                        {selectedGod.flavorText && (
+                            <p className={styles.modalFlavorText}>"{selectedGod.flavorText}"</p>
+                        )}
+
+                        <div className={styles.modalGodStats}>
+                            <div className={styles.modalGodStat}>
+                                <span className={styles.statLabel}>PV Max</span>
+                                <span className={styles.statValue}>{selectedGod.maxHealth}</span>
+                            </div>
+                            <div className={styles.modalGodStat}>
+                                <span className={styles.statLabel}>Élément</span>
+                                <span className={styles.statValue}>{selectedGod.element}</span>
+                            </div>
+                            <div className={styles.modalGodStat}>
+                                <span className={styles.statLabel}>Faiblesse</span>
+                                <span className={styles.statValue}>{selectedGod.weakness}</span>
+                            </div>
+                        </div>
+
+                        <div className={styles.modalPrice}>
+                            <Image src="/icons/ambroisie.png" alt="Ambroisie" width={24} height={24} />
+                            <span>{currentGod?.id === selectedGod.id ? '2 000' : '3 000'}</span>
+                            {currentGod?.id === selectedGod.id && (
+                                <span className={styles.promoBadge}>Promo du mois !</span>
+                            )}
+                        </div>
+
+                        <button className={styles.buyButton}>Acheter ce dieu</button>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
