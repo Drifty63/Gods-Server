@@ -32,7 +32,8 @@ export type TargetType =
     | 'any_god'          // N'importe quel dieu
     | 'all_gods'         // Tous les dieux
     | 'dead_ally_god'    // Un dieu allié mort (pour résurrection)
-    | 'enemy_hand';      // Main adverse (pour discard)
+    | 'enemy_hand'       // Main adverse (pour discard)
+    | 'same';            // Même cible que l'effet précédent
 
 // Carte Dieu
 export interface GodCard {

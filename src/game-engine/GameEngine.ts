@@ -123,6 +123,12 @@ export class GameEngine {
 
         // Appliquer les effets
         for (const effect of card.effects) {
+            // Pour target 'same', utiliser la dernière cible
+            if (effect.target === 'same' && lastUsedTargetId) {
+                this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
+                continue;
+            }
+
             // Pour les effets qui ciblent enemy_god ou ally_god, utiliser une cible de la liste
             const needsSingleTarget = effect.target === 'enemy_god' || effect.target === 'ally_god' || effect.target === 'any_god' || effect.target === 'dead_ally_god';
 
@@ -392,6 +398,14 @@ export class GameEngine {
                             if (allyTarget) return [allyTarget];
                             const enemyTarget = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
                             if (enemyTarget) return [enemyTarget];
+                        }
+                        return [];
+                    case 'same':
+                        // Le cas 'same' est géré en amont dans executeAction
+                        // Si on arrive ici, utiliser la cible fournie
+                        if (targetGodId) {
+                            const sameTarget = [...opponent.gods, ...player.gods].find(g => g.card.id === targetGodId && !g.isDead);
+                            return sameTarget ? [sameTarget] : [];
                         }
                         return [];
                 }

@@ -960,7 +960,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god', description: 'Stun pendant 1 tour' }
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same', description: 'Stun pendant 1 tour' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_coeur_brise.png',
         description: '2🩸 +😵1⏳ → ⚔️',
