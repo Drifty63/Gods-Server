@@ -50,8 +50,16 @@ export interface UserProfile {
     isCreator?: boolean; // True si l'utilisateur est un créateur (accès aux dieux cachés)
     dailyQuests?: DailyQuestsData; // Quêtes journalières
     godPlayCounts?: Record<string, number>; // Compteur de parties par dieu
+    savedDecks?: SavedDeck[]; // Decks pré-configurés
     createdAt: Date;
     lastLoginAt: Date;
+}
+
+// Type pour les decks sauvegardés
+export interface SavedDeck {
+    id: string;
+    name: string;
+    godIds: string[]; // 4 IDs de dieux
 }
 
 // Types pour les quêtes journalières
@@ -407,6 +415,31 @@ export async function purchaseCoffret(uid: string, coffretId: string): Promise<{
     });
 
     return { success: true, message: `Coffret acheté ! ${godsToAdd.length} nouveaux dieux ajoutés.`, godsAdded: godsToAdd };
+}
+
+// =====================================
+// DECKS SAUVEGARDÉS
+// =====================================
+
+// Sauvegarder les decks d'un utilisateur
+export async function saveDecks(uid: string, decks: SavedDeck[]): Promise<void> {
+    await updateDoc(doc(db, 'users', uid), {
+        savedDecks: decks,
+    });
+}
+
+// Obtenir les decks d'un utilisateur
+export function getDecks(profile: UserProfile | null): SavedDeck[] {
+    return profile?.savedDecks || [];
+}
+
+// Créer un deck par défaut vide
+export function createEmptyDeck(id: string, name: string): SavedDeck {
+    return {
+        id,
+        name,
+        godIds: [],
+    };
 }
 
 // =====================================

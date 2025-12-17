@@ -436,3 +436,114 @@
         font-size: 0.95rem;
     }
 }
+
+/* ================================
+   TOGGLE DECK / MANUEL
+   ================================ */
+.modeToggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.toggleButton {
+    font-family: 'Cinzel', serif;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggleButton:hover {
+    color: var(--gold-divine);
+}
+
+.toggleButton.active {
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--gold-divine);
+    font-weight: 600;
+}
+
+/* ================================
+   SECTION DECKS
+   ================================ */
+.decksSection {
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.sectionTitle {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.decksGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.deckCard {
+    background: linear-gradient(145deg, rgba(16, 16, 32, 0.95), rgba(26, 26, 58, 0.9));
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.deckCard:hover {
+    border-color: var(--gold-divine);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.deckName {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-divine);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.deckGods {
+    display: flex;
+    gap: 8px;
+}
+
+.deckGodImage {
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    object-fit: cover;
+}
+
+@media (max-width: 768px) {
+    .modeToggle {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .toggleButton {
+        width: 100%;
+    }
+
+    .decksGrid {
+        grid-template-columns: 1fr;
+    }
+}

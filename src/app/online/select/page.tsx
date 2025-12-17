@@ -3,10 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
-import { getOwnedGods } from '@/data/gods';
+import { getOwnedGods, getGodById } from '@/data/gods';
 import { GodCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
-import { auth, getUserProfile } from '@/services/firebase';
+import { auth, getUserProfile, SavedDeck } from '@/services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Image from 'next/image';
 import styles from './page.module.css';
@@ -19,9 +19,14 @@ export default function OnlineSelectPage() {
     const [hasRejoined, setHasRejoined] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
     const [godsOwned, setGodsOwned] = useState<string[]>([]);
+    const [savedDecks, setSavedDecks] = useState<SavedDeck[]>([]);
+    const [showDecks, setShowDecks] = useState(true);
 
     // Filtrer les dieux selon ceux possédés par le joueur
     const availableGods = useMemo(() => getOwnedGods(godsOwned, isCreator), [godsOwned, isCreator]);
+
+    // Decks complets (4 dieux)
+    const completeDecks = useMemo(() => savedDecks.filter(d => d.godIds.length === 4), [savedDecks]);
 
     // Récupérer le profil et les dieux possédés
     useEffect(() => {
@@ -30,6 +35,7 @@ export default function OnlineSelectPage() {
                 const profile = await getUserProfile(user.uid);
                 setIsCreator(profile?.isCreator || false);
                 setGodsOwned(profile?.collection.godsOwned || []);
+                setSavedDecks(profile?.savedDecks || []);
             }
         });
         return () => unsubscribe();
@@ -93,6 +99,20 @@ export default function OnlineSelectPage() {
         }
     };
 
+    // Charger un deck pré-enregistré
+    const handleLoadDeck = (deck: SavedDeck) => {
+        if (hasSubmitted) return;
+
+        const gods = deck.godIds
+            .map(id => getGodById(id))
+            .filter((g): g is GodCard => g !== undefined);
+
+        if (gods.length === 4) {
+            setSelectedGods(gods);
+            setShowDecks(false);
+        }
+    };
+
     const savedOpponentName = typeof window !== 'undefined' ? sessionStorage.getItem('opponentName') : null;
     const displayOpponentName = opponentName || savedOpponentName || 'Adversaire';
 
@@ -120,40 +140,94 @@ export default function OnlineSelectPage() {
                 )}
             </div>
 
-            <div className={styles.godsGrid}>
-                {availableGods.map((god) => {
-                    const isSelected = selectedGods.some(g => g.id === god.id);
-                    const elementSymbol = ELEMENT_SYMBOLS[god.element] || '⚪';
+            {/* Toggle Deck / Manuel */}
+            {!hasSubmitted && completeDecks.length > 0 && (
+                <div className={styles.modeToggle}>
+                    <button
+                        className={`${styles.toggleButton} ${showDecks ? styles.active : ''}`}
+                        onClick={() => setShowDecks(true)}
+                    >
+                        📦 Mes Decks
+                    </button>
+                    <button
+                        className={`${styles.toggleButton} ${!showDecks ? styles.active : ''}`}
+                        onClick={() => setShowDecks(false)}
+                    >
+                        👆 Sélection manuelle
+                    </button>
+                </div>
+            )}
 
-                    return (
-                        <div
-                            key={god.id}
-                            className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${hasSubmitted ? styles.disabled : ''}`}
-                            onClick={() => handleSelectGod(god)}
-                        >
-                            <div className={styles.godImage}>
-                                <Image
-                                    src={god.imageUrl}
-                                    alt={god.name}
-                                    fill
-                                    className={styles.godImg}
-                                    sizes="120px"
-                                />
-                            </div>
-                            <div className={styles.godInfo}>
-                                <h3>{god.name.split(',')[0]}</h3>
-                                <p className={styles.godElement}>{elementSymbol} {god.element}</p>
-                                <p className={styles.godHealth}>❤️ {god.maxHealth}</p>
-                            </div>
-                            {isSelected && (
-                                <div className={styles.selectedBadge}>
-                                    {selectedGods.findIndex(g => g.id === god.id) + 1}
+            {/* Sélection des decks */}
+            {showDecks && completeDecks.length > 0 && !hasSubmitted && (
+                <div className={styles.decksSection}>
+                    <h3 className={styles.sectionTitle}>Choisir un deck</h3>
+                    <div className={styles.decksGrid}>
+                        {completeDecks.map((deck) => (
+                            <div
+                                key={deck.id}
+                                className={styles.deckCard}
+                                onClick={() => handleLoadDeck(deck)}
+                            >
+                                <span className={styles.deckName}>{deck.name}</span>
+                                <div className={styles.deckGods}>
+                                    {deck.godIds.map((godId) => {
+                                        const god = getGodById(godId);
+                                        return god ? (
+                                            <Image
+                                                key={godId}
+                                                src={god.imageUrl}
+                                                alt={god.name}
+                                                width={35}
+                                                height={35}
+                                                className={styles.deckGodImage}
+                                            />
+                                        ) : null;
+                                    })}
                                 </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Grille de sélection manuelle */}
+            {(!showDecks || completeDecks.length === 0) && (
+                <div className={styles.godsGrid}>
+                    {availableGods.map((god) => {
+                        const isSelected = selectedGods.some(g => g.id === god.id);
+                        const elementSymbol = ELEMENT_SYMBOLS[god.element] || '⚪';
+
+                        return (
+                            <div
+                                key={god.id}
+                                className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${hasSubmitted ? styles.disabled : ''}`}
+                                onClick={() => handleSelectGod(god)}
+                            >
+                                <div className={styles.godImage}>
+                                    <Image
+                                        src={god.imageUrl}
+                                        alt={god.name}
+                                        fill
+                                        className={styles.godImg}
+                                        sizes="120px"
+                                    />
+                                </div>
+                                <div className={styles.godInfo}>
+                                    <h3>{god.name.split(',')[0]}</h3>
+                                    <p className={styles.godElement}>{elementSymbol} {god.element}</p>
+                                    <p className={styles.godHealth}>❤️ {god.maxHealth}</p>
+                                </div>
+                                {isSelected && (
+                                    <div className={styles.selectedBadge}>
+                                        {selectedGods.findIndex(g => g.id === god.id) + 1}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             <div className={styles.actions}>
                 {!hasSubmitted ? (
