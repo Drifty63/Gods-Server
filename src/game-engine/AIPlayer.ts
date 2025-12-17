@@ -19,6 +19,7 @@ export class AIPlayer {
         const actions: GameAction[] = [];
         const state = engine.getState();
         const player = engine.getCurrentPlayer();
+        const aiPlayerId = player.id;
 
         // 1. Essayer de jouer une carte
         const playAction = this.decideAction(engine);
@@ -49,10 +50,18 @@ export class AIPlayer {
             }
         }
 
+        // Vérifier si c'est toujours le tour de l'IA avant de finir
+        // (le tour peut avoir changé si un dieu est mort du poison)
+        const currentState = engine.getState();
+        if (currentState.currentPlayerId !== aiPlayerId || currentState.status !== 'playing') {
+            // Le tour a déjà changé (mort du poison, fin de partie, etc.)
+            return actions;
+        }
+
         // Fin de tour systématique après une action (ou aucune)
         const endTurnAction: GameAction = {
             type: 'end_turn',
-            playerId: player.id,
+            playerId: aiPlayerId,
         };
         engine.executeAction(endTurnAction);
         actions.push(endTurnAction);
