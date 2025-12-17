@@ -330,6 +330,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
         // Détecter la fin de partie
         if (gameState.status === 'finished' && gameState.winnerId && user) {
+            // Marquer immédiatement comme enregistré pour éviter les doubles appels
+            setGameResultRecorded(true);
+
             const isVictory = gameState.winnerId === playerId;
 
             // Vérifier le mode de jeu (ranked, casual, private, ou solo)
@@ -339,7 +342,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             // Les parties vs IA (pas de gameMode) et parties privées (private) ne comptent pas
             if (!gameMode || gameMode === 'private') {
                 console.log(`🎮 Partie ${gameMode || 'vs IA'} terminée - pas de mise à jour des quêtes`);
-                setGameResultRecorded(true);
                 return;
             }
 
@@ -374,7 +376,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             };
 
             recordResult();
-            setGameResultRecorded(true);
         }
     }, [gameState, gameResultRecorded, user, playerId, refreshProfile]);
 
