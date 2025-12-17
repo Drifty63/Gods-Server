@@ -115,52 +115,54 @@ export default function ShopPage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>← Retour</Link>
+                <Link href="/" className={styles.backButton}>‹ Retour</Link>
                 <h1 className={styles.title}>Boutique</h1>
-                <div className={styles.goldBalance}>
-                    <Image
-                        src="/icons/ambroisie.png"
-                        alt="Ambroisie"
-                        width={20}
-                        height={20}
-                    />
-                    <span>{userAmbroisie.toLocaleString()}</span>
-                </div>
             </header>
 
             <div className={styles.content}>
-                {/* Onglets de navigation */}
-                <div className={styles.navTabs}>
-                    <button
-                        className={styles.navTab}
-                        onClick={() => document.getElementById('section-offre')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        Offres
-                    </button>
-                    <button
-                        className={styles.navTab}
-                        onClick={() => document.getElementById('section-coffrets')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        Coffrets
-                    </button>
-                    <button
-                        className={styles.navTab}
-                        onClick={() => document.getElementById('section-dieux')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        Dieux
-                    </button>
-                    <button
-                        className={styles.navTab}
-                        onClick={() => document.getElementById('section-cosmetiques')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        Cosmétiques
-                    </button>
-                    <button
-                        className={styles.navTab}
-                        onClick={() => document.getElementById('section-ambroisie')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        Ambroisie
-                    </button>
+                {/* Onglets de navigation + Ambroisie */}
+                <div className={styles.navRow}>
+                    <div className={styles.navTabs}>
+                        <button
+                            className={styles.navTab}
+                            onClick={() => document.getElementById('section-offre')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            Offres
+                        </button>
+                        <button
+                            className={styles.navTab}
+                            onClick={() => document.getElementById('section-coffrets')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            Coffrets
+                        </button>
+                        <button
+                            className={styles.navTab}
+                            onClick={() => document.getElementById('section-dieux')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            Dieux
+                        </button>
+                        <button
+                            className={styles.navTab}
+                            onClick={() => document.getElementById('section-cosmetiques')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            Cosmétiques
+                        </button>
+                        <button
+                            className={styles.navTab}
+                            onClick={() => document.getElementById('section-ambroisie')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            Ambroisie
+                        </button>
+                    </div>
+                    <div className={styles.goldBalance}>
+                        <Image
+                            src="/icons/ambroisie.png"
+                            alt="Ambroisie"
+                            width={20}
+                            height={20}
+                        />
+                        <span>{userAmbroisie.toLocaleString()}</span>
+                    </div>
                 </div>
 
                 {/* Section Offre - Abonnement */}
