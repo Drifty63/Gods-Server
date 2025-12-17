@@ -1106,6 +1106,9 @@
     border-radius: 16px;
     text-align: center;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
 }
 
 .ambroisiePack:hover {
@@ -1155,6 +1158,10 @@
     font-weight: 600;
     color: white;
     margin-bottom: 12px;
+    flex-grow: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
 }
 
 @media (max-width: 600px) {

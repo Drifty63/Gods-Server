@@ -240,7 +240,10 @@ export default function ShopPage() {
                                 <div
                                     key={coffret.id}
                                     className={styles.coffretCard}
-                                    style={{ borderColor: coffret.color }}
+                                    style={{
+                                        borderColor: coffret.color,
+                                        background: `linear-gradient(145deg, ${coffret.color}25, rgba(0, 0, 0, 0.5))`
+                                    }}
                                     onClick={() => setSelectedCoffret(coffret)}
                                 >
                                     <h3 className={styles.coffretName} style={{ color: coffret.color }}>
