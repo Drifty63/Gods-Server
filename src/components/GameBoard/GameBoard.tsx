@@ -332,8 +332,17 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         if (gameState.status === 'finished' && gameState.winnerId && user) {
             const isVictory = gameState.winnerId === playerId;
 
-            // Vérifier si c'est une partie classée ou amicale
-            const gameMode = sessionStorage.getItem('gameMode') || 'ranked';
+            // Vérifier le mode de jeu (ranked, casual, private, ou solo)
+            const gameMode = sessionStorage.getItem('gameMode');
+
+            // Seules les parties en ligne (ranked ou casual) comptent pour les quêtes
+            // Les parties vs IA (pas de gameMode) et parties privées (private) ne comptent pas
+            if (!gameMode || gameMode === 'private') {
+                console.log(`🎮 Partie ${gameMode || 'vs IA'} terminée - pas de mise à jour des quêtes`);
+                setGameResultRecorded(true);
+                return;
+            }
+
             const isRanked = gameMode === 'ranked';
 
             // Enregistrer le résultat

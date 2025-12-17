@@ -92,6 +92,7 @@ export default function OnlinePage() {
             return;
         }
         localStorage.setItem('playerName', playerName);
+        sessionStorage.setItem('gameMode', 'private');
         createPrivateGame(playerName);
         setMode('private-create');
     };
@@ -102,6 +103,7 @@ export default function OnlinePage() {
             return;
         }
         localStorage.setItem('playerName', playerName);
+        sessionStorage.setItem('gameMode', 'private');
         joinPrivateGame(privateCode.toUpperCase(), playerName);
     };
 
