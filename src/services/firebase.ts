@@ -294,6 +294,54 @@ export async function updateAvatar(uid: string, avatar: string): Promise<void> {
 }
 
 // =====================================
+// PACKS STARTER
+// =====================================
+
+// Définition des packs starter
+export const STARTER_PACKS = {
+    poseidon: {
+        id: 'poseidon',
+        name: 'Coffret Poséidon',
+        godIds: ['poseidon', 'artemis', 'athena', 'demeter'],
+        color: '#3b82f6' // Bleu
+    },
+    hades: {
+        id: 'hades',
+        name: 'Coffret Hadès',
+        godIds: ['hades', 'nyx', 'apollon', 'ares'],
+        color: '#ef4444' // Rouge
+    },
+    zeus: {
+        id: 'zeus',
+        name: 'Coffret Zeus',
+        godIds: ['zeus', 'hestia', 'aphrodite', 'dionysos'],
+        color: '#fbbf24' // Jaune
+    }
+} as const;
+
+export type StarterPackId = keyof typeof STARTER_PACKS;
+
+// Attribuer un pack starter à un utilisateur
+export async function claimStarterPack(uid: string, packId: StarterPackId): Promise<void> {
+    const pack = STARTER_PACKS[packId];
+    if (!pack) throw new Error('Pack starter invalide');
+
+    const profile = await getUserProfile(uid);
+    if (!profile) throw new Error('Profil introuvable');
+
+    // Vérifier que l'utilisateur n'a pas déjà de dieux (éviter les abus)
+    if (profile.collection.godsOwned.length > 0) {
+        throw new Error('Vous avez déjà reçu votre pack starter');
+    }
+
+    // Attribuer les dieux du pack
+    await updateDoc(doc(db, 'users', uid), {
+        'collection.godsOwned': pack.godIds,
+        starterPack: packId, // Enregistrer quel pack a été choisi
+    });
+}
+
+// =====================================
 // STATISTIQUES
 // =====================================
 

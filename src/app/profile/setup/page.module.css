@@ -312,6 +312,155 @@
     animation: spin 1s linear infinite;
 }
 
+/* Indicateur d'étapes */
+.stepIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 30px;
+}
+
+.stepDot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.stepDot.active {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    border-color: #ffd700;
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.stepLine {
+    width: 60px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Grille des packs */
+.packGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.packCard {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.packCard:hover {
+    border-color: var(--pack-color, rgba(255, 255, 255, 0.3));
+    background: rgba(var(--pack-color), 0.1);
+    transform: translateY(-2px);
+}
+
+.packCard.selectedPack {
+    border-color: var(--pack-color, #ffd700);
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.4), rgba(var(--pack-color), 0.15));
+    box-shadow: 0 0 30px rgba(var(--pack-color), 0.3);
+}
+
+.packName {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.packGods {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.packGod {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.packGodImage {
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    object-fit: cover;
+}
+
+.packGodName {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selectedBadge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Ligne de boutons */
+.buttonRow {
+    display: flex;
+    gap: 12px;
+}
+
+.backButton {
+    flex: 1;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.backButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.backButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.buttonRow .submitButton {
+    flex: 2;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
     .setupCard {
@@ -331,5 +480,14 @@
         width: 70px;
         height: 70px;
         font-size: 2rem;
+    }
+
+    .packGods {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .packGodImage {
+        width: 40px !important;
+        height: 40px !important;
     }
 }

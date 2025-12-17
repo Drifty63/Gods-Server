@@ -292,3 +292,13 @@ export function getVisibleGods(isCreator: boolean = false): GodCard[] {
     return ALL_GODS.filter(god => !god.hidden); // Les autres ne voient que les dieux non cachés
 }
 
+// Helper pour obtenir les dieux possédés par un joueur
+export function getOwnedGods(godsOwned: string[], isCreator: boolean = false): GodCard[] {
+    // Les créateurs ont accès à tous les dieux
+    if (isCreator) {
+        return ALL_GODS;
+    }
+
+    // Sinon, retourner seulement les dieux possédés
+    return ALL_GODS.filter(god => godsOwned.includes(god.id));
+}

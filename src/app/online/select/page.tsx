@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
-import { ALL_GODS, getVisibleGods } from '@/data/gods';
+import { getOwnedGods } from '@/data/gods';
 import { GodCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
 import { auth, getUserProfile } from '@/services/firebase';
@@ -18,16 +18,18 @@ export default function OnlineSelectPage() {
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [hasRejoined, setHasRejoined] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
+    const [godsOwned, setGodsOwned] = useState<string[]>([]);
 
-    // Filtrer les dieux selon le statut créateur
-    const visibleGods = useMemo(() => getVisibleGods(isCreator), [isCreator]);
+    // Filtrer les dieux selon ceux possédés par le joueur
+    const availableGods = useMemo(() => getOwnedGods(godsOwned, isCreator), [godsOwned, isCreator]);
 
-    // Récupérer le statut créateur
+    // Récupérer le profil et les dieux possédés
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const profile = await getUserProfile(user.uid);
                 setIsCreator(profile?.isCreator || false);
+                setGodsOwned(profile?.collection.godsOwned || []);
             }
         });
         return () => unsubscribe();
@@ -119,7 +121,7 @@ export default function OnlineSelectPage() {
             </div>
 
             <div className={styles.godsGrid}>
-                {visibleGods.map((god) => {
+                {availableGods.map((god) => {
                     const isSelected = selectedGods.some(g => g.id === god.id);
                     const elementSymbol = ELEMENT_SYMBOLS[god.element] || '⚪';
 
