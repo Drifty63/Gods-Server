@@ -10,6 +10,8 @@ import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionMod
 import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
 import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
+import { recordVictory, recordDefeat } from '@/services/firebase';
 import styles from './GameBoard.module.css';
 
 // Liste des éléments disponibles pour la sélection
@@ -73,6 +75,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         discardBlindCard,
         surrender,
     } = useGameStore();
+
+    // Récupérer l'utilisateur connecté pour enregistrer les stats
+    const { user, refreshProfile } = useAuth();
 
     // Helper local pour la détection fiable du choix de foudre
     const needsLightningChoice = (card: import('@/types/cards').SpellCard): boolean => {
@@ -314,6 +319,40 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             setPendingCardForEnemySelection(null);
         }
     }, [pendingCardForEnemySelection, startEnemyCardSelection]);
+
+    // État pour éviter d'enregistrer les stats plusieurs fois
+    const [gameResultRecorded, setGameResultRecorded] = useState(false);
+
+    // Effet pour enregistrer les stats de fin de partie (quêtes journalières)
+    useEffect(() => {
+        // Ne rien faire si pas de gameState ou si déjà enregistré
+        if (!gameState || gameResultRecorded) return;
+
+        // Détecter la fin de partie
+        if (gameState.status === 'finished' && gameState.winnerId && user) {
+            const isVictory = gameState.winnerId === playerId;
+
+            // Enregistrer le résultat
+            const recordResult = async () => {
+                try {
+                    if (isVictory) {
+                        await recordVictory(user.uid);
+                        console.log('✅ Victoire enregistrée, quêtes mises à jour');
+                    } else {
+                        await recordDefeat(user.uid);
+                        console.log('📝 Défaite enregistrée, quêtes mises à jour');
+                    }
+                    // Rafraîchir le profil pour mettre à jour l'affichage
+                    await refreshProfile();
+                } catch (error) {
+                    console.error('Erreur enregistrement résultat:', error);
+                }
+            };
+
+            recordResult();
+            setGameResultRecorded(true);
+        }
+    }, [gameState, gameResultRecorded, user, playerId, refreshProfile]);
 
     if (!gameState) {
         return <div className={styles.loading}>Chargement...</div>;
