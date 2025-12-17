@@ -180,6 +180,22 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const [showCardDetail, setShowCardDetail] = useState(false);
     const [isForcedDetail, setIsForcedDetail] = useState(false);
 
+    // Système de toast pour les messages d'erreur
+    const [toast, setToast] = useState<{ message: string; type: 'warning' | 'error' | 'info' } | null>(null);
+    const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const showToast = useCallback((message: string, type: 'warning' | 'error' | 'info' = 'warning') => {
+        // Annuler le timeout précédent
+        if (toastTimeoutRef.current) {
+            clearTimeout(toastTimeoutRef.current);
+        }
+        setToast({ message, type });
+        // Fermer automatiquement après 4 secondes
+        toastTimeoutRef.current = setTimeout(() => {
+            setToast(null);
+        }, 4000);
+    }, []);
+
     // Chronomètre de tour (60 secondes par tour)
     const TURN_TIME_LIMIT = 60;
     const [turnTimer, setTurnTimer] = useState(TURN_TIME_LIMIT);
@@ -468,7 +484,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         if (player.energy < revealedCard.energyCost) {
             // Pas assez d'énergie → défausser simplement la carte (sans pénalité)
             discardBlindCard(revealedCard.id, false);
-            alert(`⚠️ "${revealedCard.name}" révélée mais pas assez d'énergie (${revealedCard.energyCost}⚡ requis). Carte défaussée.`);
+            showToast(`"${revealedCard.name}" révélée mais pas assez d'énergie (${revealedCard.energyCost}⚡ requis). Carte défaussée.`, 'warning');
 
             // Terminer le tour
             endTurn();
@@ -485,7 +501,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             // La carte ne peut PAS être jouée (pas de cible valide)
             // Le joueur perd l'énergie de la carte et elle va à la défausse
             discardBlindCard(revealedCard.id, true);
-            alert(`⚠️ "${revealedCard.name}" ne peut pas être jouée (pas de cible valide). Vous perdez ${revealedCard.energyCost} énergie.`);
+            showToast(`"${revealedCard.name}" ne peut pas être jouée (pas de cible valide). Vous perdez ${revealedCard.energyCost} énergie.`, 'error');
 
             // Terminer le tour
             endTurn();
@@ -498,7 +514,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         if (!selectedBlindCard) return;
 
         if (hasDiscardedBlindThisTurn) {
-            alert("⚠️ Vous ne pouvez défausser qu'une seule carte cachée par tour !");
+            showToast("Vous ne pouvez défausser qu'une seule carte cachée par tour !", 'warning');
             setSelectedBlindCard(null);
             return;
         }
@@ -1065,6 +1081,19 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 canPlay={selectedCard ? canPlayCard(selectedCard) : false}
                 canDiscard={isPlayerTurn && !player.hasPlayedCard && !isForcedDetail}
             />
+
+            {/* Toast de notification */}
+            {toast && (
+                <div className={`${styles.toast} ${styles[`toast${toast.type.charAt(0).toUpperCase() + toast.type.slice(1)}`]}`}>
+                    <span className={styles.toastIcon}>
+                        {toast.type === 'warning' && '⚠️'}
+                        {toast.type === 'error' && '❌'}
+                        {toast.type === 'info' && 'ℹ️'}
+                    </span>
+                    <span className={styles.toastMessage}>{toast.message}</span>
+                    <button className={styles.toastClose} onClick={() => setToast(null)}>✕</button>
+                </div>
+            )}
         </div >
     );
 }
