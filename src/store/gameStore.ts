@@ -359,13 +359,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     getCardsForSelection: (): SpellCard[] => {
-        const { engine, playerId, cardSelectionSource } = get();
+        const { engine, playerId, cardSelectionSource, pendingCardSelectionEffect } = get();
         if (!engine || !cardSelectionSource) return [];
 
         const player = engine.getState().players.find(p => p.id === playerId);
         if (!player) return [];
 
-        return cardSelectionSource === 'hand' ? player.hand : player.discard;
+        if (cardSelectionSource === 'discard') {
+            // Si c'est pour recycler, on ne doit pas pouvoir recycler la carte qu'on vient de jouer
+            // La carte jouée est toujours la dernière de la défausse car elle y est mise à la fin de playCard
+            if (pendingCardSelectionEffect === 'recycle_from_discard' && player.discard.length > 0) {
+                // Retourner toutes les cartes sauf la dernière
+                return player.discard.slice(0, player.discard.length - 1);
+            }
+            return player.discard;
+        }
+
+        return player.hand;
     },
 
     // Méthodes pour distribution de soins
