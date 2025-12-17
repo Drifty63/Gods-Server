@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
-import { ALL_GODS, getVisibleGods, getGodById } from '@/data/gods';
+import { getVisibleGods, getGodById } from '@/data/gods';
+import { purchaseGod, purchaseCoffret, GOD_PRICE, GOD_PROMO_PRICE, COFFRET_PRICE, STARTER_PACKS } from '@/services/firebase';
 
 // Cycle annuel des dieux en promo
 const MONTHLY_GODS: { [key: number]: string } = {
@@ -23,30 +24,11 @@ const MONTHLY_GODS: { [key: number]: string } = {
     11: 'nyx',        // Décembre
 };
 
-// Coffrets
-const COFFRETS = [
-    {
-        id: 'poseidon',
-        name: 'Coffret Poséidon',
-        godIds: ['poseidon', 'artemis', 'athena', 'demeter'],
-        price: 10000,
-        color: '#3b82f6' // Bleu
-    },
-    {
-        id: 'hades',
-        name: 'Coffret Hadès',
-        godIds: ['hades', 'nyx', 'apollon', 'ares'],
-        price: 10000,
-        color: '#ef4444' // Rouge
-    },
-    {
-        id: 'zeus',
-        name: 'Coffret Zeus',
-        godIds: ['zeus', 'hestia', 'aphrodite', 'dionysos'],
-        price: 10000,
-        color: '#fbbf24' // Jaune
-    }
-];
+// Coffrets (utilise les mêmes que STARTER_PACKS mais avec prix)
+const COFFRETS = Object.values(STARTER_PACKS).map(pack => ({
+    ...pack,
+    price: COFFRET_PRICE,
+}));
 
 // Packs d'Ambroisie
 const AMBROISIE_PACKS = [
@@ -56,15 +38,30 @@ const AMBROISIE_PACKS = [
 ];
 
 export default function ShopPage() {
-    const { profile } = useAuth();
+    const { user, profile, refreshProfile } = useAuth();
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [selectedCoffret, setSelectedCoffret] = useState<typeof COFFRETS[0] | null>(null);
     const [selectedGod, setSelectedGod] = useState<ReturnType<typeof getGodById> | null>(null);
+    const [purchasing, setPurchasing] = useState(false);
+    const [purchaseMessage, setPurchaseMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     // Utiliser l'ambroisie du profil ou 0 par défaut
     const userAmbroisie = profile?.ambroisie ?? 0;
+    // Dieux possédés
+    const godsOwned = profile?.collection.godsOwned ?? [];
     // Filtrer les dieux selon le statut créateur
     const visibleGods = useMemo(() => getVisibleGods(profile?.isCreator || false), [profile?.isCreator]);
+
+    // Vérifier si un dieu est possédé
+    const isGodOwned = (godId: string) => godsOwned.includes(godId);
+
+    // Vérifier si tous les dieux d'un coffret sont possédés
+    const isCoffretFullyOwned = (coffret: typeof COFFRETS[0]) =>
+        coffret.godIds.every(godId => godsOwned.includes(godId));
+
+    // Compter combien de dieux d'un coffret sont possédés
+    const getCoffretOwnedCount = (coffret: typeof COFFRETS[0]) =>
+        coffret.godIds.filter(godId => godsOwned.includes(godId)).length;
 
     // Fonction pour obtenir la couleur de fond selon le dieu
     const getGodBgColor = (godId: string) => {
@@ -148,6 +145,56 @@ export default function ShopPage() {
 
         return () => clearInterval(timer);
     }, []);
+
+    // Acheter un dieu
+    const handlePurchaseGod = async (godId: string, isPromo: boolean = false) => {
+        if (!user) {
+            setPurchaseMessage({ type: 'error', text: 'Vous devez être connecté pour acheter' });
+            return;
+        }
+        if (isGodOwned(godId)) return;
+
+        setPurchasing(true);
+        setPurchaseMessage(null);
+
+        try {
+            const result = await purchaseGod(user.uid, godId, isPromo);
+            setPurchaseMessage({ type: result.success ? 'success' : 'error', text: result.message });
+            if (result.success) {
+                await refreshProfile();
+                setSelectedGod(null);
+            }
+        } catch (error) {
+            setPurchaseMessage({ type: 'error', text: 'Erreur lors de l\'achat' });
+        } finally {
+            setPurchasing(false);
+        }
+    };
+
+    // Acheter un coffret
+    const handlePurchaseCoffret = async (coffretId: string) => {
+        if (!user) {
+            setPurchaseMessage({ type: 'error', text: 'Vous devez être connecté pour acheter' });
+            return;
+        }
+        if (isCoffretFullyOwned(COFFRETS.find(c => c.id === coffretId)!)) return;
+
+        setPurchasing(true);
+        setPurchaseMessage(null);
+
+        try {
+            const result = await purchaseCoffret(user.uid, coffretId);
+            setPurchaseMessage({ type: result.success ? 'success' : 'error', text: result.message });
+            if (result.success) {
+                await refreshProfile();
+                setSelectedCoffret(null);
+            }
+        } catch (error) {
+            setPurchaseMessage({ type: 'error', text: 'Erreur lors de l\'achat' });
+        } finally {
+            setPurchasing(false);
+        }
+    };
 
     return (
         <main className={styles.main}>
@@ -236,16 +283,24 @@ export default function ShopPage() {
                     <div className={styles.coffretsGrid}>
                         {COFFRETS.map((coffret) => {
                             const coffretGods = coffret.godIds.map(id => getGodById(id)).filter(Boolean);
+                            const isFullyOwned = isCoffretFullyOwned(coffret);
+                            const ownedCount = getCoffretOwnedCount(coffret);
                             return (
                                 <div
                                     key={coffret.id}
-                                    className={styles.coffretCard}
+                                    className={`${styles.coffretCard} ${isFullyOwned ? styles.owned : ''}`}
                                     style={{
                                         borderColor: coffret.color,
                                         background: `linear-gradient(145deg, ${coffret.color}25, rgba(0, 0, 0, 0.5))`
                                     }}
-                                    onClick={() => setSelectedCoffret(coffret)}
+                                    onClick={() => !isFullyOwned && setSelectedCoffret(coffret)}
                                 >
+                                    {isFullyOwned && (
+                                        <div className={styles.ownedBadge}>✓ Possédé</div>
+                                    )}
+                                    {!isFullyOwned && ownedCount > 0 && (
+                                        <div className={styles.partialBadge}>{ownedCount}/4 possédés</div>
+                                    )}
                                     <h3 className={styles.coffretName} style={{ color: coffret.color }}>
                                         {coffret.name}
                                     </h3>
@@ -277,7 +332,9 @@ export default function ShopPage() {
                                         <Image src="/icons/ambroisie.png" alt="Ambroisie" width={18} height={18} />
                                         <span>{coffret.price.toLocaleString()}</span>
                                     </div>
-                                    <button className={styles.viewButton}>Voir le contenu</button>
+                                    <button className={`${styles.viewButton} ${isFullyOwned ? styles.disabledButton : ''}`}>
+                                        {isFullyOwned ? 'Déjà possédé' : 'Voir le contenu'}
+                                    </button>
                                 </div>
                             );
                         })}
@@ -345,30 +402,44 @@ export default function ShopPage() {
                     {/* Tous les dieux */}
                     <h3 className={styles.subSectionTitle}>Tous les Dieux</h3>
                     <div className={styles.godsGrid}>
-                        {visibleGods.map((god) => (
-                            <div
-                                key={god.id}
-                                className={styles.godCard}
-                                style={{ background: getGodBgColor(god.id) }}
-                                onClick={() => setSelectedGod(god)}
-                            >
-                                <div className={styles.godImageWrapper}>
-                                    <Image
-                                        src={god.imageUrl}
-                                        alt={god.name}
-                                        width={80}
-                                        height={80}
-                                        className={styles.godImage}
-                                    />
+                        {visibleGods.map((god) => {
+                            const owned = isGodOwned(god.id);
+                            return (
+                                <div
+                                    key={god.id}
+                                    className={`${styles.godCard} ${owned ? styles.owned : ''}`}
+                                    style={{ background: getGodBgColor(god.id) }}
+                                    onClick={() => setSelectedGod(god)}
+                                >
+                                    {owned && (
+                                        <div className={styles.ownedBadge}>✓ Possédé</div>
+                                    )}
+                                    <div className={styles.godImageWrapper}>
+                                        <Image
+                                            src={god.imageUrl}
+                                            alt={god.name}
+                                            width={80}
+                                            height={80}
+                                            className={styles.godImage}
+                                        />
+                                    </div>
+                                    <h4 className={styles.godName}>{god.name}</h4>
+                                    {owned ? (
+                                        <div className={styles.godPriceOwned}>
+                                            <span>Débloqué</span>
+                                        </div>
+                                    ) : (
+                                        <div className={styles.godPrice}>
+                                            <Image src="/icons/ambroisie.png" alt="Ambroisie" width={14} height={14} />
+                                            <span>{GOD_PRICE.toLocaleString()}</span>
+                                        </div>
+                                    )}
+                                    <button className={`${styles.viewButtonMini} ${owned ? styles.disabledButton : ''}`}>
+                                        {owned ? 'Posséd' : 'Voir'}
+                                    </button>
                                 </div>
-                                <h4 className={styles.godName}>{god.name}</h4>
-                                <div className={styles.godPrice}>
-                                    <Image src="/icons/ambroisie.png" alt="Ambroisie" width={14} height={14} />
-                                    <span>3 000</span>
-                                </div>
-                                <button className={styles.viewButtonMini}>Voir</button>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
 
@@ -443,21 +514,39 @@ export default function ShopPage() {
                             })}
                         </div>
 
-                        <div className={styles.modalPrice}>
-                            <Image src="/icons/ambroisie.png" alt="Ambroisie" width={24} height={24} />
-                            <span>{selectedCoffret.price.toLocaleString()}</span>
-                        </div>
+                        {purchaseMessage && (
+                            <div className={`${styles.purchaseMessage} ${purchaseMessage.type === 'success' ? styles.successMessage : styles.errorMessage}`}>
+                                {purchaseMessage.text}
+                            </div>
+                        )}
 
-                        <button className={styles.buyButton}>Acheter ce coffret</button>
+                        {isCoffretFullyOwned(selectedCoffret) ? (
+                            <button className={`${styles.buyButton} ${styles.disabledButton}`} disabled>
+                                ✓ Coffret déjà possédé
+                            </button>
+                        ) : (
+                            <button
+                                className={styles.buyButton}
+                                onClick={() => handlePurchaseCoffret(selectedCoffret.id)}
+                                disabled={purchasing || userAmbroisie < COFFRET_PRICE}
+                            >
+                                {purchasing ? '⏳ Achat en cours...' :
+                                    userAmbroisie < COFFRET_PRICE ? 'Pas assez d\'ambroisie' : 'Acheter ce coffret'}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
 
             {/* Modal Dieu */}
             {selectedGod && (
-                <div className={styles.modalOverlay} onClick={() => setSelectedGod(null)}>
+                <div className={styles.modalOverlay} onClick={() => { setSelectedGod(null); setPurchaseMessage(null); }}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.modalClose} onClick={() => setSelectedGod(null)}>✕</button>
+                        <button className={styles.modalClose} onClick={() => { setSelectedGod(null); setPurchaseMessage(null); }}>✕</button>
+
+                        {isGodOwned(selectedGod.id) && (
+                            <div className={styles.modalOwnedBadge}>✓ Vous possédez ce dieu</div>
+                        )}
 
                         <div className={styles.modalGodHero}>
                             <div className={styles.modalGodHeroImage}>
@@ -491,15 +580,36 @@ export default function ShopPage() {
                             </div>
                         </div>
 
-                        <div className={styles.modalPrice}>
-                            <Image src="/icons/ambroisie.png" alt="Ambroisie" width={24} height={24} />
-                            <span>{currentGod?.id === selectedGod.id ? '2 000' : '3 000'}</span>
-                            {currentGod?.id === selectedGod.id && (
-                                <span className={styles.promoBadge}>Promo du mois !</span>
-                            )}
-                        </div>
+                        {!isGodOwned(selectedGod.id) && (
+                            <div className={styles.modalPrice}>
+                                <Image src="/icons/ambroisie.png" alt="Ambroisie" width={24} height={24} />
+                                <span>{currentGod?.id === selectedGod.id ? GOD_PROMO_PRICE.toLocaleString() : GOD_PRICE.toLocaleString()}</span>
+                                {currentGod?.id === selectedGod.id && (
+                                    <span className={styles.promoBadge}>Promo du mois !</span>
+                                )}
+                            </div>
+                        )}
 
-                        <button className={styles.buyButton}>Acheter ce dieu</button>
+                        {purchaseMessage && (
+                            <div className={`${styles.purchaseMessage} ${purchaseMessage.type === 'success' ? styles.successMessage : styles.errorMessage}`}>
+                                {purchaseMessage.text}
+                            </div>
+                        )}
+
+                        {isGodOwned(selectedGod.id) ? (
+                            <button className={`${styles.buyButton} ${styles.disabledButton}`} disabled>
+                                ✓ Dieu déjà possédé
+                            </button>
+                        ) : (
+                            <button
+                                className={styles.buyButton}
+                                onClick={() => handlePurchaseGod(selectedGod.id, currentGod?.id === selectedGod.id)}
+                                disabled={purchasing || userAmbroisie < (currentGod?.id === selectedGod.id ? GOD_PROMO_PRICE : GOD_PRICE)}
+                            >
+                                {purchasing ? '⏳ Achat en cours...' :
+                                    userAmbroisie < (currentGod?.id === selectedGod.id ? GOD_PROMO_PRICE : GOD_PRICE) ? 'Pas assez d\'ambroisie' : 'Acheter ce dieu'}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

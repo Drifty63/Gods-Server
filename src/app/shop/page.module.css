@@ -1501,4 +1501,102 @@
 
 .godCard {
     cursor: pointer;
+    position: relative;
+}
+
+/* ================================
+   OWNED & DISABLED STATES
+   ================================ */
+
+.ownedBadge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 10px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 12px;
+    z-index: 5;
+}
+
+.partialBadge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 10px;
+    background: linear-gradient(145deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 12px;
+    z-index: 5;
+}
+
+.coffretCard.owned {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.coffretCard.owned:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.godPriceOwned {
+    font-size: 0.85rem;
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.disabledButton {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    background: rgba(100, 100, 100, 0.5) !important;
+}
+
+.disabledButton:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ================================
+   PURCHASE MESSAGES
+   ================================ */
+
+.purchaseMessage {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.successMessage {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #22c55e;
+}
+
+.errorMessage {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+/* ================================
+   MODAL OWNED BADGE
+   ================================ */
+
+.modalOwnedBadge {
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: inline-block;
 }

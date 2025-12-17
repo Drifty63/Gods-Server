@@ -341,6 +341,74 @@ export async function claimStarterPack(uid: string, packId: StarterPackId): Prom
     });
 }
 
+// Prix des dieux et coffrets
+export const GOD_PRICE = 3000;
+export const GOD_PROMO_PRICE = 2000;
+export const COFFRET_PRICE = 10000;
+
+// Acheter un dieu
+export async function purchaseGod(uid: string, godId: string, isPromo: boolean = false): Promise<{ success: boolean; message: string }> {
+    const profile = await getUserProfile(uid);
+    if (!profile) return { success: false, message: 'Profil introuvable' };
+
+    // Vérifier si le dieu est déjà possédé
+    if (profile.collection.godsOwned.includes(godId)) {
+        return { success: false, message: 'Vous possédez déjà ce dieu' };
+    }
+
+    // Calculer le prix
+    const price = isPromo ? GOD_PROMO_PRICE : GOD_PRICE;
+
+    // Vérifier l'ambroisie
+    if ((profile.ambroisie || 0) < price) {
+        return { success: false, message: 'Pas assez d\'ambroisie' };
+    }
+
+    // Effectuer l'achat
+    const newGodsOwned = [...profile.collection.godsOwned, godId];
+    const newAmbroisie = (profile.ambroisie || 0) - price;
+
+    await updateDoc(doc(db, 'users', uid), {
+        'collection.godsOwned': newGodsOwned,
+        ambroisie: newAmbroisie,
+    });
+
+    return { success: true, message: 'Dieu acheté avec succès !' };
+}
+
+// Acheter un coffret
+export async function purchaseCoffret(uid: string, coffretId: string): Promise<{ success: boolean; message: string; godsAdded?: string[] }> {
+    const profile = await getUserProfile(uid);
+    if (!profile) return { success: false, message: 'Profil introuvable' };
+
+    // Récupérer le coffret
+    const coffret = STARTER_PACKS[coffretId as StarterPackId];
+    if (!coffret) return { success: false, message: 'Coffret introuvable' };
+
+    // Calculer les dieux qui ne sont pas encore possédés
+    const godsToAdd = coffret.godIds.filter(godId => !profile.collection.godsOwned.includes(godId));
+
+    if (godsToAdd.length === 0) {
+        return { success: false, message: 'Vous possédez déjà tous les dieux de ce coffret' };
+    }
+
+    // Vérifier l'ambroisie
+    if ((profile.ambroisie || 0) < COFFRET_PRICE) {
+        return { success: false, message: 'Pas assez d\'ambroisie' };
+    }
+
+    // Effectuer l'achat
+    const newGodsOwned = [...profile.collection.godsOwned, ...godsToAdd];
+    const newAmbroisie = (profile.ambroisie || 0) - COFFRET_PRICE;
+
+    await updateDoc(doc(db, 'users', uid), {
+        'collection.godsOwned': newGodsOwned,
+        ambroisie: newAmbroisie,
+    });
+
+    return { success: true, message: `Coffret acheté ! ${godsToAdd.length} nouveaux dieux ajoutés.`, godsAdded: godsToAdd };
+}
+
 // =====================================
 // STATISTIQUES
 // =====================================
