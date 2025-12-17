@@ -267,9 +267,29 @@ export class GameEngine {
         // Infliger des dégâts de fatigue à tous les dieux vivants
         for (const god of player.gods) {
             if (!god.isDead) {
-                god.currentHealth -= player.fatigueCounter;
-                if (god.currentHealth <= 0) {
-                    this.handleGodDeath(player, god);
+                let damageToInflict = player.fatigueCounter;
+
+                // Vérifier s'il y a un bouclier actif
+                const shieldIndex = god.statusEffects.findIndex(s => s.type === 'shield');
+                if (shieldIndex !== -1) {
+                    const shield = god.statusEffects[shieldIndex];
+                    if (shield.stacks >= damageToInflict) {
+                        shield.stacks -= damageToInflict;
+                        damageToInflict = 0;
+                    } else {
+                        damageToInflict -= shield.stacks;
+                        shield.stacks = 0;
+                        // Retirer le statut si bouclier épuisé
+                        god.statusEffects.splice(shieldIndex, 1);
+                    }
+                }
+
+                // Appliquer les dégâts restants à la santé
+                if (damageToInflict > 0) {
+                    god.currentHealth -= damageToInflict;
+                    if (god.currentHealth <= 0) {
+                        this.handleGodDeath(player, god);
+                    }
                 }
             }
         }
