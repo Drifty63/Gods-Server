@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
-import { ALL_GODS } from '@/data/gods';
+import { ALL_GODS, getVisibleGods, getGodById } from '@/data/gods';
 
 // Cycle annuel des dieux en promo
 const MONTHLY_GODS: { [key: number]: string } = {
@@ -61,6 +61,8 @@ export default function ShopPage() {
 
     // Utiliser l'ambroisie du profil ou 0 par défaut
     const userAmbroisie = profile?.ambroisie ?? 0;
+    // Filtrer les dieux selon le statut créateur
+    const visibleGods = useMemo(() => getVisibleGods(profile?.isCreator || false), [profile?.isCreator]);
 
     // Fonction pour obtenir la couleur de fond selon le dieu
     const getGodBgColor = (godId: string) => {
@@ -84,7 +86,7 @@ export default function ShopPage() {
     // Obtenir le dieu du mois actuel
     const currentMonth = new Date().getMonth();
     const currentGodId = MONTHLY_GODS[currentMonth];
-    const currentGod = ALL_GODS.find(g => g.id === currentGodId);
+    const currentGod = getGodById(currentGodId);
 
     // Countdown jusqu'au prochain mois
     useEffect(() => {
@@ -192,7 +194,7 @@ export default function ShopPage() {
                     <h2 className={styles.sectionTitle}>🎁 Coffrets</h2>
                     <div className={styles.coffretsGrid}>
                         {COFFRETS.map((coffret) => {
-                            const coffretGods = coffret.godIds.map(id => ALL_GODS.find(g => g.id === id)).filter(Boolean);
+                            const coffretGods = coffret.godIds.map(id => getGodById(id)).filter(Boolean);
                             return (
                                 <div
                                     key={coffret.id}
@@ -297,7 +299,7 @@ export default function ShopPage() {
                     {/* Tous les dieux */}
                     <h3 className={styles.subSectionTitle}>Tous les Dieux</h3>
                     <div className={styles.godsGrid}>
-                        {ALL_GODS.map((god) => (
+                        {visibleGods.map((god) => (
                             <div
                                 key={god.id}
                                 className={styles.godCard}

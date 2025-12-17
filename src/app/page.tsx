@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
-import { ALL_GODS } from '@/data/gods';
+import { ALL_GODS, getVisibleGods } from '@/data/gods';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -23,21 +23,23 @@ function HomeContent() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   // Utiliser l'ambroisie du profil ou 0 par défaut
   const userAmbroisie = profile?.ambroisie ?? 0;
+  // Filtrer les dieux selon le statut créateur
+  const visibleGods = useMemo(() => getVisibleGods(profile?.isCreator || false), [profile?.isCreator]);
 
   // Carrousel automatique des dieux (10 secondes)
   useEffect(() => {
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentGodIndex((prev) => (prev + 1) % ALL_GODS.length);
+        setCurrentGodIndex((prev) => (prev + 1) % visibleGods.length);
         setIsTransitioning(false);
       }, 500);
     }, 10000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [visibleGods.length]);
 
-  const currentGod = ALL_GODS[currentGodIndex];
+  const currentGod = visibleGods[currentGodIndex];
 
   const handlePlayClick = () => {
     setShowPlayModal(true);
@@ -66,7 +68,7 @@ function HomeContent() {
   const prevGod = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentGodIndex((prev) => (prev - 1 + ALL_GODS.length) % ALL_GODS.length);
+      setCurrentGodIndex((prev) => (prev - 1 + visibleGods.length) % visibleGods.length);
       setIsTransitioning(false);
     }, 300);
   };
@@ -75,7 +77,7 @@ function HomeContent() {
   const nextGod = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentGodIndex((prev) => (prev + 1) % ALL_GODS.length);
+      setCurrentGodIndex((prev) => (prev + 1) % visibleGods.length);
       setIsTransitioning(false);
     }, 300);
   };
@@ -157,7 +159,7 @@ function HomeContent() {
               </div>
             </div>
             <div className={styles.godCardIndicators}>
-              {ALL_GODS.map((_, index) => (
+              {visibleGods.map((_, index) => (
                 <button
                   key={index}
                   className={`${styles.indicator} ${index === currentGodIndex ? styles.activeIndicator : ''}`}
@@ -168,7 +170,7 @@ function HomeContent() {
                       setIsTransitioning(false);
                     }, 300);
                   }}
-                  aria-label={`Voir ${ALL_GODS[index].name}`}
+                  aria-label={`Voir ${visibleGods[index].name}`}
                 />
               ))}
             </div>

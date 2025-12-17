@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
-import { ALL_GODS } from '@/data/gods';
+import { ALL_GODS, getVisibleGods } from '@/data/gods';
 import { getSpellsForGod, SpellCard } from '@/data/mock_spells';
 import { God } from '@/data/gods';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Team {
     id: number;
@@ -48,6 +49,7 @@ interface SelectedCard {
 }
 
 export default function DeckPage() {
+    const { profile } = useAuth();
     // État des équipes (chargé depuis localStorage idéalement, ici state local pour démo)
     const [teams, setTeams] = useState<Team[]>(DEFAULT_TEAMS);
     const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
@@ -57,6 +59,9 @@ export default function DeckPage() {
 
     // État pour les volets déroulants des saisons
     const [isSeason1Open, setIsSeason1Open] = useState(true);
+
+    // Filtrer les dieux selon le statut créateur
+    const visibleGods = useMemo(() => getVisibleGods(profile?.isCreator || false), [profile?.isCreator]);
 
     // Charger les équipes depuis localStorage au montage
     useEffect(() => {
@@ -171,14 +176,14 @@ export default function DeckPage() {
                     >
                         <span className={styles.seasonIcon}>⭐</span>
                         <span className={styles.seasonTitle}>Saison 1 : Set de base</span>
-                        <span className={styles.seasonCount}>{ALL_GODS.length} / {ALL_GODS.length} dieux</span>
+                        <span className={styles.seasonCount}>{visibleGods.length} / {visibleGods.length} dieux</span>
                         <span className={styles.seasonArrow}>{isSeason1Open ? '▼' : '▶'}</span>
                     </button>
 
                     {isSeason1Open && (
                         <div className={styles.seasonContent}>
 
-                            {ALL_GODS.map((god) => {
+                            {visibleGods.map((god) => {
                                 const spells = getSpellsForGod(god);
                                 return (
                                     <div key={god.id} className={styles.godRow}>
