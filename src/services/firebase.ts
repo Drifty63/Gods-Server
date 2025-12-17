@@ -48,9 +48,34 @@ export interface UserProfile {
     achievements: string[];
     needsSetup?: boolean; // True si le profil nécessite une configuration initiale
     isCreator?: boolean; // True si l'utilisateur est un créateur (accès aux dieux cachés)
+    dailyQuests?: DailyQuestsData; // Quêtes journalières
     createdAt: Date;
     lastLoginAt: Date;
 }
+
+// Types pour les quêtes journalières
+export interface DailyQuest {
+    id: string;
+    name: string;
+    description: string;
+    progress: number;
+    target: number;
+    reward: number; // Ambroisie
+    claimed: boolean;
+}
+
+export interface DailyQuestsData {
+    quests: DailyQuest[];
+    lastResetDate: string; // Format YYYY-MM-DD
+}
+
+// Définition des quêtes journalières par défaut
+const DEFAULT_DAILY_QUESTS: Omit<DailyQuest, 'progress' | 'claimed'>[] = [
+    { id: 'play_1', name: 'Jouer 1 partie', description: 'Participez à une partie', target: 1, reward: 50 },
+    { id: 'play_3', name: 'Jouer 3 parties', description: 'Participez à 3 parties', target: 3, reward: 100 },
+    { id: 'win_1', name: 'Gagner 1 partie', description: 'Remportez une victoire', target: 1, reward: 75 },
+    { id: 'win_3', name: 'Gagner 3 parties', description: 'Remportez 3 victoires', target: 3, reward: 150 },
+];
 
 // Créer un profil utilisateur par défaut
 function createDefaultProfile(uid: string, email: string, username: string): Omit<UserProfile, 'createdAt' | 'lastLoginAt'> {
@@ -287,6 +312,10 @@ export async function recordVictory(uid: string): Promise<void> {
         'stats.bestStreak': bestStreak,
         xp: profile.xp + 100, // +100 XP par victoire
     });
+
+    // Mettre à jour les quêtes journalières (une partie jouée + une victoire)
+    await updateQuestProgress(uid, 'play');
+    await updateQuestProgress(uid, 'win');
 }
 
 // Enregistrer une défaite
@@ -300,6 +329,134 @@ export async function recordDefeat(uid: string): Promise<void> {
         'stats.currentStreak': 0,
         xp: profile.xp + 25, // +25 XP par défaite
     });
+
+    // Mettre à jour les quêtes journalières (une partie jouée)
+    await updateQuestProgress(uid, 'play');
+}
+
+// =====================================
+// QUÊTES JOURNALIÈRES
+// =====================================
+
+// Obtenir la date du jour au format YYYY-MM-DD
+function getTodayDateString(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+// Initialiser ou réinitialiser les quêtes journalières
+function createFreshDailyQuests(): DailyQuestsData {
+    return {
+        quests: DEFAULT_DAILY_QUESTS.map(q => ({
+            ...q,
+            progress: 0,
+            claimed: false,
+        })),
+        lastResetDate: getTodayDateString(),
+    };
+}
+
+// Récupérer les quêtes journalières (avec réinitialisation automatique si nouveau jour)
+export async function getDailyQuests(uid: string): Promise<DailyQuestsData> {
+    const profile = await getUserProfile(uid);
+    if (!profile) {
+        return createFreshDailyQuests();
+    }
+
+    const today = getTodayDateString();
+
+    // Si pas de quêtes ou si c'est un nouveau jour, réinitialiser
+    if (!profile.dailyQuests || profile.dailyQuests.lastResetDate !== today) {
+        const freshQuests = createFreshDailyQuests();
+        await updateDoc(doc(db, 'users', uid), {
+            dailyQuests: freshQuests,
+        });
+        return freshQuests;
+    }
+
+    return profile.dailyQuests;
+}
+
+// Mettre à jour la progression des quêtes
+export async function updateQuestProgress(uid: string, type: 'play' | 'win'): Promise<void> {
+    const quests = await getDailyQuests(uid);
+
+    // Mettre à jour les quêtes correspondantes
+    const updatedQuests = quests.quests.map(quest => {
+        if (type === 'play' && (quest.id === 'play_1' || quest.id === 'play_3')) {
+            return { ...quest, progress: Math.min(quest.progress + 1, quest.target) };
+        }
+        if (type === 'win' && (quest.id === 'win_1' || quest.id === 'win_3')) {
+            return { ...quest, progress: Math.min(quest.progress + 1, quest.target) };
+        }
+        return quest;
+    });
+
+    await updateDoc(doc(db, 'users', uid), {
+        'dailyQuests.quests': updatedQuests,
+    });
+}
+
+// Réclamer la récompense d'une quête
+export async function claimQuestReward(uid: string, questId: string): Promise<{ success: boolean; reward: number }> {
+    const profile = await getUserProfile(uid);
+    if (!profile || !profile.dailyQuests) {
+        return { success: false, reward: 0 };
+    }
+
+    const quest = profile.dailyQuests.quests.find(q => q.id === questId);
+    if (!quest) {
+        return { success: false, reward: 0 };
+    }
+
+    // Vérifier si la quête est complétée et non réclamée
+    if (quest.progress < quest.target || quest.claimed) {
+        return { success: false, reward: 0 };
+    }
+
+    // Marquer comme réclamée et ajouter l'ambroisie
+    const updatedQuests = profile.dailyQuests.quests.map(q =>
+        q.id === questId ? { ...q, claimed: true } : q
+    );
+
+    const newAmbroisie = (profile.ambroisie || 0) + quest.reward;
+
+    await updateDoc(doc(db, 'users', uid), {
+        'dailyQuests.quests': updatedQuests,
+        ambroisie: newAmbroisie,
+    });
+
+    return { success: true, reward: quest.reward };
+}
+
+// Réclamer toutes les récompenses disponibles
+export async function claimAllQuestRewards(uid: string): Promise<{ success: boolean; totalReward: number }> {
+    const profile = await getUserProfile(uid);
+    if (!profile || !profile.dailyQuests) {
+        return { success: false, totalReward: 0 };
+    }
+
+    let totalReward = 0;
+    const updatedQuests = profile.dailyQuests.quests.map(quest => {
+        if (quest.progress >= quest.target && !quest.claimed) {
+            totalReward += quest.reward;
+            return { ...quest, claimed: true };
+        }
+        return quest;
+    });
+
+    if (totalReward === 0) {
+        return { success: false, totalReward: 0 };
+    }
+
+    const newAmbroisie = (profile.ambroisie || 0) + totalReward;
+
+    await updateDoc(doc(db, 'users', uid), {
+        'dailyQuests.quests': updatedQuests,
+        ambroisie: newAmbroisie,
+    });
+
+    return { success: true, totalReward };
 }
 
 // Exports

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest } from '@/services/firebase';
 import styles from './GlobalUI.module.css';
 
-// Mock data pour les récompenses
+// Mock data pour les récompenses (sera remplacé plus tard)
 const MOCK_REWARDS = [
     { id: 1, text: "Remerciement des développeurs.", timeLeft: "29j restant" },
     { id: 2, text: "Récompense défi 'Aphrodite' combat 1/5.", timeLeft: "29j restant" },
@@ -15,19 +17,19 @@ const MOCK_REWARDS = [
     { id: 5, text: "Récompense 1000 téléchargements.", timeLeft: "29j restant" },
 ];
 
-// Mock data pour les quêtes journalières
-const MOCK_QUESTS = [
-    { id: 1, name: "Jouer 1 partie", progress: 0, target: 1, reward: 50, completed: false },
-    { id: 2, name: "Jouer 3 parties", progress: 1, target: 3, reward: 50, completed: false },
-    { id: 3, name: "Gagner 3 parties", progress: 2, target: 3, reward: 50, completed: false },
-];
-
 export default function GlobalUI() {
     const pathname = usePathname();
+    const { user, profile, refreshProfile } = useAuth();
+
     const [showOptionsModal, setShowOptionsModal] = useState(false);
     const [showRewardsModal, setShowRewardsModal] = useState(false);
     const [showQuestsModal, setShowQuestsModal] = useState(false);
     const [showRulesModal, setShowRulesModal] = useState(false);
+
+    // États pour les quêtes journalières
+    const [dailyQuests, setDailyQuests] = useState<DailyQuest[]>([]);
+    const [questsLoading, setQuestsLoading] = useState(false);
+    const [claimingQuest, setClaimingQuest] = useState<string | null>(null);
 
     // Chrono de réinitialisation des quêtes (temps jusqu'à minuit)
     const [timeUntilReset, setTimeUntilReset] = useState('');
@@ -67,6 +69,72 @@ export default function GlobalUI() {
 
         return () => clearInterval(interval);
     }, []);
+
+    // Charger les quêtes journalières
+    const loadDailyQuests = useCallback(async () => {
+        if (!user) return;
+        setQuestsLoading(true);
+        try {
+            const data = await getDailyQuests(user.uid);
+            setDailyQuests(data.quests);
+        } catch (error) {
+            console.error('Erreur chargement quêtes:', error);
+        } finally {
+            setQuestsLoading(false);
+        }
+    }, [user]);
+
+    // Charger les quêtes quand la modal s'ouvre
+    useEffect(() => {
+        if (showQuestsModal && user) {
+            loadDailyQuests();
+        }
+    }, [showQuestsModal, user, loadDailyQuests]);
+
+    // Réclamer une récompense
+    const handleClaimReward = async (questId: string) => {
+        if (!user || claimingQuest) return;
+        setClaimingQuest(questId);
+        try {
+            const result = await claimQuestReward(user.uid, questId);
+            if (result.success) {
+                // Mettre à jour localement
+                setDailyQuests(prev => prev.map(q =>
+                    q.id === questId ? { ...q, claimed: true } : q
+                ));
+                // Rafraîchir le profil pour mettre à jour l'ambroisie
+                await refreshProfile();
+            }
+        } catch (error) {
+            console.error('Erreur réclamation récompense:', error);
+        } finally {
+            setClaimingQuest(null);
+        }
+    };
+
+    // Réclamer toutes les récompenses
+    const handleClaimAllRewards = async () => {
+        if (!user || claimingQuest) return;
+        setClaimingQuest('all');
+        try {
+            const result = await claimAllQuestRewards(user.uid);
+            if (result.success) {
+                // Mettre à jour localement
+                setDailyQuests(prev => prev.map(q =>
+                    q.progress >= q.target ? { ...q, claimed: true } : q
+                ));
+                // Rafraîchir le profil
+                await refreshProfile();
+            }
+        } catch (error) {
+            console.error('Erreur réclamation récompenses:', error);
+        } finally {
+            setClaimingQuest(null);
+        }
+    };
+
+    // Vérifier s'il y a des récompenses à réclamer
+    const hasClaimableRewards = dailyQuests.some(q => q.progress >= q.target && !q.claimed);
 
     // Charger les volumes depuis localStorage au montage
     useEffect(() => {
@@ -380,43 +448,73 @@ export default function GlobalUI() {
                             <span>Réinitialisation dans {timeUntilReset}</span>
                         </div>
 
-                        <div className={styles.questsList}>
-                            {MOCK_QUESTS.map((quest) => (
-                                <div key={quest.id} className={`${styles.questItem} ${quest.completed ? styles.questCompleted : ''}`}>
-                                    <div className={styles.questInfo}>
-                                        <span className={styles.questName}>{quest.name}</span>
-                                        <div className={styles.questProgressContainer}>
-                                            <div className={styles.questProgressBar}>
-                                                <div
-                                                    className={styles.questProgressFill}
-                                                    style={{ width: `${(quest.progress / quest.target) * 100}%` }}
-                                                />
+                        {!user ? (
+                            <div className={styles.questsNotLoggedIn}>
+                                <p>🔒 Connectez-vous pour accéder aux quêtes journalières !</p>
+                                <Link href="/auth" className={styles.loginButton} onClick={closeQuestsModal}>
+                                    Se connecter
+                                </Link>
+                            </div>
+                        ) : questsLoading ? (
+                            <div className={styles.questsLoading}>
+                                <span>⏳ Chargement des quêtes...</span>
+                            </div>
+                        ) : (
+                            <div className={styles.questsList}>
+                                {dailyQuests.map((quest) => (
+                                    <div key={quest.id} className={`${styles.questItem} ${quest.claimed ? styles.questCompleted : ''}`}>
+                                        <div className={styles.questInfo}>
+                                            <span className={styles.questName}>{quest.name}</span>
+                                            <div className={styles.questProgressContainer}>
+                                                <div className={styles.questProgressBar}>
+                                                    <div
+                                                        className={styles.questProgressFill}
+                                                        style={{ width: `${(quest.progress / quest.target) * 100}%` }}
+                                                    />
+                                                </div>
+                                                <span className={styles.questProgressText}>
+                                                    {quest.progress}/{quest.target}
+                                                </span>
                                             </div>
-                                            <span className={styles.questProgressText}>
-                                                {quest.progress}/{quest.target}
-                                            </span>
+                                        </div>
+                                        <div className={styles.questReward}>
+                                            <Image
+                                                src="/icons/ambroisie.png"
+                                                alt="Ambroisie"
+                                                width={20}
+                                                height={20}
+                                                className={styles.ambroisieIcon}
+                                            />
+                                            <span className={styles.ambroisieAmount}>{quest.reward}</span>
+                                            {quest.claimed ? (
+                                                <button className={styles.claimButtonDisabled} disabled>✓ Récupéré</button>
+                                            ) : quest.progress >= quest.target ? (
+                                                <button
+                                                    className={styles.claimButton}
+                                                    onClick={() => handleClaimReward(quest.id)}
+                                                    disabled={claimingQuest !== null}
+                                                >
+                                                    {claimingQuest === quest.id ? '...' : 'Récupérer'}
+                                                </button>
+                                            ) : (
+                                                <button className={styles.claimButtonDisabled} disabled>Récupérer</button>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className={styles.questReward}>
-                                        <Image
-                                            src="/icons/ambroisie.png"
-                                            alt="Ambroisie"
-                                            width={20}
-                                            height={20}
-                                            className={styles.ambroisieIcon}
-                                        />
-                                        <span className={styles.ambroisieAmount}>{quest.reward}</span>
-                                        {quest.progress >= quest.target ? (
-                                            <button className={styles.claimButton}>Récupérer</button>
-                                        ) : (
-                                            <button className={styles.claimButtonDisabled} disabled>Récupérer</button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
 
                         <div className={styles.questsFooter}>
+                            {user && hasClaimableRewards && (
+                                <button
+                                    className={styles.claimAllButton}
+                                    onClick={handleClaimAllRewards}
+                                    disabled={claimingQuest !== null}
+                                >
+                                    {claimingQuest === 'all' ? 'Récupération...' : '✨ Tout récupérer'}
+                                </button>
+                            )}
                             <button className={styles.closeButton} onClick={closeQuestsModal}>
                                 Fermer
                             </button>
