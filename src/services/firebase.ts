@@ -47,6 +47,7 @@ export interface UserProfile {
     };
     achievements: string[];
     needsSetup?: boolean; // True si le profil nécessite une configuration initiale
+    isCreator?: boolean; // True si l'utilisateur est un créateur (accès aux dieux cachés)
     createdAt: Date;
     lastLoginAt: Date;
 }
@@ -76,6 +77,7 @@ function createDefaultProfile(uid: string, email: string, username: string): Omi
             spellsOwned: [],
         },
         achievements: [],
+        isCreator: false,
     };
 }
 

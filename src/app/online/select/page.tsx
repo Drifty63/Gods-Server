@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
-import { ALL_GODS } from '@/data/gods';
+import { ALL_GODS, getVisibleGods } from '@/data/gods';
 import { GodCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
+import { auth, getUserProfile } from '@/services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import Image from 'next/image';
 import styles from './page.module.css';
 
@@ -15,6 +17,21 @@ export default function OnlineSelectPage() {
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [hasRejoined, setHasRejoined] = useState(false);
+    const [isCreator, setIsCreator] = useState(false);
+
+    // Filtrer les dieux selon le statut créateur
+    const visibleGods = useMemo(() => getVisibleGods(isCreator), [isCreator]);
+
+    // Récupérer le statut créateur
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const profile = await getUserProfile(user.uid);
+                setIsCreator(profile?.isCreator || false);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
     // Rejoindre la partie au chargement
     useEffect(() => {
@@ -102,7 +119,7 @@ export default function OnlineSelectPage() {
             </div>
 
             <div className={styles.godsGrid}>
-                {ALL_GODS.map((god) => {
+                {visibleGods.map((god) => {
                     const isSelected = selectedGods.some(g => g.id === god.id);
                     const elementSymbol = ELEMENT_SYMBOLS[god.element] || '⚪';
 

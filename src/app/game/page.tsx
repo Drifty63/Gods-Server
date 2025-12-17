@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import GameBoard from '@/components/GameBoard/GameBoard';
 import TeamSelection from '@/components/TeamSelection/TeamSelection';
 import RockPaperScissors from '@/components/RockPaperScissors/RockPaperScissors';
 import { ALL_GODS, getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
+import { auth, getUserProfile } from '@/services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import styles from './page.module.css';
 import Link from 'next/link';
 
@@ -23,6 +25,18 @@ export default function GamePage() {
     const [phase, setPhase] = useState<GamePhase>('team_selection');
     const [error, setError] = useState<string | null>(null);
     const [selectedTeams, setSelectedTeams] = useState<SelectedTeams | null>(null);
+    const [isCreator, setIsCreator] = useState(false);
+
+    // Récupérer le statut créateur
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const profile = await getUserProfile(user.uid);
+                setIsCreator(profile?.isCreator || false);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
     // Étape 1: Sélection des équipes terminée
     const handleTeamsSelected = (playerTeam: string[], aiTeam: string[]) => {
@@ -66,7 +80,7 @@ export default function GamePage() {
 
     // Phase: Sélection des équipes
     if (phase === 'team_selection') {
-        return <TeamSelection onTeamsSelected={handleTeamsSelected} />;
+        return <TeamSelection onTeamsSelected={handleTeamsSelected} isCreator={isCreator} />;
     }
 
     // Phase: Pierre-Feuille-Ciseaux

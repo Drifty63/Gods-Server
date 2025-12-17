@@ -172,6 +172,106 @@ export const ALL_GODS: GodCard[] = [
         carouselImage: '/cards/gods/aphrodite.jpg',
         flavorText: '"Aucun spectacle de la nature, ni les flammes occidentales, ni la tempête dans les palmiers... ne semblent dignes d\'étonnement à ceux qui ont vu dans leur bras la transfiguration de la femme."',
     },
+
+    // =====================================================
+    // DIEUX CACHÉS - EXTENSION DEATH & GLORY
+    // =====================================================
+
+    // PERSÉPHONE (Ténèbres 💀) - CACHÉ
+    {
+        id: 'persephone',
+        name: 'Perséphone, Reine des Enfers',
+        element: 'darkness',
+        weakness: 'light',
+        maxHealth: 26,
+        imageUrl: '/cards/gods/persephone.png',
+        flavorText: '"Je suis celle qui règne sur les morts et guide les âmes. Mon royaume est éternel."',
+        hidden: true,
+    },
+
+    // HÉPHAÏSTOS (Feu 🔥) - CACHÉ
+    {
+        id: 'hephaistos',
+        name: 'Héphaïstos, Dieu de la forge',
+        element: 'fire',
+        weakness: 'water',
+        maxHealth: 25,
+        imageUrl: '/cards/gods/hephaistos.png',
+        flavorText: '"Dans ma forge brûlent les flammes de la création. Mes armures sont invincibles."',
+        hidden: true,
+    },
+
+    // THANATOS (Ténèbres 💀) - CACHÉ
+    {
+        id: 'thanatos',
+        name: 'Thanatos, Dieu de la mort',
+        element: 'darkness',
+        weakness: 'light',
+        maxHealth: 26,
+        imageUrl: '/cards/gods/thanatos.png',
+        flavorText: '"Je suis la fin inévitable. Chaque mort me rend plus puissant."',
+        hidden: true,
+    },
+
+    // HERMÈS (Foudre ⚡) - CACHÉ
+    {
+        id: 'hermes',
+        name: 'Hermès, Messager des dieux',
+        element: 'lightning',
+        weakness: 'earth',
+        maxHealth: 24,
+        imageUrl: '/cards/gods/hermes.png',
+        flavorText: '"Plus rapide que la pensée, je frappe avant même que tu ne me voies venir."',
+        hidden: true,
+    },
+
+    // SÉLÉNÉ (Eau 💧) - CACHÉ
+    {
+        id: 'selene',
+        name: 'Séléné, Déesse de la lune',
+        element: 'water',
+        weakness: 'lightning',
+        maxHealth: 30,
+        imageUrl: '/cards/gods/selene.png',
+        flavorText: '"Ma lumière argentée apaise les blessures et ranime les âmes perdues."',
+        hidden: true,
+    },
+
+    // ZÉPHYR (Air 🌀) - CACHÉ
+    {
+        id: 'zephyr',
+        name: 'Zéphyr, Dieu du vent d\'ouest',
+        element: 'air',
+        weakness: 'fire',
+        maxHealth: 24,
+        imageUrl: '/cards/gods/zephyr.png',
+        flavorText: '"Mon souffle disperse tes plans comme des feuilles dans la tempête."',
+        hidden: true,
+    },
+
+    // NIKÉ (Lumière ✨) - CACHÉ
+    {
+        id: 'nike',
+        name: 'Niké, Déesse de la victoire',
+        element: 'light',
+        weakness: 'darkness',
+        maxHealth: 22,
+        imageUrl: '/cards/gods/nike.png',
+        flavorText: '"La victoire couronne ceux qui triomphent de leurs ennemis. Je suis leur récompense."',
+        hidden: true,
+    },
+
+    // CHIONÉ (Eau 💧) - CACHÉ
+    {
+        id: 'chione',
+        name: 'Chioné, Déesse de la neige',
+        element: 'water',
+        weakness: 'lightning',
+        maxHealth: 22,
+        imageUrl: '/cards/gods/chione.png',
+        flavorText: '"Mon froid gèle le temps lui-même. Tes actions seront figées dans la glace."',
+        hidden: true,
+    },
 ];
 
 // Helper pour obtenir un dieu par son ID
@@ -183,3 +283,12 @@ export function getGodById(id: string): GodCard | undefined {
 export function getGodsByElement(element: GodCard['element']): GodCard[] {
     return ALL_GODS.filter(god => god.element === element);
 }
+
+// Helper pour obtenir les dieux visibles selon le statut créateur
+export function getVisibleGods(isCreator: boolean = false): GodCard[] {
+    if (isCreator) {
+        return ALL_GODS; // Les créateurs voient tous les dieux
+    }
+    return ALL_GODS.filter(god => !god.hidden); // Les autres ne voient que les dieux non cachés
+}
+

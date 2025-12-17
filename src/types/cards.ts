@@ -31,7 +31,8 @@ export type TargetType =
     | 'self'             // Le dieu qui lance le sort
     | 'any_god'          // N'importe quel dieu
     | 'all_gods'         // Tous les dieux
-    | 'dead_ally_god';   // Un dieu allié mort (pour résurrection)
+    | 'dead_ally_god'    // Un dieu allié mort (pour résurrection)
+    | 'enemy_hand';      // Main adverse (pour discard)
 
 // Carte Dieu
 export interface GodCard {
@@ -43,6 +44,7 @@ export interface GodCard {
     imageUrl: string;
     carouselImage?: string; // Image spécifique pour le carrousel (optionnelle)
     flavorText: string;
+    hidden?: boolean; // True si le dieu est caché (accessible uniquement aux créateurs)
 }
 
 // Effet d'un sort

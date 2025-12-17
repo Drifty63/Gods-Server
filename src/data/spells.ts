@@ -1013,6 +1013,674 @@ export const ALL_SPELLS: SpellCard[] = [
         imageUrl: '/cards/spells/spell_aphrodite_desir.png',
         description: '➖🟠 +3💚 → 👥',
     },
+
+    // =====================================================
+    // SORTS DE PERSÉPHONE (Ténèbres 💀) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'persephone_generator_1',
+        name: 'Gifle Réginale',
+        element: 'darkness',
+        godId: 'persephone',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_persephone_gifle.png',
+        description: '3🩸 → ⚔️',
+    },
+    {
+        id: 'persephone_generator_2',
+        name: 'Vision du Tartare',
+        element: 'darkness',
+        godId: 'persephone',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'custom', customEffectId: 'optional_mill_boost', description: 'Défaussez 2 cartes pour +1 dégât' }
+        ],
+        imageUrl: '/cards/spells/spell_persephone_vision.png',
+        description: '1🩸 → ⚔️⚔️ | 2📤 → +1🩸',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'persephone_skill_1',
+        name: 'Échange d\'Âme',
+        element: 'darkness',
+        godId: 'persephone',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'retrieve_discard', description: 'Récupérez une carte de la défausse' },
+            { type: 'mill', value: 3 }
+        ],
+        imageUrl: '/cards/spells/spell_persephone_echange.png',
+        description: '🗑️ → 🖐️ | 3📤',
+    },
+    {
+        id: 'persephone_skill_2',
+        name: 'Brûlure Rémanente',
+        element: 'darkness',
+        godId: 'persephone',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'temp_resurrect', description: 'Ressuscite un dieu avec 5 PV, inflige 1 dégât chaque tour' }
+        ],
+        imageUrl: '/cards/spells/spell_persephone_brulure.png',
+        description: '☠️ → 💀5💚 | 1🩸⏳',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'persephone_utility_1',
+        name: 'Pouvoirs des Âmes',
+        element: 'darkness',
+        godId: 'persephone',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'copy_discard_spell', description: 'Copie un sort de la défausse en ténèbres' }
+        ],
+        imageUrl: '/cards/spells/spell_persephone_ames.png',
+        description: '🗑️🎴 → 📋💀',
+    },
+
+    // =====================================================
+    // SORTS D'HÉPHAÏSTOS (Feu 🔥) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'hephaistos_generator_1',
+        name: 'Martellement',
+        element: 'fire',
+        godId: 'hephaistos',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'shield', value: 2, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_hephaistos_martellement.png',
+        description: '2🩸 → ⚔️ | +2🛡️',
+    },
+    {
+        id: 'hephaistos_generator_2',
+        name: 'Étincelle Divine',
+        element: 'fire',
+        godId: 'hephaistos',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_hephaistos_etincelle.png',
+        description: '1🩸 → 👊',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'hephaistos_skill_1',
+        name: 'Forge d\'Héphaïstos',
+        element: 'fire',
+        godId: 'hephaistos',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 6, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_hephaistos_forge.png',
+        description: '+6🛡️',
+    },
+    {
+        id: 'hephaistos_skill_2',
+        name: 'Absorption d\'Armure',
+        element: 'fire',
+        godId: 'hephaistos',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'custom', customEffectId: 'gain_current_shield', description: 'Gagne en bouclier le nombre de boucliers actuels' }
+        ],
+        imageUrl: '/cards/spells/spell_hephaistos_absorption.png',
+        description: '2🩸 → ⚔️ | +🛡️=🛡️',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'hephaistos_utility_1',
+        name: 'Armure de Destruction',
+        element: 'fire',
+        godId: 'hephaistos',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'damage_plus_shield', description: 'Inflige 3 + nombre de boucliers' }
+        ],
+        imageUrl: '/cards/spells/spell_hephaistos_destruction.png',
+        description: '3+🛡️🩸 → ⚔️',
+    },
+
+    // =====================================================
+    // SORTS DE THANATOS (Ténèbres 💀) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'thanatos_generator_1',
+        name: 'Coup Mortel',
+        element: 'darkness',
+        godId: 'thanatos',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'custom', customEffectId: 'damage_plus_dead_allies', description: 'Inflige 2 + 1 par allié mort' }
+        ],
+        imageUrl: '/cards/spells/spell_thanatos_coup.png',
+        description: '2+☠️🩸 → ⚔️',
+    },
+    {
+        id: 'thanatos_generator_2',
+        name: 'Nova Sombre',
+        element: 'darkness',
+        godId: 'thanatos',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_thanatos_nova.png',
+        description: '1🩸 → 👊',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'thanatos_skill_1',
+        name: 'Décharge Mortelle',
+        element: 'darkness',
+        godId: 'thanatos',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'damage_plus_2x_dead_allies', description: 'Inflige 2 + 2 par allié mort' }
+        ],
+        imageUrl: '/cards/spells/spell_thanatos_decharge.png',
+        description: '2+2☠️🩸 → ⚔️',
+    },
+    {
+        id: 'thanatos_skill_2',
+        name: 'Happement Mortuaire',
+        element: 'darkness',
+        godId: 'thanatos',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'aoe_damage_plus_dead_allies', description: 'Inflige 1 + 1 par allié mort à tous' }
+        ],
+        imageUrl: '/cards/spells/spell_thanatos_happement.png',
+        description: '1+☠️🩸 → 👊',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'thanatos_utility_1',
+        name: 'Faucheuse d\'Âme',
+        element: 'darkness',
+        godId: 'thanatos',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'damage_plus_2x_dead_allies', description: 'Inflige 2 + 2 par allié mort' }
+        ],
+        imageUrl: '/cards/spells/spell_thanatos_faucheuse.png',
+        description: '2+2☠️🩸 → ⚔️',
+    },
+
+    // =====================================================
+    // SORTS D'HERMÈS (Foudre ⚡) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'hermes_generator_1',
+        name: 'Frappe Rapide',
+        element: 'lightning',
+        godId: 'hermes',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
+        ],
+        imageUrl: '/cards/spells/spell_hermes_frappe.png',
+        description: '1🩸 → ⚔️ | 🔄',
+    },
+    {
+        id: 'hermes_generator_2',
+        name: 'Balayage Fulgurant',
+        element: 'lightning',
+        godId: 'hermes',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_hermes_balayage.png',
+        description: '1🩸 → 👊',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'hermes_skill_1',
+        name: 'Bim !',
+        element: 'lightning',
+        godId: 'hermes',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
+        ],
+        imageUrl: '/cards/spells/spell_hermes_bim.png',
+        description: '2🩸 → ⚔️ | 🔄',
+    },
+    {
+        id: 'hermes_skill_2',
+        name: 'Bam !',
+        element: 'lightning',
+        godId: 'hermes',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' },
+            { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
+        ],
+        imageUrl: '/cards/spells/spell_hermes_bam.png',
+        description: '1🩸 → 👊 | 🔄',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'hermes_utility_1',
+        name: 'Boom !',
+        element: 'lightning',
+        godId: 'hermes',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'custom', customEffectId: 'frequency_boost', description: 'Augmente fréquence de 2' },
+            { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
+        ],
+        imageUrl: '/cards/spells/spell_hermes_boom.png',
+        description: '2🩸 → ⚔️ | +2⚡ | 🔄',
+    },
+
+    // =====================================================
+    // SORTS DE SÉLÉNÉ (Eau 💧) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'selene_generator_1',
+        name: 'Rayon de Lune',
+        element: 'water',
+        godId: 'selene',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_selene_rayon.png',
+        description: '3🩸 → ⚔️',
+    },
+    {
+        id: 'selene_generator_2',
+        name: 'Rivière',
+        element: 'water',
+        godId: 'selene',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'heal', value: 1, target: 'all_allies' }
+        ],
+        imageUrl: '/cards/spells/spell_selene_riviere.png',
+        description: '1🩸 → ⚔️⚔️ | +1💚 → 👥',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'selene_skill_1',
+        name: 'Pluie de Lune',
+        element: 'water',
+        godId: 'selene',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'heal_over_time', description: 'Soigne tous les alliés de 1 pendant 2 tours' }
+        ],
+        imageUrl: '/cards/spells/spell_selene_pluie.png',
+        description: '+1💚2⏳ → 👥',
+    },
+    {
+        id: 'selene_skill_2',
+        name: 'Marée Basse',
+        element: 'water',
+        godId: 'selene',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'cascade_heal', description: 'Soigne 3, 2, 1 selon la position' }
+        ],
+        imageUrl: '/cards/spells/spell_selene_maree.png',
+        description: '+3/2/1💚 → 👥',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'selene_utility_1',
+        name: 'Renaissance Bénéfique',
+        element: 'water',
+        godId: 'selene',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'resurrect_two', description: 'Ressuscite 2 alliés avec 3 PV' }
+        ],
+        imageUrl: '/cards/spells/spell_selene_renaissance.png',
+        description: '☠️☠️ → 3💚',
+    },
+
+    // =====================================================
+    // SORTS DE ZÉPHYR (Air 💨) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'zephyr_generator_1',
+        name: 'Envol Printanier',
+        element: 'air',
+        godId: 'zephyr',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_zephyr_envol.png',
+        description: '3🩸 → ⚔️',
+    },
+    {
+        id: 'zephyr_generator_2',
+        name: 'Vent d\'Ouest',
+        element: 'air',
+        godId: 'zephyr',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' },
+            { type: 'discard', value: 1, target: 'enemy_hand' }
+        ],
+        imageUrl: '/cards/spells/spell_zephyr_vent.png',
+        description: '1🩸 → 👊 | 1🎴🃏⚔️ → 🗑️',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'zephyr_skill_1',
+        name: 'Vent de Face',
+        element: 'air',
+        godId: 'zephyr',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'shuffle_god_cards', description: 'Replace les cartes d\'un dieu dans le deck' }
+        ],
+        imageUrl: '/cards/spells/spell_zephyr_face.png',
+        description: '⚔️🎴 → 🔀📚',
+    },
+    {
+        id: 'zephyr_skill_2',
+        name: 'Lame d\'Air',
+        element: 'air',
+        godId: 'zephyr',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'discard', value: 2, target: 'enemy_hand' }
+        ],
+        imageUrl: '/cards/spells/spell_zephyr_lame.png',
+        description: '3🩸 → ⚔️ | 2🎴🃏⚔️ → 🗑️',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'zephyr_utility_1',
+        name: 'Bourrasque Chanceuse',
+        element: 'air',
+        godId: 'zephyr',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'fatigue_boost', description: 'Augmente la fatigue adverse' }
+        ],
+        imageUrl: '/cards/spells/spell_zephyr_bourrasque.png',
+        description: '📚⚔️ → 🔀😵',
+    },
+
+    // =====================================================
+    // SORTS DE NIKÉ (Lumière ☀️) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'nike_generator_1',
+        name: 'Frappe Victorieuse',
+        element: 'light',
+        godId: 'nike',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_nike_frappe.png',
+        description: '2🩸 → ⚔️',
+    },
+    {
+        id: 'nike_generator_2',
+        name: 'Succès Flamboyant',
+        element: 'light',
+        godId: 'nike',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'custom', customEffectId: 'damage_plus_dead_enemies', description: 'Inflige 1 + 1 par ennemi mort à 2 cibles' }
+        ],
+        imageUrl: '/cards/spells/spell_nike_succes.png',
+        description: '1+💀🩸 → ⚔️⚔️',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'nike_skill_1',
+        name: 'Coup Triomphant',
+        element: 'light',
+        godId: 'nike',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'damage_plus_2x_dead_enemies', description: 'Inflige 2 + 2 par ennemi mort' }
+        ],
+        imageUrl: '/cards/spells/spell_nike_coup.png',
+        description: '2+2💀🩸 → ⚔️',
+    },
+    {
+        id: 'nike_skill_2',
+        name: 'Consécration',
+        element: 'light',
+        godId: 'nike',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'aoe_damage_plus_dead_enemies', description: 'Inflige 1 + 1 par ennemi mort à tous' }
+        ],
+        imageUrl: '/cards/spells/spell_nike_consecration.png',
+        description: '1+💀🩸 → 👊',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'nike_utility_1',
+        name: 'Apothéose',
+        element: 'light',
+        godId: 'nike',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'custom', customEffectId: 'aoe_damage_plus_2x_dead_enemies', description: 'Inflige 2 + 2 par ennemi mort à tous' }
+        ],
+        imageUrl: '/cards/spells/spell_nike_apotheose.png',
+        description: '2+2💀🩸 → 👊',
+    },
+
+    // =====================================================
+    // SORTS DE CHIONÉ (Eau 💧) - CACHÉ
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'chione_generator_1',
+        name: 'Toucher Glacial',
+        element: 'water',
+        godId: 'chione',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_chione_toucher.png',
+        description: '2🩸 → ⚔️ | +❄️1⏳',
+    },
+    {
+        id: 'chione_generator_2',
+        name: 'Tempête de Neige',
+        element: 'water',
+        godId: 'chione',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_chione_tempete.png',
+        description: '1🩸 → 👊',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'chione_skill_1',
+        name: 'Lance de Glace',
+        element: 'water',
+        godId: 'chione',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 4, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_chione_lance.png',
+        description: '4🩸 → ⚔️ | +❄️1⏳',
+    },
+    {
+        id: 'chione_skill_2',
+        name: 'Cône de Froid',
+        element: 'water',
+        godId: 'chione',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_chione_cone.png',
+        description: '2🩸 → ⚔️⚔️ | +❄️1⏳',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'chione_utility_1',
+        name: 'Âge de Glace',
+        element: 'water',
+        godId: 'chione',
+        type: 'utility',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'custom', customEffectId: 'splash_damage', description: 'Inflige 2 aux cibles adjacentes' }
+        ],
+        imageUrl: '/cards/spells/spell_chione_age.png',
+        description: '3🩸 → ⚔️ | 2🩸 → ⚔️↔️',
+    },
 ];
 
 // Helper pour obtenir les sorts d'un dieu

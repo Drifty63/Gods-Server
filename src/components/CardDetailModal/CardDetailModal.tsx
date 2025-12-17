@@ -92,7 +92,6 @@ const getExplicitDescription = (card: SpellCard): string => {
                     'burn': 'Brûlure',
                     'stun': 'Étourdissement',
                     'lightning_mark': 'Marque Foudre',
-                    'regeneration': 'Régénération',
                     'provocation': 'Provocation',
                     'confusion': 'Confusion',
                     'weakness': 'Faiblesse'

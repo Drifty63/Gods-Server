@@ -1,20 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { GodCard } from '@/types/cards';
-import { ALL_GODS } from '@/data/gods';
+import { ALL_GODS, getVisibleGods, getGodById } from '@/data/gods';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
 import styles from './TeamSelection.module.css';
 
 interface TeamSelectionProps {
     onTeamsSelected: (playerTeam: string[], aiTeam: string[]) => void;
+    isCreator?: boolean;
 }
 
-export default function TeamSelection({ onTeamsSelected }: TeamSelectionProps) {
+export default function TeamSelection({ onTeamsSelected, isCreator = false }: TeamSelectionProps) {
     const [playerTeam, setPlayerTeam] = useState<string[]>([]);
     const [aiTeam, setAiTeam] = useState<string[]>([]);
     const [phase, setPhase] = useState<'player' | 'ai'>('player');
+
+    // Filtrer les dieux selon le statut créateur
+    const visibleGods = useMemo(() => getVisibleGods(isCreator), [isCreator]);
 
     const maxTeamSize = 4;
 
@@ -45,7 +49,7 @@ export default function TeamSelection({ onTeamsSelected }: TeamSelectionProps) {
     };
 
     const handleRandomAiTeam = () => {
-        const availableGods = ALL_GODS
+        const availableGods = visibleGods
             .filter(g => !playerTeam.includes(g.id))
             .map(g => g.id);
 
@@ -142,7 +146,7 @@ export default function TeamSelection({ onTeamsSelected }: TeamSelectionProps) {
             </p>
 
             <div className={styles.godsGrid}>
-                {ALL_GODS.map(god => renderGodCard(god))}
+                {visibleGods.map(god => renderGodCard(god))}
             </div>
 
             <div className={styles.selectedTeams}>
@@ -153,7 +157,7 @@ export default function TeamSelection({ onTeamsSelected }: TeamSelectionProps) {
                             <span className={styles.emptyTeam}>Aucun dieu sélectionné</span>
                         ) : (
                             playerTeam.map(id => {
-                                const god = ALL_GODS.find(g => g.id === id);
+                                const god = getGodById(id);
                                 return god ? (
                                     <span key={id} className={styles.teamGod}>
                                         {ELEMENT_SYMBOLS[god.element]} {god.name.split(',')[0]}
@@ -170,7 +174,7 @@ export default function TeamSelection({ onTeamsSelected }: TeamSelectionProps) {
                             <span className={styles.emptyTeam}>Aucun dieu sélectionné</span>
                         ) : (
                             aiTeam.map(id => {
-                                const god = ALL_GODS.find(g => g.id === id);
+                                const god = getGodById(id);
                                 return god ? (
                                     <span key={id} className={styles.teamGod}>
                                         {ELEMENT_SYMBOLS[god.element]} {god.name.split(',')[0]}
