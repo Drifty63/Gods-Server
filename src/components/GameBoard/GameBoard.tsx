@@ -17,7 +17,7 @@ const ALL_ELEMENTS: Element[] = ['fire', 'water', 'earth', 'air', 'lightning', '
 
 interface GameBoardProps {
     onAction?: (action: {
-        type: 'play_card' | 'discard' | 'end_turn';
+        type: 'play_card' | 'discard' | 'end_turn' | 'game_over';
         payload: Record<string, unknown>;
     }) => void;
 }
@@ -71,6 +71,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         // Cartes cachées (Nyx)
         revealBlindCard,
         discardBlindCard,
+        surrender,
     } = useGameStore();
 
     // Helper local pour la détection fiable du choix de foudre
@@ -788,6 +789,26 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 Fin ➡️
                             </button>
                         )}
+
+                        {/* Bouton Abandonner (disponible tout le temps si la partie est en cours) */}
+                        {gameState.status === 'playing' && (
+                            <button
+                                className={styles.surrenderButton}
+                                onClick={() => {
+                                    if (window.confirm('Êtes-vous sûr de vouloir abandonner la partie ? 🏳️')) {
+                                        surrender();
+                                        // Pour le mode en ligne, envoyer l'événement game_over
+                                        if (onAction) {
+                                            const opponentId = gameState.players.find(p => p.id !== playerId)?.id;
+                                            onAction({ type: 'game_over', payload: { winnerId: opponentId } });
+                                        }
+                                    }
+                                }}
+                                title="Abandonner la partie"
+                            >
+                                🏳️
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -1083,17 +1104,19 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             />
 
             {/* Toast de notification */}
-            {toast && (
-                <div className={`${styles.toast} ${styles[`toast${toast.type.charAt(0).toUpperCase() + toast.type.slice(1)}`]}`}>
-                    <span className={styles.toastIcon}>
-                        {toast.type === 'warning' && '⚠️'}
-                        {toast.type === 'error' && '❌'}
-                        {toast.type === 'info' && 'ℹ️'}
-                    </span>
-                    <span className={styles.toastMessage}>{toast.message}</span>
-                    <button className={styles.toastClose} onClick={() => setToast(null)}>✕</button>
-                </div>
-            )}
+            {
+                toast && (
+                    <div className={`${styles.toast} ${styles[`toast${toast.type.charAt(0).toUpperCase() + toast.type.slice(1)}`]}`}>
+                        <span className={styles.toastIcon}>
+                            {toast.type === 'warning' && '⚠️'}
+                            {toast.type === 'error' && '❌'}
+                            {toast.type === 'info' && 'ℹ️'}
+                        </span>
+                        <span className={styles.toastMessage}>{toast.message}</span>
+                        <button className={styles.toastClose} onClick={() => setToast(null)}>✕</button>
+                    </div>
+                )
+            }
         </div >
     );
 }

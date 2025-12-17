@@ -427,6 +427,26 @@
     transform: scale(1.02);
 }
 
+.surrenderButton {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(145deg, #444, #222);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.surrenderButton:hover {
+    background: linear-gradient(145deg, #555, #333);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
 /* ================================
    CHRONOMÈTRE DE TOUR
    ================================ */

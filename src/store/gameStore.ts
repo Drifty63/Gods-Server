@@ -97,6 +97,7 @@ interface GameStore {
     // Actions pour cartes cachées (Nyx)
     revealBlindCard: (cardId: string) => SpellCard | null;  // Révèle une carte cachée et retourne la carte
     discardBlindCard: (cardId: string, loseEnergy: boolean) => void;  // Défausse une carte cachée
+    surrender: () => void; // Abandonner la partie
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -540,6 +541,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             set({ gameState: engine.getState() });
         }
+    },
+
+    surrender: () => {
+        const { engine, playerId } = get();
+        if (!engine) return;
+
+        const state = engine.getState();
+        state.status = 'finished';
+        state.winnerId = state.players.find(p => p.id !== playerId)?.id; // L'autre gagne
+
+        set({ gameState: { ...state } });
     },
 
     setLightningAction: (action) => {
