@@ -11,7 +11,7 @@ import HealDistributionModal from '@/components/HealDistributionModal/HealDistri
 import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { recordVictory, recordDefeat } from '@/services/firebase';
+import { recordVictory, recordDefeat, recordGodsPlayed } from '@/services/firebase';
 import styles from './GameBoard.module.css';
 
 // Liste des éléments disponibles pour la sélection
@@ -345,6 +345,10 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
             const isRanked = gameMode === 'ranked';
 
+            // Récupérer les dieux du joueur pour les statistiques
+            const playerData = gameState.players.find(p => p.id === playerId);
+            const playerGodIds = playerData?.gods.map(g => g.card.id) || [];
+
             // Enregistrer le résultat
             const recordResult = async () => {
                 try {
@@ -355,6 +359,13 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         await recordDefeat(user.uid, isRanked);
                         console.log(`📝 Défaite enregistrée (${isRanked ? 'classée' : 'amicale'}), quêtes mises à jour`);
                     }
+
+                    // Enregistrer les dieux joués
+                    if (playerGodIds.length > 0) {
+                        await recordGodsPlayed(user.uid, playerGodIds);
+                        console.log(`🎭 Dieux enregistrés: ${playerGodIds.join(', ')}`);
+                    }
+
                     // Rafraîchir le profil pour mettre à jour l'affichage
                     await refreshProfile();
                 } catch (error) {

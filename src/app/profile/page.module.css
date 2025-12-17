@@ -199,6 +199,26 @@
     margin-top: 4px;
 }
 
+/* Dieu le plus joué */
+.mostPlayedGod {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.godImage {
+    border-radius: 8px;
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    object-fit: cover;
+}
+
+.godPlayCount {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold-divine);
+}
+
 /* Favorite God */
 .favoriteGod {
     display: flex;

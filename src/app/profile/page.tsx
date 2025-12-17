@@ -3,7 +3,10 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
+import { getMostPlayedGod } from '@/services/firebase';
+import { ALL_GODS } from '@/data/gods';
 import styles from './page.module.css';
 
 // Liste des avatars disponibles
@@ -104,6 +107,10 @@ export default function ProfilePage() {
         ? ((profile.stats.victories / profile.stats.totalGames) * 100).toFixed(1)
         : '0.0';
 
+    // Dieu le plus joué
+    const mostPlayed = getMostPlayedGod(profile.godPlayCounts);
+    const mostPlayedGod = mostPlayed ? ALL_GODS.find(g => g.id === mostPlayed.godId) : null;
+
     return (
         <main className={styles.main}>
             {/* Header */}
@@ -174,8 +181,26 @@ export default function ProfilePage() {
                             <span className={styles.statLabel}>Meilleure série</span>
                         </div>
                         <div className={styles.statCard}>
-                            <span className={styles.statValue}>{profile.stats.totalGames}</span>
-                            <span className={styles.statLabel}>Total parties</span>
+                            {mostPlayedGod ? (
+                                <>
+                                    <div className={styles.mostPlayedGod}>
+                                        <Image
+                                            src={mostPlayedGod.imageUrl}
+                                            alt={mostPlayedGod.name}
+                                            width={40}
+                                            height={40}
+                                            className={styles.godImage}
+                                        />
+                                        <span className={styles.godPlayCount}>{mostPlayed?.count}×</span>
+                                    </div>
+                                    <span className={styles.statLabel}>Dieu favori</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className={styles.statValue}>-</span>
+                                    <span className={styles.statLabel}>Dieu favori</span>
+                                </>
+                            )}
                         </div>
                     </div>
                 </section>

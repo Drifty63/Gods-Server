@@ -49,6 +49,7 @@ export interface UserProfile {
     needsSetup?: boolean; // True si le profil nécessite une configuration initiale
     isCreator?: boolean; // True si l'utilisateur est un créateur (accès aux dieux cachés)
     dailyQuests?: DailyQuestsData; // Quêtes journalières
+    godPlayCounts?: Record<string, number>; // Compteur de parties par dieu
     createdAt: Date;
     lastLoginAt: Date;
 }
@@ -464,6 +465,46 @@ export async function claimAllQuestRewards(uid: string): Promise<{ success: bool
     });
 
     return { success: true, totalReward };
+}
+
+// =====================================
+// STATISTIQUES DIEUX
+// =====================================
+
+// Enregistrer les dieux joués dans une partie
+export async function recordGodsPlayed(uid: string, godIds: string[]): Promise<void> {
+    const profile = await getUserProfile(uid);
+    if (!profile) return;
+
+    const currentCounts = profile.godPlayCounts || {};
+
+    // Incrémenter le compteur pour chaque dieu
+    for (const godId of godIds) {
+        currentCounts[godId] = (currentCounts[godId] || 0) + 1;
+    }
+
+    await updateDoc(doc(db, 'users', uid), {
+        godPlayCounts: currentCounts,
+    });
+}
+
+// Obtenir le dieu le plus joué
+export function getMostPlayedGod(godPlayCounts: Record<string, number> | undefined): { godId: string; count: number } | null {
+    if (!godPlayCounts || Object.keys(godPlayCounts).length === 0) {
+        return null;
+    }
+
+    let maxGodId = '';
+    let maxCount = 0;
+
+    for (const [godId, count] of Object.entries(godPlayCounts)) {
+        if (count > maxCount) {
+            maxCount = count;
+            maxGodId = godId;
+        }
+    }
+
+    return maxGodId ? { godId: maxGodId, count: maxCount } : null;
 }
 
 // Exports
