@@ -151,6 +151,23 @@ export default function GlobalUI() {
         localStorage.setItem('battleVolume', String(battleVolume));
     }, [battleVolume]);
 
+    // Gérer la transition menu/combat selon la page
+    const isInGame = pathname === '/game';
+
+    useEffect(() => {
+        if (isInGame) {
+            // On est en combat : arrêter la musique du menu
+            if (menuAudioRef.current) {
+                menuAudioRef.current.pause();
+            }
+        } else {
+            // On n'est pas en combat : reprendre la musique du menu si pas mute
+            if (menuAudioRef.current && hasInteracted && !isMuted) {
+                menuAudioRef.current.play().catch(console.log);
+            }
+        }
+    }, [isInGame, hasInteracted, isMuted]);
+
     const handleOptionsClick = () => {
         setShowOptionsModal(true);
     };
