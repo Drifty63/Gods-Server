@@ -72,9 +72,8 @@ export interface DailyQuestsData {
 // Définition des quêtes journalières par défaut
 const DEFAULT_DAILY_QUESTS: Omit<DailyQuest, 'progress' | 'claimed'>[] = [
     { id: 'play_1', name: 'Jouer 1 partie', description: 'Participez à une partie', target: 1, reward: 50 },
-    { id: 'play_3', name: 'Jouer 3 parties', description: 'Participez à 3 parties', target: 3, reward: 100 },
-    { id: 'win_1', name: 'Gagner 1 partie', description: 'Remportez une victoire', target: 1, reward: 75 },
-    { id: 'win_3', name: 'Gagner 3 parties', description: 'Remportez 3 victoires', target: 3, reward: 150 },
+    { id: 'play_3', name: 'Jouer 3 parties', description: 'Participez à 3 parties', target: 3, reward: 50 },
+    { id: 'win_3', name: 'Gagner 3 parties', description: 'Remportez 3 victoires', target: 3, reward: 50 },
 ];
 
 // Créer un profil utilisateur par défaut
@@ -386,7 +385,7 @@ export async function updateQuestProgress(uid: string, type: 'play' | 'win'): Pr
         if (type === 'play' && (quest.id === 'play_1' || quest.id === 'play_3')) {
             return { ...quest, progress: Math.min(quest.progress + 1, quest.target) };
         }
-        if (type === 'win' && (quest.id === 'win_1' || quest.id === 'win_3')) {
+        if (type === 'win' && quest.id === 'win_3') {
             return { ...quest, progress: Math.min(quest.progress + 1, quest.target) };
         }
         return quest;
