@@ -255,7 +255,7 @@ function HomeContent() {
               <Link href="/game" className={styles.playOption} onClick={closePlayModal}>
                 <span className={styles.optionIcon}>🤖</span>
                 <div className={styles.optionInfo}>
-                  <h3>Contre l'IA</h3>
+                  <h3>Entrainement</h3>
                   <p>Entraînez-vous contre l'intelligence artificielle</p>
                 </div>
               </Link>
