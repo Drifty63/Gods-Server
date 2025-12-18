@@ -9,7 +9,7 @@ import {
     StatusEffect,
     GodCard
 } from '@/types/cards';
-import { calculateDamage, getWeakness } from './ElementSystem';
+import { calculateDamage, calculateDamageWithDualWeakness, getWeakness } from './ElementSystem';
 
 // Fonction utilitaire pour générer un UUID compatible HTTP (non sécurisé)
 const generateUUID = () => {
@@ -456,16 +456,16 @@ export class GameEngine {
                 for (const target of targets) {
                     // Vérifier si la cible a l'immunité aux faiblesses
                     const hasWeaknessImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
-                    // Utiliser la faiblesse temporaire si elle existe, sinon la faiblesse naturelle
-                    // Si immunité, passer undefined pour éviter tout bonus de faiblesse
-                    const weakness = hasWeaknessImmunity
-                        ? undefined  // Pas de faiblesse = pas de bonus (multiplicateur 1)
-                        : (target.temporaryWeakness || target.card.weakness);
-                    const { damage, isWeakness } = calculateDamage(
-                        effect.value || 0,
-                        card.element,
-                        weakness as any  // undefined sera différent de card.element donc pas de bonus
-                    );
+                    // Calculer les dégâts en prenant en compte les DEUX faiblesses (innée ET temporaire)
+                    // Si immunité, passer undefined pour les deux
+                    const { damage, isWeakness } = hasWeaknessImmunity
+                        ? { damage: effect.value || 0, isWeakness: false }
+                        : calculateDamageWithDualWeakness(
+                            effect.value || 0,
+                            card.element,
+                            target.card.weakness,
+                            target.temporaryWeakness
+                        );
 
                     let damageToInflict = damage;
 
@@ -712,11 +712,10 @@ export class GameEngine {
                     if (target) {
                         // Vérifier si le dieu a l'immunité aux faiblesses
                         const hasWeaknessImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
-                        const weakness = hasWeaknessImmunity
-                            ? undefined  // Pas de faiblesse = pas de bonus
-                            : (target.temporaryWeakness || target.card.weakness);
-                        // Calculer les dégâts réels (base 3 pour Syphon d'âme)
-                        const { damage } = calculateDamage(3, card.element, weakness as any);
+                        // Calculer les dégâts réels avec les deux faiblesses
+                        const { damage } = hasWeaknessImmunity
+                            ? { damage: 3 }
+                            : calculateDamageWithDualWeakness(3, card.element, target.card.weakness, target.temporaryWeakness);
 
                         // 1. Retirer le poison (min entre heal et stacks de poison)
                         const poisonIndex = castingGod.statusEffects.findIndex(s => s.type === 'poison');
@@ -756,9 +755,10 @@ export class GameEngine {
                     const lostHealth = castingGod.card.maxHealth - castingGod.currentHealth;
                     const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
                     if (target && lostHealth > 0) {
-                        // Appliquer le bonus de faiblesse (+2x dégâts si l'élément est efficace)
-                        const targetWeakness = target.temporaryWeakness || target.card.weakness;
-                        const { damage: finalDamage } = calculateDamage(lostHealth, card.element, targetWeakness);
+                        // Appliquer le bonus de faiblesse avec les deux faiblesses
+                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                            lostHealth, card.element, target.card.weakness, target.temporaryWeakness
+                        );
 
                         // Gestion du bouclier
                         let damageToInflict = finalDamage;
@@ -840,12 +840,12 @@ export class GameEngine {
                         : (lightningStacks > 0 ? 'remove' : 'apply');
 
                     if (action === 'remove' && lightningStacks > 0) {
-                        // Calcul des dégâts bonus avec prise en compte de la faiblesse (élément Lightning)
-                        const defenderWeakness = target.temporaryWeakness || target.card.weakness;
-                        const { damage: bonusDamage } = calculateDamage(
+                        // Calcul des dégâts bonus avec prise en compte des deux faiblesses
+                        const { damage: bonusDamage } = calculateDamageWithDualWeakness(
                             lightningStacks * 2,
                             'lightning',
-                            defenderWeakness
+                            target.card.weakness,
+                            target.temporaryWeakness
                         );
 
                         // Gestion bouclier et dégâts
@@ -888,11 +888,11 @@ export class GameEngine {
                             : (lightningStacks > 0 ? 'remove' : 'apply');
 
                         if (action === 'remove' && lightningStacks > 0) {
-                            const defenderWeakness = god.temporaryWeakness || god.card.weakness;
-                            const { damage: bonusDamage } = calculateDamage(
+                            const { damage: bonusDamage } = calculateDamageWithDualWeakness(
                                 lightningStacks * 2,
                                 'lightning',
-                                defenderWeakness
+                                god.card.weakness,
+                                god.temporaryWeakness
                             );
 
                             let damageToInflict = bonusDamage;
@@ -931,11 +931,11 @@ export class GameEngine {
             case 'conductive_lightning':
                 // Inflige 1 dégât et applique 1 marque de foudre à chaque cible
                 for (const target of targets) {
-                    const defenderWeakness = target.temporaryWeakness || target.card.weakness;
-                    const { damage: finalDamage } = calculateDamage(
+                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
                         1,
                         card.element,
-                        defenderWeakness
+                        target.card.weakness,
+                        target.temporaryWeakness
                     );
 
                     let damageToInflict = finalDamage;
@@ -1015,8 +1015,9 @@ export class GameEngine {
                     const lostHealth = castingGod.card.maxHealth - castingGod.currentHealth;
                     if (lostHealth > 0) {
                         for (const target of targets) {
-                            const weakness = target.temporaryWeakness || target.card.weakness;
-                            const { damage } = calculateDamage(lostHealth, card.element, weakness);
+                            const { damage } = calculateDamageWithDualWeakness(
+                                lostHealth, card.element, target.card.weakness, target.temporaryWeakness
+                            );
 
                             let damageToInflict = damage;
                             const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
@@ -1179,11 +1180,11 @@ export class GameEngine {
 
                         if (baseDamage > 0) {
                             // Appliquer les dégâts avec le système d'éléments
-                            // La faiblesse est soit temporaire (appliquée par un autre sort) soit naturelle
-                            const defenderWeakness = targetGod.temporaryWeakness ||
-                                getWeakness(targetGod.card.element);
-
-                            const damageResult = calculateDamage(baseDamage, card.element, defenderWeakness);
+                            // La faiblesse est soit temporaire soit naturelle (obtenue de l'élément)
+                            const innateWeakness = getWeakness(targetGod.card.element);
+                            const damageResult = calculateDamageWithDualWeakness(
+                                baseDamage, card.element, innateWeakness, targetGod.temporaryWeakness
+                            );
 
                             targetGod.currentHealth -= damageResult.damage;
                             if (targetGod.currentHealth <= 0) {

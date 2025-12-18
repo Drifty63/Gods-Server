@@ -129,3 +129,25 @@ export function calculateDamage(
         isWeakness,
     };
 }
+
+/**
+ * Calcule les dégâts avec prise en compte de la faiblesse innée ET temporaire
+ * Le bonus de faiblesse s'applique si l'attaque correspond à l'une OU l'autre
+ */
+export function calculateDamageWithDualWeakness(
+    baseDamage: number,
+    attackElement: Element,
+    innateWeakness: Element | undefined,
+    temporaryWeakness: Element | undefined
+): { damage: number; isWeakness: boolean } {
+    // Vérifie si l'attaque correspond à l'une des deux faiblesses
+    const matchesInnate = innateWeakness && attackElement === innateWeakness;
+    const matchesTemporary = temporaryWeakness && attackElement === temporaryWeakness;
+    const isWeakness = !!(matchesInnate || matchesTemporary);
+    const multiplier = isWeakness ? 2 : 1;
+
+    return {
+        damage: baseDamage * multiplier,
+        isWeakness,
+    };
+}
