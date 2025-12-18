@@ -57,6 +57,7 @@ export default function DeckPage() {
     const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
     const [isSeason1Open, setIsSeason1Open] = useState(true);
     const [showGodPickerModal, setShowGodPickerModal] = useState(false);
+    const [showBuyModal, setShowBuyModal] = useState<{ god: God } | null>(null);
 
     // Dieux possédés et visibles
     const godsOwned = profile?.collection.godsOwned ?? [];
@@ -350,7 +351,13 @@ export default function DeckPage() {
                                             {/* 1. Carte du Dieu */}
                                             <div
                                                 className={`${styles.cardWrapper} ${styles.godCardEntry}`}
-                                                onClick={() => openGodCard(god)}
+                                                onClick={() => {
+                                                    if (isOwned) {
+                                                        openGodCard(god);
+                                                    } else {
+                                                        setShowBuyModal({ god });
+                                                    }
+                                                }}
                                             >
                                                 <Image
                                                     src={god.carouselImage || god.imageUrl}
@@ -442,6 +449,35 @@ export default function DeckPage() {
                             {selectedCard.type === 'god' && selectedCard.god && (
                                 <span className={styles.cardModalElement}>{getElementSymbol(selectedCard.god.element)}</span>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal pour acheter un dieu non possédé */}
+            {showBuyModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowBuyModal(null)}>
+                    <div className={styles.buyModal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.modalClose} onClick={() => setShowBuyModal(null)}>✕</button>
+                        <div className={styles.buyModalContent}>
+                            <Image
+                                src={showBuyModal.god.imageUrl}
+                                alt={showBuyModal.god.name}
+                                width={100}
+                                height={100}
+                                className={styles.buyModalImage}
+                            />
+                            <h3 className={styles.buyModalTitle}>{showBuyModal.god.name}</h3>
+                            <p className={styles.buyModalText}>
+                                Vous ne possédez pas encore ce dieu.
+                            </p>
+                            <Link
+                                href="/shop#section-dieux"
+                                className={styles.buyModalButton}
+                                onClick={() => setShowBuyModal(null)}
+                            >
+                                🛒 Aller à la boutique
+                            </Link>
                         </div>
                     </div>
                 </div>
