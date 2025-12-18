@@ -311,7 +311,7 @@ export default function ShopPage() {
                                                 <div className={styles.coffretOwnedOverlay}>✓</div>
                                             )}
                                             {!isFullyOwned && ownedCount > 0 && (
-                                                <div className={styles.coffretPartialOverlay}>{ownedCount}/4</div>
+                                                <div className={styles.coffretPartialOverlay}>{ownedCount}/4 possédés</div>
                                             )}
                                         </div>
                                     )}
