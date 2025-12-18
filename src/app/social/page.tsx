@@ -49,18 +49,18 @@ export default function SocialPage() {
                     <div className={styles.statsGrid}>
                         <div className={styles.statCard}>
                             <span className={styles.statIcon}>⚔️</span>
-                            <span className={styles.statValue}>{profile?.stats?.gamesPlayed || 0}</span>
+                            <span className={styles.statValue}>{profile?.stats?.totalGames || 0}</span>
                             <span className={styles.statLabel}>Parties jouées</span>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statIcon}>🏅</span>
-                            <span className={styles.statValue}>{profile?.stats?.gamesWon || 0}</span>
+                            <span className={styles.statValue}>{profile?.stats?.victories || 0}</span>
                             <span className={styles.statLabel}>Victoires</span>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statIcon}>📊</span>
-                            <span className={styles.statValue}>{profile?.eloRating || 1000}</span>
-                            <span className={styles.statLabel}>Elo</span>
+                            <span className={styles.statValue}>{profile?.level || 1}</span>
+                            <span className={styles.statLabel}>Niveau</span>
                         </div>
                     </div>
                 </div>
