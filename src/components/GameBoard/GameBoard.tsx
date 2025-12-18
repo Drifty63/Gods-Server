@@ -417,8 +417,15 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const autoEndTurnMultiplayer = () => {
         if (!isSoloMode) {
             setTimeout(() => {
-                endTurn();
-                onAction?.({ type: 'end_turn', payload: {} });
+                // Vérifier si c'est toujours le tour du joueur
+                // (le tour peut avoir changé si un dieu est mort du poison)
+                const currentState = useGameStore.getState().gameState;
+                if (currentState && currentState.currentPlayerId === playerId && currentState.status === 'playing') {
+                    endTurn();
+                    onAction?.({ type: 'end_turn', payload: {} });
+                }
+                // Si le tour a déjà changé (mort du poison), ne rien faire
+                // L'état a déjà été synchronisé via play_card
             }, 500);
         }
     };
