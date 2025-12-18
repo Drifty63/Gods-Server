@@ -163,7 +163,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const aiPlayer = soloMode ? new AIPlayer('medium') : null;
 
         set({
-            gameState: engine.getState(),
+            gameState: cloneGameState(engine.getState()),
             engine,
             aiPlayer,
             selectedCard: null,
@@ -346,7 +346,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // Mettre à jour l'état et fermer le modal
         set({
-            gameState: engine.getState(),
+            gameState: cloneGameState(engine.getState()),
             isSelectingCards: false,
             cardSelectionSource: null,
             cardSelectionCount: 0,
@@ -431,7 +431,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // Mettre à jour l'état et fermer le modal
         set({
-            gameState: engine.getState(),
+            gameState: cloneGameState(engine.getState()),
             isDistributingHeal: false,
             healDistributionTotal: 0,
         });
@@ -490,7 +490,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // Mettre à jour l'état et fermer le modal
         set({
-            gameState: engine.getState(),
+            gameState: cloneGameState(engine.getState()),
             isSelectingEnemyCards: false,
             enemyCardSelectionCount: 0,
             enemyCardSelectionTitle: '',
@@ -517,7 +517,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const card = player.hand.find(c => c.id === cardId);
         if (card && card.isHiddenFromOwner) {
             card.isHiddenFromOwner = false;
-            set({ gameState: engine.getState() });
+            set({ gameState: cloneGameState(engine.getState()) });
             return card;
         }
         return card || null;
@@ -545,7 +545,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             delete discardedCard.revealedToPlayerId;
             player.discard.push(discardedCard);
 
-            set({ gameState: engine.getState() });
+            set({ gameState: cloneGameState(engine.getState()) });
         }
     },
 
@@ -602,7 +602,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         if (result.success) {
             set({
-                gameState: engine.getState(),
+                gameState: cloneGameState(engine.getState()),
                 selectedCard: null,
                 selectedTargetGod: null,
                 selectedTargetGods: [],
@@ -642,7 +642,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         if (result.success) {
             set({
-                gameState: engine.getState(),
+                gameState: cloneGameState(engine.getState()),
                 selectedCard: null,
             });
         }
@@ -661,7 +661,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         if (result.success) {
             set({
-                gameState: engine.getState(),
+                gameState: cloneGameState(engine.getState()),
                 selectedCard: null,
                 selectedTargetGod: null,
                 isSelectingTarget: false,
@@ -693,7 +693,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         aiPlayer.playTurn(engine);
 
         set({
-            gameState: engine.getState(),
+            gameState: cloneGameState(engine.getState()),
             isAIPlaying: false,
         });
     },
