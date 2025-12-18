@@ -411,10 +411,10 @@ export default function ShopPage() {
                                     style={{ background: getGodBgColor(god.id) }}
                                     onClick={() => setSelectedGod(god)}
                                 >
-                                    {owned && (
-                                        <div className={styles.ownedBadge}>✓ Possédé</div>
-                                    )}
                                     <div className={styles.godImageWrapper}>
+                                        {owned && (
+                                            <div className={styles.godOwnedBadge}>✓</div>
+                                        )}
                                         <Image
                                             src={god.imageUrl}
                                             alt={god.name}
@@ -435,7 +435,7 @@ export default function ShopPage() {
                                         </div>
                                     )}
                                     <button className={`${styles.viewButtonMini} ${owned ? styles.disabledButton : ''}`}>
-                                        {owned ? 'Posséd' : 'Voir'}
+                                        {owned ? 'Possédé' : 'Voir'}
                                     </button>
                                 </div>
                             );

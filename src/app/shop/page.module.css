@@ -699,6 +699,7 @@
 }
 
 .coffretCard {
+    position: relative;
     padding: 20px;
     background: rgba(0, 0, 0, 0.4);
     border: 2px solid rgba(212, 175, 55, 0.2);
@@ -711,6 +712,51 @@
 .coffretCard:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.coffretCard.owned {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.coffretCard.owned:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Badge "Possédé" sur coffret */
+.ownedBadge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 8px;
+    z-index: 10;
+}
+
+/* Badge "X/4 possédés" sur coffret */
+.partialBadge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    background: linear-gradient(145deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 8px;
+    z-index: 10;
+}
+
+/* Bouton désactivé */
+.disabledButton {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .coffretName {
@@ -969,13 +1015,33 @@
 }
 
 .godImageWrapper {
+    position: relative;
     width: 80px;
     height: 80px;
     margin: 0 auto 8px;
     border-radius: 50%;
     background: rgba(212, 175, 55, 0.1);
-    overflow: hidden;
+    overflow: visible;
     flex-shrink: 0;
+}
+
+/* Badge de possession sur l'image du dieu */
+.godOwnedBadge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border: 2px solid rgba(0, 0, 0, 0.3);
 }
 
 .godImage {
