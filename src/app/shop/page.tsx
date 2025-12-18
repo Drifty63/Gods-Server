@@ -295,12 +295,6 @@ export default function ShopPage() {
                                     }}
                                     onClick={() => !isFullyOwned && setSelectedCoffret(coffret)}
                                 >
-                                    {isFullyOwned && (
-                                        <div className={styles.ownedBadge}>✓ Possédé</div>
-                                    )}
-                                    {!isFullyOwned && ownedCount > 0 && (
-                                        <div className={styles.partialBadge}>{ownedCount}/4 possédés</div>
-                                    )}
                                     <h3 className={styles.coffretName} style={{ color: coffret.color }}>
                                         {coffret.name}
                                     </h3>
@@ -313,6 +307,12 @@ export default function ShopPage() {
                                                 width={70}
                                                 height={70}
                                             />
+                                            {isFullyOwned && (
+                                                <div className={styles.coffretOwnedOverlay}>✓</div>
+                                            )}
+                                            {!isFullyOwned && ownedCount > 0 && (
+                                                <div className={styles.coffretPartialOverlay}>{ownedCount}/4</div>
+                                            )}
                                         </div>
                                     )}
                                     {/* 3 autres dieux - plus petits et alignés */}
