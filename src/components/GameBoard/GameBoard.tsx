@@ -191,6 +191,13 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const [toast, setToast] = useState<{ message: string; type: 'warning' | 'error' | 'info' } | null>(null);
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // État pour afficher la carte jouée au centre du terrain
+    const [displayedCard, setDisplayedCard] = useState<import('@/types/cards').SpellCard | null>(null);
+
+    // États pour les animations de dégâts/soins sur les dieux
+    const [healthChanges, setHealthChanges] = useState<Record<string, number>>({});
+    const previousHealthRef = useRef<Record<string, number>>({});
+
     // Musique de combat
     const battleAudioRef = useRef<HTMLAudioElement | null>(null);
     const [battleVolume, setBattleVolume] = useState(0.3);
@@ -320,6 +327,63 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
     }, [pendingCardForEnemySelection, startEnemyCardSelection]);
 
+    // Effet pour détecter les changements de HP et afficher les animations
+    useEffect(() => {
+        if (!gameState) return;
+
+        const allGods = [...gameState.players[0].gods, ...gameState.players[1].gods];
+        const newChanges: Record<string, number> = {};
+        let hasChanges = false;
+
+        allGods.forEach(god => {
+            const prevHealth = previousHealthRef.current[god.card.id];
+            if (prevHealth !== undefined && prevHealth !== god.currentHealth) {
+                const diff = god.currentHealth - prevHealth;
+                newChanges[god.card.id] = diff;
+                hasChanges = true;
+            }
+            // Mettre à jour la référence
+            previousHealthRef.current[god.card.id] = god.currentHealth;
+        });
+
+        if (hasChanges) {
+            setHealthChanges(newChanges);
+            // Clear les animations après 1.5 secondes
+            setTimeout(() => {
+                setHealthChanges({});
+            }, 1500);
+        }
+    }, [gameState]);
+
+    // Référence pour détecter les cartes jouées par l'adversaire
+    const opponentDiscardLengthRef = useRef<number>(0);
+
+    // Effet pour détecter quand l'adversaire joue une carte et l'afficher
+    useEffect(() => {
+        if (!gameState) return;
+
+        const currentOpponent = gameState.players.find(p => p.id !== playerId);
+        if (!currentOpponent) return;
+
+        const currentDiscardLength = currentOpponent.discard.length;
+        const prevDiscardLength = opponentDiscardLengthRef.current;
+
+        // Si la défausse a augmenté et que ce n'est pas notre tour
+        if (currentDiscardLength > prevDiscardLength && gameState.currentPlayerId === playerId) {
+            // L'adversaire a joué une carte (la défausse a augmenté pendant son tour)
+            // La dernière carte de la défausse est celle qui vient d'être jouée
+            const lastPlayedCard = currentOpponent.discard[currentOpponent.discard.length - 1];
+            if (lastPlayedCard && !displayedCard) {
+                setDisplayedCard(lastPlayedCard);
+                setTimeout(() => {
+                    setDisplayedCard(null);
+                }, 2000);
+            }
+        }
+
+        opponentDiscardLengthRef.current = currentDiscardLength;
+    }, [gameState, playerId, displayedCard]);
+
     // État pour éviter d'enregistrer les stats plusieurs fois
     const [gameResultRecorded, setGameResultRecorded] = useState(false);
 
@@ -430,6 +494,15 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
     };
 
+    // Fonction pour afficher la carte jouée au centre du terrain
+    const showPlayedCard = (card: import('@/types/cards').SpellCard) => {
+        setDisplayedCard(card);
+        // Cacher la carte après 2 secondes
+        setTimeout(() => {
+            setDisplayedCard(null);
+        }, 2000);
+    };
+
     // Wrapper pour playCard qui gère aussi la sélection de cartes et la distribution de soins
     const handlePlayCard = (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => {
         const card = player.hand.find(c => c.id === cardId);
@@ -437,6 +510,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const currentSelectedElement = selectedElement;
 
         if (card) {
+            // Afficher la carte jouée au centre du terrain
+            showPlayedCard(card);
+
             // Vérifier si la carte nécessite une sélection de cartes
             const selection = getCardSelectionRequired(card);
             if (selection) {
@@ -894,6 +970,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 isSelectable={isSelectingTarget && isValidTarget}
                                 isSelected={isTargetSelected(uniqueId)}
                                 isRequired={isSelectingTarget && isRequiredTarget && isMultiTarget}
+                                healthChange={healthChanges[god.card.id]}
                                 onClick={() => handleSingleTargetSelect(uniqueId)}
                             />
                         );
@@ -920,6 +997,15 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     </button>
                 </div>
             </div>
+
+            {/* Overlay de la carte jouée au centre du terrain */}
+            {displayedCard && (
+                <div className={styles.playedCardOverlay}>
+                    <div className={styles.playedCardContainer}>
+                        <SpellCard card={displayedCard} canPlay={false} />
+                    </div>
+                </div>
+            )}
 
             {/* Zone centrale - Informations de jeu */}
             <div className={styles.centerZone}>
@@ -1127,6 +1213,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 god={god}
                                 isSelectable={isSelectingTarget && isValidAllyTarget}
                                 isSelected={isTargetSelected(uniqueId)}
+                                healthChange={healthChanges[god.card.id]}
                                 onClick={() => handleSingleTargetSelect(uniqueId)}
                             />
                         );

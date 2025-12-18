@@ -11,6 +11,7 @@ interface GodCardProps {
     isSelectable?: boolean;
     isSelected?: boolean;
     isRequired?: boolean; // Cible obligatoire (provocateur)
+    healthChange?: number; // Animation de dégâts/soins
     onClick?: () => void;
 }
 
@@ -20,6 +21,7 @@ export default function GodCard({
     isSelectable = false,
     isSelected = false,
     isRequired = false,
+    healthChange,
     onClick
 }: GodCardProps) {
     const { card, currentHealth, statusEffects, isDead } = god;
@@ -64,6 +66,13 @@ export default function GodCard({
                                 <span>{status.stacks}</span>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Animation de dégâts/soins */}
+                {healthChange !== undefined && healthChange !== 0 && (
+                    <div className={`${styles.healthChangeAnimation} ${healthChange > 0 ? styles.heal : styles.damage}`}>
+                        {healthChange > 0 ? `+${healthChange}` : healthChange}
                     </div>
                 )}
 
@@ -124,3 +133,4 @@ function getStatusIcon(status: string): string {
         default: return '✨';
     }
 }
+
