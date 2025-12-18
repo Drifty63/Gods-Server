@@ -1630,10 +1630,10 @@
     justify-content: center;
     z-index: 10000;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .playedCardContainer {
-    transform: scale(2.2);
-    filter: drop-shadow(0 0 50px rgba(212, 175, 55, 0.9));
+    transform: scale(1.7);
+    filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.8));
 }

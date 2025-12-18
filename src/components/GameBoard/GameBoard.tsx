@@ -358,11 +358,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         });
 
         if (hasChanges) {
-            setHealthChanges(prev => ({ ...prev, ...newChanges }));
-            // Clear les animations après 2.5 secondes
+            // Retarder l'affichage des animations de 1.5 secondes pour laisser le temps de voir la carte
             setTimeout(() => {
-                setHealthChanges({});
-            }, 2500);
+                setHealthChanges(prev => ({ ...prev, ...newChanges }));
+                // Clear les animations après 2.5 secondes supplémentaires
+                setTimeout(() => {
+                    setHealthChanges({});
+                }, 2500);
+            }, 1500);
         }
     }, [gameState]);
 
