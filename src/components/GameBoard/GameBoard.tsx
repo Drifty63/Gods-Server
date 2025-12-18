@@ -1016,7 +1016,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             {displayedCard && (
                 <div className={styles.playedCardOverlay}>
                     <div className={styles.playedCardContainer}>
-                        <SpellCard card={displayedCard} canPlay={false} />
+                        <SpellCard card={displayedCard} canPlay={true} />
                     </div>
                 </div>
             )}
