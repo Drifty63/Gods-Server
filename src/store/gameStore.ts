@@ -673,7 +673,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 // Jouer le tour de l'IA après un délai
                 setTimeout(() => {
                     get().playAITurn();
-                }, 1500);
+                }, 2500);
             }
         }
 
@@ -689,28 +689,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         set({ isAIPlaying: true });
 
-        // L'IA joue son tour (sans fin de tour auto maintenant)
-        const actions = aiPlayer.playTurn(engine);
-
-        // Mettre à jour l'état immédiatement pour montrer les actions (ex: carte jouée)
-        set({
-            gameState: cloneGameState(engine.getState()),
-        });
-
-        // Déterminer le délai avant de finir le tour
-        const playedCardAction = actions.find(a => a.type === 'play_card');
-        const delay = playedCardAction ? 4500 : 1000;
-
+        // Petit délai de "réflexion" avant que l'IA ne joue
         setTimeout(() => {
-            // Finir le tour de l'IA manuellement sur l'engine
-            const aiId = engine.getState().currentPlayerId;
-            engine.executeAction({ type: 'end_turn', playerId: aiId });
+            // L'IA joue son tour (sans fin de tour auto maintenant)
+            const actions = aiPlayer.playTurn(engine);
 
+            // Mettre à jour l'état immédiatement pour montrer les actions (ex: carte jouée)
             set({
                 gameState: cloneGameState(engine.getState()),
-                isAIPlaying: false,
             });
-        }, delay);
+
+            // Déterminer le délai avant de finir le tour
+            const playedCardAction = actions.find(a => a.type === 'play_card');
+            const delay = playedCardAction ? 4500 : 1000;
+
+            setTimeout(() => {
+                // Finir le tour de l'IA manuellement sur l'engine
+                const aiId = engine.getState().currentPlayerId;
+                engine.executeAction({ type: 'end_turn', playerId: aiId });
+
+                set({
+                    gameState: cloneGameState(engine.getState()),
+                    isAIPlaying: false,
+                });
+            }, delay);
+        }, 1200);
     },
 
     resetGame: () => {

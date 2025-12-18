@@ -193,6 +193,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     // État pour afficher la carte jouée au centre du terrain
     const [displayedCard, setDisplayedCard] = useState<import('@/types/cards').SpellCard | null>(null);
+    const [pendingCardForOverlay, setPendingCardForOverlay] = useState<import('@/types/cards').SpellCard | null>(null);
 
     // États pour les animations de dégâts/soins sur les dieux
     const [healthChanges, setHealthChanges] = useState<Record<string, number>>({});
@@ -382,10 +383,11 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const currentDiscardLength = currentOpponent.discard.length;
         const prevDiscardLength = opponentDiscardLengthRef.current;
 
-        // Si la défausse a augmenté et que c'est notre tour (donc l'adversaire vient de jouer)
-        if (currentDiscardLength > prevDiscardLength && gameState.currentPlayerId === playerId) {
-            // L'adversaire a joué une carte (la défausse a augmenté pendant son tour)
-            // La dernière carte de la défausse est celle qui vient d'être jouée
+        // Détection de carte jouée par l'adversaire :
+        // 1. La défausse adverse a augmenté
+        if (currentDiscardLength > prevDiscardLength) {
+            // 2. Soit c'est le tour de l'adversaire (Solo), soit le tour vient de nous revenir (Multi)
+            // Dans tous les cas, on veut montrer la carte
             const lastPlayedCard = currentOpponent.discard[currentOpponent.discard.length - 1];
             if (lastPlayedCard && !displayedCard) {
                 setDisplayedCard(lastPlayedCard);
@@ -524,9 +526,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const currentSelectedElement = selectedElement;
 
         if (card) {
-            // Afficher la carte jouée au centre du terrain
-            showPlayedCard(card);
-
             // Vérifier si la carte nécessite une sélection de cartes
             const selection = getCardSelectionRequired(card);
             if (selection) {
@@ -534,6 +533,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
                 setPendingCardForSelection(card);
+                setPendingCardForOverlay(card); // Programmer l'affichage pour après le choix
                 // La fin de tour sera appelée après la confirmation du modal
                 return;
             }
@@ -545,6 +545,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
                 setPendingCardForHealDistribution(card);
+                setPendingCardForOverlay(card); // Programmer l'affichage pour après le choix
                 // La fin de tour sera appelée après la confirmation du modal
                 return;
             }
@@ -556,9 +557,13 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
                 setPendingCardForEnemySelection(card);
+                setPendingCardForOverlay(card); // Programmer l'affichage pour après le choix
                 // La fin de tour sera appelée après la confirmation du modal
                 return;
             }
+
+            // Afficher la carte jouée au centre immédiatement si pas de choix requis
+            showPlayedCard(card);
         }
 
         playCard(cardId, targetGodId, targetGodIds, lightningAction);
@@ -571,16 +576,28 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Wrappers pour les confirmations de modals qui finissent le tour en multijoueur
     const handleConfirmCardSelection = (cards: typeof player.hand) => {
         confirmCardSelection(cards);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
         autoEndTurnMultiplayer();
     };
 
     const handleConfirmHealDistribution = (distribution: { godId: string; amount: number }[]) => {
         confirmHealDistribution(distribution);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
         autoEndTurnMultiplayer();
     };
 
     const handleConfirmEnemyCardSelection = (cardIds: string[]) => {
         confirmEnemyCardSelection(cardIds);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
         autoEndTurnMultiplayer();
     };
 
