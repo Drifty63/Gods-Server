@@ -1,32 +1,28 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
-import { getLeaderboard, LeaderboardEntry } from '@/services/firebase';
+
+// Données mock pour le classement (en attendant l'intégration Firebase)
+const MOCK_LEADERBOARD = [
+    { odemonUid: 'uid1', username: 'DivineMaster', level: 25, eloRating: 1850, mostPlayedGodImage: '/cards/gods/zeus.png', stats: { gamesWon: 156, gamesPlayed: 200 } },
+    { odemonUid: 'uid2', username: 'OlympusChamp', level: 23, eloRating: 1780, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 142, gamesPlayed: 185 } },
+    { odemonUid: 'uid3', username: 'TitanSlayer', level: 22, eloRating: 1720, mostPlayedGodImage: '/cards/gods/hades.png', stats: { gamesWon: 138, gamesPlayed: 175 } },
+    { odemonUid: 'uid4', username: 'GodOfWar', level: 21, eloRating: 1680, mostPlayedGodImage: '/cards/gods/ares.png', stats: { gamesWon: 127, gamesPlayed: 165 } },
+    { odemonUid: 'uid5', username: 'MythicHero', level: 20, eloRating: 1620, mostPlayedGodImage: '/cards/gods/athena.png', stats: { gamesWon: 118, gamesPlayed: 155 } },
+    { odemonUid: 'uid6', username: 'LightBringer', level: 19, eloRating: 1580, mostPlayedGodImage: '/cards/gods/apollon.png', stats: { gamesWon: 105, gamesPlayed: 140 } },
+    { odemonUid: 'uid7', username: 'ShadowMaster', level: 18, eloRating: 1540, mostPlayedGodImage: '/cards/gods/nyx.png', stats: { gamesWon: 98, gamesPlayed: 130 } },
+    { odemonUid: 'uid8', username: 'SeaKing', level: 17, eloRating: 1500, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 92, gamesPlayed: 125 } },
+];
 
 export default function LeaderboardPage() {
     const { user, profile } = useAuth();
-    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-    const [loading, setLoading] = useState(true);
     const [timeFilter, setTimeFilter] = useState<'all' | 'month' | 'week'>('all');
 
-    // Charger le classement
-    useEffect(() => {
-        const loadLeaderboard = async () => {
-            setLoading(true);
-            try {
-                const data = await getLeaderboard(50);
-                setLeaderboard(data);
-            } catch (error) {
-                console.error('Erreur chargement classement:', error);
-            }
-            setLoading(false);
-        };
-        loadLeaderboard();
-    }, []);
+    const leaderboard = MOCK_LEADERBOARD;
 
     // Trouver la position du joueur actuel
     const myRank = useMemo(() => {
@@ -71,7 +67,7 @@ export default function LeaderboardPage() {
             </div>
 
             {/* Podium Top 3 */}
-            {!loading && leaderboard.length >= 3 && (
+            {leaderboard.length >= 3 && (
                 <div className={styles.podium}>
                     {/* 2ème place */}
                     <div className={styles.podiumPosition + ' ' + styles.second}>
@@ -138,83 +134,74 @@ export default function LeaderboardPage() {
 
             {/* Liste du classement */}
             <div className={styles.content}>
-                {loading ? (
-                    <div className={styles.loading}>
-                        <span className={styles.loadingIcon}>⏳</span>
-                        <p>Chargement du classement...</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className={styles.leaderboardHeader}>
-                            <span className={styles.rankHeader}>#</span>
-                            <span className={styles.playerHeader}>Joueur</span>
-                            <span className={styles.statsHeader}>Victoires</span>
-                            <span className={styles.ratingHeader}>Elo</span>
-                        </div>
+                <div className={styles.leaderboardHeader}>
+                    <span className={styles.rankHeader}>#</span>
+                    <span className={styles.playerHeader}>Joueur</span>
+                    <span className={styles.statsHeader}>Victoires</span>
+                    <span className={styles.ratingHeader}>Elo</span>
+                </div>
 
-                        <div className={styles.leaderboardList}>
-                            {leaderboard.slice(3).map((player, index) => (
-                                <div
-                                    key={player.odemonUid}
-                                    className={`${styles.leaderboardRow} ${player.odemonUid === user?.uid ? styles.myRow : ''}`}
-                                >
-                                    <span className={styles.rank}>{index + 4}</span>
-                                    <div className={styles.playerInfo}>
-                                        <div className={styles.playerAvatar}>
-                                            {player.mostPlayedGodImage ? (
-                                                <Image
-                                                    src={player.mostPlayedGodImage}
-                                                    alt="Avatar"
-                                                    width={40}
-                                                    height={40}
-                                                    className={styles.avatarImage}
-                                                />
-                                            ) : (
-                                                <span>⚔️</span>
-                                            )}
-                                        </div>
-                                        <div className={styles.playerDetails}>
-                                            <span className={styles.playerName}>{player.username}</span>
-                                            <span className={styles.playerLevel}>Niv. {player.level || 1}</span>
-                                        </div>
-                                    </div>
-                                    <span className={styles.wins}>{player.stats?.gamesWon || 0}</span>
-                                    <span className={styles.rating}>{player.eloRating || 1000}</span>
+                <div className={styles.leaderboardList}>
+                    {leaderboard.slice(3).map((player, index) => (
+                        <div
+                            key={player.odemonUid}
+                            className={`${styles.leaderboardRow} ${player.odemonUid === user?.uid ? styles.myRow : ''}`}
+                        >
+                            <span className={styles.rank}>{index + 4}</span>
+                            <div className={styles.playerInfo}>
+                                <div className={styles.playerAvatar}>
+                                    {player.mostPlayedGodImage ? (
+                                        <Image
+                                            src={player.mostPlayedGodImage}
+                                            alt="Avatar"
+                                            width={40}
+                                            height={40}
+                                            className={styles.avatarImage}
+                                        />
+                                    ) : (
+                                        <span>⚔️</span>
+                                    )}
                                 </div>
-                            ))}
-                        </div>
-
-                        {/* Ma position */}
-                        {myRank && myRank > 3 && myEntry && (
-                            <div className={styles.myRankContainer}>
-                                <p className={styles.myRankLabel}>Votre classement</p>
-                                <div className={styles.myRank}>
-                                    <span className={styles.rank}>{myRank}</span>
-                                    <div className={styles.playerInfo}>
-                                        <div className={styles.playerAvatar}>
-                                            {myEntry.mostPlayedGodImage ? (
-                                                <Image
-                                                    src={myEntry.mostPlayedGodImage}
-                                                    alt="Avatar"
-                                                    width={40}
-                                                    height={40}
-                                                    className={styles.avatarImage}
-                                                />
-                                            ) : (
-                                                <span>⚔️</span>
-                                            )}
-                                        </div>
-                                        <div className={styles.playerDetails}>
-                                            <span className={styles.playerName}>{profile?.username || 'Joueur'}</span>
-                                            <span className={styles.playerLevel}>Niv. {profile?.level || 1}</span>
-                                        </div>
-                                    </div>
-                                    <span className={styles.wins}>{myEntry.stats?.gamesWon || 0}</span>
-                                    <span className={styles.rating}>{myEntry.eloRating || 1000}</span>
+                                <div className={styles.playerDetails}>
+                                    <span className={styles.playerName}>{player.username}</span>
+                                    <span className={styles.playerLevel}>Niv. {player.level || 1}</span>
                                 </div>
                             </div>
-                        )}
-                    </>
+                            <span className={styles.wins}>{player.stats?.gamesWon || 0}</span>
+                            <span className={styles.rating}>{player.eloRating || 1000}</span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Ma position */}
+                {myRank && myRank > 3 && myEntry && (
+                    <div className={styles.myRankContainer}>
+                        <p className={styles.myRankLabel}>Votre classement</p>
+                        <div className={styles.myRank}>
+                            <span className={styles.rank}>{myRank}</span>
+                            <div className={styles.playerInfo}>
+                                <div className={styles.playerAvatar}>
+                                    {myEntry.mostPlayedGodImage ? (
+                                        <Image
+                                            src={myEntry.mostPlayedGodImage}
+                                            alt="Avatar"
+                                            width={40}
+                                            height={40}
+                                            className={styles.avatarImage}
+                                        />
+                                    ) : (
+                                        <span>⚔️</span>
+                                    )}
+                                </div>
+                                <div className={styles.playerDetails}>
+                                    <span className={styles.playerName}>{profile?.username || 'Joueur'}</span>
+                                    <span className={styles.playerLevel}>Niv. {profile?.level || 1}</span>
+                                </div>
+                            </div>
+                            <span className={styles.wins}>{myEntry.stats?.gamesWon || 0}</span>
+                            <span className={styles.rating}>{myEntry.eloRating || 1000}</span>
+                        </div>
+                    </div>
                 )}
             </div>
         </main>
