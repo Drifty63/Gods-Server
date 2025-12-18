@@ -963,19 +963,24 @@ export class GameEngine {
                 break;
 
             case 'tsunami_damage':
-                // Inflige 3 dégâts par carte du dieu ciblé qui a été meulée
-                // Note: L'effet mill a déjà été appliqué, on compte les cartes dans la défausse
+                // Inflige 3 dégâts par carte du dieu ciblé qui a été meulée récemment
+                // Le mill a déjà été appliqué, on compte les 5 dernières cartes meulées
                 if (targetGodId) {
                     const targetGod = opponent.gods.find(g => g.card.id === targetGodId);
-                    if (targetGod) {
-                        // Compter les cartes du dieu ciblé dans la défausse (récemment meulées)
-                        const cardsInDiscard = opponent.discard.filter(c => c.godId === targetGodId).length;
-                        // Limiter à 5 (le nombre de cartes meulées max)
-                        const damageCards = Math.min(cardsInDiscard, 5);
-                        const totalDamage = damageCards * 3;
+                    if (targetGod && !targetGod.isDead) {
+                        // Compter les cartes récemment meulées (5 dernières) appartenant à ce dieu
+                        const recentDiscard = opponent.discard.slice(-5);
+                        const cardsFromTargetGod = recentDiscard.filter(c => c.godId === targetGodId);
+                        const baseDamage = cardsFromTargetGod.length * 3;
 
-                        if (totalDamage > 0) {
-                            let damageToInflict = totalDamage;
+                        if (baseDamage > 0) {
+                            // Appliquer le bonus de faiblesse
+                            const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                                baseDamage, card.element, targetGod.card.weakness, targetGod.temporaryWeakness
+                            );
+
+                            // Gestion du bouclier
+                            let damageToInflict = finalDamage;
                             const shieldIndex = targetGod.statusEffects.findIndex(s => s.type === 'shield');
                             if (shieldIndex !== -1) {
                                 const shield = targetGod.statusEffects[shieldIndex];
@@ -1163,37 +1168,6 @@ export class GameEngine {
                 }
                 break;
 
-            // ========================================
-            // POSÉIDON - Tsunami (dégâts par carte meulée du dieu ciblé)
-            // ========================================
-            case 'tsunami_damage':
-                // Le mill a déjà été fait par l'effet précédent
-                // Nous devons compter les cartes du dieu ciblé qui ont été meulées
-                // et infliger 3 dégâts par carte
-                if (targetGodId) {
-                    const targetGod = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (targetGod) {
-                        // Compter les cartes récemment meulées appartenant à ce dieu
-                        const recentDiscard = opponent.discard.slice(-5);
-                        const cardsFromTargetGod = recentDiscard.filter(c => c.godId === targetGodId);
-                        const baseDamage = cardsFromTargetGod.length * 3;
-
-                        if (baseDamage > 0) {
-                            // Appliquer les dégâts avec le système d'éléments
-                            // La faiblesse est soit temporaire soit naturelle (obtenue de l'élément)
-                            const innateWeakness = getWeakness(targetGod.card.element);
-                            const damageResult = calculateDamageWithDualWeakness(
-                                baseDamage, card.element, innateWeakness, targetGod.temporaryWeakness
-                            );
-
-                            targetGod.currentHealth -= damageResult.damage;
-                            if (targetGod.currentHealth <= 0) {
-                                this.handleGodDeath(opponent, targetGod);
-                            }
-                        }
-                    }
-                }
-                break;
 
             // ========================================
             // POSÉIDON - Prison Aquatique (meule du nombre d'ennemis touchés)
