@@ -371,7 +371,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     }, [gameState]);
 
     // Référence pour détecter les cartes jouées par l'adversaire
-    const opponentDiscardLengthRef = useRef<number>(0);
+    const opponentDiscardLengthRef = useRef<number>(-1);
 
     // Effet pour détecter quand l'adversaire joue une carte et l'afficher
     useEffect(() => {
@@ -381,24 +381,34 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         if (!currentOpponent) return;
 
         const currentDiscardLength = currentOpponent.discard.length;
+
+        // Initialisation lors du premier chargement du gameState
+        if (opponentDiscardLengthRef.current === -1) {
+            opponentDiscardLengthRef.current = currentDiscardLength;
+            return;
+        }
+
         const prevDiscardLength = opponentDiscardLengthRef.current;
 
         // Détection de carte jouée par l'adversaire :
-        // 1. La défausse adverse a augmenté
+        // La défausse adverse a augmenté
         if (currentDiscardLength > prevDiscardLength) {
-            // 2. Soit c'est le tour de l'adversaire (Solo), soit le tour vient de nous revenir (Multi)
-            // Dans tous les cas, on veut montrer la carte
+            console.log(`🎴 Opponent played: ${currentDiscardLength} cards in discard (was ${prevDiscardLength})`);
+
             const lastPlayedCard = currentOpponent.discard[currentOpponent.discard.length - 1];
-            if (lastPlayedCard && !displayedCard) {
+            if (lastPlayedCard) {
+                // On remplace la carte affichée par la nouvelle (pour l'IA qui peut jouer vite)
                 setDisplayedCard(lastPlayedCard);
+
+                // On nettoie le timeout précédent s'il y en avait un (optionnel via useRef si on voulait être parfait)
                 setTimeout(() => {
-                    setDisplayedCard(null);
+                    setDisplayedCard(prev => prev?.id === lastPlayedCard.id ? null : prev);
                 }, 4000);
             }
         }
 
         opponentDiscardLengthRef.current = currentDiscardLength;
-    }, [gameState, playerId, displayedCard]);
+    }, [gameState, playerId]);
 
     // État pour éviter d'enregistrer les stats plusieurs fois
     const [gameResultRecorded, setGameResultRecorded] = useState(false);
