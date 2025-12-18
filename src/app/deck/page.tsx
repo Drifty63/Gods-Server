@@ -329,7 +329,7 @@ export default function DeckPage() {
                     >
                         <span className={styles.seasonIcon}>⭐</span>
                         <span className={styles.seasonTitle}>Saison 1 : Set de base</span>
-                        <span className={styles.seasonCount}>{visibleGods.length} / {visibleGods.length} dieux</span>
+                        <span className={styles.seasonCount}>{godsOwned.length} / {visibleGods.length} dieux</span>
                         <span className={styles.seasonArrow}>{isSeason1Open ? '▼' : '▶'}</span>
                     </button>
 
@@ -338,8 +338,9 @@ export default function DeckPage() {
 
                             {visibleGods.map((god) => {
                                 const spells = getSpellsForGod(god);
+                                const isOwned = godsOwned.includes(god.id);
                                 return (
-                                    <div key={god.id} className={styles.godRow}>
+                                    <div key={god.id} className={`${styles.godRow} ${!isOwned ? styles.notOwned : ''}`}>
                                         <div className={styles.godHeader}>
                                             <span className={styles.godNameBig}>{god.name}</span>
                                             <span className={styles.godElement}>{getElementSymbol(god.element)}</span>

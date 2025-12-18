@@ -480,6 +480,16 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Dieu non possédé - grisé */
+.godRow.notOwned {
+    opacity: 0.5;
+}
+
+.godRow.notOwned .godCardImage,
+.godRow.notOwned .cardWrapper {
+    filter: grayscale(100%);
+}
+
 .godHeader {
     display: flex;
     align-items: center;
