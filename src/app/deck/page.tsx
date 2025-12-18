@@ -56,6 +56,7 @@ export default function DeckPage() {
     // États pour la bibliothèque
     const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
     const [isSeason1Open, setIsSeason1Open] = useState(true);
+    const [showGodPickerModal, setShowGodPickerModal] = useState(false);
 
     // Dieux possédés et visibles
     const godsOwned = profile?.collection.godsOwned ?? [];
@@ -220,7 +221,13 @@ export default function DeckPage() {
                             <div
                                 key={slotIndex}
                                 className={`${styles.deckSlot} ${god ? styles.filled : styles.empty}`}
-                                onClick={() => godId && toggleGodInDeck(godId)}
+                                onClick={() => {
+                                    if (godId) {
+                                        toggleGodInDeck(godId);
+                                    } else if (currentDeck.godIds.length < 4) {
+                                        setShowGodPickerModal(true);
+                                    }
+                                }}
                             >
                                 {god ? (
                                     <>
@@ -249,34 +256,47 @@ export default function DeckPage() {
                 )}
             </div>
 
-            {/* Bibliothèque des dieux possédés pour ajouter au deck */}
-            <div className={styles.library}>
-                <h2 className={styles.sectionTitle}>Ajouter à ce deck ({availableGods.length} dieux disponibles)</h2>
-                <div className={styles.godsGrid}>
-                    {availableGods.map((god) => {
-                        const isInDeck = currentDeck.godIds.includes(god.id);
-                        const canAdd = !isInDeck && currentDeck.godIds.length < 4;
+            {/* Modal de sélection de dieux */}
+            {showGodPickerModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowGodPickerModal(false)}>
+                    <div className={styles.godPickerModal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.modalClose} onClick={() => setShowGodPickerModal(false)}>✕</button>
+                        <h2 className={styles.modalTitle}>Ajouter un Dieu</h2>
+                        <p className={styles.modalSubtitle}>{availableGods.length} dieux disponibles</p>
+                        <div className={styles.modalGodsGrid}>
+                            {availableGods.map((god) => {
+                                const isInDeck = currentDeck.godIds.includes(god.id);
+                                const canAdd = !isInDeck && currentDeck.godIds.length < 4;
 
-                        return (
-                            <div
-                                key={god.id}
-                                className={`${styles.godCard} ${isInDeck ? styles.inDeck : ''} ${!canAdd && !isInDeck ? styles.disabled : ''}`}
-                                onClick={() => (isInDeck || canAdd) && toggleGodInDeck(god.id)}
-                            >
-                                {isInDeck && <div className={styles.inDeckBadge}>✓</div>}
-                                <Image
-                                    src={god.imageUrl}
-                                    alt={god.name}
-                                    width={60}
-                                    height={60}
-                                    className={styles.godImage}
-                                />
-                                <span className={styles.godName}>{god.name.split(',')[0]}</span>
-                            </div>
-                        );
-                    })}
+                                return (
+                                    <div
+                                        key={god.id}
+                                        className={`${styles.modalGodCard} ${isInDeck ? styles.inDeck : ''} ${!canAdd && !isInDeck ? styles.disabled : ''}`}
+                                        onClick={() => {
+                                            if (canAdd) {
+                                                toggleGodInDeck(god.id);
+                                                setShowGodPickerModal(false);
+                                            } else if (isInDeck) {
+                                                toggleGodInDeck(god.id);
+                                            }
+                                        }}
+                                    >
+                                        {isInDeck && <div className={styles.inDeckBadge}>✓</div>}
+                                        <Image
+                                            src={god.imageUrl}
+                                            alt={god.name}
+                                            width={70}
+                                            height={70}
+                                            className={styles.modalGodImage}
+                                        />
+                                        <span className={styles.modalGodName}>{god.name.split(',')[0]}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Bouton de sauvegarde */}
             <div className={styles.actions}>
