@@ -18,7 +18,7 @@ export default function Home() {
 
 function HomeContent() {
   const { profile } = useAuth();
-  const [showPlayModal, setShowPlayModal] = useState(false);
+
   const [currentGodIndex, setCurrentGodIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   // Utiliser l'ambroisie du profil ou 0 par défaut
@@ -41,13 +41,7 @@ function HomeContent() {
 
   const currentGod = visibleGods[currentGodIndex];
 
-  const handlePlayClick = () => {
-    setShowPlayModal(true);
-  };
 
-  const closePlayModal = () => {
-    setShowPlayModal(false);
-  };
 
   const handleOptionsClick = () => {
     // Déclencher l'événement pour ouvrir le modal global
@@ -217,13 +211,10 @@ function HomeContent() {
         </Link>
 
         {/* Bouton central JOUER */}
-        <button
-          className={styles.playButton}
-          onClick={handlePlayClick}
-        >
+        <Link href="/play" className={styles.playButton}>
           <span className={styles.playIcon}>⚔️</span>
           <span className={styles.playLabel}>Jouer</span>
-        </button>
+        </Link>
 
         <Link href="/social" className={styles.navItem}>
           <span className={styles.navIcon}>💬</span>
@@ -236,33 +227,7 @@ function HomeContent() {
         </Link>
       </nav>
 
-      {/* Modal de sélection du mode de jeu */}
-      {showPlayModal && (
-        <div className={styles.modalOverlay} onClick={closePlayModal}>
-          <div className={styles.playModal} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.closeModal} onClick={closePlayModal}>✕</button>
-            <h2>Choisir un Mode</h2>
 
-            <div className={styles.playOptions}>
-              <Link href="/online" className={styles.playOption} onClick={closePlayModal}>
-                <span className={styles.optionIcon}>🌐</span>
-                <div className={styles.optionInfo}>
-                  <h3>En Ligne</h3>
-                  <p>Affrontez des joueurs du monde entier</p>
-                </div>
-              </Link>
-
-              <Link href="/game" className={styles.playOption} onClick={closePlayModal}>
-                <span className={styles.optionIcon}>🤖</span>
-                <div className={styles.optionInfo}>
-                  <h3>Entrainement</h3>
-                  <p>Entraînez-vous contre l'intelligence artificielle</p>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
 
 

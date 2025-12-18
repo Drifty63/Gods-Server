@@ -1,0 +1,194 @@
+.main {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #050510, #1a1a2e);
+    color: white;
+    padding: 20px;
+    padding-bottom: 40px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.backButton {
+    position: absolute;
+    left: 20px;
+    color: var(--gold-divine);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+
+.backButton:hover {
+    transform: translateX(-5px);
+}
+
+.title {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    color: var(--gold-divine);
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    margin: 0;
+    letter-spacing: 4px;
+}
+
+/* Content */
+.content {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Modes Grid */
+.modesGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Mode Card */
+.modeCard {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.modeCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modeCard:not(.comingSoon):hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateX(10px);
+}
+
+.modeCard:not(.comingSoon):hover::before {
+    opacity: 1;
+}
+
+/* Coming Soon */
+.modeCard.comingSoon {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.comingSoonBadge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 12px;
+    background: rgba(100, 100, 100, 0.5);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 20px;
+    letter-spacing: 1px;
+}
+
+/* Mode Icon */
+.modeIconWrapper {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.modeCard:not(.comingSoon):hover .modeIconWrapper {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+}
+
+.modeIcon {
+    font-size: 2.5rem;
+}
+
+/* Mode Info */
+.modeInfo {
+    flex: 1;
+}
+
+.modeTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--gold-divine);
+    margin: 0 0 6px 0;
+}
+
+.modeDescription {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Mode Arrow */
+.modeArrow {
+    font-size: 2rem;
+    color: var(--gold-divine);
+    opacity: 0.3;
+    transition: all 0.3s ease;
+}
+
+.modeCard:not(.comingSoon):hover .modeArrow {
+    opacity: 1;
+    transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .title {
+        font-size: 2rem;
+    }
+
+    .modeCard {
+        padding: 18px;
+    }
+
+    .modeIconWrapper {
+        width: 55px;
+        height: 55px;
+    }
+
+    .modeIcon {
+        font-size: 2rem;
+    }
+
+    .modeTitle {
+        font-size: 1.2rem;
+    }
+
+    .modeDescription {
+        font-size: 0.85rem;
+    }
+}
