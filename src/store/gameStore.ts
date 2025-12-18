@@ -622,7 +622,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 if (currentState.currentPlayerId === playerId && currentState.status === 'playing') {
                     setTimeout(() => {
                         get().endTurn();
-                    }, 500);
+                    }, 4500);
                 }
             }
         }
@@ -689,13 +689,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         set({ isAIPlaying: true });
 
-        // L'IA joue son tour
-        aiPlayer.playTurn(engine);
+        // L'IA joue son tour (sans fin de tour auto maintenant)
+        const actions = aiPlayer.playTurn(engine);
 
+        // Mettre à jour l'état immédiatement pour montrer les actions (ex: carte jouée)
         set({
             gameState: cloneGameState(engine.getState()),
-            isAIPlaying: false,
         });
+
+        // Déterminer le délai avant de finir le tour
+        const playedCardAction = actions.find(a => a.type === 'play_card');
+        const delay = playedCardAction ? 4500 : 1000;
+
+        setTimeout(() => {
+            // Finir le tour de l'IA manuellement sur l'engine
+            const aiId = engine.getState().currentPlayerId;
+            engine.executeAction({ type: 'end_turn', playerId: aiId });
+
+            set({
+                gameState: cloneGameState(engine.getState()),
+                isAIPlaying: false,
+            });
+        }, delay);
     },
 
     resetGame: () => {

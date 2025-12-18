@@ -504,7 +504,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 }
                 // Si le tour a déjà changé (mort du poison), ne rien faire
                 // L'état a déjà été synchronisé via play_card
-            }, 500);
+            }, 4500);
         }
     };
 

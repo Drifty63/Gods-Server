@@ -58,14 +58,7 @@ export class AIPlayer {
             return actions;
         }
 
-        // Fin de tour systématique après une action (ou aucune)
-        const endTurnAction: GameAction = {
-            type: 'end_turn',
-            playerId: aiPlayerId,
-        };
-        engine.executeAction(endTurnAction);
-        actions.push(endTurnAction);
-
+        // Ne pas finir le tour ici, le GameStore s'en occupe avec un délai si besoin
         return actions;
     }
 
