@@ -336,18 +336,29 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         let hasChanges = false;
 
         allGods.forEach(god => {
-            const prevHealth = previousHealthRef.current[god.card.id];
-            if (prevHealth !== undefined && prevHealth !== god.currentHealth) {
-                const diff = god.currentHealth - prevHealth;
-                newChanges[god.card.id] = diff;
-                hasChanges = true;
+            const godKey = god.card.id;
+            const prevHealth = previousHealthRef.current[godKey];
+
+            // Si c'est la première fois qu'on voit ce dieu, on l'initialise sans animation
+            if (prevHealth === undefined) {
+                previousHealthRef.current[godKey] = god.currentHealth;
+                return;
             }
+
+            // Si la santé a changé
+            if (prevHealth !== god.currentHealth) {
+                const diff = god.currentHealth - prevHealth;
+                newChanges[godKey] = diff;
+                hasChanges = true;
+                console.log(`💥 HP change: ${god.card.name} ${diff > 0 ? '+' : ''}${diff} (${prevHealth} -> ${god.currentHealth})`);
+            }
+
             // Mettre à jour la référence
-            previousHealthRef.current[god.card.id] = god.currentHealth;
+            previousHealthRef.current[godKey] = god.currentHealth;
         });
 
         if (hasChanges) {
-            setHealthChanges(newChanges);
+            setHealthChanges(prev => ({ ...prev, ...newChanges }));
             // Clear les animations après 2.5 secondes
             setTimeout(() => {
                 setHealthChanges({});
