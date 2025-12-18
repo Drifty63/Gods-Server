@@ -100,6 +100,12 @@ interface GameStore {
     surrender: () => void; // Abandonner la partie
 }
 
+// Fonction helper pour créer une copie profonde du gameState
+// Cela force React à détecter le changement et déclencher un re-render
+const cloneGameState = (state: GameState): GameState => {
+    return JSON.parse(JSON.stringify(state));
+};
+
 export const useGameStore = create<GameStore>((set, get) => ({
     // État initial
     gameState: null,
