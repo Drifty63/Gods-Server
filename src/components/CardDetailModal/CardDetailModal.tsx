@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { SpellCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
+import { ALL_GODS } from '@/data/gods';
 import styles from './CardDetailModal.module.css';
 
 interface CardDetailModalProps {
@@ -152,10 +153,14 @@ export default function CardDetailModal({
     if (!isOpen || !card || !mounted) return null;
 
     const typeLabels: Record<string, string> = {
-        'generator': '🔋 Générateur',
-        'competence': '⚔️ Compétence',
-        'utility': '🛠️ Utilitaire'
+        'generator': 'Générateur',
+        'competence': 'Compétence',
+        'utility': 'Utilitaire'
     };
+
+    // Trouver le dieu pour afficher son nom
+    const god = ALL_GODS.find(g => g.id === card.godId);
+    const godName = god ? god.name.split(',')[0] : 'Inconnu'; // Juste le nom, pas le titre
 
     const modalContent = (
         <div className={styles.overlay} onClick={onClose}>
@@ -167,53 +172,63 @@ export default function CardDetailModal({
                     </button>
                 )}
 
-                {/* Contenu de la carte */}
-                <div className={styles.cardContent}>
-                    {/* Image de la carte */}
-                    <div className={styles.imageContainer}>
-                        {card.imageUrl ? (
-                            <Image
-                                src={card.imageUrl}
-                                alt={card.name}
-                                fill
-                                className={styles.image}
-                                sizes="300px"
-                            />
-                        ) : (
-                            <div className={styles.imagePlaceholder}>
-                                {ELEMENT_SYMBOLS[card.element]}
+                {/* Contenu de la carte - Nouveau layout deux colonnes */}
+                <div className={styles.cardLayout}>
+                    {/* COLONNE GAUCHE: Visuel de la carte */}
+                    <div className={styles.visualColumn}>
+                        <div className={styles.cardPreview}>
+                            <div className={styles.godNameOverlay}>{godName}</div>
+
+                            <div className={styles.imageWrapper}>
+                                {card.imageUrl ? (
+                                    <Image
+                                        src={card.imageUrl}
+                                        alt={card.name}
+                                        fill
+                                        className={styles.image}
+                                        sizes="300px"
+                                        priority
+                                    />
+                                ) : (
+                                    <div className={styles.imagePlaceholder}>
+                                        {ELEMENT_SYMBOLS[card.element]}
+                                    </div>
+                                )}
                             </div>
-                        )}
+
+                            <div className={styles.emojiOverlay}>
+                                {card.description}
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Infos de la carte */}
-                    <div className={styles.cardInfo}>
-                        <div className={styles.header}>
-                            <span className={styles.element}>{ELEMENT_SYMBOLS[card.element]}</span>
-                            <h2 className={styles.name}>{card.name}</h2>
+                    {/* COLONNE DROITE: Informations textuelles */}
+                    <div className={styles.infoColumn}>
+                        <h2 className={styles.spellName}>{card.name}</h2>
+
+                        <div className={styles.sectionHeader}>
+                            <span className={styles.label}>Compétence :</span>
+                            <span className={styles.value}>{typeLabels[card.type]}</span>
                         </div>
 
-                        <div className={styles.stats}>
-                            <span className={styles.type}>{typeLabels[card.type]}</span>
-                            {card.energyCost > 0 && (
-                                <span className={styles.cost}>⚡ Coût: {card.energyCost}</span>
-                            )}
-                            {card.energyGain > 0 && (
-                                <span className={styles.gain}>⚡ Gain: +{card.energyGain}</span>
-                            )}
+                        <div className={styles.energyValues}>
+                            <div className={styles.energyItem}>
+                                <span className={styles.energyIcon}>⚡</span>
+                                <span className={styles.energyLabel}>Coût</span>
+                                <span className={styles.energyValue}>-{card.energyCost}</span>
+                            </div>
+                            <div className={styles.energyItem}>
+                                <span className={styles.energyIcon}>⚡</span>
+                                <span className={styles.energyLabel}>Gain</span>
+                                <span className={styles.energyValue}>+{card.energyGain}</span>
+                            </div>
                         </div>
 
-                        <div className={styles.descriptionBox}>
-                            <h3 className={styles.descriptionTitle}>Effet</h3>
-                            <p className={styles.description}>
+                        <div className={styles.effectSection}>
+                            <h3 className={styles.effectLabel}>Effet :</h3>
+                            <p className={styles.fullDescription}>
                                 {getExplicitDescription(card)}
                             </p>
-                        </div>
-
-                        {/* Symboles originaux */}
-                        <div className={styles.symbols}>
-                            <span className={styles.symbolsLabel}>Résumé:</span>
-                            <span className={styles.symbolsText}>{card.description}</span>
                         </div>
                     </div>
                 </div>

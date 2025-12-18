@@ -1,13 +1,13 @@
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
-    animation: fadeIn 0.2s ease;
+    z-index: 10000;
+    animation: fadeIn 0.25s ease-out;
 }
 
 @keyframes fadeIn {
@@ -22,66 +22,90 @@
 
 .modal {
     position: relative;
-    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
-    border: 2px solid rgba(212, 175, 55, 0.3);
-    border-radius: 20px;
-    padding: 1.5rem;
-    max-width: 500px;
-    max-height: 90vh;
+    background: #fdfdfd;
+    /* Background clair comme dans l'image */
+    border: 1px solid #333;
+    border-radius: 4px;
+    /* Coins plus saillants comme dans le dessin */
+    padding: 2rem;
+    max-width: 800px;
     width: 95%;
-    overflow-y: auto;
-    box-shadow:
-        0 25px 50px rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(212, 175, 55, 0.15);
-    animation: modalIn 0.3s ease;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes modalIn {
+@keyframes modalSlide {
     from {
         opacity: 0;
-        transform: scale(0.9);
+        transform: translateY(20px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0) scale(1);
     }
 }
 
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 36px;
-    height: 36px;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
     border: none;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    font-size: 1.2rem;
+    background: none;
+    color: #333;
+    font-size: 1.5rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
 }
 
 .closeButton:hover {
-    background: rgba(255, 80, 80, 0.8);
-    transform: scale(1.1);
+    transform: rotate(90deg);
+    color: #ff5252;
 }
 
-.cardContent {
+.cardLayout {
+    display: flex;
+    gap: 3rem;
+    align-items: flex-start;
+}
+
+/* COLONNE GAUCHE: Visuel de la carte */
+.visualColumn {
+    flex: 0 0 300px;
+}
+
+.cardPreview {
+    position: relative;
+    aspect-ratio: 2.5/3.5;
+    border: 2px solid #333;
+    background: #fff;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-.imageContainer {
+.godNameOverlay {
+    padding: 0.75rem;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
+    border-bottom: 2px solid #333;
+    background: #f8f8f8;
+}
+
+.imageWrapper {
     position: relative;
-    width: 100%;
-    height: 200px;
-    border-radius: 12px;
-    overflow: hidden;
-    background: linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%);
+    flex: 1;
+    background: #eee;
 }
 
 .image {
@@ -95,164 +119,193 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 4rem;
-    opacity: 0.5;
+    font-size: 5rem;
+    background: #f0f0f0;
 }
 
-.cardInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.header {
+.emojiOverlay {
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #333;
+    border-top: 2px solid #333;
+    background: #f8f8f8;
+    min-height: 3rem;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
 }
 
-.element {
-    font-size: 2rem;
-    filter: drop-shadow(0 0 8px currentColor);
-}
-
-.name {
-    color: white;
-    font-size: 1.5rem;
-    margin: 0;
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-}
-
-.stats {
+/* COLONNE DROITE: Informations */
+.infoColumn {
+    flex: 1;
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+    color: #333;
 }
 
-.type {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.85rem;
-}
-
-.cost {
-    color: #ffd700;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
-.gain {
-    color: #4caf50;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
-.descriptionBox {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    padding: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.descriptionTitle {
-    color: rgba(212, 175, 55, 0.9);
-    font-size: 0.9rem;
-    margin: 0 0 0.5rem 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.description {
-    color: white;
-    font-size: 1rem;
-    line-height: 1.5;
+.spellName {
     margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    border-bottom: 3px solid #333;
+    padding-bottom: 0.5rem;
 }
 
-.symbols {
+.sectionHeader {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: 1.3rem;
+}
+
+.label {
+    font-weight: 700;
+}
+
+.value {
+    color: #666;
+}
+
+.energyValues {
+    display: flex;
+    gap: 2rem;
+    margin: 0.5rem 0;
+}
+
+.energyItem {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding-top: 0.5rem;
-    opacity: 0.7;
+    font-size: 1.2rem;
 }
 
-.symbolsLabel {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.8rem;
+.energyIcon {
+    color: #f1c40f;
+    filter: drop-shadow(0 0 2px rgba(241, 196, 15, 0.5));
 }
 
-.symbolsText {
-    color: white;
-    font-size: 0.9rem;
+.energyLabel {
+    font-weight: 600;
 }
 
+.energyValue {
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.effectSection {
+    margin-top: 0.5rem;
+}
+
+.effectLabel {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+}
+
+.fullDescription {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: #222;
+    background: #f4f4f4;
+    padding: 1rem;
+    border-left: 4px solid #333;
+    border-radius: 2px;
+}
+
+/* ACTIONS */
 .actions {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #ddd;
 }
 
 .discardButton,
 .playButton {
     flex: 1;
-    padding: 0.75rem 1rem;
-    border: none;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 600;
+    padding: 1rem;
+    border: 2px solid #333;
+    border-radius: 4px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .discardButton {
-    background: linear-gradient(135deg, #666 0%, #444 100%);
-    color: white;
+    background: #fff;
+    color: #333;
 }
 
 .discardButton:hover:not(:disabled) {
-    background: linear-gradient(135deg, #777 0%, #555 100%);
+    background: #333;
+    color: #fff;
     transform: translateY(-2px);
 }
 
 .playButton {
-    background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
-    color: white;
+    background: #333;
+    color: #fff;
 }
 
 .playButton:hover:not(:disabled) {
-    background: linear-gradient(135deg, #5cbf60 0%, #45a049 100%);
+    background: #000;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .discardButton:disabled,
 .playButton:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed;
-    transform: none;
+    border-color: #ccc;
+    color: #999;
 }
 
-@media (max-width: 500px) {
-    .modal {
-        padding: 1rem;
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .cardLayout {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: center;
     }
 
-    .imageContainer {
-        height: 150px;
+    .visualColumn {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 280px;
     }
 
-    .name {
-        font-size: 1.2rem;
+    .infoColumn {
+        text-align: center;
+        align-items: center;
     }
 
-    .element {
-        font-size: 1.5rem;
+    .spellName {
+        font-size: 1.8rem;
+    }
+
+    .sectionHeader {
+        justify-content: center;
+    }
+
+    .energyValues {
+        justify-content: center;
+    }
+
+    .fullDescription {
+        text-align: left;
     }
 }
