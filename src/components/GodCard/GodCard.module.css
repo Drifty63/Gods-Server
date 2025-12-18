@@ -452,7 +452,7 @@
     0 2px 10px rgba(0, 0, 0, 1),
     0 0 30px currentColor;
   pointer-events: none;
-  animation: healthChangeFloat 2.5s ease-out forwards;
+  animation: healthChangeFloat 4s ease-out forwards;
 }
 
 .healthChangeAnimation.damage {
