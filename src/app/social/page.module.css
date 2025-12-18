@@ -10,16 +10,19 @@
 .header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    padding-top: 20px;
+    justify-content: center;
+    padding: 30px 20px;
+    position: relative;
+    margin-bottom: 40px;
 }
 
 .backButton {
+    position: absolute;
+    left: 20px;
     color: var(--gold-divine);
     text-decoration: none;
     font-family: 'Cinzel', serif;
-    font-size: 1rem;
+    font-size: 1.2rem;
     transition: transform 0.2s;
 }
 
@@ -29,84 +32,12 @@
 
 .title {
     font-family: 'Cinzel', serif;
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: var(--gold-divine);
     text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
     margin: 0;
-}
-
-.headerRight {
-    width: 80px;
-}
-
-/* Onglets */
-.tabsContainer {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.tabsContainer::-webkit-scrollbar {
-    display: none;
-}
-
-.tab {
-    flex: 1;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: #888;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    white-space: nowrap;
-}
-
-.tab:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.activeTab {
-    background: rgba(212, 175, 55, 0.2);
-    border-color: var(--gold-divine);
-    color: var(--gold-divine);
-}
-
-.tabBadge {
-    background: rgba(100, 200, 100, 0.3);
-    color: #6c6;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-}
-
-.tabBadgeAlert {
-    background: rgba(255, 100, 100, 0.3);
-    color: #f66;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.6;
-    }
+    letter-spacing: 4px;
 }
 
 /* Content */
@@ -115,358 +46,154 @@
     margin: 0 auto;
 }
 
-/* Search */
-.searchContainer {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.searchIcon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1rem;
-    opacity: 0.6;
-}
-
-.searchInput {
-    width: 100%;
-    padding: 14px 14px 14px 45px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: white;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.searchInput::placeholder {
-    color: #666;
-}
-
-.searchInput:focus {
-    outline: none;
-    border-color: var(--gold-divine);
-    background: rgba(255, 255, 255, 0.08);
-}
-
-/* Friends List */
-.friendsList {
+/* Menu Grid */
+.menuGrid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 40px;
 }
 
-.friendCard {
+.menuCard {
     display: flex;
     align-items: center;
-    padding: 15px;
+    padding: 24px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: inherit;
     transition: all 0.3s ease;
 }
 
-.friendCard:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(212, 175, 55, 0.3);
+.menuCard:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateX(10px);
 }
 
-.friendAvatar {
-    position: relative;
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #2a2a4a 0%, #1a1a2e 100%);
-    border-radius: 50%;
+.cardIcon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    margin-right: 15px;
+    font-size: 2.5rem;
+    margin-right: 20px;
+    flex-shrink: 0;
 }
 
-.statusDot {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid #1a1a2e;
-}
-
-.statusDot.online {
-    background: #4ade80;
-}
-
-.statusDot.ingame {
-    background: #fbbf24;
-}
-
-.statusDot.offline {
-    background: #6b7280;
-}
-
-.friendInfo {
+.cardContent {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
 }
 
-.friendName {
-    font-weight: 600;
-    color: white;
-    font-size: 1rem;
-}
-
-.friendLevel {
-    color: #888;
-    font-size: 0.85rem;
-}
-
-.friendStatus {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-}
-
-.lastSeen {
-    color: #666;
-    font-size: 0.8rem;
-}
-
-.inviteButton {
-    padding: 8px 16px;
-    background: linear-gradient(135deg, var(--gold-divine) 0%, #b8860b 100%);
-    border: none;
-    border-radius: 8px;
-    color: #1a1a2e;
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.inviteButton:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-}
-
-.addFriendButton {
-    width: 100%;
-    padding: 15px;
-    background: rgba(212, 175, 55, 0.1);
-    border: 2px dashed rgba(212, 175, 55, 0.3);
-    border-radius: 12px;
+.cardTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
     color: var(--gold-divine);
-    font-size: 1rem;
-    cursor: pointer;
+    margin: 0 0 6px 0;
+}
+
+.cardDescription {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.cardArrow {
+    font-size: 2rem;
+    color: var(--gold-divine);
+    opacity: 0.5;
     transition: all 0.3s ease;
 }
 
-.addFriendButton:hover {
-    background: rgba(212, 175, 55, 0.2);
-    border-style: solid;
+.menuCard:hover .cardArrow {
+    opacity: 1;
+    transform: translateX(5px);
 }
 
-.emptyMessage {
+/* Quick Stats */
+.quickStats {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 20px;
+    padding: 24px;
+}
+
+.statsTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    color: var(--gold-divine);
     text-align: center;
-    color: #666;
-    padding: 40px;
-    font-style: italic;
+    margin: 0 0 20px 0;
 }
 
-/* Requests */
-.requestsList {
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.statCard {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.requestsInfo {
-    color: #888;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-}
-
-.requestCard {
-    display: flex;
     align-items: center;
-    padding: 15px;
+    padding: 16px;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
 }
 
-.requestActions {
-    display: flex;
-    gap: 10px;
+.statIcon {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
 }
 
-.acceptButton {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(74, 222, 128, 0.2);
-    color: #4ade80;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.acceptButton:hover {
-    background: rgba(74, 222, 128, 0.4);
-    transform: scale(1.1);
-}
-
-.rejectButton {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(248, 113, 113, 0.2);
-    color: #f87171;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.rejectButton:hover {
-    background: rgba(248, 113, 113, 0.4);
-    transform: scale(1.1);
-}
-
-/* Leaderboard */
-.leaderboard {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.leaderboardHeader {
-    display: flex;
-    padding: 10px 15px;
-    color: #666;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.rankHeader {
-    width: 50px;
-}
-
-.playerHeader {
-    flex: 1;
-}
-
-.winsHeader {
-    width: 80px;
-    text-align: right;
-}
-
-.leaderboardRow {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.leaderboardRow:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.leaderboardRow.topThree {
-    background: rgba(212, 175, 55, 0.05);
-    border-color: rgba(212, 175, 55, 0.2);
-}
-
-.rank {
-    width: 50px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #888;
-}
-
-.rank1 {
-    color: #ffd700;
-}
-
-.rank2 {
-    color: #c0c0c0;
-}
-
-.rank3 {
-    color: #cd7f32;
-}
-
-.playerInfo {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.playerAvatar {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #2a2a4a 0%, #1a1a2e 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-}
-
-.playerDetails {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.playerName {
-    font-weight: 600;
-    color: white;
-}
-
-.playerLevel {
-    color: #888;
-    font-size: 0.8rem;
-}
-
-.wins {
-    width: 80px;
-    text-align: right;
-    font-weight: bold;
+.statValue {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
     color: var(--gold-divine);
 }
 
-.myRankContainer {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.myRankLabel {
-    color: #888;
-    font-size: 0.9rem;
-    margin-bottom: 12px;
+.statLabel {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 4px;
     text-align: center;
 }
 
-.myRank {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background: rgba(212, 175, 55, 0.1);
-    border: 2px solid var(--gold-divine);
-    border-radius: 12px;
+/* Responsive */
+@media (max-width: 480px) {
+    .title {
+        font-size: 2rem;
+    }
+
+    .menuCard {
+        padding: 18px;
+    }
+
+    .cardIcon {
+        width: 55px;
+        height: 55px;
+        font-size: 2rem;
+    }
+
+    .cardTitle {
+        font-size: 1.2rem;
+    }
+
+    .statsGrid {
+        gap: 10px;
+    }
+
+    .statCard {
+        padding: 12px;
+    }
+
+    .statValue {
+        font-size: 1.3rem;
+    }
 }

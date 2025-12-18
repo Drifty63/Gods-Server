@@ -1,0 +1,566 @@
+.main {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #050510, #1a1a2e);
+    color: white;
+    padding: 20px;
+    padding-bottom: 40px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.backButton {
+    position: absolute;
+    left: 20px;
+    color: var(--gold-divine);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+
+.backButton:hover {
+    transform: translateX(-5px);
+}
+
+.title {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    color: var(--gold-divine);
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    margin: 0;
+    letter-spacing: 4px;
+}
+
+/* Search Row */
+.searchRow {
+    display: flex;
+    gap: 12px;
+    max-width: 600px;
+    margin: 0 auto 20px;
+}
+
+.searchContainer {
+    flex: 1;
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    opacity: 0.6;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 14px 14px 14px 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.searchInput::placeholder {
+    color: #666;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--gold-divine);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.requestsButton {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.requestsButton:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold-divine);
+}
+
+.requestsBadge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 22px;
+    height: 22px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Content */
+.content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.friendsCount {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    padding-left: 4px;
+}
+
+.maxFriends {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Friends List */
+.friendsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.friendCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    transition: all 0.3s ease;
+}
+
+.friendCard:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(212, 175, 55, 0.2);
+}
+
+.friendLeft {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.friendAvatar {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #2a2a4a, #1a1a2e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    border: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+.statusDot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #1a1a2e;
+}
+
+.statusDot.online {
+    background: #4ade80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+}
+
+.statusDot.ingame {
+    background: #fbbf24;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+
+.statusDot.offline {
+    background: #6b7280;
+}
+
+.friendInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.friendName {
+    font-weight: 600;
+    color: white;
+    font-size: 1rem;
+}
+
+.friendStatus {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+/* Friend Actions */
+.friendActions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionButton {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.fightButton {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.fightButton:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.3);
+    transform: scale(1.1);
+}
+
+.fightButton:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.profileButton {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
+.profileButton:hover {
+    background: rgba(59, 130, 246, 0.3);
+    transform: scale(1.1);
+}
+
+.favoriteButton {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.favoriteButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.favoriteButton.isFavorite {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.optionsButton {
+    background: rgba(255, 255, 255, 0.05);
+    color: #888;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.optionsButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Empty State */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+.emptyIcon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.4;
+}
+
+.emptyMessage {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Modal Overlay */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+/* Modal Demandes */
+.modal {
+    position: relative;
+    background: linear-gradient(180deg, rgba(26, 26, 58, 0.98), rgba(10, 10, 26, 0.98));
+    border: 2px solid var(--gold-divine);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 450px;
+    width: 100%;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modalClose {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modalClose:hover {
+    background: rgba(239, 68, 68, 0.5);
+}
+
+.modalTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--gold-divine);
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.emptyRequests {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.emptyRequests span {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+/* Requests List */
+.requestsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.requestCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+.requestLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.requestAvatar {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #2a2a4a, #1a1a2e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.requestInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.requestName {
+    font-weight: 600;
+    color: white;
+}
+
+.requestLevel {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.requestActions {
+    display: flex;
+    gap: 8px;
+}
+
+.requestProfileButton {
+    width: 40px;
+    height: 40px;
+    background: rgba(59, 130, 246, 0.15);
+    border: none;
+    border-radius: 50%;
+    color: #3b82f6;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.requestProfileButton:hover {
+    background: rgba(59, 130, 246, 0.3);
+    transform: scale(1.1);
+}
+
+.acceptButton {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.acceptButton:hover {
+    background: rgba(74, 222, 128, 0.4);
+    transform: scale(1.1);
+}
+
+.rejectButton {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.rejectButton:hover {
+    background: rgba(248, 113, 113, 0.4);
+    transform: scale(1.1);
+}
+
+/* Options Modal */
+.optionsModalContent {
+    background: rgba(26, 26, 58, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    width: 280px;
+}
+
+.optionItem {
+    width: 100%;
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s;
+}
+
+.optionItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.optionItem.danger {
+    color: #ef4444;
+}
+
+.optionItem.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.optionCancel {
+    width: 100%;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #888;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.optionCancel:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .title {
+        font-size: 2rem;
+    }
+
+    .friendActions {
+        gap: 6px;
+    }
+
+    .actionButton {
+        width: 34px;
+        height: 34px;
+        font-size: 1rem;
+    }
+}
