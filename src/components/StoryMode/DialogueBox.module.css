@@ -1,0 +1,218 @@
+.dialogueContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+    padding-bottom: 40px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+    cursor: pointer;
+    z-index: 1000;
+    user-select: none;
+}
+
+/* Portrait du personnage */
+.portraitWrapper {
+    position: relative;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.portrait {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    border: 3px solid var(--glow-color, #ffd700);
+    box-shadow: 
+        0 0 20px var(--glow-color, #ffd700),
+        0 0 40px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+    animation: portraitGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes portraitGlow {
+    from {
+        box-shadow: 
+            0 0 20px var(--glow-color, #ffd700),
+            0 0 40px rgba(0, 0, 0, 0.5);
+    }
+    to {
+        box-shadow: 
+            0 0 30px var(--glow-color, #ffd700),
+            0 0 60px var(--glow-color, #ffd700);
+    }
+}
+
+.portraitImage {
+    object-fit: cover;
+    object-position: top center;
+}
+
+/* Indicateur d'émotion */
+.emotionIndicator {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #1a1a2e;
+}
+
+.emotionIndicator.angry {
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+}
+
+.emotionIndicator.sad {
+    background: linear-gradient(135deg, #4a90d9, #2c5aa0);
+}
+
+.emotionIndicator.happy {
+    background: linear-gradient(135deg, #ffdd44, #ff9900);
+}
+
+.emotionIndicator.surprised {
+    background: linear-gradient(135deg, #ff69b4, #ff1493);
+}
+
+.emotionIndicator.determined {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.emotionIndicator.neutral {
+    background: linear-gradient(135deg, #888888, #555555);
+}
+
+/* Boîte de dialogue */
+.dialogueBox {
+    flex: 1;
+    background: rgba(20, 20, 40, 0.95);
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    border-radius: 16px;
+    padding: 20px 24px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.dialogueBox::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+}
+
+/* Nom du personnage */
+.speakerName {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 10px currentColor;
+}
+
+/* Texte du dialogue */
+.dialogueText {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.95);
+    min-height: 60px;
+}
+
+.cursor {
+    animation: blink 0.5s step-end infinite;
+    color: var(--gold-divine, #d4af37);
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Indicateur de continuation */
+.continueIndicator {
+    position: absolute;
+    bottom: 12px;
+    right: 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--gold-divine, #d4af37);
+    animation: bounce 1s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Barre de progression */
+.progressBar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 14px 14px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-divine, #d4af37), #ffd700);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--gold-divine, #d4af37);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dialogueContainer {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        padding-bottom: 30px;
+    }
+
+    .portraitWrapper {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .portrait {
+        width: 80px;
+        height: 80px;
+    }
+
+    .dialogueBox {
+        width: 100%;
+        padding: 16px 20px;
+    }
+
+    .speakerName {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .dialogueText {
+        font-size: 1rem;
+        min-height: 50px;
+    }
+}

@@ -1,0 +1,449 @@
+.main {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #050510, #1a1a2e);
+    color: white;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    position: relative;
+}
+
+.backButton {
+    position: absolute;
+    left: 20px;
+    color: var(--gold-divine);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+
+.backButton:hover {
+    transform: translateX(-5px);
+}
+
+.title {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    color: var(--gold-divine);
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    margin: 0;
+    letter-spacing: 4px;
+}
+
+.resetButton {
+    position: absolute;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.resetButton:hover {
+    background: rgba(255, 100, 100, 0.2);
+    border-color: rgba(255, 100, 100, 0.5);
+}
+
+/* Loading */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold-divine);
+}
+
+/* Content */
+.content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Campaign Header */
+.campaignHeader {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px;
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+}
+
+.campaignTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--gold-divine);
+    margin: 0 0 10px 0;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.campaignDescription {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Team Section */
+.teamSection {
+    margin-bottom: 30px;
+}
+
+.sectionTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    color: var(--gold-divine);
+    margin: 0 0 15px 0;
+    text-align: center;
+}
+
+.teamGods {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.teamGod {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--gold-divine);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.teamGod:hover {
+    transform: scale(1.1);
+}
+
+.godImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Continue Button */
+.continueButton {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 30px;
+    padding: 16px 32px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, var(--gold-divine), #ffd700);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+}
+
+.continueButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6);
+}
+
+/* Chapters Grid */
+.chaptersGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Chapter Card */
+.chapterCard {
+    position: relative;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.chapterCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chapterCard:not(.locked):hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateX(10px);
+}
+
+.chapterCard:not(.locked):hover::before {
+    opacity: 1;
+}
+
+/* Locked state */
+.chapterCard.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Completed state */
+.chapterCard.completed {
+    border-color: rgba(50, 205, 50, 0.4);
+}
+
+.chapterCard.completed::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(50, 205, 50, 0.05), transparent);
+    pointer-events: none;
+}
+
+/* Current state */
+.chapterCard.current {
+    border-color: rgba(212, 175, 55, 0.6);
+    animation: currentPulse 2s infinite;
+}
+
+@keyframes currentPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+}
+
+/* Status Badge */
+.statusBadge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 12px;
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--gold-divine);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 20px;
+    letter-spacing: 1px;
+}
+
+.chapterCard.completed .statusBadge {
+    background: rgba(50, 205, 50, 0.2);
+    color: #32cd32;
+}
+
+.lockIcon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+/* Chapter Number */
+.chapterNumber {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+/* Chapter Title */
+.chapterTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold-divine);
+    margin: 0 0 4px 0;
+}
+
+.chapterSubtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin: 0 0 12px 0;
+}
+
+/* Chapter Description */
+.chapterDescription {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 15px 0;
+}
+
+/* Difficulty */
+.difficulty {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.difficulty.easy {
+    background: rgba(50, 205, 50, 0.2);
+    color: #32cd32;
+}
+
+.difficulty.medium {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+}
+
+.difficulty.hard {
+    background: rgba(255, 50, 50, 0.2);
+    color: #ff3232;
+}
+
+/* Event Count */
+.eventCount {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Story View (pendant l'histoire) */
+.storyView {
+    position: relative;
+    min-height: calc(100vh - 100px);
+}
+
+.storyBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/assets/story/underworld.png') center/cover no-repeat;
+    z-index: -1;
+}
+
+.backgroundOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(5, 5, 16, 0.7),
+            rgba(5, 5, 16, 0.5),
+            rgba(5, 5, 16, 0.9));
+}
+
+/* Battle Prompt */
+.battlePrompt {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 40px;
+    background: rgba(20, 20, 40, 0.95);
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    border-radius: 20px;
+    max-width: 500px;
+    backdrop-filter: blur(10px);
+}
+
+.battlePrompt h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--gold-divine);
+    margin: 0 0 15px 0;
+}
+
+.battlePrompt p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+.battleCondition {
+    padding: 12px 20px;
+    background: rgba(255, 100, 100, 0.15);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    border-radius: 10px;
+    color: #ff6b6b;
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+}
+
+.battleButton {
+    padding: 16px 40px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.4);
+}
+
+.battleButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 68, 68, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .title {
+        font-size: 1.8rem;
+    }
+
+    .campaignTitle {
+        font-size: 1.5rem;
+    }
+
+    .chapterCard {
+        padding: 20px;
+    }
+
+    .chapterTitle {
+        font-size: 1.3rem;
+    }
+
+    .teamGod {
+        width: 55px;
+        height: 55px;
+    }
+}

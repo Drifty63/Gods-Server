@@ -174,12 +174,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isAIPlaying: false,
         });
 
-        // Si c'est le tour de l'IA (joueur 2 commence), jouer après un délai
-        if (soloMode && !isPlayer1First) {
-            setTimeout(() => {
-                get().playAITurn();
-            }, 1000);
-        }
+        // NOTE: On ne lance plus playAITurn ici pour laisser le temps à l'UI d'afficher les intros
+        // C'est à la page de combat de déclencher le premier tour IA si besoin
     },
 
     // Initialiser le jeu avec un état spécifique (pour le multijoueur : l'invité reçoit l'état de l'hôte)

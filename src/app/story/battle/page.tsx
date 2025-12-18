@@ -1,0 +1,396 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useGameStore } from '@/store/gameStore';
+import { useStoryStore } from '@/store/storyStore';
+import GameBoard from '@/components/GameBoard/GameBoard';
+import { getGodById, ALL_GODS } from '@/data/gods';
+import { createDeck } from '@/data/spells';
+import { RequireAuth } from '@/components/Auth/RequireAuth';
+import styles from './page.module.css';
+
+type BattlePhase = 'loading' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
+
+export default function StoryBattlePage() {
+    return (
+        <RequireAuth>
+            <StoryBattleContent />
+        </RequireAuth>
+    );
+}
+
+function StoryBattleContent() {
+    const router = useRouter();
+    const [phase, setPhase] = useState<BattlePhase>('loading');
+    const [error, setError] = useState<string | null>(null);
+
+    const [postBattleDialogues, setPostBattleDialogues] = useState<any[]>([]);
+    const [postBattleIndex, setPostBattleIndex] = useState(0);
+
+    const { initGame, gameState, resetGame, playAITurn } = useGameStore();
+    const {
+        currentBattleConfig,
+        getPlayerTeam,
+        completeBattle,
+        advanceToNextEvent,
+        getCurrentEvent
+    } = useStoryStore();
+
+    // Initialiser le combat
+    const initBattle = useCallback(() => {
+        if (!currentBattleConfig) {
+            setError('Aucun combat configuré');
+            return;
+        }
+
+        try {
+            // Équipe du joueur (Zeus)
+            const playerTeamIds = getPlayerTeam();
+            const playerGods = playerTeamIds.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
+
+            // Équipe ennemie
+            const enemyGods = currentBattleConfig.enemyTeam.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
+
+            if (playerGods.length !== 4 || enemyGods.length !== 4) {
+                throw new Error('Impossible de charger toutes les équipes');
+            }
+
+            // Créer les decks
+            const playerDeck = createDeck(playerTeamIds);
+            const enemyDeck = createDeck(currentBattleConfig.enemyTeam);
+
+            // L'ennemi commence (attaque surprise)
+            const playerGoesFirst = false;
+
+            // Initialiser la partie
+            initGame(playerGods, playerDeck, enemyGods, enemyDeck, playerGoesFirst);
+
+            // Appliquer les conditions spéciales APRÈS l'initialisation
+            setTimeout(() => {
+                applyBattleConditions();
+            }, 100);
+
+            setPhase('intro');
+
+            // Passer à la phase de jeu après un délai
+            setTimeout(() => {
+                const updatedState = useGameStore.getState();
+                setPhase('playing');
+
+                // Si l'IA commence, lancer son tour maintenant que l'intro est finie
+                if (!playerGoesFirst && updatedState.isSoloMode) {
+                    setTimeout(() => {
+                        useGameStore.getState().playAITurn();
+                    }, 500);
+                }
+            }, 3000);
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erreur lors de l\'initialisation du combat');
+        }
+    }, [currentBattleConfig, getPlayerTeam, initGame]);
+
+    // Appliquer les conditions de combat (ex: 50% PV)
+    const applyBattleConditions = useCallback(() => {
+        if (!currentBattleConfig?.playerCondition) return;
+
+        const { engine, gameState } = useGameStore.getState();
+        if (!engine || !gameState) return;
+
+        if (currentBattleConfig.playerCondition.type === 'half_hp') {
+            // Récupérer l'état interne de l'engine et le modifier
+            const internalState = engine.getState();
+
+            // Réduire les PV du joueur à 50% dans l'état interne de l'engine
+            // players[0] = joueur 1 (nous)
+            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
+                god.currentHealth = Math.floor(god.card.maxHealth / 2);
+            });
+
+            // Créer une copie profonde de l'état pour React
+            const newGameState = JSON.parse(JSON.stringify(internalState));
+
+            // Mettre à jour le store avec le nouvel état
+            useGameStore.setState({ gameState: newGameState });
+        }
+    }, [currentBattleConfig]);
+
+    // Lancer le combat au chargement
+    useEffect(() => {
+        if (phase === 'loading') {
+            initBattle();
+        }
+    }, [phase, initBattle]);
+
+    // Surveiller la fin du combat
+    useEffect(() => {
+        if (!gameState || phase !== 'playing') return;
+
+        if (gameState.winnerId) {
+            const playerWon = gameState.winnerId === 'player1';
+
+            // Préparer les dialogues de fin
+            const dialogues = playerWon
+                ? [
+                    { speaker: 'zeus', text: "Hadès ! Ta trahison s'arrête ici ! L'Olympe ne tombera pas aujourd'hui.", portrait: 'zeus' },
+                    { speaker: 'hades', text: "Grrr... Tu n'as fait que retarder l'inévitable, frère. Les ombres ne meurent jamais.", portrait: 'hades' },
+                    { speaker: 'aphrodite', text: "Même dans les ténèbres les plus profondes, la beauté et l'amour triomphent toujours. Ton royaume manque cruellement de goût, mon oncle.", portrait: 'aphrodite' },
+                    { speaker: 'dionysos', text: "Allez, détends-toi Hadès ! Un petit verre de nectar et on oublie tout ? L'ambiance était un peu trop... mortelle ici.", portrait: 'dionysos' },
+                    { speaker: 'zeus', text: "Assez. Nous rentrons. Mais sache que je garderai un œil sur les Enfers désormais.", portrait: 'zeus' }
+                ]
+                : [
+                    { speaker: 'hades', text: "L'Olympe s'effondre enfin. Mon heure est venue de régner sur les cieux et les morts.", portrait: 'hades' },
+                    { speaker: 'nyx', text: "Le voile tombe sur les dieux de la lumière. L'éternelle nuit commence, comme je l'avais prédit.", portrait: 'nyx' },
+                    { speaker: 'zeus', text: "Impossible... Mes forces m'abandonnent... Mais sache-le, Hadès... d'autres se lèveront...", portrait: 'zeus' },
+                    { speaker: 'hestia', text: "Le foyer de l'Olympe s'éteint... Que les dieux nous protègent dans cette nouvelle ère de ténèbres.", portrait: 'hestia' }
+                ];
+
+            setPostBattleDialogues(dialogues);
+            setPhase('post_battle_dialogue');
+            completeBattle(playerWon);
+        }
+    }, [gameState, phase, completeBattle]);
+
+    const handleNextPostDialogue = () => {
+        if (postBattleIndex < postBattleDialogues.length - 1) {
+            setPostBattleIndex(postBattleIndex + 1);
+        } else {
+            const playerWon = gameState?.winnerId === 'player1';
+            setPhase(playerWon ? 'victory' : 'defeat');
+        }
+    };
+
+    // Continuer l'histoire après le combat
+    const handleContinue = () => {
+        const event = getCurrentEvent();
+        const playerWon = phase === 'victory';
+
+        // Passer à l'événement suivant
+        const nextEvent = advanceToNextEvent(playerWon);
+
+        resetGame();
+
+        // Retourner à la page histoire
+        router.push('/story');
+    };
+
+    // Réessayer le combat
+    const handleRetry = () => {
+        resetGame();
+        setPhase('loading');
+        setError(null);
+    };
+
+    // Abandonner et retourner à l'histoire
+    const handleQuit = () => {
+        resetGame();
+        router.push('/story');
+    };
+
+    // Phase: Chargement
+    if (phase === 'loading') {
+        return (
+            <main className={styles.main}>
+                <div className={styles.loadingScreen}>
+                    <div className={styles.loadingContent}>
+                        <div className={styles.spinner}></div>
+                        <h2>Préparation du combat...</h2>
+                        <p>{currentBattleConfig?.name || 'Chargement...'}</p>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Phase: Erreur
+    if (error) {
+        return (
+            <main className={styles.main}>
+                <div className={styles.errorScreen}>
+                    <h2>⚠️ Erreur</h2>
+                    <p>{error}</p>
+                    <div className={styles.buttonGroup}>
+                        <button onClick={handleRetry} className={styles.retryButton}>
+                            🔄 Réessayer
+                        </button>
+                        <Link href="/story" className={styles.backButton}>
+                            ← Retour à l'histoire
+                        </Link>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Phase: Introduction du combat
+    if (phase === 'intro') {
+        return (
+            <main className={styles.main}>
+                <div className={styles.storyBackground}>
+                    <div className={styles.backgroundOverlay} />
+                </div>
+                <div className={styles.introScreen}>
+                    <div className={styles.introContent}>
+                        <h1 className={styles.battleTitle}>{currentBattleConfig?.name}</h1>
+                        <p className={styles.battleDescription}>{currentBattleConfig?.description}</p>
+
+                        {currentBattleConfig?.playerCondition && (
+                            <div className={styles.conditionWarning}>
+                                ⚠️ {currentBattleConfig.playerCondition.description}
+                            </div>
+                        )}
+
+                        <div className={styles.vsContainer}>
+                            <div className={styles.teamPreview}>
+                                <span className={styles.teamLabel}>Votre Équipe</span>
+                                <div className={styles.teamIcons}>
+                                    {getPlayerTeam().map(id => (
+                                        <div key={id} className={styles.godIcon}>
+                                            <img src={`/cards/gods/${id}.png`} alt={id} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className={styles.vsText}>VS</div>
+
+                            <div className={styles.teamPreview}>
+                                <span className={styles.teamLabel}>Adversaires</span>
+                                <div className={styles.teamIcons}>
+                                    {currentBattleConfig?.enemyTeam.map(id => (
+                                        <div key={id} className={styles.godIcon}>
+                                            <img src={`/cards/gods/${id}.png`} alt={id} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <p className={styles.preparingText}>Le combat commence...</p>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Phase: Dialogue post-combat
+    if (phase === 'post_battle_dialogue') {
+        const dialogue = postBattleDialogues[postBattleIndex];
+        return (
+            <main className={styles.main}>
+                <div className={styles.storyBackground}>
+                    <div className={styles.backgroundOverlay} />
+                </div>
+                <div className={styles.dialogueOverlay}>
+                    <div className={styles.dialogueContainer}>
+                        <div className={styles.portraitContainer}>
+                            <img src={`/portraits/${dialogue.portrait}.png`} alt={dialogue.speaker} className={styles.dialoguePortrait} />
+                        </div>
+                        <div className={styles.dialogueBox}>
+                            <h3 className={styles.speakerName}>{dialogue.speaker.toUpperCase()}</h3>
+                            <p className={styles.dialogueText}>{dialogue.text}</p>
+                            <button onClick={handleNextPostDialogue} className={styles.nextButton}>
+                                {postBattleIndex < postBattleDialogues.length - 1 ? 'Suite' : 'Terminer'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Phase: Victoire
+    if (phase === 'victory') {
+        return (
+            <main className={styles.main}>
+                <div className={styles.storyBackground}>
+                    <div className={styles.backgroundOverlay} />
+                </div>
+                <div className={styles.resultScreen}>
+                    <div className={`${styles.resultContent} ${styles.victory}`}>
+                        <div className={styles.resultIcon}>🏆</div>
+                        <h1>VICTOIRE !</h1>
+                        <p>Vous avez remporté le combat !</p>
+
+                        {currentBattleConfig?.rewards && currentBattleConfig.rewards.length > 0 && (
+                            <div className={styles.rewards}>
+                                <h3>Récompenses :</h3>
+                                {currentBattleConfig.rewards.map((reward, idx) => (
+                                    <div key={idx} className={styles.rewardItem}>
+                                        {reward.description}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <button onClick={handleContinue} className={styles.continueButton}>
+                            ▶ Continuer l'histoire
+                        </button>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Phase: Défaite
+    if (phase === 'defeat') {
+        const canContinue = currentBattleConfig?.continueOnDefeat;
+
+        return (
+            <main className={styles.main}>
+                <div className={styles.storyBackground}>
+                    <div className={styles.backgroundOverlay} />
+                </div>
+                <div className={styles.resultScreen}>
+                    <div className={`${styles.resultContent} ${styles.defeat}`}>
+                        <div className={styles.resultIcon}>💀</div>
+                        <h1>DÉFAITE...</h1>
+                        <p>Vous avez perdu le combat.</p>
+
+                        <div className={styles.buttonGroup}>
+                            <button onClick={handleRetry} className={styles.retryButton}>
+                                🔄 Réessayer
+                            </button>
+
+                            {canContinue && (
+                                <button onClick={handleContinue} className={styles.continueButton}>
+                                    ▶ Continuer malgré tout
+                                </button>
+                            )}
+
+                            <button onClick={handleQuit} className={styles.quitButton}>
+                                ← Abandonner
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Phase: Combat en cours
+    return (
+        <main className={styles.main}>
+            {/* Header du mode histoire */}
+            <header className={styles.header}>
+                <button onClick={handleQuit} className={styles.backBtn}>
+                    ← Quitter
+                </button>
+                <h1 className={styles.title}>{currentBattleConfig?.name || 'Combat'}</h1>
+                <div className={styles.headerSpacer} />
+            </header>
+
+            {/* Condition de combat affichée */}
+            {currentBattleConfig?.playerCondition && (
+                <div className={styles.conditionBanner}>
+                    ⚠️ {currentBattleConfig.playerCondition.description}
+                </div>
+            )}
+
+            {/* Plateau de jeu */}
+            <GameBoard />
+        </main>
+    );
+}

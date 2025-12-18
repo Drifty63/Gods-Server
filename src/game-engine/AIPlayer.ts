@@ -167,6 +167,16 @@ export class AIPlayer {
                 return false;
             }
 
+            // Vérifier si le joueur a déjà joué une carte ce tour
+            if (player.hasPlayedCard) {
+                return false;
+            }
+
+            // Vérifier si le joueur a déjà défaussé ce tour (exclusif)
+            if (player.hasDiscardedForEnergy) {
+                return false;
+            }
+
             return true;
         });
     }

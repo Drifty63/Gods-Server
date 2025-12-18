@@ -82,6 +82,11 @@ export class GameEngine {
             return { success: false, message: 'Carte non trouvée dans la main' };
         }
 
+        // Vérifier si le joueur a déjà joué une carte ce tour
+        if (player.hasPlayedCard) {
+            return { success: false, message: 'Vous avez déjà joué une carte ce tour' };
+        }
+
         const card = player.hand[cardIndex];
 
         // Vérifier le coût en énergie

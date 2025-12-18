@@ -25,8 +25,7 @@ function PlayContent() {
             <div className={styles.content}>
                 <div className={styles.modesGrid}>
                     {/* Mode Histoire */}
-                    <div className={`${styles.modeCard} ${styles.comingSoon}`}>
-                        <div className={styles.comingSoonBadge}>Bientôt</div>
+                    <Link href="/story" className={styles.modeCard}>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>📖</span>
                         </div>
@@ -37,7 +36,7 @@ function PlayContent() {
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
-                    </div>
+                    </Link>
 
                     {/* Mode En Ligne */}
                     <Link href="/online" className={styles.modeCard}>
