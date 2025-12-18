@@ -404,6 +404,8 @@ export default function ShopPage() {
                     <div className={styles.godsGrid}>
                         {visibleGods.map((god) => {
                             const owned = isGodOwned(god.id);
+                            const isMonthlyGod = god.id === currentGodId;
+                            const godPrice = isMonthlyGod ? GOD_PROMO_PRICE : GOD_PRICE;
                             return (
                                 <div
                                     key={god.id}
@@ -414,6 +416,9 @@ export default function ShopPage() {
                                     <div className={styles.godImageWrapper}>
                                         {owned && (
                                             <div className={styles.godOwnedBadge}>✓</div>
+                                        )}
+                                        {isMonthlyGod && !owned && (
+                                            <div className={styles.promoBadgeSmall}>PROMO</div>
                                         )}
                                         <Image
                                             src={god.imageUrl}
@@ -431,7 +436,7 @@ export default function ShopPage() {
                                     ) : (
                                         <div className={styles.godPrice}>
                                             <Image src="/icons/ambroisie.png" alt="Ambroisie" width={14} height={14} />
-                                            <span>{GOD_PRICE.toLocaleString()}</span>
+                                            <span>{godPrice.toLocaleString()}</span>
                                         </div>
                                     )}
                                     <button className={`${styles.viewButtonMini} ${owned ? styles.disabledButton : ''}`}>
