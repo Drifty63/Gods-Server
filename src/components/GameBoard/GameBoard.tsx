@@ -348,10 +348,10 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
         if (hasChanges) {
             setHealthChanges(newChanges);
-            // Clear les animations après 1.5 secondes
+            // Clear les animations après 2.5 secondes
             setTimeout(() => {
                 setHealthChanges({});
-            }, 1500);
+            }, 2500);
         }
     }, [gameState]);
 
@@ -368,7 +368,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const currentDiscardLength = currentOpponent.discard.length;
         const prevDiscardLength = opponentDiscardLengthRef.current;
 
-        // Si la défausse a augmenté et que ce n'est pas notre tour
+        // Si la défausse a augmenté et que c'est notre tour (donc l'adversaire vient de jouer)
         if (currentDiscardLength > prevDiscardLength && gameState.currentPlayerId === playerId) {
             // L'adversaire a joué une carte (la défausse a augmenté pendant son tour)
             // La dernière carte de la défausse est celle qui vient d'être jouée
@@ -377,7 +377,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 setDisplayedCard(lastPlayedCard);
                 setTimeout(() => {
                     setDisplayedCard(null);
-                }, 2000);
+                }, 4000);
             }
         }
 
@@ -497,10 +497,10 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Fonction pour afficher la carte jouée au centre du terrain
     const showPlayedCard = (card: import('@/types/cards').SpellCard) => {
         setDisplayedCard(card);
-        // Cacher la carte après 2 secondes
+        // Cacher la carte après 4 secondes
         setTimeout(() => {
             setDisplayedCard(null);
-        }, 2000);
+        }, 4000);
     };
 
     // Wrapper pour playCard qui gère aussi la sélection de cartes et la distribution de soins
