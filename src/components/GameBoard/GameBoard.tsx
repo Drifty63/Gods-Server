@@ -12,6 +12,7 @@ import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
 import OptionalChoiceModal from '@/components/OptionalChoiceModal/OptionalChoiceModal';
 import PlayerSelectionModal from '@/components/PlayerSelectionModal/PlayerSelectionModal';
 import DeadGodSelectionModal from '@/components/DeadGodSelectionModal/DeadGodSelectionModal';
+import ZombieDamageModal from '@/components/ZombieDamageModal/ZombieDamageModal';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { recordVictory, recordDefeat, recordGodsPlayed } from '@/services/firebase';
@@ -793,6 +794,19 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
         autoEndTurnMultiplayer();
     };
+
+    // Handler pour les dégâts du zombie (fin de tour)
+    const handleConfirmZombieDamage = (targetGodId: string | null) => {
+        confirmZombieDamage(targetGodId);
+        // Après le zombie damage, finir le tour normalement
+        autoEndTurnMultiplayer();
+    };
+
+    // Trouver le zombie actif du joueur pour le modal de dégâts
+    const activeZombie = player?.gods.find(g => g.isZombie && !g.isDead);
+    const zombieForModal = zombieDamageGodId
+        ? player?.gods.find(g => g.card.id === zombieDamageGodId)
+        : null;
 
     const handleCardClick = (card: typeof selectedCard) => {
         if (!isPlayerTurn || !card) return;
@@ -1608,6 +1622,15 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 deadGods={player?.gods.filter(g => g.isDead && !g.isZombie) || []}
                 onSelectGod={handleConfirmDeadGodSelection}
                 onCancel={cancelDeadGodSelection}
+            />
+
+            {/* Modal de dégâts zombie (fin de tour) */}
+            <ZombieDamageModal
+                isOpen={isShowingZombieDamage}
+                zombieGod={zombieForModal || null}
+                enemyGods={opponent?.gods || []}
+                onSelectTarget={handleConfirmZombieDamage}
+                onSkip={() => handleConfirmZombieDamage(null)}
             />
 
             {/* Toast de notification */}

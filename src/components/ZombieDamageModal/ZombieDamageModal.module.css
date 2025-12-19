@@ -1,0 +1,175 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal {
+    background: linear-gradient(145deg, #0d0d1a, #1a0a20);
+    border: 2px solid #8e44ad;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 550px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(142, 68, 173, 0.6),
+        0 0 100px rgba(142, 68, 173, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.zombieInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.zombieImage {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid #8e44ad;
+    position: relative;
+    box-shadow: 0 0 30px rgba(142, 68, 173, 0.8);
+}
+
+.zombieOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: linear-gradient(180deg,
+            rgba(75, 0, 130, 0.3) 0%,
+            rgba(50, 50, 50, 0.5) 100%);
+    mix-blend-mode: multiply;
+}
+
+.zombieName {
+    color: #bb86fc;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+.zombieHealth {
+    color: #e74c3c;
+    font-size: 1rem;
+}
+
+.title {
+    color: #9b59b6;
+    font-size: 1.4rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: bold;
+}
+
+.description {
+    color: #b0b0b0;
+    font-size: 0.95rem;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
+.targetsContainer {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.targetButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.8rem;
+    background: linear-gradient(145deg, #2d1b4e, #1a0f30);
+    border: 2px solid #e74c3c;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.targetButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
+    border-color: #ff6b6b;
+}
+
+.targetImage {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 0.3rem;
+    border: 2px solid #e74c3c;
+}
+
+.targetName {
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.targetHealth {
+    color: #e74c3c;
+    font-size: 0.8rem;
+}
+
+.noTargets {
+    color: #888;
+    font-style: italic;
+}
+
+.skipButton {
+    background: transparent;
+    border: 1px solid #666;
+    color: #888;
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.skipButton:hover {
+    border-color: #888;
+    color: #aaa;
+    background: rgba(255, 255, 255, 0.05);
+}

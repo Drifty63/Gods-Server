@@ -118,6 +118,14 @@ export default function GodCard({
                     <span className={styles.deadText}>💀</span>
                 </div>
             )}
+
+            {/* Overlay zombie (Perséphone) */}
+            {god.isZombie && !isDead && (
+                <div className={styles.zombieOverlay}>
+                    <span className={styles.zombieText}>⚰️</span>
+                    <span className={styles.zombieLabel}>ZOMBIE</span>
+                </div>
+            )}
         </div>
     );
 }
