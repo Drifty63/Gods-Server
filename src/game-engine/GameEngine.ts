@@ -126,6 +126,9 @@ export class GameEngine {
         let targetIndex = 0;
         let lastUsedTargetId: string | undefined = undefined;
 
+        // Marquer que le joueur a joué une carte ce tour (avant les effets pour permettre le reset via replay_action)
+        player.hasPlayedCard = true;
+
         // Appliquer les effets
         for (const effect of card.effects) {
             // Pour target 'same', utiliser la dernière cible
@@ -161,8 +164,6 @@ export class GameEngine {
         this.cleanBlindCard(card);
         player.discard.push(card);
 
-        // Marquer que le joueur a joué une carte ce tour
-        player.hasPlayedCard = true;
 
         return { success: true, message: `${card.name} joué avec succès` };
     }
