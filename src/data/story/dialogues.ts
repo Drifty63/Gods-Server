@@ -5,128 +5,223 @@ import { DialogueLine } from '@/types/story';
 // CHAPITRE 1 - PROLOGUE : LA TRAHISON
 // ===========================================
 
-// Introduction - Avant le combat 1
+// Introduction narrative - L'histoire du monde
+export const PROLOGUE_NARRATIVE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Au commencement, il n'y avait que le Chaos. Puis naquirent Gaïa, la Terre, et Ouranos, le Ciel étoilé...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "De leur union naquirent les Titans, et parmi eux Cronos, qui dévora ses propres enfants par crainte d'une prophétie.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Mais Rhéa, désespérée, cacha le dernier né : Zeus. Celui-ci grandit en secret, et libéra un jour ses frères et sœurs des entrailles de son père.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Après une guerre terrible contre les Titans - la Titanomachie - les trois frères se partagèrent le monde.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Zeus reçut le Ciel et devint roi des dieux. Poséidon obtint les Mers. Et Hadès... Hadès fut relégué aux Enfers.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Pendant des millénaires, les trois royaumes coexistèrent. Mais dans les profondeurs du Tartare, une rancœur grandissait...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Cette nuit, sur l'Olympe, le tonnerre gronde d'une façon inhabituelle. Zeus sent une présence familière approcher...",
+        emotion: 'neutral'
+    }
+];
+
+// Dialogue entre Zeus et Hadès avant le combat
 export const PROLOGUE_INTRO: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "L'Olympe est en paix depuis des siècles. Les mortels nous vénèrent, et l'équilibre règne entre les royaumes.",
+        text: "Qui ose troubler la quiétude de l'Olympe à cette heure ? Montre-toi !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Calme-toi, frère. Tu sais très bien qui je suis. Tu m'as toujours su présent, même quand tu feignais de m'ignorer.",
         emotion: 'neutral'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Mais je sens une ombre grandir... Une menace que je n'arrive pas à identifier.",
+        text: "Hadès... Cela fait des siècles que tu n'as pas quitté ton royaume. Que me vaut cette... visite ?",
         emotion: 'surprised'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Cher frère... Tu aurais dû écouter cette intuition plus tôt.",
+        text: "Visite ? Non, Zeus. Je préfère le terme 'réclamation'.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Réclamation ? Mais de quoi parles-tu ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Du trône ! De CE trône que tu occupes depuis la chute de Cronos !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "J'étais l'aîné ! Le droit d'aînesse aurait dû me revenir ! Mais non... vous aviez TOUS peur de moi.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Le sort a décidé, Hadès. Ce n'est pas moi qui ai choisi les Enfers pour toi.",
         emotion: 'neutral'
     },
     {
-        speakerId: 'zeus',
-        speakerName: 'Zeus',
-        text: "Hadès ?! Que fais-tu ici ? Et... pourquoi es-tu accompagné d'une armée ?",
-        emotion: 'surprised'
-    },
-    {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Depuis trop longtemps, je suis relégué aux Enfers pendant que TU règnes sur l'Olympe !",
+        text: "Le sort ? Tu parles du tirage truqué que toi et Poséidon avez orchestré ?",
         emotion: 'angry'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Aujourd'hui, je prends ce qui m'appartient de droit. Le trône sera MIEN !",
-        emotion: 'angry'
-    },
-    {
-        speakerId: 'nyx',
-        speakerName: 'Nyx',
-        text: "Les ténèbres engloutiront la lumière, Zeus. Ta chute est inévitable.",
-        emotion: 'determined'
-    },
-    {
-        speakerId: 'hestia',
-        speakerName: 'Hestia',
-        text: "Zeus ! Nous sommes attaqués de toutes parts ! C'est une embuscade !",
-        emotion: 'surprised'
-    },
-    {
-        speakerId: 'aphrodite',
-        speakerName: 'Aphrodite',
-        text: "Nous n'avons pas le temps de nous préparer... Il faut nous défendre !",
-        emotion: 'determined'
-    },
-    {
-        speakerId: 'dionysos',
-        speakerName: 'Dionysos',
-        text: "Hé bien... la fête va être sanglante ce soir !",
+        text: "J'ai eu des millénaires pour méditer dans les ténèbres. Des millénaires pour préparer... ceci.",
         emotion: 'determined'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Mes fidèles alliés, préparez-vous au combat ! Nous ne céderons pas face à cette traîtrise !",
+        text: "Tu ne peux pas me menacer sur mon propre trône ! Je suis le Roi des Dieux !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Tu ÉTAIS le roi. Les morts que tu m'as envoyés pendant des siècles m'ont rendu plus puissant que tu ne l'imagines.",
         emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Très bien, frère... Si c'est un combat que tu veux, c'est un combat que tu auras !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Que le plus digne des fils de Cronos prenne le trône de l'Olympe. Mais sache que je t'ai déjà affaibli... regarde-toi.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "L'ombre... le malaise que je ressentais... C'était TOI ! Tu as drainé mon énergie !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Les Enfers m'ont appris la patience. Maintenant, TOMBE !",
+        emotion: 'angry'
     }
 ];
 
-// Après la défaite ou la victoire du combat 1
+// Après la victoire du combat
 export const PROLOGUE_AFTER_BATTLE_1_WIN: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Nous... nous les avons repoussés... pour l'instant...",
-        emotion: 'sad'
+        text: "*souffle lourd* Tu... tu pensais vraiment pouvoir me vaincre, Hadès ?",
+        emotion: 'determined'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Tu crois avoir gagné, frère ? Regarde autour de toi !",
+        text: "*à genoux* Impossible... même affaibli, tu parviens à me repousser...",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Je suis le Maître de la Foudre. Mon pouvoir perdure quelles que soient tes machinations.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Tu as peut-être gagné cette bataille, Zeus... Mais la guerre ne fait que commencer.",
         emotion: 'angry'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Pendant que tu te battais contre nous, mes légions ont pris le contrôle de l'Olympe.",
+        text: "Pendant que tu te réjouissais, mes légions encerclaient l'Olympe. Regarde autour de toi !",
         emotion: 'happy'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Non... C'est impossible...",
+        text: "Non... C'est impossible... Des ombres partout !",
         emotion: 'surprised'
-    },
-    {
-        speakerId: 'hades',
-        speakerName: 'Hadès',
-        text: "L'Olympe est à MOI désormais ! Et toi, Zeus, tu n'es plus rien !",
-        emotion: 'happy'
     }
 ];
 
+// Après la défaite du combat
 export const PROLOGUE_AFTER_BATTLE_1_LOSE: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Nous... nous sommes vaincus...",
+        text: "*s'effondre* La foudre... ne répond plus...",
         emotion: 'sad'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Comme je l'avais prévu. Tu es devenu faible, Zeus.",
+        text: "Enfin... le tout-puissant Zeus tombe devant son frère méprisé.",
         emotion: 'happy'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "L'Olympe m'appartient désormais. Emmènes-les !",
+        text: "Savoure ta défaite, frère. Tu l'as bien méritée après des millénaires d'arrogance.",
         emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Ce n'est pas... terminé... Hadès...",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Oh, mais ça l'est. Regarde autour de toi. Mes ombres contrôlent déjà l'Olympe.",
+        emotion: 'happy'
     }
 ];
 
@@ -135,56 +230,66 @@ export const PROLOGUE_HADES_TAKES_THRONE: DialogueLine[] = [
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Enfin... Le trône de l'Olympe est mien !",
+        text: "Enfin... ENFIN ! Ce trône qui m'était destiné est mien !",
         emotion: 'happy'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Une nouvelle ère commence. L'ère des Ténèbres !",
+        text: "Une nouvelle ère commence, frère. L'ère des Ténèbres Éternelles.",
         emotion: 'determined'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Ce n'est pas terminé, Hadès. Nous reviendrons...",
+        text: "Tu penses avoir gagné, mais tu te trompes. Les autres dieux ne se laisseront pas faire.",
         emotion: 'determined'
     },
     {
-        speakerId: 'hestia',
-        speakerName: 'Hestia',
-        text: "Nous devons fuir pour l'instant. Regroupons nos forces.",
-        emotion: 'sad'
-    },
-    {
-        speakerId: 'aphrodite',
-        speakerName: 'Aphrodite',
-        text: "Les autres dieux... nous devons les rallier à notre cause !",
-        emotion: 'determined'
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Les autres dieux ? Arès s'est déjà rallié à moi. Nyx me sert depuis toujours. Qui te reste-t-il ?",
+        emotion: 'happy'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Tu as raison. La résistance commence maintenant.",
+        text: "Athéna... Poséidon... Ils ne te laisseront pas régner. Je reviendrai, Hadès.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Fuis alors ! Fuis pendant que je te laisse encore respirer. Mais sache que la prochaine fois...",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "...je ne serai pas aussi clément.",
         emotion: 'determined'
     }
 ];
 
-// ===========================================
-// FIN DU CHAPITRE 1
-// ===========================================
+// Fin du chapitre
 export const PROLOGUE_END: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Nous avons perdu l'Olympe... mais pas la guerre.",
+        text: "L'Olympe est tombé... mais moi, je suis toujours debout.",
         emotion: 'determined'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "À suivre...",
-        emotion: 'neutral'
+        text: "Je dois trouver mes alliés. Athéna la Sage... Poséidon des Océans... ensemble, nous reprendrons ce qui nous appartient.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "La résistance commence maintenant. Ce n'est que le début...",
+        emotion: 'determined'
     }
 ];
 

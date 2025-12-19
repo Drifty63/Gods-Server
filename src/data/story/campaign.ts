@@ -1,6 +1,7 @@
 // Configuration de la campagne Zeus
 import { StoryCampaign, Chapter, StoryEvent } from '@/types/story';
 import {
+    PROLOGUE_NARRATIVE,
     PROLOGUE_INTRO,
     PROLOGUE_AFTER_BATTLE_1_WIN,
     PROLOGUE_AFTER_BATTLE_1_LOSE,
@@ -28,34 +29,44 @@ import {
 
 // ===========================================
 // CHAPITRE 1 - PROLOGUE : LA TRAHISON
+// Combat 1v1 : Zeus vs Hadès
 // ===========================================
 const chapter1Events: StoryEvent[] = [
-    // Introduction narrative
+    // Introduction narrative - Histoire mythologique
+    {
+        id: 'ch1_narrative',
+        type: 'cutscene',
+        dialogues: PROLOGUE_NARRATIVE,
+        nextEventId: 'ch1_intro'
+    },
+    // Dialogue Zeus vs Hadès avant le combat
     {
         id: 'ch1_intro',
         type: 'dialogue',
         dialogues: PROLOGUE_INTRO,
         nextEventId: 'ch1_battle1'
     },
-    // Combat 1 : L'embuscade d'Hadès
+    // Combat 1v1 : Zeus vs Hadès
     {
         id: 'ch1_battle1',
         type: 'battle',
         battle: {
-            id: 'battle_hades_ambush',
-            name: "L'Embuscade",
-            description: "Hadès attaque par surprise avec son armée des ténèbres !",
-            enemyTeam: ['hades', 'nyx', 'apollon', 'ares'],
+            id: 'battle_zeus_vs_hades',
+            name: "Duel des Frères",
+            description: "Zeus affronte Hadès en combat singulier pour le trône de l'Olympe !",
+            playerTeam: ['zeus'],           // 1 seul dieu : Zeus
+            enemyTeam: ['hades'],           // 1 seul dieu : Hadès
+            deckMultiplier: 4,              // Deck x4 (20 cartes au lieu de 5)
             playerCondition: {
                 type: 'half_hp',
-                description: "L'attaque surprise a affaibli votre équipe (50% PV)"
+                description: "L'attaque surprise d'Hadès a affaibli Zeus (50% PV)"
             },
             continueOnDefeat: true,  // L'histoire continue dans les deux cas
             rewards: [
                 {
                     type: 'ambroisie',
-                    amount: 50,
-                    description: '50 Ambroisie'
+                    amount: 100,
+                    description: '100 Ambroisie'
                 }
             ]
         },

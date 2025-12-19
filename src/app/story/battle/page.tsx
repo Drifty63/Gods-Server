@@ -66,20 +66,58 @@ function StoryBattleContent() {
         }
 
         try {
-            // Équipe du joueur (Zeus)
-            const playerTeamIds = getPlayerTeam();
+            // Équipe du joueur - utilise la config de bataille si définie, sinon l'équipe par défaut
+            const playerTeamIds = currentBattleConfig.playerTeam || getPlayerTeam();
             const playerGods = playerTeamIds.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
             // Équipe ennemie
             const enemyGods = currentBattleConfig.enemyTeam.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
-            if (playerGods.length !== 4 || enemyGods.length !== 4) {
-                throw new Error('Impossible de charger toutes les équipes');
+            // Vérification de la taille des équipes (supportent maintenant 1-4 dieux)
+            if (playerGods.length === 0 || playerGods.length > 4) {
+                throw new Error(`Équipe joueur invalide (${playerGods.length} dieux)`);
+            }
+            if (enemyGods.length === 0 || enemyGods.length > 4) {
+                throw new Error(`Équipe ennemie invalide (${enemyGods.length} dieux)`);
             }
 
-            // Créer les decks
-            const playerDeck = createDeck(playerTeamIds);
-            const enemyDeck = createDeck(currentBattleConfig.enemyTeam);
+            // Créer les decks avec multiplicateur optionnel
+            const basePlaverDeck = createDeck(playerTeamIds);
+            const baseEnemyDeck = createDeck(currentBattleConfig.enemyTeam);
+
+            let playerDeck = basePlaverDeck;
+            let enemyDeck = baseEnemyDeck;
+
+            // Appliquer le multiplicateur de deck si défini (pour combat 1v1)
+            if (currentBattleConfig.deckMultiplier && currentBattleConfig.deckMultiplier > 1) {
+                const multiplier = currentBattleConfig.deckMultiplier;
+                playerDeck = [];
+                enemyDeck = [];
+
+                // Multiplier les cartes du deck du joueur
+                for (let i = 0; i < multiplier; i++) {
+                    basePlaverDeck.forEach(card => {
+                        playerDeck.push({
+                            ...card,
+                            id: `${card.id}_copy_${i}`  // ID unique pour chaque copie
+                        });
+                    });
+                }
+
+                // Multiplier les cartes du deck ennemi
+                for (let i = 0; i < multiplier; i++) {
+                    baseEnemyDeck.forEach(card => {
+                        enemyDeck.push({
+                            ...card,
+                            id: `${card.id}_copy_${i}`  // ID unique pour chaque copie
+                        });
+                    });
+                }
+
+                console.log(`🎮 Combat 1v1 - Deck multiplié x${multiplier}`);
+                console.log(`📚 Joueur: ${playerDeck.length} cartes`);
+                console.log(`📚 Ennemi: ${enemyDeck.length} cartes`);
+            }
 
             // L'ennemi commence (attaque surprise)
             const playerGoesFirst = false;

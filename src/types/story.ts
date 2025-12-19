@@ -19,6 +19,8 @@ export interface BattleConfig {
     name: string;
     description: string;
     enemyTeam: string[];           // IDs des dieux ennemis
+    playerTeam?: string[];         // IDs des dieux du joueur (si différent de la campagne)
+    deckMultiplier?: number;       // Multiplicateur des cartes du deck (ex: 4 pour 1v1)
     playerCondition?: BattleCondition;  // Condition spéciale pour le joueur
     enemyCondition?: BattleCondition;   // Condition spéciale pour l'ennemi
     continueOnDefeat: boolean;     // L'histoire continue même en cas de défaite
