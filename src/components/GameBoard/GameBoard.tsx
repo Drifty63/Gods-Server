@@ -651,6 +651,32 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 return;
             }
 
+            // Vérifier si la carte nécessite un choix optionnel (Perséphone Vision du Tartare)
+            const optionalChoice = getOptionalChoiceRequired(card);
+            if (optionalChoice) {
+                // Jouer la carte d'abord (applique les dégâts de base), puis ouvrir le modal
+                playCard(cardId, targetGodId, targetGodIds, lightningAction);
+                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
+                // Récupérer les cibles pour les passer au modal
+                const targetIds = targetGodIds || (targetGodId ? [targetGodId] : []);
+                startOptionalChoice(optionalChoice.title, optionalChoice.description, optionalChoice.effectId, targetIds);
+                setPendingCardForOverlay(card);
+                // La fin de tour sera appelée après la confirmation du modal
+                return;
+            }
+
+            // Vérifier si la carte nécessite un choix de joueur (Zéphyr Bourrasque Chanceuse)
+            const playerSel = getPlayerSelectionRequired(card);
+            if (playerSel) {
+                // Jouer la carte d'abord, puis ouvrir le modal
+                playCard(cardId, targetGodId, targetGodIds, lightningAction);
+                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
+                startPlayerSelection(playerSel.title, playerSel.effectId);
+                setPendingCardForOverlay(card);
+                // La fin de tour sera appelée après la confirmation du modal
+                return;
+            }
+
             // Afficher la carte jouée au centre immédiatement si pas de choix requis
             showPlayedCard(card);
         }
@@ -683,6 +709,26 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     const handleConfirmEnemyCardSelection = (cardIds: string[]) => {
         confirmEnemyCardSelection(cardIds);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
+        autoEndTurnMultiplayer();
+    };
+
+    // Handler pour la confirmation du choix optionnel (Vision du Tartare)
+    const handleConfirmOptionalChoice = (accepted: boolean) => {
+        confirmOptionalChoice(accepted);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
+        autoEndTurnMultiplayer();
+    };
+
+    // Handler pour la confirmation du choix de joueur (Bourrasque Chanceuse)
+    const handleConfirmPlayerSelection = (targetSelf: boolean) => {
+        confirmPlayerSelection(targetSelf);
         if (pendingCardForOverlay) {
             showPlayedCard(pendingCardForOverlay);
             setPendingCardForOverlay(null);
@@ -1484,16 +1530,16 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 isOpen={isShowingOptionalChoice}
                 title={optionalChoiceTitle}
                 description={optionalChoiceDescription}
-                onAccept={() => confirmOptionalChoice(true)}
-                onDecline={() => confirmOptionalChoice(false)}
+                onAccept={() => handleConfirmOptionalChoice(true)}
+                onDecline={() => handleConfirmOptionalChoice(false)}
             />
 
             {/* Modal de sélection de joueur (Zéphyr Bourrasque Chanceuse) */}
             <PlayerSelectionModal
                 isOpen={isSelectingPlayer}
                 title={playerSelectionTitle}
-                onSelectSelf={() => confirmPlayerSelection(true)}
-                onSelectOpponent={() => confirmPlayerSelection(false)}
+                onSelectSelf={() => handleConfirmPlayerSelection(true)}
+                onSelectOpponent={() => handleConfirmPlayerSelection(false)}
                 onCancel={cancelPlayerSelection}
             />
 
