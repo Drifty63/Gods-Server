@@ -2,6 +2,7 @@
     min-height: 100vh;
     background: linear-gradient(to bottom, #050510, #1a1a2e);
     color: white;
+    position: relative;
 }
 
 /* Header */
@@ -340,18 +341,22 @@
 
 /* Story View (pendant l'histoire) */
 .storyView {
-    position: relative;
-    min-height: calc(100vh - 100px);
-}
-
-.storyBackground {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('/assets/story/underworld.png') center/cover no-repeat;
-    z-index: -1;
+    z-index: 100;
+}
+
+.storyBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/assets/story/olympus_storm.png') center/cover no-repeat;
+    z-index: 0;
 }
 
 .backgroundOverlay {
@@ -364,6 +369,7 @@
             rgba(5, 5, 16, 0.7),
             rgba(5, 5, 16, 0.5),
             rgba(5, 5, 16, 0.9));
+    z-index: 1;
 }
 
 /* Battle Prompt */
@@ -379,6 +385,7 @@
     border-radius: 20px;
     max-width: 500px;
     backdrop-filter: blur(10px);
+    z-index: 10;
 }
 
 .battlePrompt h2 {
