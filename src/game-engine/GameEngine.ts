@@ -1298,6 +1298,47 @@ export class GameEngine {
                 break;
 
             // ========================================
+            // HÉPHAÏSTOS - Dégâts = 3 + boucliers actuels
+            // ========================================
+            case 'damage_plus_shield':
+                // Inflige 3 + nombre de boucliers du lanceur
+                if (castingGod && targetGodId) {
+                    const targetDestruction = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    if (targetDestruction) {
+                        // Calculer les boucliers actuels du lanceur
+                        const shieldEffect = castingGod.statusEffects.find(s => s.type === 'shield');
+                        const currentShields = shieldEffect?.stacks || 0;
+                        const totalDamageBase = 3 + currentShields;
+
+                        // Calculer avec faiblesse
+                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                            totalDamageBase, card.element, targetDestruction.card.weakness, targetDestruction.temporaryWeakness
+                        );
+
+                        // Gestion du bouclier de la cible
+                        let damageToInflict = finalDamage;
+                        const targetShieldIndex = targetDestruction.statusEffects.findIndex(s => s.type === 'shield');
+                        if (targetShieldIndex !== -1) {
+                            const shield = targetDestruction.statusEffects[targetShieldIndex];
+                            if (shield.stacks >= damageToInflict) {
+                                shield.stacks -= damageToInflict;
+                                damageToInflict = 0;
+                            } else {
+                                damageToInflict -= shield.stacks;
+                                shield.stacks = 0;
+                                targetDestruction.statusEffects.splice(targetShieldIndex, 1);
+                            }
+                        }
+
+                        targetDestruction.currentHealth -= damageToInflict;
+                        if (targetDestruction.currentHealth <= 0) {
+                            this.handleGodDeath(opponent, targetDestruction);
+                        }
+                    }
+                }
+                break;
+
+            // ========================================
             // PERSÉPHONE - Récupérer une carte de la défausse
             // ========================================
             case 'retrieve_discard':

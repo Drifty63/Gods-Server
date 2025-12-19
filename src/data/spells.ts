@@ -1175,7 +1175,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 3,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'damage_plus_shield', description: 'Inflige 3 + nombre de boucliers' }
+            { type: 'custom', customEffectId: 'damage_plus_shield', target: 'enemy_god', description: 'Inflige 3 + nombre de boucliers' }
         ],
         imageUrl: '/cards/spells/spell_hephaistos_destruction.png',
         description: '3+🛡️🩸 → ⚔️',
