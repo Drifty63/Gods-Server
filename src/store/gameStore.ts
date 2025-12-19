@@ -1098,28 +1098,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const { engine, playerId, zombieDamageGodId } = get();
         if (!engine) return;
 
-        const opponent = engine.getState().players.find(p => p.id !== playerId);
-        if (!opponent) return;
-
-        // Si une cible est sélectionnée, infliger 1 dégât
+        // Si une cible est sélectionnée, exécuter l'action d'attaque zombie
         if (targetGodId) {
-            const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-            if (target) {
-                // Gestion du bouclier
-                const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                if (shieldIndex !== -1 && target.statusEffects[shieldIndex].stacks >= 1) {
-                    target.statusEffects[shieldIndex].stacks -= 1;
-                    if (target.statusEffects[shieldIndex].stacks <= 0) {
-                        target.statusEffects.splice(shieldIndex, 1);
-                    }
-                } else {
-                    target.currentHealth -= 1;
-                    if (target.currentHealth <= 0) {
-                        target.isDead = true;
-                        target.currentHealth = 0;
-                    }
-                }
-            }
+            engine.executeAction({
+                type: 'zombie_attack',
+                playerId,
+                targetGodId
+            });
         }
 
         // Fermer le modal et mettre à jour l'état

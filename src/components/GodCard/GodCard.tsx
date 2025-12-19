@@ -40,7 +40,7 @@ export default function GodCard({
             {/* Image du dieu avec barre de vie overlay */}
             <div className={styles.imageContainer}>
                 <Image
-                    src={card.imageUrl}
+                    src={god.isZombie && !isDead ? '/cards/zombie_overlay.png' : card.imageUrl}
                     alt={card.name}
                     fill
                     className={styles.image}

@@ -66,6 +66,8 @@ export class GameEngine {
                 return this.discardForEnergy(action);
             case 'end_turn':
                 return this.endTurn();
+            case 'zombie_attack':
+                return this.zombieAttack(action);
             default:
                 return { success: false, message: 'Action inconnue' };
         }
@@ -201,6 +203,35 @@ export class GameEngine {
         } else {
             return { success: true, message: `${card.name} défaussé (énergie déjà gagnée ce tour)` };
         }
+    }
+
+    /**
+     * Effectue une attaque de zombie (1 dégât ténèbres + gestion faiblesse/bouclier)
+     */
+    private zombieAttack(action: GameAction): { success: boolean; message: string } {
+        const opponent = this.getOpponent();
+        const targetGodId = action.targetGodId;
+
+        if (!targetGodId) {
+            return { success: false, message: 'Aucune cible spécifiée pour l\'attaque zombie' };
+        }
+
+        const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+        if (!target) {
+            return { success: false, message: 'Cible invalide ou déjà morte' };
+        }
+
+        // Dégâts : 1 (Ténèbres)
+        const damage = 1;
+        const element = 'darkness';
+
+        const { damage: finalDamage } = calculateDamageWithDualWeakness(
+            damage, element, target.card.weakness, target.temporaryWeakness
+        );
+
+        this.applyDamageWithShield(target, finalDamage, opponent);
+
+        return { success: true, message: 'Attaque zombie effectuée' };
     }
 
     /**

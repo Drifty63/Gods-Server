@@ -121,7 +121,7 @@ export interface GameState {
 
 // Action de jeu
 export interface GameAction {
-    type: 'play_card' | 'discard_for_energy' | 'end_turn' | 'select_target';
+    type: 'play_card' | 'discard_for_energy' | 'end_turn' | 'select_target' | 'zombie_attack';
     playerId: string;
     cardId?: string;
     targetGodId?: string;           // Pour ciblage simple
