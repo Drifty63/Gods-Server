@@ -92,7 +92,7 @@ function createDefaultProfile(uid: string, email: string, username: string): Omi
         email,
         username,
         usernameLower: username.toLowerCase(), // Pour recherche insensible à la casse
-        avatar: '⚡',
+        avatar: '/avatars/default.png',
         level: 1,
         xp: 0,
         ambroisie: 0, // Début à 0 Ambroisie
@@ -201,7 +201,7 @@ export async function loginWithGoogle(): Promise<{ user: User; isNewUser: boolea
         const profileData = createDefaultProfile(user.uid, user.email || '', username);
         await setDoc(doc(db, 'users', user.uid), {
             ...profileData,
-            avatar: user.photoURL || '⚡',
+            avatar: user.photoURL || '/avatars/default.png',
             needsSetup: true, // Flag pour indiquer qu'il faut passer par le setup
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp(),

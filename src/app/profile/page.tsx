@@ -10,9 +10,6 @@ import { ALL_GODS } from '@/data/gods';
 import { getRankByFerveur, getRankProgress } from '@/data/ranks';
 import styles from './page.module.css';
 
-// Liste des avatars disponibles
-const AVATARS = ['⚡', '🔥', '💧', '🌿', '☀️', '💀', '💨', '🌙', '⭐', '👑', '🦅', '🐍'];
-
 // Données mock pour l'historique des parties (20 dernières)
 const MOCK_MATCH_HISTORY = [
     { id: 1, playerGods: ['zeus', 'poseidon', 'athena', 'apollon'], opponentGods: ['hades', 'ares', 'nyx', 'artemis'], result: 'victory', turns: 8 },
@@ -123,7 +120,17 @@ export default function ProfilePage() {
                 {/* Carte de profil */}
                 <section className={styles.profileCard}>
                     <div className={styles.avatarContainer} onClick={() => setShowAvatarModal(true)}>
-                        <div className={styles.avatar}>{profile.avatar}</div>
+                        {profile.avatar.startsWith('/') ? (
+                            <Image
+                                src={profile.avatar}
+                                alt="Avatar"
+                                width={80}
+                                height={80}
+                                className={styles.avatarImage}
+                            />
+                        ) : (
+                            <div className={styles.avatar}>{profile.avatar}</div>
+                        )}
                         <div className={styles.avatarEditHint}>✏️</div>
                     </div>
                     <div className={styles.profileInfo}>
@@ -312,19 +319,33 @@ export default function ProfilePage() {
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                         <button className={styles.modalClose} onClick={() => setShowAvatarModal(false)}>✕</button>
                         <h2 className={styles.modalTitle}>🎭 Choisir un avatar</h2>
+
+                        {/* Section Dieux débloqués */}
+                        <h3 className={styles.modalSubtitle}>Mes Dieux</h3>
                         <div className={styles.avatarGrid}>
-                            {AVATARS.map((avatar) => (
-                                <button
-                                    key={avatar}
-                                    className={`${styles.avatarOption} ${profile.avatar === avatar ? styles.selected : ''}`}
-                                    onClick={() => {
-                                        handleAvatarChange(avatar);
-                                        setShowAvatarModal(false);
-                                    }}
-                                >
-                                    {avatar}
-                                </button>
-                            ))}
+                            {profile.collection.godsOwned.map((godId) => {
+                                const god = ALL_GODS.find(g => g.id === godId);
+                                if (!god) return null;
+                                const avatarPath = god.imageUrl;
+                                return (
+                                    <button
+                                        key={godId}
+                                        className={`${styles.avatarOptionImage} ${profile.avatar === avatarPath ? styles.selected : ''}`}
+                                        onClick={() => {
+                                            handleAvatarChange(avatarPath);
+                                            setShowAvatarModal(false);
+                                        }}
+                                    >
+                                        <Image
+                                            src={avatarPath}
+                                            alt={god.name}
+                                            width={50}
+                                            height={50}
+                                            className={styles.avatarGodImage}
+                                        />
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
