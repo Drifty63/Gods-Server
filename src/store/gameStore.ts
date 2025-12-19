@@ -46,6 +46,15 @@ interface GameStore {
     playerSelectionTitle: string;
     pendingPlayerEffect: string | null;
 
+    // État pour zombie resurrection (Perséphone temp_resurrect)
+    isSelectingDeadGod: boolean;
+    deadGodSelectionTitle: string;
+    pendingZombieEffect: string | null;
+
+    // État pour zombie damage de fin de tour
+    isShowingZombieDamage: boolean;
+    zombieDamageGodId: string | null;
+
     // Actions
     initGame: (
         player1Gods: GodCard[],
@@ -120,6 +129,16 @@ interface GameStore {
     startPlayerSelection: (title: string, effectId: string) => void;
     confirmPlayerSelection: (targetSelf: boolean) => void;
     cancelPlayerSelection: () => void;
+
+    // Actions pour zombie resurrection (Perséphone - temp_resurrect)
+    startDeadGodSelection: (title: string, effectId: string) => void;
+    confirmDeadGodSelection: (godId: string) => void;
+    cancelDeadGodSelection: () => void;
+
+    // Actions pour zombie damage de fin de tour
+    startZombieDamage: (godId: string) => void;
+    confirmZombieDamage: (targetGodId: string | null) => void;  // null = skip damage
+    cancelZombieDamage: () => void;
 }
 
 // Fonction helper pour créer une copie profonde du gameState
@@ -174,6 +193,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     isSelectingPlayer: false,
     playerSelectionTitle: '',
     pendingPlayerEffect: null,
+
+    // État initial pour zombie resurrection (Perséphone temp_resurrect)
+    isSelectingDeadGod: false,
+    deadGodSelectionTitle: '',
+    pendingZombieEffect: null,
+
+    // État initial pour zombie damage de fin de tour
+    isShowingZombieDamage: false,
+    zombieDamageGodId: null,
 
     // Initialiser une nouvelle partie
     initGame: (player1Gods, player1Deck, player2Gods, player2Deck, isPlayer1First, soloMode = true) => {
@@ -992,6 +1020,107 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isSelectingPlayer: false,
             playerSelectionTitle: '',
             pendingPlayerEffect: null,
+        });
+    },
+
+    // === ACTIONS POUR ZOMBIE RESURRECTION (Perséphone - temp_resurrect) ===
+    startDeadGodSelection: (title, effectId) => {
+        set({
+            isSelectingDeadGod: true,
+            deadGodSelectionTitle: title,
+            pendingZombieEffect: effectId,
+        });
+    },
+
+    confirmDeadGodSelection: (godId) => {
+        const { engine, playerId, pendingZombieEffect } = get();
+        if (!engine || !pendingZombieEffect) return;
+
+        const player = engine.getState().players.find(p => p.id === playerId);
+        if (!player) return;
+
+        // Trouver le dieu mort
+        const deadGod = player.gods.find(g => g.card.id === godId && g.isDead);
+        if (!deadGod) return;
+
+        if (pendingZombieEffect === 'temp_resurrect' && player.deck.length > 0) {
+            // Prendre la carte du dessus du deck
+            const zombieCard = player.deck.shift()!;
+
+            // Ressusciter le dieu en zombie
+            deadGod.isDead = false;
+            deadGod.currentHealth = 5;  // 5 PV
+            deadGod.isZombie = true;
+            deadGod.zombieCard = zombieCard;
+            deadGod.zombieOwnerId = playerId;
+            deadGod.statusEffects = [];  // Reset les effets de statut
+        }
+
+        // Fermer le modal et mettre à jour l'état
+        set({
+            gameState: cloneGameState(engine.getState()),
+            isSelectingDeadGod: false,
+            deadGodSelectionTitle: '',
+            pendingZombieEffect: null,
+        });
+    },
+
+    cancelDeadGodSelection: () => {
+        set({
+            isSelectingDeadGod: false,
+            deadGodSelectionTitle: '',
+            pendingZombieEffect: null,
+        });
+    },
+
+    // === ACTIONS POUR ZOMBIE DAMAGE DE FIN DE TOUR ===
+    startZombieDamage: (godId) => {
+        set({
+            isShowingZombieDamage: true,
+            zombieDamageGodId: godId,
+        });
+    },
+
+    confirmZombieDamage: (targetGodId) => {
+        const { engine, playerId, zombieDamageGodId } = get();
+        if (!engine) return;
+
+        const opponent = engine.getState().players.find(p => p.id !== playerId);
+        if (!opponent) return;
+
+        // Si une cible est sélectionnée, infliger 1 dégât
+        if (targetGodId) {
+            const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+            if (target) {
+                // Gestion du bouclier
+                const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
+                if (shieldIndex !== -1 && target.statusEffects[shieldIndex].stacks >= 1) {
+                    target.statusEffects[shieldIndex].stacks -= 1;
+                    if (target.statusEffects[shieldIndex].stacks <= 0) {
+                        target.statusEffects.splice(shieldIndex, 1);
+                    }
+                } else {
+                    target.currentHealth -= 1;
+                    if (target.currentHealth <= 0) {
+                        target.isDead = true;
+                        target.currentHealth = 0;
+                    }
+                }
+            }
+        }
+
+        // Fermer le modal et mettre à jour l'état
+        set({
+            gameState: cloneGameState(engine.getState()),
+            isShowingZombieDamage: false,
+            zombieDamageGodId: null,
+        });
+    },
+
+    cancelZombieDamage: () => {
+        set({
+            isShowingZombieDamage: false,
+            zombieDamageGodId: null,
         });
     },
 }));

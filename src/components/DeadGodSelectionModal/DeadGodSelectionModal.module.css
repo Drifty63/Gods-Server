@@ -1,0 +1,131 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal {
+    background: linear-gradient(145deg, #1a1a2e, #0d0d1a);
+    border: 2px solid #8e44ad;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(142, 68, 173, 0.5);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.title {
+    color: #bb86fc;
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: bold;
+}
+
+.description {
+    color: #b0b0b0;
+    font-size: 0.95rem;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
+.godsContainer {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.godButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: linear-gradient(145deg, #2d1b4e, #1a0f30);
+    border: 2px solid #8e44ad;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.godButton:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(142, 68, 173, 0.6);
+    border-color: #bb86fc;
+}
+
+.godImage {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 0.5rem;
+    border: 3px solid #8e44ad;
+    box-shadow: 0 0 20px rgba(142, 68, 173, 0.5);
+}
+
+.godName {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.godElement {
+    font-size: 1.5rem;
+    margin-top: 0.3rem;
+}
+
+.noGods {
+    color: #888;
+    font-style: italic;
+}
+
+.cancelButton {
+    background: transparent;
+    border: 1px solid #666;
+    color: #888;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    border-color: #888;
+    color: #aaa;
+}

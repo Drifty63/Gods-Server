@@ -86,6 +86,10 @@ export interface GodState {
     }[];
     isDead: boolean;
     temporaryWeakness?: Element; // Faiblesse temporaire appliquée par Artémis
+    // Propriétés pour le zombie (Perséphone - Brûlure Rémanente)
+    isZombie?: boolean;          // True si ce dieu est un zombie temporaire
+    zombieCard?: SpellCard;      // La carte posée sur le zombie (va à la défausse si mort)
+    zombieOwnerId?: string;      // ID du joueur qui contrôle le zombie (pour les dégâts de fin de tour)
 }
 
 // État d'un joueur

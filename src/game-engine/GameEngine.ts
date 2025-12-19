@@ -1342,6 +1342,15 @@ export class GameEngine {
                 // Rien à faire ici, le store s'en occupe
                 break;
 
+            // ========================================
+            // PERSÉPHONE - Resurrection temporaire (zombie)
+            // ========================================
+            case 'temp_resurrect':
+                // Cet effet est géré par le modal de sélection de dieu mort dans le GameStore
+                // Le GameBoard détecte cet effet et ouvre le modal
+                // Rien à faire ici, le store s'en occupe
+                break;
+
             default:
                 console.warn(`Effet custom non implémenté: ${effectId}`);
                 break;

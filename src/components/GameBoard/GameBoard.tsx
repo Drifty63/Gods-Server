@@ -11,6 +11,7 @@ import HealDistributionModal from '@/components/HealDistributionModal/HealDistri
 import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
 import OptionalChoiceModal from '@/components/OptionalChoiceModal/OptionalChoiceModal';
 import PlayerSelectionModal from '@/components/PlayerSelectionModal/PlayerSelectionModal';
+import DeadGodSelectionModal from '@/components/DeadGodSelectionModal/DeadGodSelectionModal';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { recordVictory, recordDefeat, recordGodsPlayed } from '@/services/firebase';
@@ -90,6 +91,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         startPlayerSelection,
         confirmPlayerSelection,
         cancelPlayerSelection,
+        // Zombie resurrection (Perséphone Brûlure Rémanente)
+        isSelectingDeadGod,
+        deadGodSelectionTitle,
+        startDeadGodSelection,
+        confirmDeadGodSelection,
+        cancelDeadGodSelection,
+        // Zombie damage de fin de tour
+        isShowingZombieDamage,
+        zombieDamageGodId,
+        startZombieDamage,
+        confirmZombieDamage,
+        cancelZombieDamage,
     } = useGameStore();
 
     // Récupérer l'utilisateur connecté pour enregistrer les stats
@@ -250,6 +263,24 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     needed: true,
                     title: '💨 Bourrasque Chanceuse - Qui recycler ?',
                     effectId: 'free_recycle'
+                };
+            }
+        }
+        return null;
+    };
+
+    // Helper pour détecter si une carte nécessite une sélection de dieu mort (Perséphone - temp_resurrect)
+    const getDeadGodSelectionRequired = (card: import('@/types/cards').SpellCard): {
+        needed: boolean;
+        title: string;
+        effectId: string;
+    } | null => {
+        for (const effect of card.effects) {
+            if (effect.type === 'custom' && effect.customEffectId === 'temp_resurrect') {
+                return {
+                    needed: true,
+                    title: '💀 Brûlure Rémanente - Choisissez un dieu mort',
+                    effectId: 'temp_resurrect'
                 };
             }
         }
@@ -677,6 +708,23 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 return;
             }
 
+            // Vérifier si la carte nécessite une sélection de dieu mort (Perséphone Brûlure Rémanente)
+            const deadGodSel = getDeadGodSelectionRequired(card);
+            if (deadGodSel) {
+                // Vérifier s'il y a des dieux morts
+                const hasDeadGods = player.gods.some(g => g.isDead && !g.isZombie);
+                if (hasDeadGods && player.deck.length > 0) {
+                    // Jouer la carte d'abord, puis ouvrir le modal
+                    playCard(cardId, targetGodId, targetGodIds, lightningAction);
+                    onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
+                    startDeadGodSelection(deadGodSel.title, deadGodSel.effectId);
+                    setPendingCardForOverlay(card);
+                    // La fin de tour sera appelée après la confirmation du modal
+                    return;
+                }
+                // Si pas de dieux morts ou deck vide, jouer la carte sans effet
+            }
+
             // Afficher la carte jouée au centre immédiatement si pas de choix requis
             showPlayedCard(card);
         }
@@ -729,6 +777,16 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Handler pour la confirmation du choix de joueur (Bourrasque Chanceuse)
     const handleConfirmPlayerSelection = (targetSelf: boolean) => {
         confirmPlayerSelection(targetSelf);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
+        autoEndTurnMultiplayer();
+    };
+
+    // Handler pour la confirmation de sélection de dieu mort (Brûlure Rémanente)
+    const handleConfirmDeadGodSelection = (godId: string) => {
+        confirmDeadGodSelection(godId);
         if (pendingCardForOverlay) {
             showPlayedCard(pendingCardForOverlay);
             setPendingCardForOverlay(null);
@@ -1541,6 +1599,15 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 onSelectSelf={() => handleConfirmPlayerSelection(true)}
                 onSelectOpponent={() => handleConfirmPlayerSelection(false)}
                 onCancel={cancelPlayerSelection}
+            />
+
+            {/* Modal de sélection de dieu mort (Perséphone Brûlure Rémanente) */}
+            <DeadGodSelectionModal
+                isOpen={isSelectingDeadGod}
+                title={deadGodSelectionTitle}
+                deadGods={player?.gods.filter(g => g.isDead && !g.isZombie) || []}
+                onSelectGod={handleConfirmDeadGodSelection}
+                onCancel={cancelDeadGodSelection}
             />
 
             {/* Toast de notification */}
