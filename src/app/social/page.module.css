@@ -552,6 +552,40 @@
     color: var(--gold-divine);
 }
 
+/* Rank Badges */
+.podiumRankBadge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+    margin-top: 6px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.podiumFerveur {
+    color: #ff9500;
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+.playerRankBadge {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.ferveur {
+    width: 80px;
+    text-align: right;
+    font-weight: 600;
+    color: #ff9500;
+    font-size: 0.9rem;
+}
+
 /* =================== MODALS =================== */
 .modalOverlay {
     position: fixed;

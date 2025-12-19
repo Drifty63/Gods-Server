@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
+import { getRankByFerveur, getRankProgress } from '@/data/ranks';
 
 // Données mock pour les amis (limité à 25)
 const MOCK_FRIENDS = [
@@ -21,16 +22,16 @@ const MOCK_REQUESTS = [
     { id: 2, odemonUid: 'req2', username: 'ApollonMusic', level: 11, avatar: '💨' },
 ];
 
-// Données mock pour le classement
+// Données mock pour le classement avec Ferveur
 const MOCK_LEADERBOARD = [
-    { odemonUid: 'uid1', username: 'DivineMaster', level: 25, eloRating: 1850, mostPlayedGodImage: '/cards/gods/zeus.png', stats: { gamesWon: 156 } },
-    { odemonUid: 'uid2', username: 'OlympusChamp', level: 23, eloRating: 1780, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 142 } },
-    { odemonUid: 'uid3', username: 'TitanSlayer', level: 22, eloRating: 1720, mostPlayedGodImage: '/cards/gods/hades.png', stats: { gamesWon: 138 } },
-    { odemonUid: 'uid4', username: 'GodOfWar', level: 21, eloRating: 1680, mostPlayedGodImage: '/cards/gods/ares.png', stats: { gamesWon: 127 } },
-    { odemonUid: 'uid5', username: 'MythicHero', level: 20, eloRating: 1620, mostPlayedGodImage: '/cards/gods/athena.png', stats: { gamesWon: 118 } },
-    { odemonUid: 'uid6', username: 'LightBringer', level: 19, eloRating: 1580, mostPlayedGodImage: '/cards/gods/apollon.png', stats: { gamesWon: 105 } },
-    { odemonUid: 'uid7', username: 'ShadowMaster', level: 18, eloRating: 1540, mostPlayedGodImage: '/cards/gods/nyx.png', stats: { gamesWon: 98 } },
-    { odemonUid: 'uid8', username: 'SeaKing', level: 17, eloRating: 1500, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 92 } },
+    { odemonUid: 'uid1', username: 'DivineMaster', level: 25, ferveur: 2650, mostPlayedGodImage: '/cards/gods/zeus.png', stats: { gamesWon: 156 } },
+    { odemonUid: 'uid2', username: 'OlympusChamp', level: 23, ferveur: 2180, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 142 } },
+    { odemonUid: 'uid3', username: 'TitanSlayer', level: 22, ferveur: 1820, mostPlayedGodImage: '/cards/gods/hades.png', stats: { gamesWon: 138 } },
+    { odemonUid: 'uid4', username: 'GodOfWar', level: 21, ferveur: 1560, mostPlayedGodImage: '/cards/gods/ares.png', stats: { gamesWon: 127 } },
+    { odemonUid: 'uid5', username: 'MythicHero', level: 20, ferveur: 1320, mostPlayedGodImage: '/cards/gods/athena.png', stats: { gamesWon: 118 } },
+    { odemonUid: 'uid6', username: 'LightBringer', level: 19, ferveur: 980, mostPlayedGodImage: '/cards/gods/apollon.png', stats: { gamesWon: 105 } },
+    { odemonUid: 'uid7', username: 'ShadowMaster', level: 18, ferveur: 620, mostPlayedGodImage: '/cards/gods/nyx.png', stats: { gamesWon: 98 } },
+    { odemonUid: 'uid8', username: 'SeaKing', level: 17, ferveur: 340, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 92 } },
 ];
 
 type TabType = 'friends' | 'leaderboard';
@@ -226,7 +227,11 @@ export default function SocialPage() {
                                 </div>
                                 <span className={styles.podiumRank}>2</span>
                                 <span className={styles.podiumName}>{MOCK_LEADERBOARD[1].username}</span>
-                                <span className={styles.podiumScore}>{MOCK_LEADERBOARD[1].stats.gamesWon} V</span>
+                                <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(MOCK_LEADERBOARD[1].ferveur).gradient }}>
+                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[1].ferveur).icon}</span>
+                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[1].ferveur).name}</span>
+                                </div>
+                                <span className={styles.podiumFerveur}>{MOCK_LEADERBOARD[1].ferveur} 🔥</span>
                             </div>
 
                             {/* 1ère place */}
@@ -237,7 +242,11 @@ export default function SocialPage() {
                                 </div>
                                 <span className={styles.podiumRank}>1</span>
                                 <span className={styles.podiumName}>{MOCK_LEADERBOARD[0].username}</span>
-                                <span className={styles.podiumScore}>{MOCK_LEADERBOARD[0].stats.gamesWon} V</span>
+                                <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(MOCK_LEADERBOARD[0].ferveur).gradient }}>
+                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[0].ferveur).icon}</span>
+                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[0].ferveur).name}</span>
+                                </div>
+                                <span className={styles.podiumFerveur}>{MOCK_LEADERBOARD[0].ferveur} 🔥</span>
                             </div>
 
                             {/* 3ème place */}
@@ -247,28 +256,36 @@ export default function SocialPage() {
                                 </div>
                                 <span className={styles.podiumRank}>3</span>
                                 <span className={styles.podiumName}>{MOCK_LEADERBOARD[2].username}</span>
-                                <span className={styles.podiumScore}>{MOCK_LEADERBOARD[2].stats.gamesWon} V</span>
+                                <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(MOCK_LEADERBOARD[2].ferveur).gradient }}>
+                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[2].ferveur).icon}</span>
+                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[2].ferveur).name}</span>
+                                </div>
+                                <span className={styles.podiumFerveur}>{MOCK_LEADERBOARD[2].ferveur} 🔥</span>
                             </div>
                         </div>
 
                         {/* Liste classement */}
                         <div className={styles.leaderboardList}>
-                            {MOCK_LEADERBOARD.slice(3).map((player, index) => (
-                                <div key={player.odemonUid} className={styles.leaderboardRow}>
-                                    <span className={styles.rank}>{index + 4}</span>
-                                    <div className={styles.playerInfo}>
-                                        <div className={styles.playerAvatar}>
-                                            <Image src={player.mostPlayedGodImage} alt="" width={35} height={35} className={styles.avatarImage} />
+                            {MOCK_LEADERBOARD.slice(3).map((player, index) => {
+                                const playerRank = getRankByFerveur(player.ferveur);
+                                return (
+                                    <div key={player.odemonUid} className={styles.leaderboardRow}>
+                                        <span className={styles.rank}>{index + 4}</span>
+                                        <div className={styles.playerInfo}>
+                                            <div className={styles.playerAvatar}>
+                                                <Image src={player.mostPlayedGodImage} alt="" width={35} height={35} className={styles.avatarImage} />
+                                            </div>
+                                            <div className={styles.playerDetails}>
+                                                <span className={styles.playerName}>{player.username}</span>
+                                                <span className={styles.playerRankBadge} style={{ color: playerRank.color }}>
+                                                    {playerRank.icon} {playerRank.name}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className={styles.playerDetails}>
-                                            <span className={styles.playerName}>{player.username}</span>
-                                            <span className={styles.playerLevel}>Niv. {player.level}</span>
-                                        </div>
+                                        <span className={styles.ferveur}>{player.ferveur} 🔥</span>
                                     </div>
-                                    <span className={styles.wins}>{player.stats.gamesWon}</span>
-                                    <span className={styles.rating}>{player.eloRating}</span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </>
                 )}
