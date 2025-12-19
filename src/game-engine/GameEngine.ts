@@ -68,6 +68,8 @@ export class GameEngine {
                 return this.endTurn();
             case 'zombie_attack':
                 return this.zombieAttack(action);
+            case 'cast_copied_spell':
+                return this.castCopiedSpell(action);
             default:
                 return { success: false, message: 'Action inconnue' };
         }
@@ -234,6 +236,65 @@ export class GameEngine {
         this.applyDamageWithShield(target, finalDamage, opponent);
 
         return { success: true, message: 'Attaque zombie effectuée' };
+    }
+
+    /**
+     * Lance un sort copié de la défausse (Perséphone - Utlity)
+     */
+    private castCopiedSpell(action: GameAction): { success: boolean; message: string } {
+        const player = this.getCurrentPlayer();
+
+        // 1. Vérifier les cartes
+        const originalCardIndex = player.hand.findIndex(c => c.id === action.originalCardId);
+        if (originalCardIndex === -1) return { success: false, message: "Carte originale non trouvée" };
+
+        const copiedCard = player.discard.find(c => c.id === action.copiedCardId);
+        if (!copiedCard) return { success: false, message: "Carte à copier non trouvée" };
+
+        const originalCard = player.hand[originalCardIndex];
+
+        if (player.energy < originalCard.energyCost) {
+            return { success: false, message: "Pas assez d'énergie" };
+        }
+
+        // 2. Payer et défausser l'originale
+        player.energy -= originalCard.energyCost;
+        player.hand.splice(originalCardIndex, 1);
+        this.cleanBlindCard(originalCard);
+        player.discard.push(originalCard);
+
+        // 3. Préparer et jouer la copie
+        const clonedCard = JSON.parse(JSON.stringify(copiedCard));
+        clonedCard.id = `copy_${Date.now()}_${clonedCard.id}`;
+        clonedCard.element = 'darkness'; // Transformé en Ténèbres
+        clonedCard.energyCost = 0;
+
+        player.hand.push(clonedCard);
+
+        // Hack pour autoriser le jeu immédiat
+        player.hasPlayedCard = false;
+
+        const playAction: GameAction = {
+            type: 'play_card',
+            playerId: action.playerId,
+            cardId: clonedCard.id,
+            targetGodId: action.targetGodId, // Cible choisie pour la COPIE
+            targetGodIds: action.targetGodIds,
+            selectedElement: action.selectedElement,
+            lightningAction: action.lightningAction
+        };
+
+        const result = this.playCard(playAction);
+
+        if (!result.success) {
+            player.hasPlayedCard = true;
+            // Nettoyage si échec
+            const copyIndex = player.hand.findIndex(c => c.id === clonedCard.id);
+            if (copyIndex !== -1) player.hand.splice(copyIndex, 1);
+            return result;
+        }
+
+        return { success: true, message: `Sort copié lancé: ${result.message}` };
     }
 
     /**

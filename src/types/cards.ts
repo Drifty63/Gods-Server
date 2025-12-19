@@ -121,9 +121,11 @@ export interface GameState {
 
 // Action de jeu
 export interface GameAction {
-    type: 'play_card' | 'discard_for_energy' | 'end_turn' | 'select_target' | 'zombie_attack';
+    type: 'play_card' | 'discard_for_energy' | 'end_turn' | 'select_target' | 'zombie_attack' | 'cast_copied_spell';
     playerId: string;
     cardId?: string;
+    originalCardId?: string; // ID de la carte source (Perséphone)
+    copiedCardId?: string;   // ID de la carte copiée depuis la défausse
     targetGodId?: string;           // Pour ciblage simple
     targetGodIds?: string[];        // Pour ciblage multiple (ex: 2 cibles)
     targetPlayerId?: string;

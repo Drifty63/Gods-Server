@@ -409,52 +409,47 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     player.hand.push(retrievedCard);
                 }
             }
-        } else if (pendingCardSelectionEffect === 'copy_discard_spell') {
-            // Perséphone - Copier un sort de la défausse et le jouer en Ténèbres
+        } else if (pendingCardSelectionEffect.startsWith('copy_discard_spell')) {
+            const originalCardId = pendingCardSelectionEffect.includes(':') ? pendingCardSelectionEffect.split(':')[1] : null;
+
             if (selectedCards.length > 0) {
-                const cardToCopy = selectedCards[0];
-                const opponent = engine.getState().players.find(p => p.id !== playerId);
+                const copiedCard = selectedCards[0];
 
-                if (opponent) {
-                    // Créer une copie temporaire de la carte avec élément Ténèbres
-                    const copiedCard: SpellCard = {
-                        ...cardToCopy,
-                        id: `copy_${cardToCopy.id}_${Date.now()}`,
-                        element: 'darkness', // Conversion en Ténèbres
-                    };
+                // Fermer la sélection de carte manuellement avant de passer à la suite
+                set({
+                    isSelectingCards: false,
+                    cardSelectionSource: null,
+                    cardSelectionCount: 0,
+                    cardSelectionTitle: '',
+                    pendingCardSelectionEffect: null
+                });
 
-                    // Exécuter la carte copiée (les effets s'appliquent normalement)
-                    // Pour simplifier, on ajoute temporairement la carte à la main puis on la joue
-                    // Note: Dans un cas réel, il faudrait aussi gérer le ciblage
-                    console.log(`Copie de ${cardToCopy.name} en Ténèbres`);
+                // Vérifier si la carte copiée nécessite une cible
+                // On simule la carte transformée en Ténèbres
+                const mockCard = { ...copiedCard, element: 'darkness' as const, energyCost: 0 };
+                const neededTargets = get().getRequiredTargetCount(mockCard);
 
-                    // Appliquer les effets de la carte copiée
-                    for (const effect of copiedCard.effects) {
-                        if (effect.type === 'damage') {
-                            // Appliquer les dégâts à un ennemi aléatoire vivant
-                            const aliveEnemies = opponent.gods.filter(g => !g.isDead);
-                            if (aliveEnemies.length > 0) {
-                                const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
-                                const damage = effect.value || 0;
-                                target.currentHealth -= damage;
-                                if (target.currentHealth <= 0) {
-                                    target.isDead = true;
-                                    target.currentHealth = 0;
-                                }
-                            }
-                        } else if (effect.type === 'heal') {
-                            // Soigner un allié aléatoire
-                            const aliveAllies = player.gods.filter(g => !g.isDead);
-                            if (aliveAllies.length > 0) {
-                                const target = aliveAllies[Math.floor(Math.random() * aliveAllies.length)];
-                                const heal = effect.value || 0;
-                                target.currentHealth = Math.min(target.currentHealth + heal, target.card.maxHealth);
-                            }
-                        }
-                        // TODO: Gérer les autres types d'effets
-                    }
+                if (neededTargets > 0) {
+                    // Lancer la sélection de cible
+                    set({
+                        isSelectingTarget: true,
+                        requiredTargets: neededTargets,
+                        selectedCard: mockCard,
+                        // On utilise pendingEnemyCardEffect pour stocker le contexte (HACK mais efficace)
+                        pendingEnemyCardEffect: `cast_copy:${originalCardId || ''}:${copiedCard.id}`
+                    });
+                } else {
+                    // Pas de cible nécessaire, exécuter directement
+                    engine.executeAction({
+                        type: 'cast_copied_spell',
+                        playerId,
+                        originalCardId: originalCardId || undefined,
+                        copiedCardId: copiedCard.id
+                    });
+                    set({ gameState: cloneGameState(engine.getState()) });
                 }
             }
+            return; // Empêcher l'exécution du bloc de nettoyage par défaut ci-dessous
         }
 
         // Mettre à jour l'état et fermer le modal
@@ -707,8 +702,58 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     playCard: (cardId, targetGodId, targetGodIds, lightningAction) => {
-        const { engine, playerId, selectedTargetGods, selectedLightningAction, selectedElement, isSoloMode } = get();
+        const { engine, playerId, selectedTargetGods, selectedLightningAction, selectedElement, isSoloMode, pendingEnemyCardEffect } = get();
         if (!engine) return { success: false, message: 'Partie non initialisée' };
+
+        // 1. CAS SPÉCIAL : Exécution d'un sort copié après sélection de cible
+        if (pendingEnemyCardEffect?.startsWith('cast_copy:')) {
+            const parts = pendingEnemyCardEffect.split(':');
+            const originalCardId = parts[1];
+            const copiedCardId = parts[2];
+
+            // Récupérer les cibles depuis l'appel (qui viennent de selectedTargetGods)
+            const finalTargetGodIds = targetGodIds || (selectedTargetGods.length > 0 ? selectedTargetGods.map(g => g.card.id) : undefined);
+            const finalTargetGodId = targetGodId || (selectedTargetGods.length > 0 ? selectedTargetGods[0].card.id : undefined);
+
+            const result = engine.executeAction({
+                type: 'cast_copied_spell',
+                playerId,
+                originalCardId,
+                copiedCardId,
+                targetGodId: finalTargetGodId,
+                targetGodIds: finalTargetGodIds,
+                lightningAction: lightningAction || selectedLightningAction || undefined,
+                selectedElement: selectedElement || undefined,
+            });
+
+            // Reset l'état
+            set({
+                gameState: cloneGameState(engine.getState()),
+                selectedCard: null,
+                selectedTargetGod: null,
+                selectedTargetGods: [],
+                requiredTargets: 0,
+                isSelectingTarget: false,
+                isSelectingLightningAction: false,
+                selectedLightningAction: null,
+                isSelectingElement: false,
+                selectedElement: null,
+                pendingEnemyCardEffect: null // Nettoyer le flag
+            });
+
+            return result;
+        }
+
+        // 2. CAS SPÉCIAL : Interception du sort Perséphone "Pouvoirs des Âmes"
+        const player = engine.getState().players.find(p => p.id === playerId);
+        const cardToCheck = player?.hand.find(c => c.id === cardId);
+
+        if (cardToCheck && cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'copy_discard_spell')) {
+            get().startCardSelection('discard', 1, "Copier un sort (devient Ténèbres)", `copy_discard_spell:${cardId}`);
+            return { success: true, message: 'Sélectionnez un sort à copier' };
+        }
+
+        // =========================================================
 
         // Utiliser les cibles multiples si disponibles
         const finalTargetGodIds = targetGodIds || (selectedTargetGods.length > 0 ? selectedTargetGods.map(g => g.card.id) : undefined);
