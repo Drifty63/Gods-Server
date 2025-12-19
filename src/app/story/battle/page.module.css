@@ -432,14 +432,14 @@
     }
 }
 
-/* Story Background (reused from story page) */
 .storyBackground {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('/assets/story/underworld.png') center/cover no-repeat;
+    background: url('/assets/story/olympus_storm.png') center/cover no-repeat;
+    background-size: cover;
     z-index: -1;
 }
 
@@ -455,7 +455,217 @@
             rgba(5, 5, 16, 0.9));
 }
 
-/* Post Battle Dialogue Overlay */
+.backgroundOverlayLight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(50, 80, 50, 0.5),
+            rgba(20, 40, 20, 0.4),
+            rgba(5, 5, 16, 0.8));
+}
+
+.backgroundOverlayDark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(40, 0, 60, 0.7),
+            rgba(20, 0, 40, 0.6),
+            rgba(5, 5, 16, 0.95));
+}
+
+/* ================================ */
+/* NEW Post Battle Dialogue Styles  */
+/* ================================ */
+
+.postBattleDialogue {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+    padding-bottom: 40px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+    cursor: pointer;
+    z-index: 1000;
+    user-select: none;
+}
+
+.portraitWrapper {
+    position: relative;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.portrait {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    border: 3px solid var(--glow-color, #ffd700);
+    box-shadow:
+        0 0 20px var(--glow-color, #ffd700),
+        0 0 40px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+    animation: portraitGlowNew 2s ease-in-out infinite alternate;
+}
+
+@keyframes portraitGlowNew {
+    from {
+        box-shadow:
+            0 0 20px var(--glow-color, #ffd700),
+            0 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    to {
+        box-shadow:
+            0 0 30px var(--glow-color, #ffd700),
+            0 0 60px var(--glow-color, #ffd700);
+    }
+}
+
+.portraitImage {
+    object-fit: cover;
+    object-position: top center;
+}
+
+.dialogueBoxNew {
+    flex: 1;
+    background: rgba(20, 20, 40, 0.95);
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    border-radius: 16px;
+    padding: 20px 24px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.dialogueBoxNew::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+}
+
+.speakerNameNew {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.dialogueTextNew {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.95);
+    min-height: 60px;
+}
+
+.cursor {
+    animation: blink 0.5s step-end infinite;
+    color: var(--gold-divine, #d4af37);
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.continueIndicator {
+    position: absolute;
+    bottom: 12px;
+    right: 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--gold-divine, #d4af37);
+    animation: bounce 1s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.progressBar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 14px 14px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-divine, #d4af37), #ffd700);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--gold-divine, #d4af37);
+}
+
+/* Responsive for post battle dialogue */
+@media (max-width: 768px) {
+    .postBattleDialogue {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        padding-bottom: 30px;
+    }
+
+    .portraitWrapper {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .portrait {
+        width: 80px;
+        height: 80px;
+    }
+
+    .dialogueBoxNew {
+        width: 100%;
+        padding: 16px 20px;
+    }
+
+    .speakerNameNew {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .dialogueTextNew {
+        font-size: 1rem;
+        min-height: 50px;
+    }
+}
+
+/* Legacy dialogue styles - keeping for compatibility */
 .dialogueOverlay {
     position: fixed;
     top: 0;

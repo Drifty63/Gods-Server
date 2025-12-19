@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useGameStore } from '@/store/gameStore';
 import { useStoryStore } from '@/store/storyStore';
 import GameBoard from '@/components/GameBoard/GameBoard';
@@ -12,6 +13,22 @@ import { RequireAuth } from '@/components/Auth/RequireAuth';
 import styles from './page.module.css';
 
 type BattlePhase = 'loading' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
+
+// Mapping des IDs de dieux vers leurs couleurs
+const GOD_COLORS: Record<string, string> = {
+    zeus: '#ffd700',
+    hestia: '#ff6b35',
+    aphrodite: '#ff69b4',
+    dionysos: '#9b59b6',
+    hades: '#4a0080',
+    nyx: '#1a1a2e',
+    apollon: '#87ceeb',
+    ares: '#dc143c',
+    poseidon: '#00bfff',
+    athena: '#f0e68c',
+    demeter: '#228b22',
+    artemis: '#c0c0c0',
+};
 
 export default function StoryBattlePage() {
     return (
@@ -25,9 +42,12 @@ function StoryBattleContent() {
     const router = useRouter();
     const [phase, setPhase] = useState<BattlePhase>('loading');
     const [error, setError] = useState<string | null>(null);
+    const [playerWon, setPlayerWon] = useState(false);
 
     const [postBattleDialogues, setPostBattleDialogues] = useState<any[]>([]);
     const [postBattleIndex, setPostBattleIndex] = useState(0);
+    const [displayedText, setDisplayedText] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
 
     const { initGame, gameState, resetGame, playAITurn } = useGameStore();
     const {
@@ -129,35 +149,69 @@ function StoryBattleContent() {
         if (!gameState || phase !== 'playing') return;
 
         if (gameState.winnerId) {
-            const playerWon = gameState.winnerId === 'player1';
+            const won = gameState.winnerId === 'player1';
+            setPlayerWon(won);
 
             // Préparer les dialogues de fin
-            const dialogues = playerWon
+            const dialogues = won
                 ? [
-                    { speaker: 'zeus', text: "Hadès ! Ta trahison s'arrête ici ! L'Olympe ne tombera pas aujourd'hui.", portrait: 'zeus' },
-                    { speaker: 'hades', text: "Grrr... Tu n'as fait que retarder l'inévitable, frère. Les ombres ne meurent jamais.", portrait: 'hades' },
-                    { speaker: 'aphrodite', text: "Même dans les ténèbres les plus profondes, la beauté et l'amour triomphent toujours. Ton royaume manque cruellement de goût, mon oncle.", portrait: 'aphrodite' },
-                    { speaker: 'dionysos', text: "Allez, détends-toi Hadès ! Un petit verre de nectar et on oublie tout ? L'ambiance était un peu trop... mortelle ici.", portrait: 'dionysos' },
-                    { speaker: 'zeus', text: "Assez. Nous rentrons. Mais sache que je garderai un œil sur les Enfers désormais.", portrait: 'zeus' }
+                    { speaker: 'zeus', speakerName: 'Zeus', text: "Hadès ! Ta trahison s'arrête ici ! L'Olympe ne tombera pas aujourd'hui.", portrait: 'zeus' },
+                    { speaker: 'hades', speakerName: 'Hadès', text: "Grrr... Tu n'as fait que retarder l'inévitable, frère. Les ombres ne meurent jamais.", portrait: 'hades' },
+                    { speaker: 'aphrodite', speakerName: 'Aphrodite', text: "Même dans les ténèbres les plus profondes, la beauté et l'amour triomphent toujours.", portrait: 'aphrodite' },
+                    { speaker: 'dionysos', speakerName: 'Dionysos', text: "Allez, détends-toi Hadès ! Un petit verre de nectar et on oublie tout ?", portrait: 'dionysos' },
+                    { speaker: 'zeus', speakerName: 'Zeus', text: "Assez. Nous rentrons. Mais sache que je garderai un œil sur les Enfers désormais.", portrait: 'zeus' }
                 ]
                 : [
-                    { speaker: 'hades', text: "L'Olympe s'effondre enfin. Mon heure est venue de régner sur les cieux et les morts.", portrait: 'hades' },
-                    { speaker: 'nyx', text: "Le voile tombe sur les dieux de la lumière. L'éternelle nuit commence, comme je l'avais prédit.", portrait: 'nyx' },
-                    { speaker: 'zeus', text: "Impossible... Mes forces m'abandonnent... Mais sache-le, Hadès... d'autres se lèveront...", portrait: 'zeus' },
-                    { speaker: 'hestia', text: "Le foyer de l'Olympe s'éteint... Que les dieux nous protègent dans cette nouvelle ère de ténèbres.", portrait: 'hestia' }
+                    { speaker: 'hades', speakerName: 'Hadès', text: "L'Olympe s'effondre enfin. Mon heure est venue de régner sur les cieux et les morts.", portrait: 'hades' },
+                    { speaker: 'nyx', speakerName: 'Nyx', text: "Le voile tombe sur les dieux de la lumière. L'éternelle nuit commence.", portrait: 'nyx' },
+                    { speaker: 'zeus', speakerName: 'Zeus', text: "Impossible... Mes forces m'abandonnent... Mais d'autres se lèveront...", portrait: 'zeus' },
+                    { speaker: 'hestia', speakerName: 'Hestia', text: "Le foyer de l'Olympe s'éteint... Que les dieux nous protègent.", portrait: 'hestia' }
                 ];
 
             setPostBattleDialogues(dialogues);
+            setPostBattleIndex(0);
             setPhase('post_battle_dialogue');
-            completeBattle(playerWon);
+            completeBattle(won);
         }
     }, [gameState, phase, completeBattle]);
 
+    // Effet de machine à écrire pour les dialogues post-combat
+    useEffect(() => {
+        if (phase !== 'post_battle_dialogue' || postBattleDialogues.length === 0) return;
+
+        const dialogue = postBattleDialogues[postBattleIndex];
+        if (!dialogue) return;
+
+        setDisplayedText('');
+        setIsTyping(true);
+
+        const text = dialogue.text;
+        let charIndex = 0;
+
+        const typingInterval = setInterval(() => {
+            if (charIndex < text.length) {
+                setDisplayedText(text.substring(0, charIndex + 1));
+                charIndex++;
+            } else {
+                setIsTyping(false);
+                clearInterval(typingInterval);
+            }
+        }, 25);
+
+        return () => clearInterval(typingInterval);
+    }, [phase, postBattleIndex, postBattleDialogues]);
+
     const handleNextPostDialogue = () => {
+        if (isTyping) {
+            // Skip l'animation
+            setDisplayedText(postBattleDialogues[postBattleIndex]?.text || '');
+            setIsTyping(false);
+            return;
+        }
+
         if (postBattleIndex < postBattleDialogues.length - 1) {
             setPostBattleIndex(postBattleIndex + 1);
         } else {
-            const playerWon = gameState?.winnerId === 'player1';
             setPhase(playerWon ? 'victory' : 'defeat');
         }
     };
@@ -278,22 +332,60 @@ function StoryBattleContent() {
     // Phase: Dialogue post-combat
     if (phase === 'post_battle_dialogue') {
         const dialogue = postBattleDialogues[postBattleIndex];
+        if (!dialogue) return null;
+
+        const glowColor = GOD_COLORS[dialogue.speaker] || '#ffd700';
+        const backgroundImage = playerWon
+            ? '/assets/story/victory_olympus.png'
+            : '/assets/story/defeat_underworld.png';
+
         return (
             <main className={styles.main}>
-                <div className={styles.storyBackground}>
+                <div
+                    className={styles.storyBackground}
+                    style={{ backgroundImage: `url('${backgroundImage}')` }}
+                >
                     <div className={styles.backgroundOverlay} />
                 </div>
-                <div className={styles.dialogueOverlay}>
-                    <div className={styles.dialogueContainer}>
-                        <div className={styles.portraitContainer}>
-                            <img src={`/portraits/${dialogue.portrait}.png`} alt={dialogue.speaker} className={styles.dialoguePortrait} />
+                <div className={styles.postBattleDialogue} onClick={handleNextPostDialogue}>
+                    {/* Portrait du personnage */}
+                    <div
+                        className={styles.portraitWrapper}
+                        style={{ '--glow-color': glowColor } as React.CSSProperties}
+                    >
+                        <div className={styles.portrait}>
+                            <Image
+                                src={`/cards/gods/${dialogue.portrait}.png`}
+                                alt={dialogue.speakerName}
+                                fill
+                                className={styles.portraitImage}
+                            />
                         </div>
-                        <div className={styles.dialogueBox}>
-                            <h3 className={styles.speakerName}>{dialogue.speaker.toUpperCase()}</h3>
-                            <p className={styles.dialogueText}>{dialogue.text}</p>
-                            <button onClick={handleNextPostDialogue} className={styles.nextButton}>
-                                {postBattleIndex < postBattleDialogues.length - 1 ? 'Suite' : 'Terminer'}
-                            </button>
+                    </div>
+
+                    {/* Boîte de dialogue */}
+                    <div className={styles.dialogueBoxNew}>
+                        <div
+                            className={styles.speakerNameNew}
+                            style={{ color: glowColor }}
+                        >
+                            {dialogue.speakerName}
+                        </div>
+                        <div className={styles.dialogueTextNew}>
+                            {displayedText}
+                            {isTyping && <span className={styles.cursor}>|</span>}
+                        </div>
+                        {!isTyping && (
+                            <div className={styles.continueIndicator}>
+                                {postBattleIndex < postBattleDialogues.length - 1 ? '▼ Suite' : '▶ Continuer'}
+                            </div>
+                        )}
+                        {/* Barre de progression */}
+                        <div className={styles.progressBar}>
+                            <div
+                                className={styles.progressFill}
+                                style={{ width: `${((postBattleIndex + 1) / postBattleDialogues.length) * 100}%` }}
+                            />
                         </div>
                     </div>
                 </div>
@@ -305,8 +397,11 @@ function StoryBattleContent() {
     if (phase === 'victory') {
         return (
             <main className={styles.main}>
-                <div className={styles.storyBackground}>
-                    <div className={styles.backgroundOverlay} />
+                <div
+                    className={styles.storyBackground}
+                    style={{ backgroundImage: "url('/assets/story/victory_olympus.png')" }}
+                >
+                    <div className={styles.backgroundOverlayLight} />
                 </div>
                 <div className={styles.resultScreen}>
                     <div className={`${styles.resultContent} ${styles.victory}`}>
@@ -340,8 +435,11 @@ function StoryBattleContent() {
 
         return (
             <main className={styles.main}>
-                <div className={styles.storyBackground}>
-                    <div className={styles.backgroundOverlay} />
+                <div
+                    className={styles.storyBackground}
+                    style={{ backgroundImage: "url('/assets/story/defeat_underworld.png')" }}
+                >
+                    <div className={styles.backgroundOverlayDark} />
                 </div>
                 <div className={styles.resultScreen}>
                     <div className={`${styles.resultContent} ${styles.defeat}`}>
