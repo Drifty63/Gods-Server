@@ -746,7 +746,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 const currentState = engine.getState();
                 if (currentState.currentPlayerId === playerId && currentState.status === 'playing') {
                     setTimeout(() => {
-                        get().endTurn();
+                        // Vérifier l'état actuel (peut avoir changé depuis le lancement du timeout)
+                        const freshState = engine.getState();
+                        const freshPlayer = freshState.players.find(p => p.id === playerId);
+
+                        // On ne finit le tour que si :
+                        // 1. C'est toujours notre tour
+                        // 2. La partie est toujours en cours
+                        // 3. On A JOUÉ une carte (hasPlayedCard === true)
+                        // Si hasPlayedCard est false (effet Hermès), on laisse le joueur continuer
+                        if (freshState.currentPlayerId === playerId &&
+                            freshState.status === 'playing' &&
+                            freshPlayer?.hasPlayedCard) {
+                            get().endTurn();
+                        }
                     }, 4500);
                 }
             }
