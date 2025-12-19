@@ -456,10 +456,10 @@
 }
 
 .matchGods {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    max-width: 120px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    width: 80px;
 }
 
 .matchGodIcon {
@@ -474,12 +474,20 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
+    flex: 1;
+}
+
+.matchType {
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .matchResultText {
     font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 700;
 }
 
@@ -492,8 +500,8 @@
 }
 
 .matchTurns {
-    font-size: 0.65rem;
-    color: #888;
+    font-size: 0.7rem;
+    color: #666;
 }
 
 .noHistory {
@@ -795,7 +803,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -805,12 +815,14 @@
 
 .modal {
     position: relative;
-    background: linear-gradient(180deg, rgba(26, 26, 58, 0.98), rgba(10, 10, 26, 0.98));
+    background: linear-gradient(180deg, rgba(26, 26, 58, 0.95), rgba(10, 10, 26, 0.95));
     border: 2px solid var(--gold-divine);
     border-radius: 20px;
     padding: 30px;
-    max-width: 400px;
-    width: 100%;
+    max-width: 500px;
+    width: 95%;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .modalClose {

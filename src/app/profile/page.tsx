@@ -12,12 +12,12 @@ import styles from './page.module.css';
 
 // Données mock pour l'historique des parties (20 dernières)
 const MOCK_MATCH_HISTORY = [
-    { id: 1, playerGods: ['zeus', 'poseidon', 'athena', 'apollon'], opponentGods: ['hades', 'ares', 'nyx', 'artemis'], result: 'victory', turns: 8 },
-    { id: 2, playerGods: ['hades', 'nyx', 'ares', 'hermes'], opponentGods: ['zeus', 'athena', 'artemis', 'poseidon'], result: 'defeat', turns: 12 },
-    { id: 3, playerGods: ['apollon', 'artemis', 'hermes', 'athena'], opponentGods: ['poseidon', 'hades', 'nyx', 'ares'], result: 'victory', turns: 6 },
-    { id: 4, playerGods: ['zeus', 'ares', 'hephaïstos', 'poseidon'], opponentGods: ['apollon', 'artemis', 'athena', 'hermes'], result: 'victory', turns: 9 },
-    { id: 5, playerGods: ['poseidon', 'nyx', 'hermes', 'hades'], opponentGods: ['zeus', 'athena', 'ares', 'apollon'], result: 'defeat', turns: 15 },
-    { id: 6, playerGods: ['athena', 'artemis', 'apollon', 'zeus'], opponentGods: ['hephaïstos', 'hermes', 'nyx', 'hades'], result: 'victory', turns: 7 },
+    { id: 1, playerGods: ['zeus', 'poseidon', 'athena', 'apollon'], opponentGods: ['hades', 'ares', 'nyx', 'artemis'], result: 'victory', turns: 8, matchType: 'ranked' },
+    { id: 2, playerGods: ['hades', 'nyx', 'ares', 'hermes'], opponentGods: ['zeus', 'athena', 'artemis', 'poseidon'], result: 'defeat', turns: 12, matchType: 'ranked' },
+    { id: 3, playerGods: ['apollon', 'artemis', 'hermes', 'athena'], opponentGods: ['poseidon', 'hades', 'nyx', 'ares'], result: 'victory', turns: 6, matchType: 'friendly' },
+    { id: 4, playerGods: ['zeus', 'ares', 'hephaïstos', 'poseidon'], opponentGods: ['apollon', 'artemis', 'athena', 'hermes'], result: 'victory', turns: 9, matchType: 'private' },
+    { id: 5, playerGods: ['poseidon', 'nyx', 'hermes', 'hades'], opponentGods: ['zeus', 'athena', 'ares', 'apollon'], result: 'defeat', turns: 15, matchType: 'ranked' },
+    { id: 6, playerGods: ['athena', 'artemis', 'apollon', 'zeus'], opponentGods: ['hephaïstos', 'hermes', 'nyx', 'hades'], result: 'victory', turns: 7, matchType: 'friendly' },
 ];
 
 export default function ProfilePage() {
@@ -153,33 +153,6 @@ export default function ProfilePage() {
                     </div>
                 </section>
 
-                {/* Dieu Favori - Affiché en permanence */}
-                <section className={styles.favoriteGodSection}>
-                    {mostPlayedGod ? (
-                        <>
-                            <div className={styles.favoriteGodCard}>
-                                <Image
-                                    src={mostPlayedGod.imageUrl}
-                                    alt={mostPlayedGod.name}
-                                    width={100}
-                                    height={100}
-                                    className={styles.favoriteGodImage}
-                                />
-                                <div className={styles.favoriteGodInfo}>
-                                    <span className={styles.favoriteGodLabel}>Dieu Favori</span>
-                                    <span className={styles.favoriteGodName}>{mostPlayedGod.name}</span>
-                                    <span className={styles.favoriteGodCount}>{mostPlayed?.count} parties jouées</span>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <div className={styles.noFavoriteGod}>
-                            <span>🎮</span>
-                            <span>Jouez des parties pour voir votre dieu favori !</span>
-                        </div>
-                    )}
-                </section>
-
                 {/* Statistiques - Accordéon */}
                 <section className={styles.statsSection}>
                     <div
@@ -271,8 +244,8 @@ export default function ProfilePage() {
                                                     key={i}
                                                     src={getGodIcon(godId)}
                                                     alt={godId}
-                                                    width={30}
-                                                    height={30}
+                                                    width={36}
+                                                    height={36}
                                                     className={styles.matchGodIcon}
                                                 />
                                             ))}
@@ -280,6 +253,9 @@ export default function ProfilePage() {
 
                                         {/* Résultat */}
                                         <div className={styles.matchResult}>
+                                            <span className={styles.matchType}>
+                                                {match.matchType === 'ranked' ? '⚔️ Classée' : match.matchType === 'friendly' ? '🤝 Amical' : '🔒 Privée'}
+                                            </span>
                                             <span className={`${styles.matchResultText} ${match.result === 'victory' ? styles.win : styles.loss}`}>
                                                 {match.result === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}
                                             </span>
@@ -293,8 +269,8 @@ export default function ProfilePage() {
                                                     key={i}
                                                     src={getGodIcon(godId)}
                                                     alt={godId}
-                                                    width={30}
-                                                    height={30}
+                                                    width={36}
+                                                    height={36}
                                                     className={styles.matchGodIcon}
                                                 />
                                             ))}
@@ -314,42 +290,44 @@ export default function ProfilePage() {
             </div>
 
             {/* Modal Changer d'avatar */}
-            {showAvatarModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowAvatarModal(false)}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.modalClose} onClick={() => setShowAvatarModal(false)}>✕</button>
-                        <h2 className={styles.modalTitle}>🎭 Choisir un avatar</h2>
+            {
+                showAvatarModal && (
+                    <div className={styles.modalOverlay} onClick={() => setShowAvatarModal(false)}>
+                        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                            <button className={styles.modalClose} onClick={() => setShowAvatarModal(false)}>✕</button>
+                            <h2 className={styles.modalTitle}>🎭 Choisir un avatar</h2>
 
-                        {/* Section Dieux débloqués */}
-                        <h3 className={styles.modalSubtitle}>Mes Dieux</h3>
-                        <div className={styles.avatarGrid}>
-                            {profile.collection.godsOwned.map((godId) => {
-                                const god = ALL_GODS.find(g => g.id === godId);
-                                if (!god) return null;
-                                const avatarPath = god.imageUrl;
-                                return (
-                                    <button
-                                        key={godId}
-                                        className={`${styles.avatarOptionImage} ${profile.avatar === avatarPath ? styles.selected : ''}`}
-                                        onClick={() => {
-                                            handleAvatarChange(avatarPath);
-                                            setShowAvatarModal(false);
-                                        }}
-                                    >
-                                        <Image
-                                            src={avatarPath}
-                                            alt={god.name}
-                                            width={50}
-                                            height={50}
-                                            className={styles.avatarGodImage}
-                                        />
-                                    </button>
-                                );
-                            })}
+                            {/* Section Dieux débloqués */}
+                            <h3 className={styles.modalSubtitle}>Mes Dieux</h3>
+                            <div className={styles.avatarGrid}>
+                                {profile.collection.godsOwned.map((godId) => {
+                                    const god = ALL_GODS.find(g => g.id === godId);
+                                    if (!god) return null;
+                                    const avatarPath = god.imageUrl;
+                                    return (
+                                        <button
+                                            key={godId}
+                                            className={`${styles.avatarOptionImage} ${profile.avatar === avatarPath ? styles.selected : ''}`}
+                                            onClick={() => {
+                                                handleAvatarChange(avatarPath);
+                                                setShowAvatarModal(false);
+                                            }}
+                                        >
+                                            <Image
+                                                src={avatarPath}
+                                                alt={god.name}
+                                                width={50}
+                                                height={50}
+                                                className={styles.avatarGodImage}
+                                            />
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </main>
+                )
+            }
+        </main >
     );
 }
