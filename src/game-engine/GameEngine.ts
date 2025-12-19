@@ -221,8 +221,10 @@ export class GameEngine {
             return { success: false, message: 'Cible invalide ou déjà morte' };
         }
 
-        // Dégâts : 1 (Ténèbres)
-        const damage = 1;
+        // Dégâts : 1 par zombie allié vivant (Ténèbres)
+        const player = this.getCurrentPlayer();
+        const zombieCount = player.gods.filter(g => g.isZombie && !g.isDead).length;
+        const damage = Math.max(1, zombieCount);
         const element = 'darkness';
 
         const { damage: finalDamage } = calculateDamageWithDualWeakness(
