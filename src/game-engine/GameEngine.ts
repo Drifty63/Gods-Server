@@ -1335,6 +1335,78 @@ export class GameEngine {
                 break;
 
             // ========================================
+            // NIKÉ - Succès Flamboyant (1 + 1 par ennemi mort)
+            // ========================================
+            case 'damage_plus_dead_enemies': {
+                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
+                const totalDamage = 1 + deadEnemiesCount;
+
+                if (totalDamage > 0 && targetGodId) {
+                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    if (target) {
+                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
+                        );
+                        this.applyDamageWithShield(target, finalDamage, opponent);
+                    }
+                }
+                break;
+            }
+
+            // ========================================
+            // NIKÉ - Coup Triomphant (2 + 2 par ennemi mort)
+            // ========================================
+            case 'damage_plus_2x_dead_enemies': {
+                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
+                const totalDamage = 2 + (2 * deadEnemiesCount);
+
+                if (totalDamage > 0 && targetGodId) {
+                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    if (target) {
+                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
+                        );
+                        this.applyDamageWithShield(target, finalDamage, opponent);
+                    }
+                }
+                break;
+            }
+
+            // ========================================
+            // NIKÉ - Consécration (AOE 1 + 1 par ennemi mort)
+            // ========================================
+            case 'aoe_damage_plus_dead_enemies': {
+                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
+                const totalDamage = 1 + deadEnemiesCount;
+
+                const enemies = opponent.gods.filter(g => !g.isDead);
+                for (const enemy of enemies) {
+                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                        totalDamage, card.element, enemy.card.weakness, enemy.temporaryWeakness
+                    );
+                    this.applyDamageWithShield(enemy, finalDamage, opponent);
+                }
+                break;
+            }
+
+            // ========================================
+            // NIKÉ - Apothéose (AOE 2 + 2 par ennemi mort)
+            // ========================================
+            case 'aoe_damage_plus_2x_dead_enemies': {
+                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
+                const totalDamage = 2 + (2 * deadEnemiesCount);
+
+                const enemies = opponent.gods.filter(g => !g.isDead);
+                for (const enemy of enemies) {
+                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                        totalDamage, card.element, enemy.card.weakness, enemy.temporaryWeakness
+                    );
+                    this.applyDamageWithShield(enemy, finalDamage, opponent);
+                }
+                break;
+            }
+
+            // ========================================
             // HÉPHAÏSTOS - Bouclier = dégâts infligés
             // ========================================
             case 'gain_current_shield':

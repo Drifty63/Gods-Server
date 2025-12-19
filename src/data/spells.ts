@@ -1543,7 +1543,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 0,
         energyGain: 1,
         effects: [
-            { type: 'custom', customEffectId: 'damage_plus_dead_enemies', description: 'Inflige 1 + 1 par ennemi mort à 2 cibles' }
+            { type: 'custom', customEffectId: 'damage_plus_dead_enemies', target: 'enemy_god', description: 'Inflige 1 + 1 par ennemi mort' }
         ],
         imageUrl: '/cards/spells/spell_nike_succes.png',
         description: '1+💀🩸 → ⚔️⚔️',
@@ -1559,7 +1559,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 1,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'damage_plus_2x_dead_enemies', description: 'Inflige 2 + 2 par ennemi mort' }
+            { type: 'custom', customEffectId: 'damage_plus_2x_dead_enemies', target: 'enemy_god', description: 'Inflige 2 + 2 par ennemi mort' }
         ],
         imageUrl: '/cards/spells/spell_nike_coup.png',
         description: '2+2💀🩸 → ⚔️',
