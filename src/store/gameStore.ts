@@ -34,6 +34,18 @@ interface GameStore {
     isDistributingHeal: boolean;
     healDistributionTotal: number;
 
+    // État pour confirmation optionnelle (optional_mill_boost)
+    isShowingOptionalChoice: boolean;
+    optionalChoiceTitle: string;
+    optionalChoiceDescription: string;
+    pendingOptionalEffect: string | null;
+    pendingOptionalTargetGodIds: string[];  // Les cibles pour l'effet bonus
+
+    // État pour choix de joueur (free_recycle)
+    isSelectingPlayer: boolean;
+    playerSelectionTitle: string;
+    pendingPlayerEffect: string | null;
+
     // Actions
     initGame: (
         player1Gods: GodCard[],
@@ -98,6 +110,16 @@ interface GameStore {
     revealBlindCard: (cardId: string) => SpellCard | null;  // Révèle une carte cachée et retourne la carte
     discardBlindCard: (cardId: string, loseEnergy: boolean) => void;  // Défausse une carte cachée
     surrender: () => void; // Abandonner la partie
+
+    // Actions pour confirmation optionnelle (Perséphone - optional_mill_boost)
+    startOptionalChoice: (title: string, description: string, effectId: string, targetGodIds: string[]) => void;
+    confirmOptionalChoice: (accepted: boolean) => void;
+    cancelOptionalChoice: () => void;
+
+    // Actions pour choix de joueur (Zéphyr - free_recycle)
+    startPlayerSelection: (title: string, effectId: string) => void;
+    confirmPlayerSelection: (targetSelf: boolean) => void;
+    cancelPlayerSelection: () => void;
 }
 
 // Fonction helper pour créer une copie profonde du gameState
@@ -140,6 +162,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     enemyCardSelectionCount: 0,
     enemyCardSelectionTitle: '',
     pendingEnemyCardEffect: null,
+
+    // État initial pour confirmation optionnelle (optional_mill_boost)
+    isShowingOptionalChoice: false,
+    optionalChoiceTitle: '',
+    optionalChoiceDescription: '',
+    pendingOptionalEffect: null,
+    pendingOptionalTargetGodIds: [],
+
+    // État initial pour choix de joueur (free_recycle)
+    isSelectingPlayer: false,
+    playerSelectionTitle: '',
+    pendingPlayerEffect: null,
 
     // Initialiser une nouvelle partie
     initGame: (player1Gods, player1Deck, player2Gods, player2Deck, isPlayer1First, soloMode = true) => {
@@ -828,5 +862,124 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (isStunned) return false;
 
         return true;
+    },
+
+    // === ACTIONS POUR CONFIRMATION OPTIONNELLE (optional_mill_boost) ===
+    startOptionalChoice: (title, description, effectId, targetGodIds) => {
+        set({
+            isShowingOptionalChoice: true,
+            optionalChoiceTitle: title,
+            optionalChoiceDescription: description,
+            pendingOptionalEffect: effectId,
+            pendingOptionalTargetGodIds: targetGodIds,
+        });
+    },
+
+    confirmOptionalChoice: (accepted) => {
+        const { engine, playerId, pendingOptionalEffect, pendingOptionalTargetGodIds } = get();
+        if (!engine || !pendingOptionalEffect) return;
+
+        const player = engine.getState().players.find(p => p.id === playerId);
+        const opponent = engine.getState().players.find(p => p.id !== playerId);
+        if (!player || !opponent) return;
+
+        if (pendingOptionalEffect === 'optional_mill_boost' && accepted) {
+            // Défausser 2 cartes du dessus du deck
+            for (let i = 0; i < 2 && player.deck.length > 0; i++) {
+                const card = player.deck.shift()!;
+                player.discard.push(card);
+            }
+
+            // Infliger +1 dégât aux cibles précédentes
+            for (const targetId of pendingOptionalTargetGodIds) {
+                const target = opponent.gods.find(g => g.card.id === targetId && !g.isDead);
+                if (target) {
+                    // Gestion du bouclier
+                    const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
+                    if (shieldIndex !== -1 && target.statusEffects[shieldIndex].stacks >= 1) {
+                        target.statusEffects[shieldIndex].stacks -= 1;
+                        if (target.statusEffects[shieldIndex].stacks <= 0) {
+                            target.statusEffects.splice(shieldIndex, 1);
+                        }
+                    } else {
+                        target.currentHealth -= 1;
+                        if (target.currentHealth <= 0) {
+                            target.isDead = true;
+                            target.currentHealth = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fermer le modal et mettre à jour l'état
+        set({
+            gameState: cloneGameState(engine.getState()),
+            isShowingOptionalChoice: false,
+            optionalChoiceTitle: '',
+            optionalChoiceDescription: '',
+            pendingOptionalEffect: null,
+            pendingOptionalTargetGodIds: [],
+        });
+    },
+
+    cancelOptionalChoice: () => {
+        set({
+            isShowingOptionalChoice: false,
+            optionalChoiceTitle: '',
+            optionalChoiceDescription: '',
+            pendingOptionalEffect: null,
+            pendingOptionalTargetGodIds: [],
+        });
+    },
+
+    // === ACTIONS POUR CHOIX DE JOUEUR (free_recycle) ===
+    startPlayerSelection: (title, effectId) => {
+        set({
+            isSelectingPlayer: true,
+            playerSelectionTitle: title,
+            pendingPlayerEffect: effectId,
+        });
+    },
+
+    confirmPlayerSelection: (targetSelf) => {
+        const { engine, playerId, pendingPlayerEffect } = get();
+        if (!engine || !pendingPlayerEffect) return;
+
+        const player = engine.getState().players.find(p => p.id === playerId);
+        const opponent = engine.getState().players.find(p => p.id !== playerId);
+        if (!player || !opponent) return;
+
+        if (pendingPlayerEffect === 'free_recycle') {
+            // Choisir le joueur cible
+            const targetPlayer = targetSelf ? player : opponent;
+
+            // Mélanger défausse dans le deck
+            targetPlayer.deck.push(...targetPlayer.discard);
+            targetPlayer.discard = [];
+
+            // Mélanger le deck (Fisher-Yates)
+            for (let i = targetPlayer.deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [targetPlayer.deck[i], targetPlayer.deck[j]] = [targetPlayer.deck[j], targetPlayer.deck[i]];
+            }
+            // PAS d'augmentation de fatigue, PAS de dégâts
+        }
+
+        // Fermer le modal et mettre à jour l'état
+        set({
+            gameState: cloneGameState(engine.getState()),
+            isSelectingPlayer: false,
+            playerSelectionTitle: '',
+            pendingPlayerEffect: null,
+        });
+    },
+
+    cancelPlayerSelection: () => {
+        set({
+            isSelectingPlayer: false,
+            playerSelectionTitle: '',
+            pendingPlayerEffect: null,
+        });
     },
 }));

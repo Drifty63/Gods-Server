@@ -194,6 +194,44 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         return null;
     };
 
+    // Helper pour détecter si une carte nécessite un choix optionnel (Perséphone - optional_mill_boost)
+    const getOptionalChoiceRequired = (card: import('@/types/cards').SpellCard): {
+        needed: boolean;
+        title: string;
+        description: string;
+        effectId: string;
+    } | null => {
+        for (const effect of card.effects) {
+            if (effect.type === 'custom' && effect.customEffectId === 'optional_mill_boost') {
+                return {
+                    needed: true,
+                    title: '💀 Vision du Tartare',
+                    description: 'Voulez-vous défausser 2 cartes de votre deck pour infliger +1 dégât à chaque cible ?',
+                    effectId: 'optional_mill_boost'
+                };
+            }
+        }
+        return null;
+    };
+
+    // Helper pour détecter si une carte nécessite un choix de joueur (Zéphyr - free_recycle)
+    const getPlayerSelectionRequired = (card: import('@/types/cards').SpellCard): {
+        needed: boolean;
+        title: string;
+        effectId: string;
+    } | null => {
+        for (const effect of card.effects) {
+            if (effect.type === 'custom' && effect.customEffectId === 'free_recycle') {
+                return {
+                    needed: true,
+                    title: '💨 Bourrasque Chanceuse - Qui recycler ?',
+                    effectId: 'free_recycle'
+                };
+            }
+        }
+        return null;
+    };
+
     const [viewDiscard, setViewDiscard] = useState<'player' | 'opponent' | null>(null);
     const [previewCard, setPreviewCard] = useState<import('@/types/cards').SpellCard | null>(null);
     const [pendingCardForSelection, setPendingCardForSelection] = useState<import('@/types/cards').SpellCard | null>(null);

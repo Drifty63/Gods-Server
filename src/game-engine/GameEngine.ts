@@ -1319,21 +1319,18 @@ export class GameEngine {
             // ZÉPHYR - Recyclage sans fatigue
             // ========================================
             case 'free_recycle':
-                // Mélange la défausse et le deck du joueur choisi sans pénalité de fatigue
-                // Pour l'instant, applique à l'adversaire (à améliorer avec modal de choix)
-                // TODO: Implémenter le choix soi/adversaire
-                const targetPlayer = opponent; // Par défaut l'adversaire
+                // Cet effet est géré par le modal de sélection de joueur dans le GameStore
+                // Le GameBoard détecte cet effet et ouvre le modal de choix
+                // Rien à faire ici, le store s'en occupe
+                break;
 
-                // Mélanger défausse dans le deck
-                targetPlayer.deck.push(...targetPlayer.discard);
-                targetPlayer.discard = [];
-
-                // Mélanger le deck (Fisher-Yates)
-                for (let i = targetPlayer.deck.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [targetPlayer.deck[i], targetPlayer.deck[j]] = [targetPlayer.deck[j], targetPlayer.deck[i]];
-                }
-                // PAS d'augmentation de fatigue, PAS de dégâts
+            // ========================================
+            // PERSÉPHONE - Défausse optionnelle pour bonus
+            // ========================================
+            case 'optional_mill_boost':
+                // Cet effet est géré par le modal de confirmation dans le GameStore
+                // Le GameBoard détecte cet effet et ouvre le modal Oui/Non
+                // Rien à faire ici, le store s'en occupe
                 break;
 
             default:
