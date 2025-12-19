@@ -104,6 +104,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         startZombieDamage,
         confirmZombieDamage,
         cancelZombieDamage,
+        // IA
+        playAITurn,
+        isAIPlaying,
     } = useGameStore();
 
     // Récupérer l'utilisateur connecté pour enregistrer les stats
@@ -579,6 +582,29 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             recordResult();
         }
     }, [gameState, gameResultRecorded, user, playerId, refreshProfile]);
+
+    // Référence pour savoir si on a déjà déclenché l'IA au démarrage
+    const aiStartTriggeredRef = useRef(false);
+
+    // Effet pour déclencher l'IA si elle doit jouer en premier au démarrage de la partie
+    useEffect(() => {
+        if (!gameState || !isSoloMode || aiStartTriggeredRef.current) return;
+
+        // Vérifier si c'est le premier tour (turnNumber === 1) et que c'est le tour de l'IA
+        if (
+            gameState.turnNumber === 1 &&
+            gameState.currentPlayerId !== playerId &&
+            gameState.status === 'playing' &&
+            !isAIPlaying
+        ) {
+            console.log('🤖 AI starts first, triggering AI turn...');
+            aiStartTriggeredRef.current = true;
+            // Petit délai pour laisser le temps à l'UI de se charger
+            setTimeout(() => {
+                playAITurn();
+            }, 1000);
+        }
+    }, [gameState, isSoloMode, playerId, isAIPlaying, playAITurn]);
 
     if (!gameState) {
         return <div className={styles.loading}>Chargement...</div>;
