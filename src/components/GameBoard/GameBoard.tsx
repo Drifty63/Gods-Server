@@ -700,8 +700,15 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 // Jouer la carte d'abord (applique les dégâts de base), puis ouvrir le modal
                 playCard(cardId, targetGodId, targetGodIds, lightningAction);
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
+
                 // Récupérer les cibles pour les passer au modal
-                const targetIds = targetGodIds || (targetGodId ? [targetGodId] : []);
+                // Pour all_enemies, on récupère tous les dieux ennemis vivants
+                let targetIds = targetGodIds || (targetGodId ? [targetGodId] : []);
+                if (targetIds.length === 0) {
+                    // Si pas de cibles spécifiées, c'est probablement un all_enemies
+                    targetIds = opponent.gods.filter(g => !g.isDead).map(g => g.card.id);
+                }
+
                 startOptionalChoice(optionalChoice.title, optionalChoice.description, optionalChoice.effectId, targetIds);
                 setPendingCardForOverlay(card);
                 // La fin de tour sera appelée après la confirmation du modal
