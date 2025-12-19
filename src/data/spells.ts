@@ -1688,10 +1688,10 @@ export function getSpellsByGodId(godId: string): SpellCard[] {
     return ALL_SPELLS.filter(spell => spell.godId === godId);
 }
 
-// Helper pour créer un deck complet pour un joueur (4 dieux = 20 cartes)
+// Helper pour créer un deck complet pour un joueur (1 à 4 dieux = 5 à 20 cartes)
 export function createDeck(godIds: string[]): SpellCard[] {
-    if (godIds.length !== 4) {
-        throw new Error('Un deck doit contenir exactement 4 dieux');
+    if (godIds.length === 0 || godIds.length > 4) {
+        throw new Error('Un deck doit contenir entre 1 et 4 dieux');
     }
 
     const deck: SpellCard[] = [];
