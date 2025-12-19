@@ -22,6 +22,8 @@ function StoryContent() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [showChapterSelect, setShowChapterSelect] = useState(true);
+    const [showTransition, setShowTransition] = useState(false);
+    const [previousSpeaker, setPreviousSpeaker] = useState<string | null>(null);
 
     const {
         progress,
@@ -43,6 +45,27 @@ function StoryContent() {
         setIsLoading(false);
     }, []);
 
+    // Déterminer si le dialogue actuel est du narrateur
+    const currentDialogue = currentDialogues[currentDialogueIndex];
+    const isNarratorScene = currentDialogue?.speakerId === 'narrator';
+
+    // Détecter les changements de type de scène pour la transition
+    useEffect(() => {
+        if (currentDialogue && previousSpeaker !== null) {
+            const wasNarrator = previousSpeaker === 'narrator';
+            const isNowNarrator = currentDialogue.speakerId === 'narrator';
+
+            // Transition si on passe de narrateur à personnage ou vice versa
+            if (wasNarrator !== isNowNarrator) {
+                setShowTransition(true);
+                setTimeout(() => setShowTransition(false), 1500);
+            }
+        }
+        if (currentDialogue) {
+            setPreviousSpeaker(currentDialogue.speakerId);
+        }
+    }, [currentDialogue, previousSpeaker]);
+
     // Gérer l'avancement des dialogues
     const handleDialogueAdvance = () => {
         advanceDialogue();
@@ -52,30 +75,32 @@ function StoryContent() {
     const handleDialogueComplete = () => {
         const currentEvent = getCurrentEvent();
 
-        if (currentEvent?.type === 'battle') {
-            // Rediriger vers le combat
-            router.push('/story/battle');
-        } else {
-            // Passer à l'événement suivant
-            const nextEvent = advanceToNextEvent();
+        // Passer à l'événement suivant
+        const nextEvent = advanceToNextEvent();
 
-            if (!nextEvent) {
-                // Fin du chapitre
-                setShowChapterSelect(true);
-            } else if (nextEvent.type === 'battle') {
+        if (!nextEvent) {
+            // Fin du chapitre
+            setShowChapterSelect(true);
+        } else if (nextEvent.type === 'battle') {
+            // Afficher la transition avant de naviguer
+            setShowTransition(true);
+            setTimeout(() => {
                 router.push('/story/battle');
-            }
+            }, 800);
         }
+        // Si c'est un dialogue ou cutscene, le store a déjà chargé les nouveaux dialogues
     };
 
     // Démarrer un chapitre
     const handleStartChapter = (chapterId: string) => {
+        setPreviousSpeaker(null); // Reset pour ne pas déclencher de transition au démarrage
         startChapter(chapterId);
         setShowChapterSelect(false);
     };
 
     // Continuer la progression
     const handleContinue = () => {
+        setPreviousSpeaker(null);
         initStory();
         setShowChapterSelect(false);
     };
@@ -203,10 +228,13 @@ function StoryContent() {
             ) : (
                 /* Mode histoire en cours */
                 <div className={styles.storyView}>
-                    {/* Fond atmosphérique */}
-                    <div className={styles.storyBackground}>
-                        <div className={styles.backgroundOverlay} />
+                    {/* Fond atmosphérique - change selon le type de dialogue */}
+                    <div className={isNarratorScene ? styles.storyBackgroundNarrator : styles.storyBackground}>
+                        <div className={isNarratorScene ? styles.backgroundOverlayNarrator : styles.backgroundOverlay} />
                     </div>
+
+                    {/* Transition entre scènes */}
+                    {showTransition && <div className={styles.sceneTransition} />}
 
                     {/* Dialogue actif */}
                     {isDialogueActive && currentDialogues.length > 0 && (

@@ -357,6 +357,19 @@
     bottom: 0;
     background: url('/assets/story/olympus_storm.png') center/cover no-repeat;
     z-index: 0;
+    transition: opacity 0.8s ease-in-out;
+}
+
+/* Fond spécial pour le narrateur */
+.storyBackgroundNarrator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/assets/story/narrator_backdrop.png') center/cover no-repeat;
+    z-index: 0;
+    transition: opacity 0.8s ease-in-out;
 }
 
 .backgroundOverlay {
@@ -370,6 +383,51 @@
             rgba(5, 5, 16, 0.5),
             rgba(5, 5, 16, 0.9));
     z-index: 1;
+}
+
+/* Overlay plus sombre pour le narrateur */
+.backgroundOverlayNarrator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(15, 10, 5, 0.85),
+            rgba(20, 15, 10, 0.7),
+            rgba(10, 5, 0, 0.95));
+    z-index: 1;
+}
+
+/* Animation de transition entre scènes */
+.sceneTransition {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    z-index: 50;
+    animation: fadeTransition 1.5s ease-in-out forwards;
+}
+
+@keyframes fadeTransition {
+    0% {
+        opacity: 0;
+    }
+
+    40% {
+        opacity: 1;
+    }
+
+    60% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 /* Battle Prompt */

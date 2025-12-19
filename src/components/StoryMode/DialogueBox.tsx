@@ -14,6 +14,7 @@ interface DialogueBoxProps {
 
 // Mapping des IDs de dieux vers leurs images
 const GOD_PORTRAITS: Record<string, string> = {
+    narrator: '/cards/gods/narrator.png',
     zeus: '/cards/gods/zeus.png',
     hestia: '/cards/gods/hestia.png',
     aphrodite: '/cards/gods/aphrodite.png',
@@ -30,6 +31,7 @@ const GOD_PORTRAITS: Record<string, string> = {
 
 // Couleurs par dieu pour l'effet de glow
 const GOD_COLORS: Record<string, string> = {
+    narrator: '#d4a574',  // Parchemin doré
     zeus: '#ffd700',      // Or/Foudre
     hestia: '#ff6b35',    // Orange/Feu
     aphrodite: '#ff69b4', // Rose
