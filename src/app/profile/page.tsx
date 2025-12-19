@@ -24,8 +24,6 @@ export default function ProfilePage() {
     const router = useRouter();
     const { user, profile, loading, profileLoading, signOut, updateProfile, refreshProfile } = useAuth();
     const [showAvatarModal, setShowAvatarModal] = useState(false);
-    const [showStats, setShowStats] = useState(false);
-    const [showHistory, setShowHistory] = useState(false);
 
     useEffect(() => {
         // Rafraîchir le profil au chargement si user existe mais pas de profil
@@ -153,141 +151,127 @@ export default function ProfilePage() {
                     </div>
                 </section>
 
-                {/* Statistiques - Accordéon */}
+                {/* Statistiques */}
                 <section className={styles.statsSection}>
-                    <div
-                        className={styles.statsHeader}
-                        onClick={() => setShowStats(!showStats)}
-                    >
-                        <span className={styles.statsHeaderIcon}>📊</span>
-                        <span className={styles.statsHeaderTitle}>Statistiques</span>
-                        <span className={styles.statsHeaderArrow}>{showStats ? '▼' : '▶'}</span>
+                    <div className={styles.sectionHeader}>
+                        <span className={styles.sectionIcon}>📊</span>
+                        <span className={styles.sectionTitle}>Statistiques</span>
                     </div>
-
-                    {showStats && (
-                        <div className={styles.statsContent}>
-                            {/* Dieu favori dans les stats */}
-                            {mostPlayedGod && (
-                                <div className={styles.statsFavoriteGod}>
-                                    <Image
-                                        src={mostPlayedGod.imageUrl}
-                                        alt={mostPlayedGod.name}
-                                        width={50}
-                                        height={50}
-                                        className={styles.statsFavoriteGodImage}
-                                    />
-                                    <div className={styles.statsFavoriteGodInfo}>
-                                        <span className={styles.statsFavoriteGodName}>{mostPlayedGod.name}</span>
-                                        <span className={styles.statsFavoriteGodCount}>{mostPlayed?.count} parties</span>
-                                    </div>
-                                </div>
-                            )}
-                            <div className={styles.statsRow}>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statValue}>{profile.stats.totalGames}</span>
-                                    <span className={styles.statLabel}>Parties jouées</span>
-                                </div>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statValue}>{winRate}%</span>
-                                    <span className={styles.statLabel}>Victoires</span>
+                    <div className={styles.statsContent}>
+                        {/* Dieu favori dans les stats */}
+                        {mostPlayedGod && (
+                            <div className={styles.statsFavoriteGod}>
+                                <Image
+                                    src={mostPlayedGod.imageUrl}
+                                    alt={mostPlayedGod.name}
+                                    width={50}
+                                    height={50}
+                                    className={styles.statsFavoriteGodImage}
+                                />
+                                <div className={styles.statsFavoriteGodInfo}>
+                                    <span className={styles.statsFavoriteGodName}>{mostPlayedGod.name}</span>
+                                    <span className={styles.statsFavoriteGodCount}>{mostPlayed?.count} parties</span>
                                 </div>
                             </div>
-                            <div className={styles.statsRow}>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statValue}>{userFerveur}</span>
-                                    <span className={styles.statLabel}>🔥 Ferveur max</span>
-                                </div>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statValue}>{userFerveur}</span>
-                                    <span className={styles.statLabel}>🔥 Ferveur actuelle</span>
-                                </div>
+                        )}
+                        <div className={styles.statsRow}>
+                            <div className={styles.statItem}>
+                                <span className={styles.statValue}>{profile.stats.totalGames}</span>
+                                <span className={styles.statLabel}>Parties jouées</span>
                             </div>
-                            <div className={styles.statsRow}>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statValue}>{profile.collection.godsOwned.length}/12</span>
-                                    <span className={styles.statLabel}>Dieux obtenus</span>
-                                </div>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statValue}>0</span>
-                                    <span className={styles.statLabel}>Défis réalisés</span>
-                                </div>
+                            <div className={styles.statItem}>
+                                <span className={styles.statValue}>{winRate}%</span>
+                                <span className={styles.statLabel}>Victoires</span>
                             </div>
                         </div>
-                    )}
+                        <div className={styles.statsRow}>
+                            <div className={styles.statItem}>
+                                <span className={styles.statValue}>{userFerveur}</span>
+                                <span className={styles.statLabel}>🔥 Ferveur max</span>
+                            </div>
+                            <div className={styles.statItem}>
+                                <span className={styles.statValue}>{userFerveur}</span>
+                                <span className={styles.statLabel}>🔥 Ferveur actuelle</span>
+                            </div>
+                        </div>
+                        <div className={styles.statsRow}>
+                            <div className={styles.statItem}>
+                                <span className={styles.statValue}>{profile.collection.godsOwned.length}/12</span>
+                                <span className={styles.statLabel}>Dieux obtenus</span>
+                            </div>
+                            <div className={styles.statItem}>
+                                <span className={styles.statValue}>0</span>
+                                <span className={styles.statLabel}>Défis réalisés</span>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
-                {/* Historique des parties - Accordéon */}
+                {/* Historique des parties */}
                 <section className={styles.historySection}>
-                    <div
-                        className={styles.historyHeader}
-                        onClick={() => setShowHistory(!showHistory)}
-                    >
-                        <span className={styles.historyHeaderIcon}>📜</span>
-                        <span className={styles.historyHeaderTitle}>Historique des parties</span>
-                        <span className={styles.historyHeaderArrow}>{showHistory ? '▼' : '▶'}</span>
+                    <div className={styles.sectionHeader}>
+                        <span className={styles.sectionIcon}>📜</span>
+                        <span className={styles.sectionTitle}>Historique des parties</span>
                     </div>
+                    <div className={styles.historyContent}>
+                        {MOCK_MATCH_HISTORY.slice(0, 20).map((match) => {
+                            const getGodIcon = (godId: string) => {
+                                const god = ALL_GODS.find(g => g.id === godId);
+                                return god?.imageUrl || '/cards/gods/zeus.png';
+                            };
 
-                    {showHistory && (
-                        <div className={styles.historyContent}>
-                            {MOCK_MATCH_HISTORY.slice(0, 20).map((match) => {
-                                const getGodIcon = (godId: string) => {
-                                    const god = ALL_GODS.find(g => g.id === godId);
-                                    return god?.imageUrl || '/cards/gods/zeus.png';
-                                };
-
-                                return (
-                                    <div key={match.id} className={`${styles.matchCard} ${match.result === 'victory' ? styles.matchWin : styles.matchLoss}`}>
-                                        {/* Dieux du joueur */}
-                                        <div className={styles.matchGods}>
-                                            {match.playerGods.map((godId, i) => (
-                                                <Image
-                                                    key={i}
-                                                    src={getGodIcon(godId)}
-                                                    alt={godId}
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.matchGodIcon}
-                                                />
-                                            ))}
-                                        </div>
-
-                                        {/* Résultat */}
-                                        <div className={styles.matchResult}>
-                                            <span className={styles.matchType}>
-                                                {match.matchType === 'ranked' ? '⚔️ Classée' : match.matchType === 'friendly' ? '🤝 Amical' : '🔒 Privée'}
-                                            </span>
-                                            <span className={`${styles.matchResultText} ${match.result === 'victory' ? styles.win : styles.loss}`}>
-                                                {match.result === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}
-                                            </span>
-                                            <span className={styles.matchTurns}>{match.turns} tours</span>
-                                        </div>
-
-                                        {/* Dieux adversaire */}
-                                        <div className={styles.matchGods}>
-                                            {match.opponentGods.map((godId, i) => (
-                                                <Image
-                                                    key={i}
-                                                    src={getGodIcon(godId)}
-                                                    alt={godId}
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.matchGodIcon}
-                                                />
-                                            ))}
-                                        </div>
+                            return (
+                                <div key={match.id} className={`${styles.matchCard} ${match.result === 'victory' ? styles.matchWin : styles.matchLoss}`}>
+                                    {/* Dieux du joueur */}
+                                    <div className={styles.matchGods}>
+                                        {match.playerGods.map((godId, i) => (
+                                            <Image
+                                                key={i}
+                                                src={getGodIcon(godId)}
+                                                alt={godId}
+                                                width={36}
+                                                height={36}
+                                                className={styles.matchGodIcon}
+                                            />
+                                        ))}
                                     </div>
-                                );
-                            })}
-                            {MOCK_MATCH_HISTORY.length === 0 && (
-                                <div className={styles.noHistory}>
-                                    <span>🎮</span>
-                                    <span>Aucune partie en ligne jouée</span>
+
+                                    {/* Résultat */}
+                                    <div className={styles.matchResult}>
+                                        <span className={styles.matchType}>
+                                            {match.matchType === 'ranked' ? '⚔️ Classée' : match.matchType === 'friendly' ? '🤝 Amical' : '🔒 Privée'}
+                                        </span>
+                                        <span className={`${styles.matchResultText} ${match.result === 'victory' ? styles.win : styles.loss}`}>
+                                            {match.result === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}
+                                        </span>
+                                        <span className={styles.matchTurns}>{match.turns} tours</span>
+                                    </div>
+
+                                    {/* Dieux adversaire */}
+                                    <div className={styles.matchGods}>
+                                        {match.opponentGods.map((godId, i) => (
+                                            <Image
+                                                key={i}
+                                                src={getGodIcon(godId)}
+                                                alt={godId}
+                                                width={36}
+                                                height={36}
+                                                className={styles.matchGodIcon}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    )}
+                            );
+                        })}
+                        {MOCK_MATCH_HISTORY.length === 0 && (
+                            <div className={styles.noHistory}>
+                                <span>🎮</span>
+                                <span>Aucune partie en ligne jouée</span>
+                            </div>
+                        )}
+                    </div>
                 </section>
-            </div>
+            </div >
 
             {/* Modal Changer d'avatar */}
             {
