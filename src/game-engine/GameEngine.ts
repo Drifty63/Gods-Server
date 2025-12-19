@@ -1392,6 +1392,14 @@ export class GameEngine {
                 // Rien à faire ici, le store s'en occupe
                 break;
 
+            // ========================================
+            // HERMÈS - Rejouer une action
+            // ========================================
+            case 'replay_action':
+                // Remet hasPlayedCard à false pour permettre au joueur de jouer une autre carte
+                player.hasPlayedCard = false;
+                break;
+
             default:
                 console.warn(`Effet custom non implémenté: ${effectId}`);
                 break;

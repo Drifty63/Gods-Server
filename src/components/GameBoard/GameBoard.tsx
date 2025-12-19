@@ -751,8 +751,15 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         playCard(cardId, targetGodId, targetGodIds, lightningAction);
         onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
 
-        // Finir le tour automatiquement après avoir joué une carte
-        autoEndTurnMultiplayer();
+        // Vérifier si la carte permet de rejouer (Hermès)
+        const hasReplayAction = card?.effects.some(e =>
+            e.type === 'custom' && e.customEffectId === 'replay_action'
+        );
+
+        // Ne pas finir le tour automatiquement si la carte permet de rejouer
+        if (!hasReplayAction) {
+            autoEndTurnMultiplayer();
+        }
     };
 
     // Wrappers pour les confirmations de modals qui finissent le tour en multijoueur
