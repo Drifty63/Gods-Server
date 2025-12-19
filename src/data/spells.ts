@@ -1196,7 +1196,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 0,
         energyGain: 1,
         effects: [
-            { type: 'custom', customEffectId: 'damage_plus_dead_allies', description: 'Inflige 2 + 1 par allié mort' }
+            { type: 'custom', customEffectId: 'damage_plus_dead_allies', target: 'enemy_god', description: 'Inflige 2 + 1 par allié mort' }
         ],
         imageUrl: '/cards/spells/spell_thanatos_coup.png',
         description: '2+☠️🩸 → ⚔️',
@@ -1226,7 +1226,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 1,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'damage_plus_2x_dead_allies', description: 'Inflige 2 + 2 par allié mort' }
+            { type: 'custom', customEffectId: 'damage_plus_2x_dead_allies', target: 'enemy_god', description: 'Inflige 2 + 2 par allié mort' }
         ],
         imageUrl: '/cards/spells/spell_thanatos_decharge.png',
         description: '2+2☠️🩸 → ⚔️',
@@ -1256,7 +1256,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 3,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'damage_5x_dead_allies', description: 'Inflige 5 × nombre d\'alliés morts' }
+            { type: 'custom', customEffectId: 'damage_5x_dead_allies', target: 'enemy_god', description: 'Inflige 5 × nombre d\'alliés morts' }
         ],
         imageUrl: '/cards/spells/spell_thanatos_faucheuse.png',
         description: '5×☠️🩸 → ⚔️',

@@ -1241,6 +1241,61 @@ export class GameEngine {
                 break;
 
             // ========================================
+            // THANATOS - Coup Mortel (2 + 1 par mort)
+            // ========================================
+            case 'damage_plus_dead_allies': {
+                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
+                const totalDamage = 2 + deadAlliesCount;
+
+                if (totalDamage > 0 && targetGodId) {
+                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    if (target) {
+                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
+                        );
+                        this.applyDamageWithShield(target, finalDamage, opponent);
+                    }
+                }
+                break;
+            }
+
+            // ========================================
+            // THANATOS - Décharge Mortelle (2 + 2 par mort)
+            // ========================================
+            case 'damage_plus_2x_dead_allies': {
+                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
+                const totalDamage = 2 + (2 * deadAlliesCount);
+
+                if (totalDamage > 0 && targetGodId) {
+                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    if (target) {
+                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
+                        );
+                        this.applyDamageWithShield(target, finalDamage, opponent);
+                    }
+                }
+                break;
+            }
+
+            // ========================================
+            // THANATOS - Happement Mortuaire (AOE 1 + 1 par mort)
+            // ========================================
+            case 'aoe_damage_plus_dead_allies': {
+                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
+                const totalDamage = 1 + deadAlliesCount;
+
+                const enemies = opponent.gods.filter(g => !g.isDead);
+                for (const enemy of enemies) {
+                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
+                        totalDamage, card.element, enemy.card.weakness, enemy.temporaryWeakness
+                    );
+                    this.applyDamageWithShield(enemy, finalDamage, opponent);
+                }
+                break;
+            }
+
+            // ========================================
             // THANATOS - Dégâts 5× alliés morts
             // ========================================
             case 'damage_5x_dead_allies':
@@ -1535,6 +1590,31 @@ export class GameEngine {
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         return shuffled;
+    }
+
+    /**
+     * Applique des dégâts à une cible en gérant le bouclier
+     */
+    private applyDamageWithShield(target: GodState, damage: number, owner: PlayerState): void {
+        let damageToInflict = damage;
+        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
+
+        if (shieldIndex !== -1) {
+            const shield = target.statusEffects[shieldIndex];
+            if (shield.stacks >= damageToInflict) {
+                shield.stacks -= damageToInflict;
+                damageToInflict = 0;
+            } else {
+                damageToInflict -= shield.stacks;
+                shield.stacks = 0;
+                target.statusEffects.splice(shieldIndex, 1);
+            }
+        }
+
+        target.currentHealth -= damageToInflict;
+        if (target.currentHealth <= 0) {
+            this.handleGodDeath(owner, target);
+        }
     }
 
     /**
