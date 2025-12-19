@@ -48,8 +48,8 @@ export default function SocialPage() {
         MOCK_FRIENDS.filter(f => f.isFavorite).map(f => f.odemonUid)
     );
 
-
-
+    // State pour l'accordéon des rangs
+    const [expandedRank, setExpandedRank] = useState<string | null>(null);
     const filteredFriends = MOCK_FRIENDS
         .filter(friend => friend.username.toLowerCase().includes(searchQuery.toLowerCase()))
         .slice(0, 25);
@@ -271,16 +271,17 @@ export default function SocialPage() {
                             })}
                         </div>
 
-                        {/* Section des paliers */}
+                        {/* Section des paliers - Pyramide */}
                         <div className={styles.ranksSection}>
                             <h3 className={styles.ranksSectionTitle}>Votre progression</h3>
-                            <div className={styles.ranksList}>
-                                {RANKS.map((rank, index) => {
+                            <div className={styles.pyramid}>
+                                {[...RANKS].reverse().map((rank, index) => {
                                     // TODO: Utiliser profile?.ferveur quand disponible dans UserProfile
                                     const userFerveur = 450; // Valeur mock pour démo
                                     const userRank = getRankByFerveur(userFerveur);
                                     const isCurrentRank = rank.id === userRank.id;
                                     const isPassed = userFerveur >= rank.minFerveur;
+                                    const isExpanded = expandedRank === rank.id;
 
                                     // Trouver les amis dans ce palier
                                     const friendsInRank = MOCK_FRIENDS.filter(friend => {
@@ -288,39 +289,52 @@ export default function SocialPage() {
                                         return friendRank.id === rank.id;
                                     });
 
+                                    // Calcul de la largeur pyramidale (plus étroit en haut)
+                                    const pyramidWidth = 50 + (index * 5.5); // De 50% à 100%
+
                                     return (
                                         <div
                                             key={rank.id}
-                                            className={`${styles.rankItem} ${isCurrentRank ? styles.currentRankItem : ''} ${isPassed ? styles.passedRank : styles.lockedRank}`}
+                                            className={`${styles.pyramidTier} ${isCurrentRank ? styles.currentTier : ''} ${isPassed ? styles.passedTier : styles.lockedTier}`}
+                                            style={{ width: `${pyramidWidth}%` }}
                                         >
-                                            <div className={styles.rankItemIcon} style={{ background: isPassed ? rank.gradient : 'rgba(100,100,100,0.3)' }}>
-                                                <span>{rank.icon}</span>
-                                            </div>
-                                            <div className={styles.rankItemInfo}>
-                                                <span className={styles.rankItemName} style={{ color: isPassed ? rank.color : '#666' }}>
-                                                    {rank.name}
-                                                </span>
-                                                <span className={styles.rankItemFerveur}>
-                                                    {rank.minFerveur}+ 🔥
-                                                </span>
-                                                {/* Affichage des amis dans ce palier */}
-                                                {friendsInRank.length > 0 && (
-                                                    <div className={styles.friendsInRank}>
-                                                        {friendsInRank.map(friend => (
-                                                            <span key={friend.id} className={styles.friendBubble} title={`${friend.username} - ${friend.ferveur} 🔥`}>
-                                                                {friend.avatar}
-                                                            </span>
-                                                        ))}
-                                                        <span className={styles.friendsCount}>
-                                                            {friendsInRank.length} ami{friendsInRank.length > 1 ? 's' : ''}
-                                                        </span>
-                                                    </div>
+                                            {/* Header cliquable */}
+                                            <div
+                                                className={styles.tierHeader}
+                                                onClick={() => setExpandedRank(isExpanded ? null : rank.id)}
+                                                style={{ background: isPassed ? rank.gradient : 'rgba(60,60,60,0.5)' }}
+                                            >
+                                                <span className={styles.tierIcon}>{rank.icon}</span>
+                                                <span className={styles.tierName}>{rank.name}</span>
+                                                <span className={styles.tierFerveur}>{rank.minFerveur}+</span>
+                                                {(friendsInRank.length > 0 || isCurrentRank) && (
+                                                    <span className={styles.tierBadge}>
+                                                        {isCurrentRank ? '👤' : ''}{friendsInRank.length > 0 ? `+${friendsInRank.length}` : ''}
+                                                    </span>
                                                 )}
+                                                <span className={styles.tierArrow}>{isExpanded ? '▼' : '▶'}</span>
                                             </div>
-                                            {isCurrentRank && (
-                                                <div className={styles.youAreHere}>
-                                                    <span>👈 Vous</span>
-                                                    <span className={styles.yourFerveur}>{userFerveur} 🔥</span>
+
+                                            {/* Contenu déplié */}
+                                            {isExpanded && (
+                                                <div className={styles.tierContent}>
+                                                    {isCurrentRank && (
+                                                        <div className={styles.tierUser}>
+                                                            <span className={styles.tierUserIcon}>👤</span>
+                                                            <span className={styles.tierUserName}>Vous</span>
+                                                            <span className={styles.tierUserFerveur}>{userFerveur} 🔥</span>
+                                                        </div>
+                                                    )}
+                                                    {friendsInRank.map(friend => (
+                                                        <div key={friend.id} className={styles.tierFriend}>
+                                                            <span className={styles.tierFriendAvatar}>{friend.avatar}</span>
+                                                            <span className={styles.tierFriendName}>{friend.username}</span>
+                                                            <span className={styles.tierFriendFerveur}>{friend.ferveur} 🔥</span>
+                                                        </div>
+                                                    ))}
+                                                    {!isCurrentRank && friendsInRank.length === 0 && (
+                                                        <div className={styles.tierEmpty}>Personne dans ce palier</div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
