@@ -78,7 +78,7 @@ interface GameStore {
     setLightningAction: (action: 'apply' | 'remove') => void;  // Choisir l'action foudre
     playCard: (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => { success: boolean; message: string };
     discardForEnergy: (cardId: string) => { success: boolean; message: string };
-    endTurn: () => { success: boolean; message: string };
+    endTurn: (ignoreZombieCheck?: boolean) => { success: boolean; message: string };
     resetGame: () => void;
     playAITurn: () => void;
 
@@ -788,9 +788,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
         return result;
     },
 
-    endTurn: () => {
+    endTurn: (ignoreZombieCheck = false) => {
         const { engine, isSoloMode, playerId } = get();
         if (!engine) return { success: false, message: 'Partie non initialisée' };
+
+        // Vérifier s'il y a un zombie allié vivant pour l'attaque de fin de tour
+        if (!ignoreZombieCheck) {
+            const player = engine.getState().players.find(p => p.id === playerId);
+            const zombieGod = player?.gods.find(g => g.isZombie && !g.isDead);
+
+            if (zombieGod) {
+                // Ouvrir le modal d'attaque zombie au lieu de finir le tour immédiatement
+                get().startZombieDamage(zombieGod.card.id);
+                return { success: true, message: 'Phase attaque zombie' };
+            }
+        }
 
         const result = engine.executeAction({
             type: 'end_turn',
@@ -1113,6 +1125,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isShowingZombieDamage: false,
             zombieDamageGodId: null,
         });
+
+        // Terminer le tour (en ignorant le check zombie pour éviter la boucle)
+        get().endTurn(true);
     },
 
     cancelZombieDamage: () => {
@@ -1120,5 +1135,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isShowingZombieDamage: false,
             zombieDamageGodId: null,
         });
+
+        // Terminer le tour même si on annule
+        get().endTurn(true);
     },
 }));
