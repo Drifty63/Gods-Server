@@ -1062,7 +1062,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'custom', customEffectId: 'retrieve_discard', description: 'Récupérez une carte de la défausse' },
-            { type: 'mill', value: 3 }
+            { type: 'mill', value: 3, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_persephone_echange.png',
         description: '🗑️ → 🖐️ | 3📤',
@@ -1073,7 +1073,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'darkness',
         godId: 'persephone',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'custom', customEffectId: 'temp_resurrect', description: 'Ressuscite un dieu avec 5 PV, inflige 1 dégât chaque tour' }
@@ -1155,7 +1155,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'fire',
         godId: 'hephaistos',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
@@ -1237,7 +1237,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'darkness',
         godId: 'thanatos',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'custom', customEffectId: 'aoe_damage_plus_dead_allies', description: 'Inflige 1 + 1 par allié mort à tous' }
@@ -1256,10 +1256,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 3,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'damage_plus_2x_dead_allies', description: 'Inflige 2 + 2 par allié mort' }
+            { type: 'custom', customEffectId: 'damage_5x_dead_allies', description: 'Inflige 5 × nombre d\'alliés morts' }
         ],
         imageUrl: '/cards/spells/spell_thanatos_faucheuse.png',
-        description: '2+2☠️🩸 → ⚔️',
+        description: '5×☠️🩸 → ⚔️',
     },
 
     // =====================================================
@@ -1320,7 +1320,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'lightning',
         godId: 'hermes',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' },
@@ -1340,12 +1340,12 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 3,
         energyGain: 0,
         effects: [
-            { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'custom', customEffectId: 'frequency_boost', description: 'Augmente fréquence de 2' },
+            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'energy', value: 2 },
             { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
         ],
         imageUrl: '/cards/spells/spell_hermes_boom.png',
-        description: '2🩸 → ⚔️ | +2⚡ | 🔄',
+        description: '3🩸 → ⚔️ | +2⚡ | 🔄',
     },
 
     // =====================================================
@@ -1406,7 +1406,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'water',
         godId: 'selene',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'custom', customEffectId: 'cascade_heal', description: 'Soigne 3, 2, 1 selon la position' }
@@ -1488,7 +1488,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'air',
         godId: 'zephyr',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' },
@@ -1508,10 +1508,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 3,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'fatigue_boost', description: 'Augmente la fatigue adverse' }
+            { type: 'custom', customEffectId: 'free_recycle', description: 'Mélange défausse et deck sans fatigue' }
         ],
         imageUrl: '/cards/spells/spell_zephyr_bourrasque.png',
-        description: '📚⚔️ → 🔀😵',
+        description: '🔀📚 (pas de fatigue)',
     },
 
     // =====================================================
@@ -1529,10 +1529,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 0,
         energyGain: 1,
         effects: [
-            { type: 'damage', value: 2, target: 'enemy_god' }
+            { type: 'damage', value: 3, target: 'enemy_god' }
         ],
         imageUrl: '/cards/spells/spell_nike_frappe.png',
-        description: '2🩸 → ⚔️',
+        description: '3🩸 → ⚔️',
     },
     {
         id: 'nike_generator_2',
@@ -1570,7 +1570,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'light',
         godId: 'nike',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'custom', customEffectId: 'aoe_damage_plus_dead_enemies', description: 'Inflige 1 + 1 par ennemi mort à tous' }
@@ -1653,7 +1653,7 @@ export const ALL_SPELLS: SpellCard[] = [
         element: 'water',
         godId: 'chione',
         type: 'competence',
-        energyCost: 2,
+        energyCost: 1,
         energyGain: 0,
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
@@ -1675,11 +1675,11 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 3,
         energyGain: 0,
         effects: [
-            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'damage', value: 8, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'splash_damage', description: 'Inflige 2 aux cibles adjacentes' }
         ],
         imageUrl: '/cards/spells/spell_chione_age.png',
-        description: '3🩸 → ⚔️ | 2🩸 → ⚔️↔️',
+        description: '8🩸 → ⚔️ | 2🩸 → ⚔️↔️',
     },
 ];
 

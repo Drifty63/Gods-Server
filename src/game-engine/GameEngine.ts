@@ -572,12 +572,14 @@ export class GameEngine {
                 break;
 
             case 'mill':
-                // Fait défausser des cartes du deck adverse
+                // Fait défausser des cartes du deck
+                // Si target === 'self', cible son propre deck, sinon l'adversaire
+                const millTarget = effect.target === 'self' ? player : opponent;
                 for (let i = 0; i < (effect.value || 1); i++) {
-                    if (opponent.deck.length > 0) {
-                        const card = opponent.deck.shift()!;
-                        this.cleanBlindCard(card);
-                        opponent.discard.push(card);
+                    if (millTarget.deck.length > 0) {
+                        const cardToMill = millTarget.deck.shift()!;
+                        this.cleanBlindCard(cardToMill);
+                        millTarget.discard.push(cardToMill);
                     }
                 }
                 break;
@@ -1226,6 +1228,110 @@ export class GameEngine {
                         target.temporaryWeakness = selectedElement;
                     }
                 }
+                break;
+
+            // ========================================
+            // HERMÈS - Rejouer une action
+            // ========================================
+            case 'replay_action':
+                // Permet de jouer une autre carte ce tour
+                // On remet hasPlayedCard à false pour permettre de rejouer
+                player.hasPlayedCard = false;
+                break;
+
+            // ========================================
+            // THANATOS - Dégâts 5× alliés morts
+            // ========================================
+            case 'damage_5x_dead_allies':
+                // Inflige 5 × nombre d'alliés morts à une cible
+                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
+                const totalDamage5x = 5 * deadAlliesCount;
+
+                if (totalDamage5x > 0 && targetGodId) {
+                    const target5x = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    if (target5x) {
+                        // Calculer avec faiblesse
+                        const { damage: finalDamage5x } = calculateDamageWithDualWeakness(
+                            totalDamage5x, card.element, target5x.card.weakness, target5x.temporaryWeakness
+                        );
+
+                        // Gestion du bouclier
+                        let damageToInflict5x = finalDamage5x;
+                        const shieldIndex5x = target5x.statusEffects.findIndex(s => s.type === 'shield');
+                        if (shieldIndex5x !== -1) {
+                            const shield = target5x.statusEffects[shieldIndex5x];
+                            if (shield.stacks >= damageToInflict5x) {
+                                shield.stacks -= damageToInflict5x;
+                                damageToInflict5x = 0;
+                            } else {
+                                damageToInflict5x -= shield.stacks;
+                                shield.stacks = 0;
+                                target5x.statusEffects.splice(shieldIndex5x, 1);
+                            }
+                        }
+
+                        target5x.currentHealth -= damageToInflict5x;
+                        if (target5x.currentHealth <= 0) {
+                            this.handleGodDeath(opponent, target5x);
+                        }
+                    }
+                }
+                break;
+
+            // ========================================
+            // HÉPHAÏSTOS - Bouclier = dégâts infligés
+            // ========================================
+            case 'gain_current_shield':
+                // Gagne en bouclier le nombre de dégâts infligés (avec bonus faiblesse)
+                if (castingGod && targetGodId) {
+                    const targetForShield = opponent.gods.find(g => g.card.id === targetGodId);
+                    if (targetForShield) {
+                        // Calculer les dégâts réels (2 de base pour Absorption d'Armure)
+                        const baseDamage = 2;
+                        const { damage: realDamage } = calculateDamageWithDualWeakness(
+                            baseDamage, card.element, targetForShield.card.weakness, targetForShield.temporaryWeakness
+                        );
+                        // Ajouter le bouclier au lanceur
+                        this.addStatus(castingGod, 'shield', realDamage);
+                    }
+                }
+                break;
+
+            // ========================================
+            // PERSÉPHONE - Récupérer une carte de la défausse
+            // ========================================
+            case 'retrieve_discard':
+                // Le joueur choisit une carte dans sa défausse et la remet en main
+                // Pour l'instant, on prend la dernière carte de la défausse (à améliorer avec un modal)
+                if (player.discard.length > 0) {
+                    // TODO: Implémenter un modal de sélection
+                    // Pour l'instant, prend la carte la plus récente
+                    const cardToRetrieve = player.discard.pop();
+                    if (cardToRetrieve) {
+                        player.hand.push(cardToRetrieve);
+                    }
+                }
+                break;
+
+            // ========================================
+            // ZÉPHYR - Recyclage sans fatigue
+            // ========================================
+            case 'free_recycle':
+                // Mélange la défausse et le deck du joueur choisi sans pénalité de fatigue
+                // Pour l'instant, applique à l'adversaire (à améliorer avec modal de choix)
+                // TODO: Implémenter le choix soi/adversaire
+                const targetPlayer = opponent; // Par défaut l'adversaire
+
+                // Mélanger défausse dans le deck
+                targetPlayer.deck.push(...targetPlayer.discard);
+                targetPlayer.discard = [];
+
+                // Mélanger le deck (Fisher-Yates)
+                for (let i = targetPlayer.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [targetPlayer.deck[i], targetPlayer.deck[j]] = [targetPlayer.deck[j], targetPlayer.deck[i]];
+                }
+                // PAS d'augmentation de fatigue, PAS de dégâts
                 break;
 
             default:
