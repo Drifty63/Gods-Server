@@ -622,6 +622,17 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 // (le tour peut avoir changé si un dieu est mort du poison)
                 const currentState = useGameStore.getState().gameState;
                 if (currentState && currentState.currentPlayerId === playerId && currentState.status === 'playing') {
+                    // Vérifier si le joueur a un zombie actif pour les dégâts de fin de tour
+                    const currentPlayer = currentState.players.find(p => p.id === playerId);
+                    const activeZombieGod = currentPlayer?.gods.find(g => g.isZombie && !g.isDead);
+
+                    if (activeZombieGod) {
+                        // Ouvrir le modal de dégâts zombie au lieu de finir le tour
+                        startZombieDamage(activeZombieGod.card.id);
+                        // La fin de tour sera appelée après le choix du joueur
+                        return;
+                    }
+
                     endTurn();
                     onAction?.({ type: 'end_turn', payload: {} });
                 }
@@ -798,8 +809,11 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Handler pour les dégâts du zombie (fin de tour)
     const handleConfirmZombieDamage = (targetGodId: string | null) => {
         confirmZombieDamage(targetGodId);
-        // Après le zombie damage, finir le tour normalement
-        autoEndTurnMultiplayer();
+        // Après le zombie damage, finir le tour directement (pas autoEndTurnMultiplayer pour éviter la boucle)
+        if (!isSoloMode) {
+            endTurn();
+            onAction?.({ type: 'end_turn', payload: {} });
+        }
     };
 
     // Trouver le zombie actif du joueur pour le modal de dégâts
