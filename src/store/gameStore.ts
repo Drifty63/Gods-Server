@@ -546,30 +546,42 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const opponent = engine.getState().players.find(p => p.id !== playerId);
         if (!opponent) return;
 
-        // Retirer les cartes sélectionnées de la main adverse et les mettre dans le deck
-        for (const cardId of selectedCardIds) {
-            const cardIndex = opponent.hand.findIndex(c => c.id === cardId);
-            if (cardIndex !== -1) {
-                const card = opponent.hand.splice(cardIndex, 1)[0];
-                card.isHiddenFromOwner = false; // Reset le flag
-                opponent.deck.push(card);
+        // Cas spécial : choose_discard_enemy (Vent d'Ouest) = simple défausse
+        if (pendingEnemyCardEffect === 'choose_discard_enemy') {
+            for (const cardId of selectedCardIds) {
+                const cardIndex = opponent.hand.findIndex(c => c.id === cardId);
+                if (cardIndex !== -1) {
+                    const card = opponent.hand.splice(cardIndex, 1)[0];
+                    card.isHiddenFromOwner = false;
+                    opponent.discard.push(card); // Défausse, pas dans le deck
+                }
             }
-        }
+        } else {
+            // Comportement par défaut (Nyx) : mélange dans deck + pioche à l'envers
+            for (const cardId of selectedCardIds) {
+                const cardIndex = opponent.hand.findIndex(c => c.id === cardId);
+                if (cardIndex !== -1) {
+                    const card = opponent.hand.splice(cardIndex, 1)[0];
+                    card.isHiddenFromOwner = false;
+                    opponent.deck.push(card);
+                }
+            }
 
-        // Mélanger le deck
-        opponent.deck = opponent.deck.sort(() => Math.random() - 0.5);
+            // Mélanger le deck
+            opponent.deck = opponent.deck.sort(() => Math.random() - 0.5);
 
-        // Piocher le même nombre de cartes à l'envers
-        const cardsToDraw = Math.min(selectedCardIds.length, opponent.deck.length);
-        for (let i = 0; i < cardsToDraw; i++) {
-            if (opponent.deck.length > 0) {
-                const originalCard = opponent.deck.shift()!;
-                const drawnCard = {
-                    ...originalCard,
-                    isHiddenFromOwner: true,
-                    revealedToPlayerId: playerId
-                };
-                opponent.hand.push(drawnCard);
+            // Piocher le même nombre de cartes à l'envers
+            const cardsToDraw = Math.min(selectedCardIds.length, opponent.deck.length);
+            for (let i = 0; i < cardsToDraw; i++) {
+                if (opponent.deck.length > 0) {
+                    const originalCard = opponent.deck.shift()!;
+                    const drawnCard = {
+                        ...originalCard,
+                        isHiddenFromOwner: true,
+                        revealedToPlayerId: playerId
+                    };
+                    opponent.hand.push(drawnCard);
+                }
             }
         }
 

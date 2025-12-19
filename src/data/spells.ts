@@ -1461,10 +1461,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' },
-            { type: 'discard', value: 1, target: 'enemy_hand' }
+            { type: 'custom', customEffectId: 'choose_discard_enemy', description: 'Défaussez 1 carte de la main adverse (au choix)' }
         ],
         imageUrl: '/cards/spells/spell_zephyr_vent.png',
-        description: '1🩸 → 👊 | 1🎴🃏⚔️ → 🗑️',
+        description: '1🩸 → 👊 | 1🃏⚔️ → 🗑️',
     },
 
     // --- COMPÉTENCES ---

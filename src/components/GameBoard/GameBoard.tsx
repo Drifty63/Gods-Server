@@ -9,6 +9,8 @@ import SpellCard from '@/components/SpellCard/SpellCard';
 import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionModal';
 import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
 import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
+import OptionalChoiceModal from '@/components/OptionalChoiceModal/OptionalChoiceModal';
+import PlayerSelectionModal from '@/components/PlayerSelectionModal/PlayerSelectionModal';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { recordVictory, recordDefeat, recordGodsPlayed } from '@/services/firebase';
@@ -74,6 +76,20 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         revealBlindCard,
         discardBlindCard,
         surrender,
+        // Choix optionnel (Perséphone Vision du Tartare)
+        isShowingOptionalChoice,
+        optionalChoiceTitle,
+        optionalChoiceDescription,
+        startOptionalChoice,
+        confirmOptionalChoice,
+        cancelOptionalChoice,
+        pendingOptionalTargetGodIds,
+        // Sélection de joueur (Zéphyr Bourrasque Chanceuse)
+        isSelectingPlayer,
+        playerSelectionTitle,
+        startPlayerSelection,
+        confirmPlayerSelection,
+        cancelPlayerSelection,
     } = useGameStore();
 
     // Récupérer l'utilisateur connecté pour enregistrer les stats
@@ -187,6 +203,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         count: 2,
                         title: '👁️ Choisissez 2 cartes de l\'adversaire à mélanger',
                         effectId: 'shuffle_hand_draw_blind_2'
+                    };
+                }
+                if (effect.customEffectId === 'choose_discard_enemy') {
+                    return {
+                        needed: true,
+                        count: 1,
+                        title: '💨 Vent d\'Ouest - Choisissez 1 carte à défausser',
+                        effectId: 'choose_discard_enemy'
                     };
                 }
             }
@@ -1453,6 +1477,24 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 canPlay={false}
                 canDiscard={false}
                 readOnly={true}
+            />
+
+            {/* Modal de choix optionnel (Perséphone Vision du Tartare) */}
+            <OptionalChoiceModal
+                isOpen={isShowingOptionalChoice}
+                title={optionalChoiceTitle}
+                description={optionalChoiceDescription}
+                onAccept={() => confirmOptionalChoice(true)}
+                onDecline={() => confirmOptionalChoice(false)}
+            />
+
+            {/* Modal de sélection de joueur (Zéphyr Bourrasque Chanceuse) */}
+            <PlayerSelectionModal
+                isOpen={isSelectingPlayer}
+                title={playerSelectionTitle}
+                onSelectSelf={() => confirmPlayerSelection(true)}
+                onSelectOpponent={() => confirmPlayerSelection(false)}
+                onCancel={cancelPlayerSelection}
             />
 
             {/* Toast de notification */}

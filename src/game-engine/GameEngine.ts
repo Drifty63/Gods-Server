@@ -1333,6 +1333,15 @@ export class GameEngine {
                 // Rien à faire ici, le store s'en occupe
                 break;
 
+            // ========================================
+            // ZÉPHYR - Choisir une carte adverse à défausser
+            // ========================================
+            case 'choose_discard_enemy':
+                // Cet effet est géré par le modal de sélection de cartes adverses dans le GameStore
+                // Le GameBoard détecte cet effet et ouvre le modal
+                // Rien à faire ici, le store s'en occupe
+                break;
+
             default:
                 console.warn(`Effet custom non implémenté: ${effectId}`);
                 break;
