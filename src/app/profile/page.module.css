@@ -16,50 +16,51 @@
 .header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    background: rgba(0, 0, 0, 0.5);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
+    justify-content: center;
+    padding: 30px 20px;
+    position: relative;
+    margin-bottom: 20px;
 }
 
 .backButton {
-    font-family: 'Cinzel', serif;
-    padding: 8px 16px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    border-radius: 8px;
+    position: absolute;
+    left: 20px;
     color: var(--gold-divine);
     text-decoration: none;
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 .backButton:hover {
-    background: rgba(212, 175, 55, 0.1);
+    transform: translateX(-5px);
 }
 
 .title {
     font-family: 'Cinzel', serif;
-    font-size: 1.3rem;
+    font-size: 2.5rem;
     color: var(--gold-divine);
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    margin: 0;
+    letter-spacing: 4px;
 }
 
 .settingsButton {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 1.2rem;
+    position: absolute;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.2s;
 }
 
 .settingsButton:hover {
-    background: rgba(212, 175, 55, 0.1);
+    transform: scale(1.1);
 }
 
 /* Content */
@@ -83,6 +84,12 @@
 
 .avatarContainer {
     position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.avatarContainer:hover {
+    transform: scale(1.05);
 }
 
 .avatar {
@@ -97,18 +104,19 @@
     box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
 }
 
-.rankBadge {
+.avatarEditHint {
     position: absolute;
-    bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 3px 12px;
-    background: linear-gradient(145deg, #6366f1, #4338ca);
-    border-radius: 10px;
-    font-size: 0.65rem;
-    color: white;
-    font-weight: 700;
-    white-space: nowrap;
+    bottom: -2px;
+    right: -2px;
+    width: 26px;
+    height: 26px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--gold-divine);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
 }
 
 .profileInfo {
@@ -119,68 +127,195 @@
     font-family: 'Cinzel', serif;
     font-size: 1.4rem;
     color: white;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
-.levelInfo {
+/* Rank Info */
+.rankInfo {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
 }
 
-.level {
+.rankBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    width: fit-content;
+}
+
+.rankIcon {
+    font-size: 1.2rem;
+}
+
+.rankName {
     font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    color: var(--gold-divine);
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.xpBar {
-    height: 8px;
+.ferveurDisplay {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.ferveurValue {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ff9500;
+}
+
+.ferveurLabel {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.progressBar {
+    height: 6px;
     background: rgba(0, 0, 0, 0.5);
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
 }
 
-.xpFill {
+.progressFill {
     height: 100%;
-    background: linear-gradient(90deg, var(--gold-divine), var(--gold-light));
-    border-radius: 4px;
+    border-radius: 3px;
     transition: width 0.5s ease;
 }
 
-.xpText {
-    font-size: 0.75rem;
-    color: var(--text-muted);
+.progressText {
+    font-size: 0.7rem;
+    color: #666;
 }
 
-/* Sections */
-.section {
+/* =================== DIEU FAVORI =================== */
+.favoriteGodSection {
     margin-bottom: 20px;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(212, 175, 55, 0.1);
-    border-radius: 12px;
+    padding: 25px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    text-align: center;
 }
 
-.sectionTitle {
+.favoriteGodCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.favoriteGodImage {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--gold-divine);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+    object-fit: cover;
+}
+
+.favoriteGodInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.favoriteGodLabel {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.favoriteGodName {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold-divine);
+    font-weight: 700;
+}
+
+.favoriteGodCount {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.noFavoriteGod {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.noFavoriteGod span:first-child {
+    font-size: 2.5rem;
+}
+
+/* =================== STATISTIQUES ACCORDÉON =================== */
+.statsSection {
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.statsHeader {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.statsHeader:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.statsHeaderIcon {
+    font-size: 1.3rem;
+    margin-right: 12px;
+}
+
+.statsHeaderTitle {
+    flex: 1;
     font-family: 'Cinzel', serif;
     font-size: 1rem;
     color: var(--gold-divine);
-    margin-bottom: 16px;
 }
 
-/* Stats Grid */
-.statsGrid {
+.statsHeaderArrow {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.statsContent {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    animation: slideDown 0.2s ease;
+}
+
+.statsRow {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
-.statCard {
+.statItem {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px;
+    padding: 15px;
     background: rgba(212, 175, 55, 0.05);
     border-radius: 10px;
     border: 1px solid rgba(212, 175, 55, 0.1);
@@ -188,15 +323,135 @@
 
 .statValue {
     font-family: 'Cinzel', serif;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--gold-divine);
 }
 
 .statLabel {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: #888;
     margin-top: 4px;
+    text-align: center;
+}
+
+/* =================== HISTORIQUE DES PARTIES =================== */
+.historySection {
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.historyHeader {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.historyHeader:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.historyHeaderIcon {
+    font-size: 1.3rem;
+    margin-right: 12px;
+}
+
+.historyHeaderTitle {
+    flex: 1;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold-divine);
+}
+
+.historyHeaderArrow {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.historyContent {
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    animation: slideDown 0.2s ease;
+}
+
+.matchCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.matchCard.matchWin {
+    border-left: 3px solid #4ade80;
+}
+
+.matchCard.matchLoss {
+    border-left: 3px solid #ef4444;
+}
+
+.matchGods {
+    display: flex;
+    gap: 4px;
+}
+
+.matchGodIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    object-fit: cover;
+}
+
+.matchResult {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.matchResultText {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.matchResultText.win {
+    color: #4ade80;
+}
+
+.matchResultText.loss {
+    color: #ef4444;
+}
+
+.matchTurns {
+    font-size: 0.65rem;
+    color: #888;
+}
+
+.noHistory {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9rem;
+    padding: 20px;
+}
+
+.noHistory span:first-child {
+    font-size: 2rem;
 }
 
 /* Dieu le plus joué */
@@ -433,6 +688,58 @@
 .logoutButton:hover {
     background: rgba(239, 68, 68, 0.25);
     border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    position: relative;
+    background: linear-gradient(180deg, rgba(26, 26, 58, 0.98), rgba(10, 10, 26, 0.98));
+    border: 2px solid var(--gold-divine);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.modalClose {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modalClose:hover {
+    background: rgba(239, 68, 68, 0.5);
+}
+
+.modalTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: var(--gold-divine);
+    text-align: center;
+    margin-bottom: 24px;
 }
 
 @media (max-width: 480px) {

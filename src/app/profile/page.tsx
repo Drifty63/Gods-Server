@@ -1,36 +1,34 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { getMostPlayedGod } from '@/services/firebase';
 import { ALL_GODS } from '@/data/gods';
+import { getRankByFerveur, getRankProgress } from '@/data/ranks';
 import styles from './page.module.css';
 
 // Liste des avatars disponibles
 const AVATARS = ['⚡', '🔥', '💧', '🌿', '☀️', '💀', '💨', '🌙', '⭐', '👑', '🦅', '🐍'];
 
-// Rangs selon le niveau
-function getRank(level: number): string {
-    if (level < 5) return 'Novice';
-    if (level < 10) return 'Apprenti';
-    if (level < 20) return 'Guerrier';
-    if (level < 35) return 'Héros';
-    if (level < 50) return 'Champion';
-    if (level < 75) return 'Légende';
-    return 'Dieu';
-}
-
-// XP requis pour le niveau suivant
-function getXpToNext(level: number): number {
-    return level * 500;
-}
+// Données mock pour l'historique des parties (20 dernières)
+const MOCK_MATCH_HISTORY = [
+    { id: 1, playerGods: ['zeus', 'poseidon', 'athena'], opponentGods: ['hades', 'ares', 'apollon'], result: 'victory', turns: 8 },
+    { id: 2, playerGods: ['hades', 'nyx', 'ares'], opponentGods: ['zeus', 'athena', 'artemis'], result: 'defeat', turns: 12 },
+    { id: 3, playerGods: ['apollon', 'artemis', 'hermes'], opponentGods: ['poseidon', 'hades', 'nyx'], result: 'victory', turns: 6 },
+    { id: 4, playerGods: ['zeus', 'ares', 'hephaïstos'], opponentGods: ['apollon', 'artemis', 'athena'], result: 'victory', turns: 9 },
+    { id: 5, playerGods: ['poseidon', 'nyx', 'hermes'], opponentGods: ['zeus', 'hades', 'ares'], result: 'defeat', turns: 15 },
+    { id: 6, playerGods: ['athena', 'artemis', 'apollon'], opponentGods: ['hephaïstos', 'hermes', 'nyx'], result: 'victory', turns: 7 },
+];
 
 export default function ProfilePage() {
     const router = useRouter();
     const { user, profile, loading, profileLoading, signOut, updateProfile, refreshProfile } = useAuth();
+    const [showAvatarModal, setShowAvatarModal] = useState(false);
+    const [showStats, setShowStats] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
 
     useEffect(() => {
         // Rafraîchir le profil au chargement si user existe mais pas de profil
@@ -100,9 +98,10 @@ export default function ProfilePage() {
         );
     }
 
-    const xpToNext = getXpToNext(profile.level);
-    const xpProgress = Math.min((profile.xp / xpToNext) * 100, 100);
-    const rank = getRank(profile.level);
+    // TODO: Utiliser profile?.ferveur quand disponible dans UserProfile
+    const userFerveur = 450; // Valeur mock pour démo
+    const userRank = getRankByFerveur(userFerveur);
+    const rankProgress = getRankProgress(userFerveur);
     const winRate = profile.stats.totalGames > 0
         ? ((profile.stats.victories / profile.stats.totalGames) * 100).toFixed(1)
         : '0.0';
@@ -115,128 +114,204 @@ export default function ProfilePage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>← Retour</Link>
-                <h1 className={styles.title}>Profil</h1>
+                <Link href="/" className={styles.backButton}>‹ Retour</Link>
+                <h1 className={styles.title}>PROFIL</h1>
                 <button className={styles.settingsButton} onClick={handleSignOut}>🚪</button>
             </header>
 
             <div className={styles.content}>
                 {/* Carte de profil */}
                 <section className={styles.profileCard}>
-                    <div className={styles.avatarContainer}>
+                    <div className={styles.avatarContainer} onClick={() => setShowAvatarModal(true)}>
                         <div className={styles.avatar}>{profile.avatar}</div>
-                        <div className={styles.rankBadge}>{rank}</div>
+                        <div className={styles.avatarEditHint}>✏️</div>
                     </div>
                     <div className={styles.profileInfo}>
                         <h2 className={styles.username}>{profile.username}</h2>
-                        <p className={styles.email}>{profile.email}</p>
-                        <div className={styles.levelInfo}>
-                            <span className={styles.level}>Niveau {profile.level}</span>
-                            <div className={styles.xpBar}>
-                                <div className={styles.xpFill} style={{ width: `${xpProgress}%` }} />
+                        <div className={styles.rankInfo}>
+                            <div className={styles.rankBadge} style={{ background: userRank.gradient }}>
+                                <span className={styles.rankIcon}>{userRank.icon}</span>
+                                <span className={styles.rankName}>{userRank.name}</span>
                             </div>
-                            <span className={styles.xpText}>{profile.xp} / {xpToNext} XP</span>
+                            <div className={styles.ferveurDisplay}>
+                                <span className={styles.ferveurValue}>{userFerveur}</span>
+                                <span className={styles.ferveurLabel}>🔥 Ferveur</span>
+                            </div>
+                            <div className={styles.progressBar}>
+                                <div className={styles.progressFill} style={{ width: `${rankProgress}%`, background: userRank.gradient }} />
+                            </div>
+                            <span className={styles.progressText}>Progression vers le prochain rang</span>
                         </div>
                     </div>
                 </section>
 
-                {/* Changer d'avatar */}
-                <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>🎭 Changer d&apos;avatar</h3>
-                    <div className={styles.avatarGrid}>
-                        {AVATARS.map((avatar) => (
-                            <button
-                                key={avatar}
-                                className={`${styles.avatarOption} ${profile.avatar === avatar ? styles.selected : ''}`}
-                                onClick={() => handleAvatarChange(avatar)}
-                            >
-                                {avatar}
-                            </button>
-                        ))}
-                    </div>
+                {/* Dieu Favori - Affiché en permanence */}
+                <section className={styles.favoriteGodSection}>
+                    {mostPlayedGod ? (
+                        <>
+                            <div className={styles.favoriteGodCard}>
+                                <Image
+                                    src={mostPlayedGod.imageUrl}
+                                    alt={mostPlayedGod.name}
+                                    width={100}
+                                    height={100}
+                                    className={styles.favoriteGodImage}
+                                />
+                                <div className={styles.favoriteGodInfo}>
+                                    <span className={styles.favoriteGodLabel}>Dieu Favori</span>
+                                    <span className={styles.favoriteGodName}>{mostPlayedGod.name}</span>
+                                    <span className={styles.favoriteGodCount}>{mostPlayed?.count} parties jouées</span>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className={styles.noFavoriteGod}>
+                            <span>🎮</span>
+                            <span>Jouez des parties pour voir votre dieu favori !</span>
+                        </div>
+                    )}
                 </section>
 
-                {/* Statistiques */}
-                <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>📊 Statistiques</h3>
-                    <div className={styles.statsGrid}>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>{profile.stats.victories}</span>
-                            <span className={styles.statLabel}>Victoires</span>
+                {/* Statistiques - Accordéon */}
+                <section className={styles.statsSection}>
+                    <div
+                        className={styles.statsHeader}
+                        onClick={() => setShowStats(!showStats)}
+                    >
+                        <span className={styles.statsHeaderIcon}>📊</span>
+                        <span className={styles.statsHeaderTitle}>Statistiques</span>
+                        <span className={styles.statsHeaderArrow}>{showStats ? '▼' : '▶'}</span>
+                    </div>
+
+                    {showStats && (
+                        <div className={styles.statsContent}>
+                            <div className={styles.statsRow}>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statValue}>{profile.stats.totalGames}</span>
+                                    <span className={styles.statLabel}>Parties jouées</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statValue}>{winRate}%</span>
+                                    <span className={styles.statLabel}>Victoires</span>
+                                </div>
+                            </div>
+                            <div className={styles.statsRow}>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statValue}>{userFerveur}</span>
+                                    <span className={styles.statLabel}>🔥 Ferveur max</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statValue}>{userFerveur}</span>
+                                    <span className={styles.statLabel}>🔥 Ferveur actuelle</span>
+                                </div>
+                            </div>
+                            <div className={styles.statsRow}>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statValue}>{profile.collection.godsOwned.length}/12</span>
+                                    <span className={styles.statLabel}>Dieux obtenus</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statValue}>0</span>
+                                    <span className={styles.statLabel}>Défis réalisés</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>{profile.stats.defeats}</span>
-                            <span className={styles.statLabel}>Défaites</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>{winRate}%</span>
-                            <span className={styles.statLabel}>Ratio</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>{profile.stats.currentStreak}</span>
-                            <span className={styles.statLabel}>Série actuelle</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>{profile.stats.bestStreak}</span>
-                            <span className={styles.statLabel}>Meilleure série</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            {mostPlayedGod ? (
-                                <>
-                                    <div className={styles.mostPlayedGod}>
-                                        <Image
-                                            src={mostPlayedGod.imageUrl}
-                                            alt={mostPlayedGod.name}
-                                            width={40}
-                                            height={40}
-                                            className={styles.godImage}
-                                        />
-                                        <span className={styles.godPlayCount}>{mostPlayed?.count}×</span>
+                    )}
+                </section>
+
+                {/* Historique des parties - Accordéon */}
+                <section className={styles.historySection}>
+                    <div
+                        className={styles.historyHeader}
+                        onClick={() => setShowHistory(!showHistory)}
+                    >
+                        <span className={styles.historyHeaderIcon}>📜</span>
+                        <span className={styles.historyHeaderTitle}>Historique des parties</span>
+                        <span className={styles.historyHeaderArrow}>{showHistory ? '▼' : '▶'}</span>
+                    </div>
+
+                    {showHistory && (
+                        <div className={styles.historyContent}>
+                            {MOCK_MATCH_HISTORY.slice(0, 20).map((match) => {
+                                const getGodIcon = (godId: string) => {
+                                    const god = ALL_GODS.find(g => g.id === godId);
+                                    return god?.imageUrl || '/cards/gods/zeus.png';
+                                };
+
+                                return (
+                                    <div key={match.id} className={`${styles.matchCard} ${match.result === 'victory' ? styles.matchWin : styles.matchLoss}`}>
+                                        {/* Dieux du joueur */}
+                                        <div className={styles.matchGods}>
+                                            {match.playerGods.map((godId, i) => (
+                                                <Image
+                                                    key={i}
+                                                    src={getGodIcon(godId)}
+                                                    alt={godId}
+                                                    width={30}
+                                                    height={30}
+                                                    className={styles.matchGodIcon}
+                                                />
+                                            ))}
+                                        </div>
+
+                                        {/* Résultat */}
+                                        <div className={styles.matchResult}>
+                                            <span className={`${styles.matchResultText} ${match.result === 'victory' ? styles.win : styles.loss}`}>
+                                                {match.result === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}
+                                            </span>
+                                            <span className={styles.matchTurns}>{match.turns} tours</span>
+                                        </div>
+
+                                        {/* Dieux adversaire */}
+                                        <div className={styles.matchGods}>
+                                            {match.opponentGods.map((godId, i) => (
+                                                <Image
+                                                    key={i}
+                                                    src={getGodIcon(godId)}
+                                                    alt={godId}
+                                                    width={30}
+                                                    height={30}
+                                                    className={styles.matchGodIcon}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
-                                    <span className={styles.statLabel}>Dieu favori</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span className={styles.statValue}>-</span>
-                                    <span className={styles.statLabel}>Dieu favori</span>
-                                </>
+                                );
+                            })}
+                            {MOCK_MATCH_HISTORY.length === 0 && (
+                                <div className={styles.noHistory}>
+                                    <span>🎮</span>
+                                    <span>Aucune partie en ligne jouée</span>
+                                </div>
                             )}
                         </div>
-                    </div>
-                </section>
-
-                {/* Collection */}
-                <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>🎴 Collection</h3>
-                    <div className={styles.collectionGrid}>
-                        <div className={styles.collectionItem}>
-                            <div className={styles.collectionBar}>
-                                <div
-                                    className={styles.collectionFill}
-                                    style={{ width: `${(profile.collection.godsOwned.length / 12) * 100}%` }}
-                                />
-                            </div>
-                            <span>Dieux: {profile.collection.godsOwned.length}/12</span>
-                        </div>
-                        <div className={styles.collectionItem}>
-                            <div className={styles.collectionBar}>
-                                <div
-                                    className={styles.collectionFill}
-                                    style={{ width: `${(profile.collection.spellsOwned.length / 60) * 100}%` }}
-                                />
-                            </div>
-                            <span>Sorts: {profile.collection.spellsOwned.length}/60</span>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Bouton de déconnexion */}
-                <section className={styles.section}>
-                    <button className={styles.logoutButton} onClick={handleSignOut}>
-                        🚪 Se déconnecter
-                    </button>
+                    )}
                 </section>
             </div>
+
+            {/* Modal Changer d'avatar */}
+            {showAvatarModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowAvatarModal(false)}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.modalClose} onClick={() => setShowAvatarModal(false)}>✕</button>
+                        <h2 className={styles.modalTitle}>🎭 Choisir un avatar</h2>
+                        <div className={styles.avatarGrid}>
+                            {AVATARS.map((avatar) => (
+                                <button
+                                    key={avatar}
+                                    className={`${styles.avatarOption} ${profile.avatar === avatar ? styles.selected : ''}`}
+                                    onClick={() => {
+                                        handleAvatarChange(avatar);
+                                        setShowAvatarModal(false);
+                                    }}
+                                >
+                                    {avatar}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
