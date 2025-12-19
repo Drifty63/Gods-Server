@@ -58,20 +58,56 @@ function StoryBattleContent() {
         getCurrentEvent
     } = useStoryStore();
 
+    // Appliquer les conditions de combat (ex: 50% PV)
+    const applyBattleConditions = useCallback((battleConfig: NonNullable<typeof currentBattleConfig>) => {
+        if (!battleConfig?.playerCondition) return;
+
+        const { engine, gameState } = useGameStore.getState();
+        if (!engine || !gameState) return;
+
+        if (battleConfig.playerCondition.type === 'half_hp') {
+            // Récupérer l'état interne de l'engine et le modifier
+            const internalState = engine.getState();
+
+            // Réduire les PV du joueur à 50% dans l'état interne de l'engine
+            // players[0] = joueur 1 (nous)
+            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
+                god.currentHealth = Math.floor(god.card.maxHealth / 2);
+            });
+
+            // Créer une copie profonde de l'état pour React
+            const newGameState = JSON.parse(JSON.stringify(internalState));
+
+            // Mettre à jour le store avec le nouvel état
+            useGameStore.setState({ gameState: newGameState });
+        }
+    }, []);
+
     // Initialiser le combat
     const initBattle = useCallback(() => {
-        if (!currentBattleConfig) {
+        // Récupérer la config depuis currentBattleConfig ou depuis l'événement actuel
+        let battleConfig = currentBattleConfig;
+
+        if (!battleConfig) {
+            // Essayer de récupérer depuis l'événement actuel
+            const currentEvent = getCurrentEvent();
+            if (currentEvent?.type === 'battle' && currentEvent.battle) {
+                battleConfig = currentEvent.battle;
+            }
+        }
+
+        if (!battleConfig) {
             setError('Aucun combat configuré');
             return;
         }
 
         try {
             // Équipe du joueur - utilise la config de bataille si définie, sinon l'équipe par défaut
-            const playerTeamIds = currentBattleConfig.playerTeam || getPlayerTeam();
+            const playerTeamIds = battleConfig.playerTeam || getPlayerTeam();
             const playerGods = playerTeamIds.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
             // Équipe ennemie
-            const enemyGods = currentBattleConfig.enemyTeam.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
+            const enemyGods = battleConfig.enemyTeam.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
             // Vérification de la taille des équipes (supportent maintenant 1-4 dieux)
             if (playerGods.length === 0 || playerGods.length > 4) {
@@ -83,14 +119,14 @@ function StoryBattleContent() {
 
             // Créer les decks avec multiplicateur optionnel
             const basePlaverDeck = createDeck(playerTeamIds);
-            const baseEnemyDeck = createDeck(currentBattleConfig.enemyTeam);
+            const baseEnemyDeck = createDeck(battleConfig.enemyTeam);
 
             let playerDeck = basePlaverDeck;
             let enemyDeck = baseEnemyDeck;
 
             // Appliquer le multiplicateur de deck si défini (pour combat 1v1)
-            if (currentBattleConfig.deckMultiplier && currentBattleConfig.deckMultiplier > 1) {
-                const multiplier = currentBattleConfig.deckMultiplier;
+            if (battleConfig.deckMultiplier && battleConfig.deckMultiplier > 1) {
+                const multiplier = battleConfig.deckMultiplier;
                 playerDeck = [];
                 enemyDeck = [];
 
@@ -126,8 +162,9 @@ function StoryBattleContent() {
             initGame(playerGods, playerDeck, enemyGods, enemyDeck, playerGoesFirst);
 
             // Appliquer les conditions spéciales APRÈS l'initialisation
+            // On passe battleConfig à la fonction
             setTimeout(() => {
-                applyBattleConditions();
+                applyBattleConditions(battleConfig);
             }, 100);
 
             setPhase('intro');
@@ -148,32 +185,7 @@ function StoryBattleContent() {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erreur lors de l\'initialisation du combat');
         }
-    }, [currentBattleConfig, getPlayerTeam, initGame]);
-
-    // Appliquer les conditions de combat (ex: 50% PV)
-    const applyBattleConditions = useCallback(() => {
-        if (!currentBattleConfig?.playerCondition) return;
-
-        const { engine, gameState } = useGameStore.getState();
-        if (!engine || !gameState) return;
-
-        if (currentBattleConfig.playerCondition.type === 'half_hp') {
-            // Récupérer l'état interne de l'engine et le modifier
-            const internalState = engine.getState();
-
-            // Réduire les PV du joueur à 50% dans l'état interne de l'engine
-            // players[0] = joueur 1 (nous)
-            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
-                god.currentHealth = Math.floor(god.card.maxHealth / 2);
-            });
-
-            // Créer une copie profonde de l'état pour React
-            const newGameState = JSON.parse(JSON.stringify(internalState));
-
-            // Mettre à jour le store avec le nouvel état
-            useGameStore.setState({ gameState: newGameState });
-        }
-    }, [currentBattleConfig]);
+    }, [currentBattleConfig, getCurrentEvent, getPlayerTeam, initGame, applyBattleConditions]);
 
     // Lancer le combat au chargement
     useEffect(() => {
