@@ -207,6 +207,8 @@ export class GameEngine {
         }
     }
 
+
+
     /**
      * Effectue une attaque de zombie (1 dégât ténèbres + gestion faiblesse/bouclier)
      */
@@ -1729,6 +1731,8 @@ export class GameEngine {
                 return [];
         }
     }
+
+
 
     /**
      * Obtient les cibles qui DOIVENT être incluses (provocateurs pour enemy_god)

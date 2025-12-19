@@ -24,29 +24,32 @@ export class AIPlayer {
         // 1. Essayer de jouer une carte
         const playAction = this.decideAction(engine);
 
+        let hasPlayed = false;
+
         if (playAction) {
             const result = engine.executeAction(playAction);
             if (result.success) {
                 actions.push(playAction);
+                hasPlayed = true;
             }
-        } else {
-            // 2. Si on ne peut pas jouer, défausser une carte pour l'énergie
-            // Choisir la carte la plus chère/inutile à défausser
-            if (player.hand.length > 0 && !player.hasDiscardedForEnergy) {
-                // Stratégie simple : défausser la carte la plus chère qu'on ne peut pas jouer
-                const cardsToDiscard = [...player.hand].sort((a, b) => b.energyCost - a.energyCost);
-                const cardToDiscard = cardsToDiscard[0];
+        }
 
-                const discardAction: GameAction = {
-                    type: 'discard_for_energy',
-                    playerId: player.id,
-                    cardId: cardToDiscard.id
-                };
+        // 2. Si on ne peut pas jouer (pas de carte ou exécution échouée), défausser une carte pour l'énergie
+        // Choisir la carte la plus chère/inutile à défausser
+        if (!hasPlayed && player.hand.length > 0 && !player.hasDiscardedForEnergy) {
+            // Stratégie simple : défausser la carte la plus chère qu'on ne peut pas jouer
+            const cardsToDiscard = [...player.hand].sort((a, b) => b.energyCost - a.energyCost);
+            const cardToDiscard = cardsToDiscard[0];
 
-                const result = engine.executeAction(discardAction);
-                if (result.success) {
-                    actions.push(discardAction);
-                }
+            const discardAction: GameAction = {
+                type: 'discard_for_energy',
+                playerId: player.id,
+                cardId: cardToDiscard.id
+            };
+
+            const result = engine.executeAction(discardAction);
+            if (result.success) {
+                actions.push(discardAction);
             }
         }
 
