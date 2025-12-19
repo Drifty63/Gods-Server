@@ -123,69 +123,77 @@
     flex: 1;
 }
 
+.profileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
 .username {
     font-family: 'Cinzel', serif;
     font-size: 1.4rem;
     color: white;
-    margin-bottom: 12px;
+    margin: 0;
 }
 
 /* Rank Info */
 .rankInfo {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .rankBadge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    width: fit-content;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 15px;
+    flex-shrink: 0;
 }
 
 .rankIcon {
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 .rankName {
     font-family: 'Cinzel', serif;
     font-weight: 700;
+    font-size: 0.85rem;
     color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.ferveurDisplay {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.ferveurValue {
-    font-family: 'Cinzel', serif;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #ff9500;
-}
-
-.ferveurLabel {
-    font-size: 0.85rem;
-    color: #888;
+.progressContainer {
+    width: 100%;
 }
 
 .progressBar {
-    height: 6px;
+    position: relative;
+    height: 24px;
     background: rgba(0, 0, 0, 0.5);
-    border-radius: 3px;
+    border-radius: 12px;
     overflow: hidden;
 }
 
 .progressFill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 12px;
     transition: width 0.5s ease;
+}
+
+.progressFerveur {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .progressText {
@@ -305,6 +313,43 @@
     animation: slideDown 0.2s ease;
 }
 
+/* Dieu favori dans les stats */
+.statsFavoriteGod {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+}
+
+.statsFavoriteGodImage {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    border: 2px solid var(--gold-divine);
+    object-fit: cover;
+}
+
+.statsFavoriteGodInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.statsFavoriteGodName {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold-divine);
+    font-weight: 700;
+}
+
+.statsFavoriteGodCount {
+    font-size: 0.8rem;
+    color: #888;
+}
+
 .statsRow {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -388,29 +433,31 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 14px;
+    border-radius: 12px;
     background: rgba(0, 0, 0, 0.3);
 }
 
 .matchCard.matchWin {
-    border-left: 3px solid #4ade80;
+    border-left: 4px solid #4ade80;
 }
 
 .matchCard.matchLoss {
-    border-left: 3px solid #ef4444;
+    border-left: 4px solid #ef4444;
 }
 
 .matchGods {
     display: flex;
-    gap: 4px;
+    gap: 5px;
+    flex-wrap: wrap;
+    max-width: 120px;
 }
 
 .matchGodIcon {
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
     object-fit: cover;
 }
 

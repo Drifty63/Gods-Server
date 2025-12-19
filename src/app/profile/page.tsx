@@ -15,12 +15,12 @@ const AVATARS = ['⚡', '🔥', '💧', '🌿', '☀️', '💀', '💨', '🌙'
 
 // Données mock pour l'historique des parties (20 dernières)
 const MOCK_MATCH_HISTORY = [
-    { id: 1, playerGods: ['zeus', 'poseidon', 'athena'], opponentGods: ['hades', 'ares', 'apollon'], result: 'victory', turns: 8 },
-    { id: 2, playerGods: ['hades', 'nyx', 'ares'], opponentGods: ['zeus', 'athena', 'artemis'], result: 'defeat', turns: 12 },
-    { id: 3, playerGods: ['apollon', 'artemis', 'hermes'], opponentGods: ['poseidon', 'hades', 'nyx'], result: 'victory', turns: 6 },
-    { id: 4, playerGods: ['zeus', 'ares', 'hephaïstos'], opponentGods: ['apollon', 'artemis', 'athena'], result: 'victory', turns: 9 },
-    { id: 5, playerGods: ['poseidon', 'nyx', 'hermes'], opponentGods: ['zeus', 'hades', 'ares'], result: 'defeat', turns: 15 },
-    { id: 6, playerGods: ['athena', 'artemis', 'apollon'], opponentGods: ['hephaïstos', 'hermes', 'nyx'], result: 'victory', turns: 7 },
+    { id: 1, playerGods: ['zeus', 'poseidon', 'athena', 'apollon'], opponentGods: ['hades', 'ares', 'nyx', 'artemis'], result: 'victory', turns: 8 },
+    { id: 2, playerGods: ['hades', 'nyx', 'ares', 'hermes'], opponentGods: ['zeus', 'athena', 'artemis', 'poseidon'], result: 'defeat', turns: 12 },
+    { id: 3, playerGods: ['apollon', 'artemis', 'hermes', 'athena'], opponentGods: ['poseidon', 'hades', 'nyx', 'ares'], result: 'victory', turns: 6 },
+    { id: 4, playerGods: ['zeus', 'ares', 'hephaïstos', 'poseidon'], opponentGods: ['apollon', 'artemis', 'athena', 'hermes'], result: 'victory', turns: 9 },
+    { id: 5, playerGods: ['poseidon', 'nyx', 'hermes', 'hades'], opponentGods: ['zeus', 'athena', 'ares', 'apollon'], result: 'defeat', turns: 15 },
+    { id: 6, playerGods: ['athena', 'artemis', 'apollon', 'zeus'], opponentGods: ['hephaïstos', 'hermes', 'nyx', 'hades'], result: 'victory', turns: 7 },
 ];
 
 export default function ProfilePage() {
@@ -127,18 +127,19 @@ export default function ProfilePage() {
                         <div className={styles.avatarEditHint}>✏️</div>
                     </div>
                     <div className={styles.profileInfo}>
-                        <h2 className={styles.username}>{profile.username}</h2>
-                        <div className={styles.rankInfo}>
+                        <div className={styles.profileHeader}>
+                            <h2 className={styles.username}>{profile.username}</h2>
                             <div className={styles.rankBadge} style={{ background: userRank.gradient }}>
                                 <span className={styles.rankIcon}>{userRank.icon}</span>
                                 <span className={styles.rankName}>{userRank.name}</span>
                             </div>
-                            <div className={styles.ferveurDisplay}>
-                                <span className={styles.ferveurValue}>{userFerveur}</span>
-                                <span className={styles.ferveurLabel}>🔥 Ferveur</span>
-                            </div>
-                            <div className={styles.progressBar}>
-                                <div className={styles.progressFill} style={{ width: `${rankProgress}%`, background: userRank.gradient }} />
+                        </div>
+                        <div className={styles.rankInfo}>
+                            <div className={styles.progressContainer}>
+                                <div className={styles.progressBar}>
+                                    <div className={styles.progressFill} style={{ width: `${rankProgress}%`, background: userRank.gradient }} />
+                                    <span className={styles.progressFerveur}>{userFerveur} 🔥</span>
+                                </div>
                             </div>
                             <span className={styles.progressText}>Progression vers le prochain rang</span>
                         </div>
@@ -185,6 +186,22 @@ export default function ProfilePage() {
 
                     {showStats && (
                         <div className={styles.statsContent}>
+                            {/* Dieu favori dans les stats */}
+                            {mostPlayedGod && (
+                                <div className={styles.statsFavoriteGod}>
+                                    <Image
+                                        src={mostPlayedGod.imageUrl}
+                                        alt={mostPlayedGod.name}
+                                        width={50}
+                                        height={50}
+                                        className={styles.statsFavoriteGodImage}
+                                    />
+                                    <div className={styles.statsFavoriteGodInfo}>
+                                        <span className={styles.statsFavoriteGodName}>{mostPlayedGod.name}</span>
+                                        <span className={styles.statsFavoriteGodCount}>{mostPlayed?.count} parties</span>
+                                    </div>
+                                </div>
+                            )}
                             <div className={styles.statsRow}>
                                 <div className={styles.statItem}>
                                     <span className={styles.statValue}>{profile.stats.totalGames}</span>
