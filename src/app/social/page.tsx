@@ -5,15 +5,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
-import { getRankByFerveur, getRankProgress } from '@/data/ranks';
+import { getRankByFerveur, getRankProgress, RANKS } from '@/data/ranks';
 
-// Données mock pour les amis (limité à 25)
+// Données mock pour les amis (limité à 25) avec Ferveur
 const MOCK_FRIENDS = [
-    { id: 1, odemonUid: 'uid1', username: 'ZeusLord', level: 15, status: 'online', avatar: '⚡', isFavorite: false },
-    { id: 2, odemonUid: 'uid2', username: 'PoseidonKing', level: 12, status: 'online', avatar: '💧', isFavorite: true },
-    { id: 3, odemonUid: 'uid3', username: 'HadesReaper', level: 18, status: 'ingame', avatar: '🔥', isFavorite: false },
-    { id: 4, odemonUid: 'uid4', username: 'AthenaWise', level: 10, status: 'offline', avatar: '☀️', isFavorite: false },
-    { id: 5, odemonUid: 'uid5', username: 'AresWarrior', level: 14, status: 'offline', avatar: '🌿', isFavorite: true },
+    { id: 1, odemonUid: 'uid1', username: 'ZeusLord', level: 15, status: 'online', avatar: '⚡', isFavorite: false, ferveur: 1280 },
+    { id: 2, odemonUid: 'uid2', username: 'PoseidonKing', level: 12, status: 'online', avatar: '💧', isFavorite: true, ferveur: 720 },
+    { id: 3, odemonUid: 'uid3', username: 'HadesReaper', level: 18, status: 'ingame', avatar: '🔥', isFavorite: false, ferveur: 1650 },
+    { id: 4, odemonUid: 'uid4', username: 'AthenaWise', level: 10, status: 'offline', avatar: '☀️', isFavorite: false, ferveur: 380 },
+    { id: 5, odemonUid: 'uid5', username: 'AresWarrior', level: 14, status: 'offline', avatar: '🌿', isFavorite: true, ferveur: 550 },
 ];
 
 // Données mock pour les demandes d'amis
@@ -22,7 +22,7 @@ const MOCK_REQUESTS = [
     { id: 2, odemonUid: 'req2', username: 'ApollonMusic', level: 11, avatar: '💨' },
 ];
 
-// Données mock pour le classement avec Ferveur
+// Données mock pour le classement avec Ferveur (Top 100 joueurs max)
 const MOCK_LEADERBOARD = [
     { odemonUid: 'uid1', username: 'DivineMaster', level: 25, ferveur: 2650, mostPlayedGodImage: '/cards/gods/zeus.png', stats: { gamesWon: 156 } },
     { odemonUid: 'uid2', username: 'OlympusChamp', level: 23, ferveur: 2180, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 142 } },
@@ -32,7 +32,7 @@ const MOCK_LEADERBOARD = [
     { odemonUid: 'uid6', username: 'LightBringer', level: 19, ferveur: 980, mostPlayedGodImage: '/cards/gods/apollon.png', stats: { gamesWon: 105 } },
     { odemonUid: 'uid7', username: 'ShadowMaster', level: 18, ferveur: 620, mostPlayedGodImage: '/cards/gods/nyx.png', stats: { gamesWon: 98 } },
     { odemonUid: 'uid8', username: 'SeaKing', level: 17, ferveur: 340, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 92 } },
-];
+].sort((a, b) => b.ferveur - a.ferveur).slice(0, 100); // Tri par ferveur décroissante, max 100
 
 type TabType = 'friends' | 'leaderboard';
 
@@ -48,8 +48,7 @@ export default function SocialPage() {
         MOCK_FRIENDS.filter(f => f.isFavorite).map(f => f.odemonUid)
     );
 
-    // États pour le classement
-    const [timeFilter, setTimeFilter] = useState<'all' | 'month' | 'week'>('all');
+
 
     const filteredFriends = MOCK_FRIENDS
         .filter(friend => friend.username.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -196,26 +195,10 @@ export default function SocialPage() {
                 {/* =============== TAB CLASSEMENT =============== */}
                 {activeTab === 'leaderboard' && (
                     <>
-                        {/* Filtres */}
-                        <div className={styles.filters}>
-                            <button
-                                className={`${styles.filterButton} ${timeFilter === 'all' ? styles.activeFilter : ''}`}
-                                onClick={() => setTimeFilter('all')}
-                            >
-                                🏆 Global
-                            </button>
-                            <button
-                                className={`${styles.filterButton} ${timeFilter === 'month' ? styles.activeFilter : ''}`}
-                                onClick={() => setTimeFilter('month')}
-                            >
-                                📅 Mois
-                            </button>
-                            <button
-                                className={`${styles.filterButton} ${timeFilter === 'week' ? styles.activeFilter : ''}`}
-                                onClick={() => setTimeFilter('week')}
-                            >
-                                📆 Semaine
-                            </button>
+                        {/* Titre Classement Global */}
+                        <div className={styles.leaderboardTitle}>
+                            <span>🏆</span>
+                            <h2>Classement Global</h2>
                         </div>
 
                         {/* Podium Top 3 */}
@@ -286,6 +269,64 @@ export default function SocialPage() {
                                     </div>
                                 );
                             })}
+                        </div>
+
+                        {/* Section des paliers */}
+                        <div className={styles.ranksSection}>
+                            <h3 className={styles.ranksSectionTitle}>Votre progression</h3>
+                            <div className={styles.ranksList}>
+                                {RANKS.map((rank, index) => {
+                                    // TODO: Utiliser profile?.ferveur quand disponible dans UserProfile
+                                    const userFerveur = 450; // Valeur mock pour démo
+                                    const userRank = getRankByFerveur(userFerveur);
+                                    const isCurrentRank = rank.id === userRank.id;
+                                    const isPassed = userFerveur >= rank.minFerveur;
+
+                                    // Trouver les amis dans ce palier
+                                    const friendsInRank = MOCK_FRIENDS.filter(friend => {
+                                        const friendRank = getRankByFerveur(friend.ferveur);
+                                        return friendRank.id === rank.id;
+                                    });
+
+                                    return (
+                                        <div
+                                            key={rank.id}
+                                            className={`${styles.rankItem} ${isCurrentRank ? styles.currentRankItem : ''} ${isPassed ? styles.passedRank : styles.lockedRank}`}
+                                        >
+                                            <div className={styles.rankItemIcon} style={{ background: isPassed ? rank.gradient : 'rgba(100,100,100,0.3)' }}>
+                                                <span>{rank.icon}</span>
+                                            </div>
+                                            <div className={styles.rankItemInfo}>
+                                                <span className={styles.rankItemName} style={{ color: isPassed ? rank.color : '#666' }}>
+                                                    {rank.name}
+                                                </span>
+                                                <span className={styles.rankItemFerveur}>
+                                                    {rank.minFerveur}+ 🔥
+                                                </span>
+                                                {/* Affichage des amis dans ce palier */}
+                                                {friendsInRank.length > 0 && (
+                                                    <div className={styles.friendsInRank}>
+                                                        {friendsInRank.map(friend => (
+                                                            <span key={friend.id} className={styles.friendBubble} title={`${friend.username} - ${friend.ferveur} 🔥`}>
+                                                                {friend.avatar}
+                                                            </span>
+                                                        ))}
+                                                        <span className={styles.friendsCount}>
+                                                            {friendsInRank.length} ami{friendsInRank.length > 1 ? 's' : ''}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {isCurrentRank && (
+                                                <div className={styles.youAreHere}>
+                                                    <span>👈 Vous</span>
+                                                    <span className={styles.yourFerveur}>{userFerveur} 🔥</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </>
                 )}
