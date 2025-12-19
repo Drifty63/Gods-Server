@@ -338,6 +338,61 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     player.deck.push(removedCard);
                 }
             }
+        } else if (pendingCardSelectionEffect === 'retrieve_discard') {
+            // Perséphone - Récupérer une carte de la défausse et la mettre en main
+            for (const card of selectedCards) {
+                const index = player.discard.findIndex(c => c.id === card.id);
+                if (index !== -1) {
+                    const [retrievedCard] = player.discard.splice(index, 1);
+                    player.hand.push(retrievedCard);
+                }
+            }
+        } else if (pendingCardSelectionEffect === 'copy_discard_spell') {
+            // Perséphone - Copier un sort de la défausse et le jouer en Ténèbres
+            if (selectedCards.length > 0) {
+                const cardToCopy = selectedCards[0];
+                const opponent = engine.getState().players.find(p => p.id !== playerId);
+
+                if (opponent) {
+                    // Créer une copie temporaire de la carte avec élément Ténèbres
+                    const copiedCard: SpellCard = {
+                        ...cardToCopy,
+                        id: `copy_${cardToCopy.id}_${Date.now()}`,
+                        element: 'darkness', // Conversion en Ténèbres
+                    };
+
+                    // Exécuter la carte copiée (les effets s'appliquent normalement)
+                    // Pour simplifier, on ajoute temporairement la carte à la main puis on la joue
+                    // Note: Dans un cas réel, il faudrait aussi gérer le ciblage
+                    console.log(`Copie de ${cardToCopy.name} en Ténèbres`);
+
+                    // Appliquer les effets de la carte copiée
+                    for (const effect of copiedCard.effects) {
+                        if (effect.type === 'damage') {
+                            // Appliquer les dégâts à un ennemi aléatoire vivant
+                            const aliveEnemies = opponent.gods.filter(g => !g.isDead);
+                            if (aliveEnemies.length > 0) {
+                                const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+                                const damage = effect.value || 0;
+                                target.currentHealth -= damage;
+                                if (target.currentHealth <= 0) {
+                                    target.isDead = true;
+                                    target.currentHealth = 0;
+                                }
+                            }
+                        } else if (effect.type === 'heal') {
+                            // Soigner un allié aléatoire
+                            const aliveAllies = player.gods.filter(g => !g.isDead);
+                            if (aliveAllies.length > 0) {
+                                const target = aliveAllies[Math.floor(Math.random() * aliveAllies.length)];
+                                const heal = effect.value || 0;
+                                target.currentHealth = Math.min(target.currentHealth + heal, target.card.maxHealth);
+                            }
+                        }
+                        // TODO: Gérer les autres types d'effets
+                    }
+                }
+            }
         }
 
         // Mettre à jour l'état et fermer le modal

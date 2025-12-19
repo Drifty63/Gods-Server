@@ -124,6 +124,24 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         effectId: 'put_cards_bottom'
                     };
                 }
+                if (effect.customEffectId === 'retrieve_discard') {
+                    return {
+                        needed: true,
+                        source: 'discard',
+                        count: 1,
+                        title: '💀 Échange d\'Âme - Choisissez une carte à récupérer',
+                        effectId: 'retrieve_discard'
+                    };
+                }
+                if (effect.customEffectId === 'copy_discard_spell') {
+                    return {
+                        needed: true,
+                        source: 'discard',
+                        count: 1,
+                        title: '💀 Pouvoirs des Âmes - Choisissez un sort à copier',
+                        effectId: 'copy_discard_spell'
+                    };
+                }
             }
         }
         return null;

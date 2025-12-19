@@ -1301,16 +1301,18 @@ export class GameEngine {
             // PERSÉPHONE - Récupérer une carte de la défausse
             // ========================================
             case 'retrieve_discard':
-                // Le joueur choisit une carte dans sa défausse et la remet en main
-                // Pour l'instant, on prend la dernière carte de la défausse (à améliorer avec un modal)
-                if (player.discard.length > 0) {
-                    // TODO: Implémenter un modal de sélection
-                    // Pour l'instant, prend la carte la plus récente
-                    const cardToRetrieve = player.discard.pop();
-                    if (cardToRetrieve) {
-                        player.hand.push(cardToRetrieve);
-                    }
-                }
+                // Cet effet est géré par le modal de sélection dans le GameStore
+                // Le GameBoard détecte cet effet et ouvre le modal
+                // Rien à faire ici, le store s'en occupe
+                break;
+
+            // ========================================
+            // PERSÉPHONE - Copier un sort de la défausse
+            // ========================================
+            case 'copy_discard_spell':
+                // Cet effet est géré par le modal de sélection dans le GameStore
+                // Le GameBoard détecte cet effet et ouvre le modal
+                // Rien à faire ici, le store s'en occupe
                 break;
 
             // ========================================
