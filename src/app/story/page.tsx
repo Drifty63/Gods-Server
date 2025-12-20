@@ -118,16 +118,13 @@ function StoryContent() {
 
     // Démarrer un combat spécifique d'un chapitre
     const handleStartBattle = (chapter: Chapter, battle: ChapterBattle) => {
-        if (!battle.unlocked && battle.requiresBattleId) {
-            // Vérifier si le combat requis est complété
-            const requiredBattleCompleted = progress.completedEvents.includes(
-                chapter.events.find(e => e.type === 'battle' && e.battle?.id === battle.requiresBattleId)?.id || ''
-            );
-            if (!requiredBattleCompleted) {
-                return; // Combat verrouillé
-            }
+        // Vérifier si le combat est débloqué avant de le lancer
+        if (!isBattleUnlocked(chapter, battle)) {
+            console.log('Combat verrouillé:', battle.id);
+            return;
         }
 
+        console.log('Lancement du combat:', battle.id, 'firstEventId:', battle.firstEventId);
         setPreviousSpeaker(null);
         startChapter(chapter.id, battle.firstEventId);
         setShowChapterSelect(false);
@@ -136,18 +133,31 @@ function StoryContent() {
 
     // Vérifier si un combat est débloqué
     const isBattleUnlocked = (chapter: Chapter, battle: ChapterBattle): boolean => {
+        // Si le combat est marqué comme débloqué par défaut
         if (battle.unlocked) return true;
+
+        // Si pas de combat requis, c'est débloqué
         if (!battle.requiresBattleId) return true;
 
-        // Chercher si le combat requis a été complété
+        // Chercher le combat requis dans la liste des combats du chapitre
         const requiredBattle = chapter.battles?.find(b => b.id === battle.requiresBattleId);
         if (!requiredBattle) return true;
 
-        // Vérifier dans les événements complétés
-        return progress.completedEvents.some(eventId => {
+        // Le combat est débloqué si un événement de type 'battle' a été complété
+        // On vérifie si l'événement de bataille correspondant au combat requis est complété
+        // Pour cela, on cherche l'événement de bataille qui suit le firstEventId du combat requis
+        const hasBattleCompleted = progress.completedEvents.some(eventId => {
             const event = chapter.events.find(e => e.id === eventId);
-            return event?.type === 'battle';
+            // On considère le combat comme complété si un événement post-bataille a été vu
+            // (ch1_after_battle_win, ch1_after_battle_lose, ch1_hades_throne, etc.)
+            return event && (
+                eventId.includes('after_battle') ||
+                eventId.includes('hades_throne') ||
+                eventId.includes('end_battle')
+            );
         });
+
+        return hasBattleCompleted;
     };
 
     // Fermer la modal
