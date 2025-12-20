@@ -209,36 +209,48 @@ export const PROLOGUE_AFTER_BATTLE_1_WIN: DialogueLine[] = [
     }
 ];
 
-// Après la défaite du combat
+// Après la défaite du combat (Zeus perd contre Hadès)
 export const PROLOGUE_AFTER_BATTLE_1_LOSE: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*s'effondre* La foudre... ne répond plus...",
+        text: "*s'effondre* La foudre... ne répond plus... Mon pouvoir s'éteint...",
         emotion: 'sad'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Enfin... le tout-puissant Zeus tombe devant son frère méprisé.",
+        text: "*se dresse victorieux* Enfin... Après des millénaires dans l'ombre, le tout-puissant Zeus tombe devant moi.",
         emotion: 'happy'
-    },
-    {
-        speakerId: 'hades',
-        speakerName: 'Hadès',
-        text: "Savoure ta défaite, frère. Tu l'as bien méritée après des millénaires d'arrogance.",
-        emotion: 'determined'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Ce n'est pas... terminé... Hadès...",
+        text: "Tu... tu m'as eu par traîtrise... M'affaiblir avant le combat...",
         emotion: 'angry'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Oh, mais ça l'est. Regarde autour de toi. Mes ombres contrôlent déjà l'Olympe.",
+        text: "La ruse fait partie de la guerre, frère. Tu aurais dû l'apprendre pendant la Titanomachie.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Savoure ta défaite. Tu l'as bien méritée après des millénaires d'arrogance et de mépris.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*à genoux, respirant difficilement* Ce n'est pas... terminé... Hadès...",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Oh, mais ça l'est. Regarde autour de toi. Mes ombres ont déjà envahi l'Olympe pendant notre combat.",
         emotion: 'happy'
     }
 ];

@@ -199,18 +199,9 @@ function StoryBattleContent() {
     useEffect(() => {
         if (!gameState || phase !== 'playing') return;
 
-        // DEBUG: Log pour comprendre l'état
-        console.log('[DEBUG Battle End] Checking - status:', gameState.status, 'winnerId:', gameState.winnerId, 'playerId:', playerId);
-
-        // Vérifier les PV de tous les dieux
-        gameState.players.forEach(player => {
-            console.log('[DEBUG Battle End] Player:', player.id, 'Gods:', player.gods.map(g => ({ name: g.card.name, hp: g.currentHealth, dead: g.isDead })));
-        });
-
-        // IMPORTANT: Vérifier que le jeu est vraiment terminé (status === 'finished')
+        // Vérifier que le jeu est vraiment terminé (status === 'finished')
         // et qu'il y a un gagnant défini
         if (gameState.status === 'finished' && gameState.winnerId) {
-            console.log('[DEBUG Battle End] GAME OVER - winnerId:', gameState.winnerId, 'playerId:', playerId, 'won:', gameState.winnerId === playerId);
 
             // Utiliser playerId du store pour comparer correctement
             const won = gameState.winnerId === playerId;

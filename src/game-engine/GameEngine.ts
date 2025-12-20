@@ -441,7 +441,10 @@ export class GameEngine {
             const allDead = player.gods.every(g => g.isDead);
             if (allDead) {
                 this.state.status = 'finished';
-                this.state.winnerId = this.getOpponent().id;
+                // Le gagnant est l'AUTRE joueur (celui dont les dieux ne sont pas tous morts)
+                // CORRECTION: On ne peut pas utiliser getOpponent() car ça retourne l'opposant
+                // du joueur dont c'est le tour, pas l'opposant du joueur qui vient de perdre!
+                this.state.winnerId = this.state.players.find(p => p.id !== player.id)?.id;
             }
         }
     }
