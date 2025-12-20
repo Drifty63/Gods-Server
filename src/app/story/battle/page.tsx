@@ -337,6 +337,10 @@ function StoryBattleContent() {
 
     // Phase: Introduction du combat
     if (phase === 'intro') {
+        // Pour le 1v1, on affiche seulement le premier dieu de chaque équipe
+        const playerTeam = currentBattleConfig?.playerTeam || getPlayerTeam();
+        const enemyTeam = currentBattleConfig?.enemyTeam || [];
+
         return (
             <main className={styles.main}>
                 <div className={styles.storyBackground}>
@@ -355,9 +359,9 @@ function StoryBattleContent() {
 
                         <div className={styles.vsContainer}>
                             <div className={styles.teamPreview}>
-                                <span className={styles.teamLabel}>Votre Équipe</span>
                                 <div className={styles.teamIcons}>
-                                    {getPlayerTeam().map(id => (
+                                    {/* Afficher seulement les dieux du combat (1v1 = 1 dieu) */}
+                                    {playerTeam.slice(0, currentBattleConfig?.playerTeam?.length || 1).map(id => (
                                         <div key={id} className={styles.godIcon}>
                                             <img src={`/cards/gods/${id}.png`} alt={id} />
                                         </div>
@@ -368,9 +372,8 @@ function StoryBattleContent() {
                             <div className={styles.vsText}>VS</div>
 
                             <div className={styles.teamPreview}>
-                                <span className={styles.teamLabel}>Adversaires</span>
                                 <div className={styles.teamIcons}>
-                                    {currentBattleConfig?.enemyTeam.map(id => (
+                                    {enemyTeam.map(id => (
                                         <div key={id} className={styles.godIcon}>
                                             <img src={`/cards/gods/${id}.png`} alt={id} />
                                         </div>
@@ -392,8 +395,9 @@ function StoryBattleContent() {
         if (!dialogue) return null;
 
         const glowColor = GOD_COLORS[dialogue.speaker] || '#ffd700';
+        // Utiliser la nouvelle image de victoire (intervention de Nyx)
         const backgroundImage = playerWon
-            ? '/assets/story/victory_olympus.png'
+            ? '/assets/story/victory_nyx.png'
             : '/assets/story/defeat_underworld.png';
 
         return (
@@ -456,7 +460,7 @@ function StoryBattleContent() {
             <main className={styles.main}>
                 <div
                     className={styles.storyBackground}
-                    style={{ backgroundImage: "url('/assets/story/victory_olympus.png')" }}
+                    style={{ backgroundImage: "url('/assets/story/victory_nyx.png')" }}
                 >
                     <div className={styles.backgroundOverlayLight} />
                 </div>
@@ -488,6 +492,7 @@ function StoryBattleContent() {
 
     // Phase: Défaite
     if (phase === 'defeat') {
+        // Si continueOnDefeat est activé, on permet de continuer directement (prologue)
         const canContinue = currentBattleConfig?.continueOnDefeat;
 
         return (
@@ -504,21 +509,21 @@ function StoryBattleContent() {
                         <h1>DÉFAITE...</h1>
                         <p>Vous avez perdu le combat.</p>
 
-                        <div className={styles.buttonGroup}>
-                            <button onClick={handleRetry} className={styles.retryButton}>
-                                🔄 Réessayer
+                        {/* Si c'est un combat où on peut continuer malgré la défaite (comme le prologue) */}
+                        {canContinue ? (
+                            <button onClick={handleContinue} className={styles.continueButton}>
+                                ▶ Continuer l'histoire
                             </button>
-
-                            {canContinue && (
-                                <button onClick={handleContinue} className={styles.continueButton}>
-                                    ▶ Continuer malgré tout
+                        ) : (
+                            <div className={styles.buttonGroup}>
+                                <button onClick={handleRetry} className={styles.retryButton}>
+                                    🔄 Réessayer
                                 </button>
-                            )}
-
-                            <button onClick={handleQuit} className={styles.quitButton}>
-                                ← Abandonner
-                            </button>
-                        </div>
+                                <button onClick={handleQuit} className={styles.quitButton}>
+                                    ← Abandonner
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
@@ -530,9 +535,7 @@ function StoryBattleContent() {
         <main className={styles.main}>
             {/* Header du mode histoire */}
             <header className={styles.header}>
-                <button onClick={handleQuit} className={styles.backBtn}>
-                    ← Quitter
-                </button>
+                <div className={styles.headerSpacer} />
                 <h1 className={styles.title}>{currentBattleConfig?.name || 'Combat'}</h1>
                 <div className={styles.headerSpacer} />
             </header>

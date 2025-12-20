@@ -141,24 +141,6 @@ function StoryContent() {
                         <p className={styles.campaignDescription}>{ZEUS_CAMPAIGN.description}</p>
                     </div>
 
-                    {/* Équipe du joueur */}
-                    <div className={styles.teamSection}>
-                        <h3 className={styles.sectionTitle}>Votre Équipe</h3>
-                        <div className={styles.teamGods}>
-                            {ZEUS_CAMPAIGN.playerTeam.map((godId) => (
-                                <div key={godId} className={styles.teamGod}>
-                                    <Image
-                                        src={`/cards/gods/${godId}.png`}
-                                        alt={godId}
-                                        width={60}
-                                        height={60}
-                                        className={styles.godImage}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
                     {/* Bouton Continuer si progression existante */}
                     {progress.currentEventIndex > 0 && (
                         <button
