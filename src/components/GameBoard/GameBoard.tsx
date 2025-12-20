@@ -109,6 +109,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         isSelectingGod,
         godSelectionTitle,
         godSelectionTargetType,
+        startGodSelection,
         confirmGodSelection,
         cancelGodSelection,
         // Sort copié (Perséphone ulti)
@@ -304,6 +305,26 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     needed: true,
                     title: '💀 Brûlure Rémanente - Choisissez un dieu mort',
                     effectId: 'temp_resurrect'
+                };
+            }
+        }
+        return null;
+    };
+
+    // Helper pour détecter si une carte nécessite une sélection de dieu vivant (Zéphyr - shuffle_god_cards)
+    const getGodSelectionRequired = (card: import('@/types/cards').SpellCard): {
+        needed: boolean;
+        title: string;
+        effectId: string;
+        targetType: 'ally' | 'enemy' | 'any';
+    } | null => {
+        for (const effect of card.effects) {
+            if (effect.type === 'custom' && effect.customEffectId === 'shuffle_god_cards') {
+                return {
+                    needed: true,
+                    title: '💨 Vent de Face - Choisissez un dieu',
+                    effectId: 'shuffle_god_cards',
+                    targetType: 'any' // Peut cibler allié ou ennemi
                 };
             }
         }
@@ -787,6 +808,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     return;
                 }
                 // Si pas de dieux morts ou deck vide, jouer la carte sans effet
+            }
+
+            // Vérifier si la carte nécessite une sélection de dieu vivant (Zéphyr Vent de Face)
+            const godSel = getGodSelectionRequired(card);
+            if (godSel) {
+                // Jouer la carte d'abord, puis ouvrir le modal
+                playCard(cardId, targetGodId, targetGodIds, lightningAction);
+                onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
+                startGodSelection(godSel.title, godSel.effectId, godSel.targetType);
+                setPendingCardForOverlay(card);
+                // La fin de tour sera appelée après la confirmation du modal
+                return;
             }
 
             // Afficher la carte jouée au centre immédiatement si pas de choix requis
