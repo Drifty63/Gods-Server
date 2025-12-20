@@ -414,6 +414,21 @@ export class GameEngine {
         god.isDead = true;
         god.currentHealth = 0;
 
+        // Si c'était un zombie, gérer spécialement
+        if (god.isZombie) {
+            // La carte zombie va à la défausse
+            if (god.zombieCard) {
+                this.cleanBlindCard(god.zombieCard);
+                player.discard.push(god.zombieCard);
+            }
+            // Réinitialiser les propriétés zombie pour permettre re-zombification
+            god.isZombie = false;
+            god.zombieCard = undefined;
+            god.zombieOwnerId = undefined;
+            // Le dieu reste mort mais peut être zombifié à nouveau
+            return;
+        }
+
         // Retirer toutes les cartes de ce dieu et les stocker dans removedCards
         const godId = god.card.id;
 
@@ -457,6 +472,7 @@ export class GameEngine {
             }
         }
     }
+
 
     /**
      * Applique un effet de sort
@@ -768,6 +784,49 @@ export class GameEngine {
                     }
                 }
                 break;
+
+            // ========================================
+            // SÉLÉNÉ - Résurrection de 2 alliés
+            // ========================================
+            case 'resurrect_two': {
+                // Ressuscite les 2 premiers dieux morts avec 3 PV chacun
+                const deadGods = player.gods.filter(g => g.isDead);
+                const godsToResurrect = deadGods.slice(0, 2);
+
+                for (const godToRevive of godsToResurrect) {
+                    godToRevive.isDead = false;
+                    godToRevive.currentHealth = 3;
+                    godToRevive.statusEffects = [];
+                    godToRevive.temporaryWeakness = undefined;
+                    // Réinitialiser les propriétés zombie si c'était un zombie
+                    godToRevive.isZombie = false;
+                    godToRevive.zombieCard = undefined;
+                    godToRevive.zombieOwnerId = undefined;
+
+                    // Récupérer les sorts du dieu depuis removedCards et les remettre dans le deck
+                    const godId = godToRevive.card.id;
+                    const cardsToReturn: SpellCard[] = [];
+
+                    // Trouver les cartes du dieu dans removedCards
+                    player.removedCards = player.removedCards.filter(card => {
+                        if (card.godId === godId) {
+                            cardsToReturn.push(card);
+                            return false; // Retirer de removedCards
+                        }
+                        return true;
+                    });
+
+                    // Ajouter les cartes au deck
+                    player.deck.push(...cardsToReturn);
+                }
+
+                // Mélanger le deck une fois à la fin (Fisher-Yates)
+                for (let i = player.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [player.deck[i], player.deck[j]] = [player.deck[j], player.deck[i]];
+                }
+                break;
+            }
 
             // ========================================
             // DIONYSOS - Soin par poison
@@ -1584,6 +1643,39 @@ export class GameEngine {
                 break;
 
             // ========================================
+            // CHIONÉ - Dégâts de zone (splash)
+            // ========================================
+            case 'splash_damage':
+                if (targetGodId) {
+                    const targetIndex = opponent.gods.findIndex(g => g.card.id === targetGodId);
+                    if (targetIndex !== -1) {
+                        // Identifier les voisins (gauche et droite)
+                        const neighbors: GodState[] = [];
+
+                        // Voisin de gauche
+                        if (targetIndex > 0) {
+                            neighbors.push(opponent.gods[targetIndex - 1]);
+                        }
+                        // Voisin de droite
+                        if (targetIndex < opponent.gods.length - 1) {
+                            neighbors.push(opponent.gods[targetIndex + 1]);
+                        }
+
+                        // Appliquer les dégâts aux voisins
+                        for (const neighbor of neighbors) {
+                            if (!neighbor.isDead) {
+                                this.applyDamageWithShield(neighbor, 2, opponent);
+                                // Vérifier la mort
+                                if (neighbor.currentHealth <= 0) {
+                                    this.handleGodDeath(opponent, neighbor);
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+
+            // ========================================
             // PERSÉPHONE - Copier un sort de la défausse
             // ========================================
             case 'copy_discard_spell':
@@ -1687,6 +1779,19 @@ export class GameEngine {
      */
     private tickStatusEffects(playerWhoJustFinished: PlayerState): void {
         for (const god of playerWhoJustFinished.gods) {
+            // Appliquer les effets périodiques avant de réduire la durée
+
+            // 1. Régénération (regen)
+            const regenEffect = god.statusEffects.find(s => s.type === 'regen');
+            if (regenEffect) {
+                // Soigner du montant de stacks (value)
+                const healAmount = regenEffect.stacks;
+                if (god.currentHealth < god.card.maxHealth && !god.isDead) {
+                    god.currentHealth = Math.min(god.currentHealth + healAmount, god.card.maxHealth);
+                }
+            }
+
+            // Gestion de la durée des effets
             god.statusEffects = god.statusEffects.filter(effect => {
                 if (effect.duration !== undefined) {
                     effect.duration--;

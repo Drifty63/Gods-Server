@@ -21,7 +21,8 @@ export type StatusEffect =
     | 'provocation' // Provocation (taunt)
     | 'stun'        // Stun (étourdi/gel)
     | 'weakness'    // Faiblesse élémentaire temporaire
-    | 'weakness_immunity'; // Immunité aux faiblesses
+    | 'weakness_immunity' // Immunité aux faiblesses
+    | 'regen';      // Régénération (soin par tour)
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi

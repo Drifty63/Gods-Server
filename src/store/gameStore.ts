@@ -135,6 +135,15 @@ interface GameStore {
     confirmDeadGodSelection: (godId: string) => void;
     cancelDeadGodSelection: () => void;
 
+    // Actions pour sélection de dieu vivant (Zéphyr - shuffle_god_cards)
+    isSelectingGod: boolean;
+    godSelectionTitle: string;
+    pendingGodEffect: string | null;  // ID de la carte originale qui a déclenché l'effet
+    godSelectionTargetType: 'ally' | 'enemy' | 'any' | null;  // Quel type de dieu peut être sélectionné
+    startGodSelection: (title: string, effectId: string, targetType: 'ally' | 'enemy' | 'any') => void;
+    confirmGodSelection: (godId: string) => void;
+    cancelGodSelection: () => void;
+
     // Actions pour zombie damage de fin de tour
     startZombieDamage: (godId: string) => void;
     confirmZombieDamage: (targetGodId: string | null) => void;  // null = skip damage
@@ -198,6 +207,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     isSelectingDeadGod: false,
     deadGodSelectionTitle: '',
     pendingZombieEffect: null,
+
+    // État initial pour sélection de dieu vivant (Zéphyr - shuffle_god_cards)
+    isSelectingGod: false,
+    godSelectionTitle: '',
+    pendingGodEffect: null,
+    godSelectionTargetType: null,
 
     // État initial pour zombie damage de fin de tour
     isShowingZombieDamage: false,
@@ -326,6 +341,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         for (const effect of card.effects) {
             if (effect.target === 'enemy_god' || effect.target === 'ally_god' || effect.target === 'any_god' || effect.target === 'dead_ally_god') {
                 count++;
+            }
+            // Vision du Tartare nécessite 2 cibles ennemies
+            if (effect.type === 'custom' && effect.customEffectId === 'vision_tartare') {
+                count += 2;
             }
         }
         return count;
@@ -753,6 +772,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
             return { success: true, message: 'Sélectionnez un sort à copier' };
         }
 
+        // 3. CAS SPÉCIAL : Interception du sort Zéphyr "Vent de Face" (shuffle_god_cards)
+        if (cardToCheck && cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'shuffle_god_cards')) {
+            // Jouer la carte (payer le coût) mais ne pas exécuter l'effet custom ici
+            const playResult = engine.executeAction({
+                type: 'play_card',
+                playerId,
+                cardId,
+            });
+
+            if (playResult.success) {
+                set({ gameState: cloneGameState(engine.getState()) });
+                // Ouvrir le modal de sélection de dieu (tous les dieux vivants)
+                get().startGodSelection("Choisissez un dieu dont les cartes retourneront dans le deck", `shuffle_god_cards:${cardId}`, 'any');
+            }
+
+            return playResult;
+        }
+
         // =========================================================
 
         // Utiliser les cibles multiples si disponibles
@@ -1029,32 +1066,61 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const opponent = engine.getState().players.find(p => p.id !== playerId);
         if (!player || !opponent) return;
 
-        if (pendingOptionalEffect === 'optional_mill_boost' && accepted) {
-            // Défausser 2 cartes du dessus du deck
-            for (let i = 0; i < 2 && player.deck.length > 0; i++) {
-                const card = player.deck.shift()!;
-                player.discard.push(card);
+        // Vision du Tartare : inflige les dégâts de base (1) + bonus (+1 si accepté)
+        if (pendingOptionalEffect === 'vision_tartare') {
+            let damagePerTarget = 1; // Dégât de base
+
+            if (accepted) {
+                // Défausser 2 cartes du dessus du deck
+                for (let i = 0; i < 2 && player.deck.length > 0; i++) {
+                    const card = player.deck.shift()!;
+                    player.discard.push(card);
+                }
+                damagePerTarget = 2; // Dégât de base + bonus
             }
 
-            // Infliger +1 dégât aux cibles précédentes
+            // Infliger les dégâts à toutes les cibles en une seule fois
             for (const targetId of pendingOptionalTargetGodIds) {
                 const target = opponent.gods.find(g => g.card.id === targetId && !g.isDead);
                 if (target) {
                     // Gestion du bouclier
+                    let remainingDamage = damagePerTarget;
                     const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                    if (shieldIndex !== -1 && target.statusEffects[shieldIndex].stacks >= 1) {
-                        target.statusEffects[shieldIndex].stacks -= 1;
+                    if (shieldIndex !== -1) {
+                        const shieldStacks = target.statusEffects[shieldIndex].stacks;
+                        const absorbedDamage = Math.min(shieldStacks, remainingDamage);
+                        target.statusEffects[shieldIndex].stacks -= absorbedDamage;
+                        remainingDamage -= absorbedDamage;
                         if (target.statusEffects[shieldIndex].stacks <= 0) {
                             target.statusEffects.splice(shieldIndex, 1);
                         }
-                    } else {
-                        target.currentHealth -= 1;
+                    }
+                    if (remainingDamage > 0) {
+                        target.currentHealth -= remainingDamage;
                         if (target.currentHealth <= 0) {
                             target.isDead = true;
                             target.currentHealth = 0;
                         }
                     }
                 }
+            }
+        }
+
+        // Séléné - Marée Basse : choix de direction du soin en cascade
+        if (pendingOptionalEffect === 'cascade_heal_choice') {
+            // Récupérer les dieux alliés vivants
+            const aliveAllies = player.gods.filter(g => !g.isDead);
+
+            // Définir les montants de soin selon la direction
+            // accepted = true → 3/2/1 (gauche vers droite)
+            // accepted = false → 1/2/3 (droite vers gauche)
+            const healAmounts = accepted ? [3, 2, 1] : [1, 2, 3];
+
+            // Appliquer le soin à chaque allié selon sa position
+            for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
+                const god = aliveAllies[i];
+                const healAmount = healAmounts[i];
+                god.currentHealth = Math.min(god.currentHealth + healAmount, god.card.maxHealth);
             }
         }
 
@@ -1219,5 +1285,77 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // Terminer le tour même si on annule
         get().endTurn(true);
+    },
+
+    // === ACTIONS POUR SÉLECTION DE DIEU VIVANT (Zéphyr - shuffle_god_cards) ===
+    startGodSelection: (title, effectId, targetType) => {
+        set({
+            isSelectingGod: true,
+            godSelectionTitle: title,
+            pendingGodEffect: effectId,
+            godSelectionTargetType: targetType,
+        });
+    },
+
+    confirmGodSelection: (godId) => {
+        const { engine, playerId, pendingGodEffect } = get();
+        if (!engine || !pendingGodEffect) return;
+
+        const player = engine.getState().players.find(p => p.id === playerId);
+        const opponent = engine.getState().players.find(p => p.id !== playerId);
+        if (!player || !opponent) return;
+
+        // Trouver le dieu cible (peut être allié ou ennemi selon l'effet)
+        let targetGod = player.gods.find(g => g.card.id === godId && !g.isDead);
+        let targetPlayer = player;
+
+        if (!targetGod) {
+            targetGod = opponent.gods.find(g => g.card.id === godId && !g.isDead);
+            targetPlayer = opponent;
+        }
+
+        if (!targetGod) return;
+
+        // Gérer l'effet shuffle_god_cards
+        if (pendingGodEffect.startsWith('shuffle_god_cards')) {
+            // Récupérer l'ID de la carte originale si présent
+            const parts = pendingGodEffect.split(':');
+            const originalCardId = parts.length > 1 ? parts[1] : null;
+
+            // Trouver les cartes du dieu sélectionné dans la main du joueur cible
+            const cardsToShuffle = targetPlayer.hand.filter(c => c.godId === godId);
+
+            if (cardsToShuffle.length > 0) {
+                // Retirer ces cartes de la main
+                targetPlayer.hand = targetPlayer.hand.filter(c => c.godId !== godId);
+
+                // Les ajouter au deck
+                targetPlayer.deck.push(...cardsToShuffle);
+
+                // Mélanger le deck (Fisher-Yates)
+                for (let i = targetPlayer.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [targetPlayer.deck[i], targetPlayer.deck[j]] = [targetPlayer.deck[j], targetPlayer.deck[i]];
+                }
+            }
+        }
+
+        // Fermer le modal et mettre à jour l'état
+        set({
+            gameState: cloneGameState(engine.getState()),
+            isSelectingGod: false,
+            godSelectionTitle: '',
+            pendingGodEffect: null,
+            godSelectionTargetType: null,
+        });
+    },
+
+    cancelGodSelection: () => {
+        set({
+            isSelectingGod: false,
+            godSelectionTitle: '',
+            pendingGodEffect: null,
+            godSelectionTargetType: null,
+        });
     },
 }));

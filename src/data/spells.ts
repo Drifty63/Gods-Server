@@ -1043,9 +1043,8 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 0,
         energyGain: 1,
         effects: [
-            { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'custom', customEffectId: 'optional_mill_boost', description: 'Défaussez 2 cartes pour +1 dégât' }
+            // Effet custom unifié : inflige 1 dégât à 2 cibles, avec choix optionnel de +1 dégât
+            { type: 'custom', customEffectId: 'vision_tartare', description: '1 dégât à 2 cibles, +1 si défausse 2 cartes' }
         ],
         imageUrl: '/cards/spells/spell_persephone_vision.png',
         description: '1🩸 → ⚔️⚔️ | 2📤 → +1🩸',
@@ -1395,7 +1394,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 1,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'heal_over_time', description: 'Soigne tous les alliés de 1 pendant 2 tours' }
+            { type: 'status', status: 'regen', value: 1, statusDuration: 2, target: 'all_allies' }
         ],
         imageUrl: '/cards/spells/spell_selene_pluie.png',
         description: '+1💚2⏳ → 👥',
@@ -1409,10 +1408,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 1,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'cascade_heal', description: 'Soigne 3, 2, 1 selon la position' }
+            { type: 'custom', customEffectId: 'cascade_heal_choice', description: 'Choisissez la direction du soin (3/2/1 ou 1/2/3)' }
         ],
         imageUrl: '/cards/spells/spell_selene_maree.png',
-        description: '+3/2/1💚 → 👥',
+        description: '⬅️➡️ +3/2/1💚 → 👥',
     },
 
     // --- UTILITAIRE ---
@@ -1656,10 +1655,12 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 1,
         energyGain: 0,
         effects: [
+            // Première cible : 2 dégâts + stun
             { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' },
+            // Deuxième cible : 2 dégâts + stun
             { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' },
-            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' }
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
         imageUrl: '/cards/spells/spell_chione_cone.png',
         description: '2🩸 → ⚔️⚔️ | +❄️1⏳',

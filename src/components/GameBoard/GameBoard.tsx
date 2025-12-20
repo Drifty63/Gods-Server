@@ -12,6 +12,7 @@ import CardDetailModal from '@/components/CardDetailModal/CardDetailModal';
 import OptionalChoiceModal from '@/components/OptionalChoiceModal/OptionalChoiceModal';
 import PlayerSelectionModal from '@/components/PlayerSelectionModal/PlayerSelectionModal';
 import DeadGodSelectionModal from '@/components/DeadGodSelectionModal/DeadGodSelectionModal';
+import GodSelectionModal from '@/components/GodSelectionModal/GodSelectionModal';
 import ZombieDamageModal from '@/components/ZombieDamageModal/ZombieDamageModal';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -104,6 +105,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         startZombieDamage,
         confirmZombieDamage,
         cancelZombieDamage,
+        // Sélection de dieu vivant (Zéphyr Vent de Face)
+        isSelectingGod,
+        godSelectionTitle,
+        godSelectionTargetType,
+        confirmGodSelection,
+        cancelGodSelection,
+        // Sort copié (Perséphone ulti)
+        pendingEnemyCardEffect,
         // IA
         playAITurn,
         isAIPlaying,
@@ -235,7 +244,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         return null;
     };
 
-    // Helper pour détecter si une carte nécessite un choix optionnel (Perséphone - optional_mill_boost)
+    // Helper pour détecter si une carte nécessite un choix optionnel
     const getOptionalChoiceRequired = (card: import('@/types/cards').SpellCard): {
         needed: boolean;
         title: string;
@@ -243,12 +252,22 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         effectId: string;
     } | null => {
         for (const effect of card.effects) {
-            if (effect.type === 'custom' && effect.customEffectId === 'optional_mill_boost') {
+            // Perséphone - Vision du Tartare
+            if (effect.type === 'custom' && effect.customEffectId === 'vision_tartare') {
                 return {
                     needed: true,
                     title: '💀 Vision du Tartare',
                     description: 'Voulez-vous défausser 2 cartes de votre deck pour infliger +1 dégât à chaque cible ?',
-                    effectId: 'optional_mill_boost'
+                    effectId: 'vision_tartare'
+                };
+            }
+            // Séléné - Marée Basse (choix de direction du soin)
+            if (effect.type === 'custom' && effect.customEffectId === 'cascade_heal_choice') {
+                return {
+                    needed: true,
+                    title: '🌊 Marée Basse',
+                    description: 'Dans quel sens coule la rivière de soin ?\n\n⬅️ Gauche → Droite (3/2/1)\n➡️ Droite → Gauche (1/2/3)',
+                    effectId: 'cascade_heal_choice'
                 };
             }
         }
@@ -856,6 +875,16 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         }
     };
 
+    // Handler pour la sélection de dieu vivant (Vent de Face - shuffle_god_cards)
+    const handleConfirmGodSelection = (godId: string) => {
+        confirmGodSelection(godId);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
+        autoEndTurnMultiplayer();
+    };
+
     // Trouver le zombie actif du joueur pour le modal de dégâts
     const activeZombie = player?.gods.find(g => g.isZombie && !g.isDead);
     const zombieForModal = zombieDamageGodId
@@ -958,15 +987,22 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     };
 
     // Jouer automatiquement quand on a sélectionné toutes les cibles nécessaires
-    // SAUF si la carte nécessite un choix de foudre ou un choix d'élément
+    // SAUF si la carte nécessite un choix de foudre, un choix d'élément, ou est un sort copié
     const handleSingleTargetSelect = (uniqueGodId: string) => {
         if (!selectedCard || !isSelectingTarget) return;
 
         // Parser l'ID unique pour obtenir le vrai godId
         const { godId } = parseUniqueGodId(uniqueGodId);
 
+        // Pour les sorts copiés (Perséphone ulti), toujours passer par handlePlayCard
+        // qui gère correctement le contexte cast_copy via pendingEnemyCardEffect
+        const isCopiedSpell = pendingEnemyCardEffect?.startsWith('cast_copy:');
+
         if (requiredTargets === 1 && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard)) {
             // Comportement classique : jouer immédiatement (cartes sans choix foudre ni élément)
+            handlePlayCard(selectedCard.id, godId);
+        } else if (isCopiedSpell && requiredTargets === 1) {
+            // Sort copié avec une seule cible : jouer directement avec la cible
             handlePlayCard(selectedCard.id, godId);
         } else {
             // Ciblage multiple OU carte avec choix foudre/élément : ajouter la cible et attendre
@@ -1685,6 +1721,17 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 enemyGods={opponent?.gods || []}
                 onSelectTarget={handleConfirmZombieDamage}
                 onSkip={() => handleConfirmZombieDamage(null)}
+            />
+
+            {/* Modal de sélection de dieu vivant (Zéphyr Vent de Face) */}
+            <GodSelectionModal
+                isOpen={isSelectingGod}
+                title={godSelectionTitle}
+                allyGods={player?.gods || []}
+                enemyGods={opponent?.gods || []}
+                targetType={godSelectionTargetType}
+                onSelectGod={handleConfirmGodSelection}
+                onCancel={cancelGodSelection}
             />
 
             {/* Toast de notification */}
