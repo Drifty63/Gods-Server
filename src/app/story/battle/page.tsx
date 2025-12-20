@@ -45,6 +45,9 @@ function StoryBattleContent() {
     const [error, setError] = useState<string | null>(null);
     const [playerWon, setPlayerWon] = useState(false);
 
+    // Stocker la config de bataille localement pour la garder disponible après le combat
+    const [battleConfig, setBattleConfig] = useState<typeof currentBattleConfig>(null);
+
     const [postBattleDialogues, setPostBattleDialogues] = useState<any[]>([]);
     const [postBattleIndex, setPostBattleIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
@@ -87,28 +90,28 @@ function StoryBattleContent() {
     // Initialiser le combat
     const initBattle = useCallback(() => {
         // Récupérer la config depuis currentBattleConfig ou depuis l'événement actuel
-        let battleConfig = currentBattleConfig;
+        let localBattleConfig = currentBattleConfig;
 
-        if (!battleConfig) {
+        if (!localBattleConfig) {
             // Essayer de récupérer depuis l'événement actuel
             const currentEvent = getCurrentEvent();
             if (currentEvent?.type === 'battle' && currentEvent.battle) {
-                battleConfig = currentEvent.battle;
+                localBattleConfig = currentEvent.battle;
             }
         }
 
-        if (!battleConfig) {
+        if (!localBattleConfig) {
             setError('Aucun combat configuré');
             return;
         }
 
         try {
             // Équipe du joueur - utilise la config de bataille si définie, sinon l'équipe par défaut
-            const playerTeamIds = battleConfig.playerTeam || getPlayerTeam();
+            const playerTeamIds = localBattleConfig.playerTeam || getPlayerTeam();
             const playerGods = playerTeamIds.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
             // Équipe ennemie
-            const enemyGods = battleConfig.enemyTeam.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
+            const enemyGods = localBattleConfig.enemyTeam.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
             // Vérification de la taille des équipes (supportent maintenant 1-4 dieux)
             if (playerGods.length === 0 || playerGods.length > 4) {
@@ -120,14 +123,14 @@ function StoryBattleContent() {
 
             // Créer les decks avec multiplicateur optionnel
             const basePlaverDeck = createDeck(playerTeamIds);
-            const baseEnemyDeck = createDeck(battleConfig.enemyTeam);
+            const baseEnemyDeck = createDeck(localBattleConfig.enemyTeam);
 
             let playerDeck = basePlaverDeck;
             let enemyDeck = baseEnemyDeck;
 
             // Appliquer le multiplicateur de deck si défini (pour combat 1v1)
-            if (battleConfig.deckMultiplier && battleConfig.deckMultiplier > 1) {
-                const multiplier = battleConfig.deckMultiplier;
+            if (localBattleConfig.deckMultiplier && localBattleConfig.deckMultiplier > 1) {
+                const multiplier = localBattleConfig.deckMultiplier;
                 playerDeck = [];
                 enemyDeck = [];
 
@@ -162,10 +165,13 @@ function StoryBattleContent() {
             // Initialiser la partie
             initGame(playerGods, playerDeck, enemyGods, enemyDeck, playerGoesFirst);
 
+            // Sauvegarder la config localement pour y accéder après le combat
+            setBattleConfig(localBattleConfig);
+
             // Appliquer les conditions spéciales APRÈS l'initialisation
             // On passe battleConfig à la fonction
             setTimeout(() => {
-                applyBattleConditions(battleConfig);
+                applyBattleConditions(localBattleConfig);
             }, 100);
 
             setPhase('intro');
@@ -493,7 +499,8 @@ function StoryBattleContent() {
     // Phase: Défaite
     if (phase === 'defeat') {
         // Si continueOnDefeat est activé, on permet de continuer directement (prologue)
-        const canContinue = currentBattleConfig?.continueOnDefeat;
+        // Utiliser le state battleConfig qui a été sauvegardé au début du combat
+        const canContinue = battleConfig?.continueOnDefeat;
 
         return (
             <main className={styles.main}>
