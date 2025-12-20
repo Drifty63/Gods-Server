@@ -150,6 +150,7 @@ const chapter1Battle2Events: StoryEvent[] = [
         id: 'ch1_battle2_win',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE2_WIN,
+        backgroundImage: '/assets/story/battle2_victory.png',
         nextEventId: undefined  // Fin du combat 2
     },
     // Après combat - Défaite
@@ -157,6 +158,7 @@ const chapter1Battle2Events: StoryEvent[] = [
         id: 'ch1_battle2_lose',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE2_LOSE,
+        backgroundImage: '/assets/story/battle2_defeat.png',
         nextEventId: undefined  // Doit réessayer
     }
 ];

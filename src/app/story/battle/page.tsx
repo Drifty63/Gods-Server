@@ -418,10 +418,20 @@ function StoryBattleContent() {
         if (!dialogue) return null;
 
         const glowColor = GOD_COLORS[dialogue.speaker] || '#ffd700';
-        // Utiliser la nouvelle image de victoire (intervention de Nyx)
-        const backgroundImage = playerWon
-            ? '/assets/story/victory_nyx.png'
-            : '/assets/story/defeat_underworld.png';
+
+        // Utiliser l'image de fond appropriée selon le combat
+        let backgroundImage: string;
+        if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
+            // Combat 2 : Zeus + Hestia vs Arès
+            backgroundImage = playerWon
+                ? '/assets/story/battle2_victory.png'
+                : '/assets/story/battle2_defeat.png';
+        } else {
+            // Combat 1 : Zeus vs Hadès
+            backgroundImage = playerWon
+                ? '/assets/story/victory_nyx.png'
+                : '/assets/story/defeat_underworld.png';
+        }
 
         return (
             <main className={styles.main}>
