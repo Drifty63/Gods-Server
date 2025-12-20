@@ -208,6 +208,28 @@
     cursor: not-allowed;
 }
 
+/* Coming Soon state */
+.chapterCard.comingSoon {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: rgba(255, 165, 0, 0.3);
+}
+
+.chapterCard.comingSoon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 165, 0, 0.03) 10px,
+            rgba(255, 165, 0, 0.03) 20px);
+    pointer-events: none;
+}
+
 /* Completed state */
 .chapterCard.completed {
     border-color: rgba(50, 205, 50, 0.4);

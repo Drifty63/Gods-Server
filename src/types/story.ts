@@ -65,6 +65,7 @@ export interface Chapter {
     events: StoryEvent[];
     battles?: ChapterBattle[];     // Liste des combats affichables dans le chapitre
     imageUrl?: string;
+    comingSoon?: boolean;          // Chapitre en cours de développement
 }
 
 export interface StoryProgress {

@@ -227,7 +227,8 @@ const CHAPTER_2: Chapter = {
     description: "Zeus et ses alliés doivent rallier les autres dieux à leur cause. (Chapitre en cours de développement)",
     difficulty: 'medium',
     events: chapter2Events,
-    imageUrl: '/story/chapter2.jpg'
+    imageUrl: '/story/chapter2.jpg',
+    comingSoon: true
 };
 
 // ===========================================
@@ -259,7 +260,8 @@ const CHAPTER_3: Chapter = {
     description: "L'heure de la confrontation finale approche. (Chapitre en cours de développement)",
     difficulty: 'hard',
     events: chapter3Events,
-    imageUrl: '/story/chapter3.jpg'
+    imageUrl: '/story/chapter3.jpg',
+    comingSoon: true
 };
 
 // ===========================================

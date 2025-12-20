@@ -143,20 +143,21 @@ function StoryContent() {
         const requiredBattle = chapter.battles?.find(b => b.id === battle.requiresBattleId);
         if (!requiredBattle) return true;
 
-        // Le combat est débloqué si un événement de type 'battle' a été complété
-        // On vérifie si l'événement de bataille correspondant au combat requis est complété
-        // Pour cela, on cherche l'événement de bataille qui suit le firstEventId du combat requis
+        // Debug: afficher les événements complétés
+        console.log('Checking unlock for', battle.id);
+        console.log('completedEvents:', progress.completedEvents);
+
+        // Le combat est débloqué si:
+        // - L'événement de bataille du combat 1 (ch1_battle1) est dans completedEvents
+        // - OU n'importe quel événement post-bataille a été vu
         const hasBattleCompleted = progress.completedEvents.some(eventId => {
-            const event = chapter.events.find(e => e.id === eventId);
-            // On considère le combat comme complété si un événement post-bataille a été vu
-            // (ch1_after_battle_win, ch1_after_battle_lose, ch1_hades_throne, etc.)
-            return event && (
+            return eventId === 'ch1_battle1' ||
                 eventId.includes('after_battle') ||
                 eventId.includes('hades_throne') ||
-                eventId.includes('end_battle')
-            );
+                eventId.includes('end_battle');
         });
 
+        console.log('Battle completed?', hasBattleCompleted);
         return hasBattleCompleted;
     };
 
@@ -223,23 +224,27 @@ function StoryContent() {
                     <div className={styles.chaptersGrid}>
                         {ZEUS_CAMPAIGN.chapters.map((chapter) => {
                             const isCompleted = isChapterCompleted(chapter.id);
-                            const canAccess = canAccessChapter(chapter.id);
+                            const canAccess = canAccessChapter(chapter.id) && !chapter.comingSoon;
                             const isCurrent = progress.currentChapterId === chapter.id;
+                            const isComingSoon = chapter.comingSoon === true;
 
                             return (
                                 <div
                                     key={chapter.id}
-                                    className={`${styles.chapterCard} ${!canAccess ? styles.locked : ''} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
+                                    className={`${styles.chapterCard} ${!canAccess ? styles.locked : ''} ${isCompleted && !isComingSoon ? styles.completed : ''} ${isCurrent && !isComingSoon ? styles.current : ''} ${isComingSoon ? styles.comingSoon : ''}`}
                                     onClick={() => canAccess && handleChapterClick(chapter)}
                                 >
                                     {/* Badge de statut */}
-                                    {isCompleted && (
+                                    {isComingSoon && (
+                                        <div className={styles.statusBadge}>🚧 À venir</div>
+                                    )}
+                                    {isCompleted && !isComingSoon && (
                                         <div className={styles.statusBadge}>✓ Terminé</div>
                                     )}
-                                    {!canAccess && !isCompleted && (
+                                    {!canAccess && !isCompleted && !isComingSoon && (
                                         <div className={styles.lockIcon}>🔒</div>
                                     )}
-                                    {isCurrent && !isCompleted && (
+                                    {isCurrent && !isCompleted && !isComingSoon && (
                                         <div className={styles.statusBadge}>En cours</div>
                                     )}
 
