@@ -10,7 +10,13 @@ import GameBoard from '@/components/GameBoard/GameBoard';
 import { getGodById, ALL_GODS } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
-import { PROLOGUE_AFTER_BATTLE_1_WIN, PROLOGUE_AFTER_BATTLE_1_LOSE, PROLOGUE_HADES_TAKES_THRONE } from '@/data/story/dialogues';
+import {
+    PROLOGUE_AFTER_BATTLE_1_WIN,
+    PROLOGUE_AFTER_BATTLE_1_LOSE,
+    PROLOGUE_HADES_TAKES_THRONE,
+    PROLOGUE_BATTLE2_WIN,
+    PROLOGUE_BATTLE2_LOSE
+} from '@/data/story/dialogues';
 import styles from './page.module.css';
 
 type BattlePhase = 'loading' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
@@ -227,21 +233,27 @@ function StoryBattleContent() {
                     portrait: d.speakerId === 'narrator' ? 'zeus' : d.speakerId
                 }));
 
-            // Utiliser les dialogues importés depuis dialogues.ts
-            // Les deux issues (victoire ou défaite) mènent à Hadès prenant le trône
-            const battleDialogues = won
-                ? PROLOGUE_AFTER_BATTLE_1_WIN
-                : PROLOGUE_AFTER_BATTLE_1_LOSE;
+            // Déterminer quels dialogues utiliser selon le combat
+            let allDialogues;
 
-            // Combiner avec les dialogues de prise de trône (communs aux deux issues)
-            const allDialogues = [...battleDialogues, ...PROLOGUE_HADES_TAKES_THRONE];
+            if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
+                // Combat 2 : Zeus + Hestia vs Arès
+                allDialogues = won ? PROLOGUE_BATTLE2_WIN : PROLOGUE_BATTLE2_LOSE;
+            } else {
+                // Combat 1 : Zeus vs Hadès (par défaut)
+                const battleDialogues = won
+                    ? PROLOGUE_AFTER_BATTLE_1_WIN
+                    : PROLOGUE_AFTER_BATTLE_1_LOSE;
+                // Combiner avec les dialogues de prise de trône (communs aux deux issues)
+                allDialogues = [...battleDialogues, ...PROLOGUE_HADES_TAKES_THRONE];
+            }
 
             setPostBattleDialogues(convertDialogues(allDialogues));
             setPostBattleIndex(0);
             setPhase('post_battle_dialogue');
             completeBattle(won);
         }
-    }, [gameState, phase, completeBattle, playerId]);
+    }, [gameState, phase, completeBattle, playerId, battleConfig]);
 
     // Effet de machine à écrire pour les dialogues post-combat
     useEffect(() => {

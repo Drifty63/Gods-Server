@@ -439,12 +439,21 @@ export class GameEngine {
         // le joueur actuel a gagné même s'il meurt ensuite du contrecoup.
         if (this.state.status !== 'finished') {
             const allDead = player.gods.every(g => g.isDead);
+
+            // Debug: afficher l'état des dieux
+            console.log(`🔍 handleGodDeath - Joueur ${player.id}:`);
+            player.gods.forEach(g => {
+                console.log(`   - ${g.card.name}: isDead=${g.isDead}, HP=${g.currentHealth}`);
+            });
+            console.log(`   => Tous morts? ${allDead}`);
+
             if (allDead) {
                 this.state.status = 'finished';
                 // Le gagnant est l'AUTRE joueur (celui dont les dieux ne sont pas tous morts)
                 // CORRECTION: On ne peut pas utiliser getOpponent() car ça retourne l'opposant
                 // du joueur dont c'est le tour, pas l'opposant du joueur qui vient de perdre!
                 this.state.winnerId = this.state.players.find(p => p.id !== player.id)?.id;
+                console.log(`🏆 Partie terminée! Gagnant: ${this.state.winnerId}`);
             }
         }
     }
