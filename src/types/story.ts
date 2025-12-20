@@ -10,7 +10,7 @@ export interface DialogueLine {
 }
 
 export interface BattleCondition {
-    type: 'half_hp' | 'no_energy' | 'debuff' | 'normal';
+    type: 'half_hp' | 'three_quarter_hp' | 'no_energy' | 'debuff' | 'normal';
     description: string;
 }
 
@@ -20,7 +20,8 @@ export interface BattleConfig {
     description: string;
     enemyTeam: string[];           // IDs des dieux ennemis
     playerTeam?: string[];         // IDs des dieux du joueur (si différent de la campagne)
-    deckMultiplier?: number;       // Multiplicateur des cartes du deck (ex: 4 pour 1v1)
+    deckMultiplier?: number;       // Multiplicateur des cartes du deck du joueur
+    enemyDeckMultiplier?: number;  // Multiplicateur des cartes du deck ennemi
     playerCondition?: BattleCondition;  // Condition spéciale pour le joueur
     enemyCondition?: BattleCondition;   // Condition spéciale pour l'ennemi
     continueOnDefeat: boolean;     // L'histoire continue même en cas de défaite
@@ -39,9 +40,19 @@ export interface StoryEvent {
     type: StoryEventType;
     dialogues?: DialogueLine[];
     battle?: BattleConfig;
+    backgroundImage?: string;      // Image de fond optionnelle pour la scène
     nextEventId?: string;          // ID de l'événement suivant
     nextEventOnWin?: string;       // Si différent selon victoire
     nextEventOnLose?: string;      // Si différent selon défaite
+}
+
+export interface ChapterBattle {
+    id: string;
+    name: string;
+    description: string;
+    firstEventId: string;          // Premier événement de ce combat
+    unlocked: boolean;             // Débloqué par défaut ?
+    requiresBattleId?: string;     // ID du combat à compléter pour débloquer
 }
 
 export interface Chapter {
@@ -52,6 +63,7 @@ export interface Chapter {
     description: string;
     difficulty: 'easy' | 'medium' | 'hard';
     events: StoryEvent[];
+    battles?: ChapterBattle[];     // Liste des combats affichables dans le chapitre
     imageUrl?: string;
 }
 

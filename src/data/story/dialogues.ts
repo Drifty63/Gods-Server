@@ -324,8 +324,228 @@ export const PROLOGUE_END: DialogueLine[] = [
 ];
 
 // ===========================================
+// COMBAT 2 DU PROLOGUE - LA FUITE SUR TERRE
+// Zeus trouve refuge chez Hestia, Arès les attaque
+// ===========================================
+
+// Narrateur - Zeus fuit vers la Terre
+export const PROLOGUE_BATTLE2_NARRATOR: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Gravement blessé par l'attaque surprise de Nyx, Zeus n'a d'autre choix que de fuir l'Olympe tombé aux mains de son frère.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le Roi des Dieux connaît bien la Terre des mortels. Il y est descendu maintes fois pour diverses raisons... certaines plus nobles que d'autres.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Mais cette fois, son objectif est clair : trouver Hestia, déesse du foyer, la seule qui pourra l'accueillir, l'aider et soigner ses blessures.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Au cœur d'une forêt verdoyante de la Grèce antique, Zeus aperçoit enfin une modeste cabane entourée de fleurs aux mille couleurs...",
+        emotion: 'neutral'
+    }
+];
+
+// Dialogue Zeus et Hestia avant le combat
+export const PROLOGUE_BATTLE2_INTRO: DialogueLine[] = [
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Zeus ?! Par les dieux, dans quel état tu es ! Entre vite, assieds-toi près du feu.",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*s'effondre sur une chaise* Hestia... L'Olympe... est tombé...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Tombé ? Comment est-ce possible ? L'Olympe est imprenable !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Hadès... Notre propre frère m'a trahi. Il a préparé son coup pendant des millénaires. Et Nyx l'a aidé.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Ils m'ont affaibli avant même le combat. J'ai... j'ai perdu le trône.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*pose une main réconfortante sur son épaule* Du calme, frère. Le foyer de ma demeure te protège. Ici, tu es en sécurité.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Je vais soigner tes blessures. Mais cela prendra du temps... ta force divine a été gravement entamée.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Je n'ai pas le temps, Hestia. Hadès va chercher à m'éliminer. Il enverra ses sbires.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Alors nous devons trouver des alliés. Je sais où se trouve Artémis... et Déméter. Elles sont liées à notre frère Poséidon.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Si nous parvenons à rallier Poséidon à notre cause, nous aurons une chance de—",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*défonce la porte* ZEUS ! Tu pensais pouvoir te cacher du dieu de la guerre ?!",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Arès ?! Comment nous as-tu trouvés si vite ?!",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "Hadès m'a promis le commandement de ses armées. En échange... je dois lui ramener ta tête !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*se place devant Zeus* Tu devras d'abord passer par moi, traître ! Le feu du foyer brûle aussi fort que ta rage sanguinaire !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "Hestia la pacifique qui ose combattre ? HAHAHAHA ! Ce sera un plaisir de t'écraser aussi !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*se lève péniblement* Je ne laisserai pas ma sœur affronter ce monstre seule. Même affaibli... je suis toujours Zeus !",
+        emotion: 'determined'
+    }
+];
+
+// Après victoire contre Arès
+export const PROLOGUE_BATTLE2_WIN: DialogueLine[] = [
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*à genoux, blessé* Impossible... Même affaibli et avec cette cuisinière, tu parviens à me battre ?!",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Cuisinière ? Le feu du foyer réchauffe les cœurs, Arès. Mais il peut aussi réduire en cendres ceux qui menacent ma famille.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Fuis, Arès. Et dis à Hadès que je reviendrai reprendre mon trône.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*se relève en titubant* Tu as gagné cette manche, Zeus... Mais Hadès a des légions entières à sa disposition !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*disparaît dans une lueur rouge* On se reverra... et la prochaine fois, je ne serai pas seul !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Il est parti. Zeus, tu dois te reposer maintenant. Cette bataille t'a encore plus affaibli.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Non, Hestia. Nous devons bouger. Si Arès nous a trouvés, d'autres viendront.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Tu as raison... Allons trouver Artémis. Elle saura nous cacher le temps que tu récupères.",
+        emotion: 'determined'
+    }
+];
+
+// Après défaite contre Arès
+export const PROLOGUE_BATTLE2_LOSE: DialogueLine[] = [
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "HAHAHAHA ! Regardez-vous, pathétiques ! Le grand Zeus, à genoux devant moi !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*protège Zeus* Tu n'as aucun honneur, Arès ! Attaquer un dieu blessé !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "L'honneur ? La guerre n'a pas d'honneur, vieille folle ! Seule la victoire compte !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*essaie de se relever* Je... ne me rendrai... jamais...",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "Têtu jusqu'au bout. Hadès sera content de te voir ramper à ses pieds.",
+        emotion: 'happy'
+    }
+];
+
+// ===========================================
 // CHAPITRE 2 - LA RÉSISTANCE
 // ===========================================
+
 
 // Introduction du Chapitre 2 - Recherche d'alliés
 export const CHAPTER2_INTRO: DialogueLine[] = [

@@ -69,22 +69,26 @@ function StoryBattleContent() {
         const { engine, gameState } = useGameStore.getState();
         if (!engine || !gameState) return;
 
-        if (battleConfig.playerCondition.type === 'half_hp') {
-            // Récupérer l'état interne de l'engine et le modifier
-            const internalState = engine.getState();
+        const internalState = engine.getState();
 
+        if (battleConfig.playerCondition.type === 'half_hp') {
             // Réduire les PV du joueur à 50% dans l'état interne de l'engine
             // players[0] = joueur 1 (nous)
             internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
                 god.currentHealth = Math.floor(god.card.maxHealth / 2);
             });
-
-            // Créer une copie profonde de l'état pour React
-            const newGameState = JSON.parse(JSON.stringify(internalState));
-
-            // Mettre à jour le store avec le nouvel état
-            useGameStore.setState({ gameState: newGameState });
+        } else if (battleConfig.playerCondition.type === 'three_quarter_hp') {
+            // Réduire les PV du joueur à 75% (Zeus pas complètement guéri)
+            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
+                god.currentHealth = Math.floor(god.card.maxHealth * 0.75);
+            });
         }
+
+        // Créer une copie profonde de l'état pour React
+        const newGameState = JSON.parse(JSON.stringify(internalState));
+
+        // Mettre à jour le store avec le nouvel état
+        useGameStore.setState({ gameState: newGameState });
     }, []);
 
     // Initialiser le combat
@@ -128,36 +132,37 @@ function StoryBattleContent() {
             let playerDeck = basePlaverDeck;
             let enemyDeck = baseEnemyDeck;
 
-            // Appliquer le multiplicateur de deck si défini (pour combat 1v1)
-            if (localBattleConfig.deckMultiplier && localBattleConfig.deckMultiplier > 1) {
-                const multiplier = localBattleConfig.deckMultiplier;
-                playerDeck = [];
-                enemyDeck = [];
+            // Multiplicateurs de deck (peuvent être différents pour joueur et ennemi)
+            const playerMultiplier = localBattleConfig.deckMultiplier || 1;
+            const enemyMultiplier = localBattleConfig.enemyDeckMultiplier || localBattleConfig.deckMultiplier || 1;
 
-                // Multiplier les cartes du deck du joueur
-                for (let i = 0; i < multiplier; i++) {
+            // Appliquer le multiplicateur de deck du joueur
+            if (playerMultiplier > 1) {
+                playerDeck = [];
+                for (let i = 0; i < playerMultiplier; i++) {
                     basePlaverDeck.forEach(card => {
                         playerDeck.push({
                             ...card,
-                            id: `${card.id}_copy_${i}`  // ID unique pour chaque copie
+                            id: `${card.id}_copy_${i}`
                         });
                     });
                 }
+            }
 
-                // Multiplier les cartes du deck ennemi
-                for (let i = 0; i < multiplier; i++) {
+            // Appliquer le multiplicateur de deck ennemi
+            if (enemyMultiplier > 1) {
+                enemyDeck = [];
+                for (let i = 0; i < enemyMultiplier; i++) {
                     baseEnemyDeck.forEach(card => {
                         enemyDeck.push({
                             ...card,
-                            id: `${card.id}_copy_${i}`  // ID unique pour chaque copie
+                            id: `${card.id}_copy_${i}`
                         });
                     });
                 }
-
-                console.log(`🎮 Combat 1v1 - Deck multiplié x${multiplier}`);
-                console.log(`📚 Joueur: ${playerDeck.length} cartes`);
-                console.log(`📚 Ennemi: ${enemyDeck.length} cartes`);
             }
+
+            console.log(`🎮 Combat - Deck joueur x${playerMultiplier} (${playerDeck.length} cartes), ennemi x${enemyMultiplier} (${enemyDeck.length} cartes)`);
 
             // L'ennemi commence (attaque surprise)
             const playerGoesFirst = false;
