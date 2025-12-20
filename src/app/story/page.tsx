@@ -9,6 +9,7 @@ import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useStoryStore } from '@/store/storyStore';
 import { ZEUS_CAMPAIGN } from '@/data/story/campaign';
 import DialogueBox from '@/components/StoryMode/DialogueBox';
+import { Chapter, ChapterBattle } from '@/types/story';
 
 export default function StoryPage() {
     return (
@@ -24,6 +25,10 @@ function StoryContent() {
     const [showChapterSelect, setShowChapterSelect] = useState(true);
     const [showTransition, setShowTransition] = useState(false);
     const [previousSpeaker, setPreviousSpeaker] = useState<string | null>(null);
+
+    // Modal de sélection des combats d'un chapitre
+    const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+    const [showBattleSelect, setShowBattleSelect] = useState(false);
 
     const {
         progress,
@@ -91,11 +96,64 @@ function StoryContent() {
         // Si c'est un dialogue ou cutscene, le store a déjà chargé les nouveaux dialogues
     };
 
-    // Démarrer un chapitre
+    // Cliquer sur un chapitre
+    const handleChapterClick = (chapter: Chapter) => {
+        // Si le chapitre a plusieurs combats, afficher la modal de sélection
+        if (chapter.battles && chapter.battles.length > 1) {
+            setSelectedChapter(chapter);
+            setShowBattleSelect(true);
+        } else {
+            // Sinon, démarrer directement le chapitre
+            handleStartChapter(chapter.id);
+        }
+    };
+
+    // Démarrer un chapitre (depuis le début)
     const handleStartChapter = (chapterId: string) => {
-        setPreviousSpeaker(null); // Reset pour ne pas déclencher de transition au démarrage
+        setPreviousSpeaker(null);
         startChapter(chapterId);
         setShowChapterSelect(false);
+        setShowBattleSelect(false);
+    };
+
+    // Démarrer un combat spécifique d'un chapitre
+    const handleStartBattle = (chapter: Chapter, battle: ChapterBattle) => {
+        if (!battle.unlocked && battle.requiresBattleId) {
+            // Vérifier si le combat requis est complété
+            const requiredBattleCompleted = progress.completedEvents.includes(
+                chapter.events.find(e => e.type === 'battle' && e.battle?.id === battle.requiresBattleId)?.id || ''
+            );
+            if (!requiredBattleCompleted) {
+                return; // Combat verrouillé
+            }
+        }
+
+        setPreviousSpeaker(null);
+        startChapter(chapter.id, battle.firstEventId);
+        setShowChapterSelect(false);
+        setShowBattleSelect(false);
+    };
+
+    // Vérifier si un combat est débloqué
+    const isBattleUnlocked = (chapter: Chapter, battle: ChapterBattle): boolean => {
+        if (battle.unlocked) return true;
+        if (!battle.requiresBattleId) return true;
+
+        // Chercher si le combat requis a été complété
+        const requiredBattle = chapter.battles?.find(b => b.id === battle.requiresBattleId);
+        if (!requiredBattle) return true;
+
+        // Vérifier dans les événements complétés
+        return progress.completedEvents.some(eventId => {
+            const event = chapter.events.find(e => e.id === eventId);
+            return event?.type === 'battle';
+        });
+    };
+
+    // Fermer la modal
+    const handleCloseBattleSelect = () => {
+        setShowBattleSelect(false);
+        setSelectedChapter(null);
     };
 
     // Continuer la progression
@@ -162,7 +220,7 @@ function StoryContent() {
                                 <div
                                     key={chapter.id}
                                     className={`${styles.chapterCard} ${!canAccess ? styles.locked : ''} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
-                                    onClick={() => canAccess && handleStartChapter(chapter.id)}
+                                    onClick={() => canAccess && handleChapterClick(chapter)}
                                 >
                                     {/* Badge de statut */}
                                     {isCompleted && (
@@ -246,6 +304,44 @@ function StoryContent() {
                             </button>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Modal de sélection des combats */}
+            {showBattleSelect && selectedChapter && (
+                <div className={styles.modalOverlay} onClick={handleCloseBattleSelect}>
+                    <div className={styles.battleSelectModal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.modalCloseBtn} onClick={handleCloseBattleSelect}>✕</button>
+
+                        <h2 className={styles.modalTitle}>
+                            {selectedChapter.title} - {selectedChapter.subtitle}
+                        </h2>
+
+                        <div className={styles.battleList}>
+                            {selectedChapter.battles?.map((battle, index) => {
+                                const unlocked = isBattleUnlocked(selectedChapter, battle);
+
+                                return (
+                                    <div
+                                        key={battle.id}
+                                        className={`${styles.battleCard} ${!unlocked ? styles.battleLocked : ''}`}
+                                        onClick={() => unlocked && handleStartBattle(selectedChapter, battle)}
+                                    >
+                                        <div className={styles.battleNumber}>Combat {index + 1}</div>
+                                        <h3 className={styles.battleName}>{battle.name}</h3>
+                                        <p className={styles.battleDescription}>{battle.description}</p>
+
+                                        {!unlocked && (
+                                            <div className={styles.battleLockOverlay}>
+                                                <span className={styles.lockIcon}>🔒</span>
+                                                <span>Terminez le combat précédent</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             )}
         </main>

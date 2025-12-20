@@ -17,7 +17,7 @@ interface StoryState {
 
     // Actions
     initStory: () => void;
-    startChapter: (chapterId: string) => void;
+    startChapter: (chapterId: string, startEventId?: string) => void;
     advanceDialogue: () => boolean;  // Retourne true si encore des dialogues
     startBattle: () => void;
     completeBattle: (won: boolean) => void;
@@ -65,22 +65,32 @@ export const useStoryStore = create<StoryState>()(
                 }
             },
 
-            startChapter: (chapterId: string) => {
-                const firstEvent = getFirstEvent(chapterId);
-                if (!firstEvent) return;
+            startChapter: (chapterId: string, startEventId?: string) => {
+                const chapter = getChapterById(chapterId);
+                if (!chapter) return;
+
+                // Soit l'événement spécifié, soit le premier événement du chapitre
+                let targetEvent;
+                if (startEventId) {
+                    targetEvent = getEventById(chapterId, startEventId);
+                }
+                if (!targetEvent) {
+                    targetEvent = getFirstEvent(chapterId);
+                }
+                if (!targetEvent) return;
 
                 set({
                     progress: {
                         ...get().progress,
                         currentChapterId: chapterId,
-                        currentEventId: firstEvent.id,
+                        currentEventId: targetEvent.id,
                         currentEventIndex: 0,
                         lastPlayedAt: new Date().toISOString()
                     },
-                    currentDialogues: firstEvent.dialogues || [],
+                    currentDialogues: targetEvent.dialogues || [],
                     currentDialogueIndex: 0,
-                    isDialogueActive: firstEvent.type === 'dialogue' || firstEvent.type === 'cutscene',
-                    currentBattleConfig: firstEvent.type === 'battle' ? firstEvent.battle : null
+                    isDialogueActive: targetEvent.type === 'dialogue' || targetEvent.type === 'cutscene',
+                    currentBattleConfig: targetEvent.type === 'battle' ? targetEvent.battle : null
                 });
             },
 
