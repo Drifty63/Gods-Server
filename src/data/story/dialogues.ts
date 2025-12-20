@@ -151,7 +151,7 @@ export const PROLOGUE_INTRO: DialogueLine[] = [
     }
 ];
 
-// Après la victoire du combat
+// Après la victoire du combat (Zeus gagne mais Nyx intervient en surprise)
 export const PROLOGUE_AFTER_BATTLE_1_WIN: DialogueLine[] = [
     {
         speakerId: 'zeus',
@@ -174,20 +174,38 @@ export const PROLOGUE_AFTER_BATTLE_1_WIN: DialogueLine[] = [
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Tu as peut-être gagné cette bataille, Zeus... Mais la guerre ne fait que commencer.",
-        emotion: 'angry'
+        text: "*sourire sinistre* Tu as peut-être gagné ce duel, Zeus... Mais tu n'as pas gagné la guerre.",
+        emotion: 'happy'
     },
     {
-        speakerId: 'hades',
-        speakerName: 'Hadès',
-        text: "Pendant que tu te réjouissais, mes légions encerclaient l'Olympe. Regarde autour de toi !",
-        emotion: 'happy'
+        speakerId: 'nyx',
+        speakerName: 'Nyx',
+        text: "*surgissant des ombres* Maître Hadès... laissez-moi finir ce que vous avez commencé.",
+        emotion: 'determined'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Non... C'est impossible... Des ombres partout !",
+        text: "NYX ?! Comment as-tu pu pénétrer dans l'Olympe sans—ARGH !",
         emotion: 'surprised'
+    },
+    {
+        speakerId: 'nyx',
+        speakerName: 'Nyx',
+        text: "*frappe Zeus par surprise* Les ténèbres sont partout, roi déchu. Vous ne pouvez pas échapper à la nuit.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*s'effondre* Traîtresse... vous m'avez piégé depuis le début...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hades',
+        speakerName: 'Hadès',
+        text: "Bien joué, Nyx. Maintenant, frère, regarde-moi prendre ce qui m'était destiné.",
+        emotion: 'happy'
     }
 ];
 

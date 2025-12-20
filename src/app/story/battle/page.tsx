@@ -10,6 +10,7 @@ import GameBoard from '@/components/GameBoard/GameBoard';
 import { getGodById, ALL_GODS } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
+import { PROLOGUE_AFTER_BATTLE_1_WIN, PROLOGUE_AFTER_BATTLE_1_LOSE, PROLOGUE_HADES_TAKES_THRONE } from '@/data/story/dialogues';
 import styles from './page.module.css';
 
 type BattlePhase = 'loading' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
@@ -198,30 +199,42 @@ function StoryBattleContent() {
     useEffect(() => {
         if (!gameState || phase !== 'playing') return;
 
+        // DEBUG: Log pour comprendre l'état
+        console.log('[DEBUG Battle End] Checking - status:', gameState.status, 'winnerId:', gameState.winnerId, 'playerId:', playerId);
+
+        // Vérifier les PV de tous les dieux
+        gameState.players.forEach(player => {
+            console.log('[DEBUG Battle End] Player:', player.id, 'Gods:', player.gods.map(g => ({ name: g.card.name, hp: g.currentHealth, dead: g.isDead })));
+        });
+
         // IMPORTANT: Vérifier que le jeu est vraiment terminé (status === 'finished')
         // et qu'il y a un gagnant défini
         if (gameState.status === 'finished' && gameState.winnerId) {
+            console.log('[DEBUG Battle End] GAME OVER - winnerId:', gameState.winnerId, 'playerId:', playerId, 'won:', gameState.winnerId === playerId);
+
             // Utiliser playerId du store pour comparer correctement
             const won = gameState.winnerId === playerId;
             setPlayerWon(won);
 
-            // Préparer les dialogues de fin
-            const dialogues = won
-                ? [
-                    { speaker: 'zeus', speakerName: 'Zeus', text: "Hadès ! Ta trahison s'arrête ici ! L'Olympe ne tombera pas aujourd'hui.", portrait: 'zeus' },
-                    { speaker: 'hades', speakerName: 'Hadès', text: "Grrr... Tu n'as fait que retarder l'inévitable, frère. Les ombres ne meurent jamais.", portrait: 'hades' },
-                    { speaker: 'aphrodite', speakerName: 'Aphrodite', text: "Même dans les ténèbres les plus profondes, la beauté et l'amour triomphent toujours.", portrait: 'aphrodite' },
-                    { speaker: 'dionysos', speakerName: 'Dionysos', text: "Allez, détends-toi Hadès ! Un petit verre de nectar et on oublie tout ?", portrait: 'dionysos' },
-                    { speaker: 'zeus', speakerName: 'Zeus', text: "Assez. Nous rentrons. Mais sache que je garderai un œil sur les Enfers désormais.", portrait: 'zeus' }
-                ]
-                : [
-                    { speaker: 'hades', speakerName: 'Hadès', text: "L'Olympe s'effondre enfin. Mon heure est venue de régner sur les cieux et les morts.", portrait: 'hades' },
-                    { speaker: 'nyx', speakerName: 'Nyx', text: "Le voile tombe sur les dieux de la lumière. L'éternelle nuit commence.", portrait: 'nyx' },
-                    { speaker: 'zeus', speakerName: 'Zeus', text: "Impossible... Mes forces m'abandonnent... Mais d'autres se lèveront...", portrait: 'zeus' },
-                    { speaker: 'hestia', speakerName: 'Hestia', text: "Le foyer de l'Olympe s'éteint... Que les dieux nous protègent.", portrait: 'hestia' }
-                ];
+            // Convertir les dialogues du format DialogueLine au format utilisé ici
+            const convertDialogues = (dialogueLines: typeof PROLOGUE_AFTER_BATTLE_1_WIN) =>
+                dialogueLines.map(d => ({
+                    speaker: d.speakerId,
+                    speakerName: d.speakerName,
+                    text: d.text,
+                    portrait: d.speakerId === 'narrator' ? 'zeus' : d.speakerId
+                }));
 
-            setPostBattleDialogues(dialogues);
+            // Utiliser les dialogues importés depuis dialogues.ts
+            // Les deux issues (victoire ou défaite) mènent à Hadès prenant le trône
+            const battleDialogues = won
+                ? PROLOGUE_AFTER_BATTLE_1_WIN
+                : PROLOGUE_AFTER_BATTLE_1_LOSE;
+
+            // Combiner avec les dialogues de prise de trône (communs aux deux issues)
+            const allDialogues = [...battleDialogues, ...PROLOGUE_HADES_TAKES_THRONE];
+
+            setPostBattleDialogues(convertDialogues(allDialogues));
             setPostBattleIndex(0);
             setPhase('post_battle_dialogue');
             completeBattle(won);
