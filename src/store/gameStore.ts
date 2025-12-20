@@ -876,21 +876,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     playAITurn: () => {
-        const { engine, aiPlayer, playerId, isSoloMode } = get();
+        const { engine, aiPlayer, playerId, isSoloMode, isAIPlaying } = get();
+
+        // GARDE CRITIQUE : Si l'IA est déjà en train de jouer, on ignore cet appel
+        if (isAIPlaying) {
+            return;
+        }
+
         if (!engine || !aiPlayer || !isSoloMode) return;
 
         const state = engine.getState();
-        if (state.currentPlayerId === playerId || state.status !== 'playing') return;
+        if (state.currentPlayerId === playerId || state.status !== 'playing') {
+            return;
+        }
+
+        // CAPTURER l'ID de l'IA MAINTENANT (avant les setTimeout)
+        const aiIdAtStart = state.currentPlayerId;
 
         set({ isAIPlaying: true });
 
         // Petit délai de "réflexion" avant que l'IA ne joue
         setTimeout(() => {
             try {
-                // L'IA joue son tour (sans fin de tour auto maintenant)
+                // Vérification de sécurité : s'assurer que c'est toujours le tour de l'IA capturée
+                const currentState = engine.getState();
+                if (currentState.currentPlayerId !== aiIdAtStart) {
+                    set({ isAIPlaying: false });
+                    return;
+                }
+
+                // L'IA joue son tour
                 const actions = aiPlayer.playTurn(engine);
 
-                // Mettre à jour l'état immédiatement pour montrer les actions (ex: carte jouée)
+                // Mettre à jour l'état immédiatement pour montrer les actions
                 set({
                     gameState: cloneGameState(engine.getState()),
                 });
@@ -900,9 +918,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 const delay = playedCardAction ? 4500 : 1000;
 
                 setTimeout(() => {
-                    // Finir le tour de l'IA manuellement sur l'engine
-                    const aiId = engine.getState().currentPlayerId;
-                    engine.executeAction({ type: 'end_turn', playerId: aiId });
+                    // Vérification de sécurité : s'assurer que c'est toujours le tour de l'IA capturée
+                    const stateBeforeEnd = engine.getState();
+                    if (stateBeforeEnd.currentPlayerId !== aiIdAtStart) {
+                        set({ isAIPlaying: false });
+                        return;
+                    }
+
+                    // Finir le tour de l'IA en utilisant l'ID capturé au début
+                    engine.executeAction({ type: 'end_turn', playerId: aiIdAtStart });
 
                     set({
                         gameState: cloneGameState(engine.getState()),
@@ -913,8 +937,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 console.error("AI execution error:", error);
                 // Fallback : on passe le tour de force pour débloquer le jeu
                 setTimeout(() => {
-                    const aiId = engine.getState().currentPlayerId;
-                    engine.executeAction({ type: 'end_turn', playerId: aiId });
+                    engine.executeAction({ type: 'end_turn', playerId: aiIdAtStart });
                     set({
                         gameState: cloneGameState(engine.getState()),
                         isAIPlaying: false,
