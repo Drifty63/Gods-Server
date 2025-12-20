@@ -49,7 +49,7 @@ function StoryBattleContent() {
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
 
-    const { initGame, gameState, resetGame, playAITurn } = useGameStore();
+    const { initGame, gameState, resetGame, playAITurn, playerId } = useGameStore();
     const {
         currentBattleConfig,
         getPlayerTeam,
@@ -198,8 +198,11 @@ function StoryBattleContent() {
     useEffect(() => {
         if (!gameState || phase !== 'playing') return;
 
-        if (gameState.winnerId) {
-            const won = gameState.winnerId === 'player1';
+        // IMPORTANT: Vérifier que le jeu est vraiment terminé (status === 'finished')
+        // et qu'il y a un gagnant défini
+        if (gameState.status === 'finished' && gameState.winnerId) {
+            // Utiliser playerId du store pour comparer correctement
+            const won = gameState.winnerId === playerId;
             setPlayerWon(won);
 
             // Préparer les dialogues de fin
@@ -223,7 +226,7 @@ function StoryBattleContent() {
             setPhase('post_battle_dialogue');
             completeBattle(won);
         }
-    }, [gameState, phase, completeBattle]);
+    }, [gameState, phase, completeBattle, playerId]);
 
     // Effet de machine à écrire pour les dialogues post-combat
     useEffect(() => {
