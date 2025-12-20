@@ -394,6 +394,20 @@
     transition: opacity 0.8s ease-in-out;
 }
 
+/* Fond personnalisé défini par l'événement */
+.storyBackgroundCustom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    transition: background-image 0.8s ease-in-out;
+}
+
 .backgroundOverlay {
     position: absolute;
     top: 0;

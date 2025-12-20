@@ -50,6 +50,10 @@ function StoryContent() {
         setIsLoading(false);
     }, []);
 
+    // Récupérer l'événement actuel pour son image de fond
+    const currentEvent = getCurrentEvent();
+    const eventBackgroundImage = currentEvent?.backgroundImage;
+
     // Déterminer si le dialogue actuel est du narrateur
     const currentDialogue = currentDialogues[currentDialogueIndex];
     const isNarratorScene = currentDialogue?.speakerId === 'narrator';
@@ -283,10 +287,21 @@ function StoryContent() {
             ) : (
                 /* Mode histoire en cours */
                 <div className={styles.storyView}>
-                    {/* Fond atmosphérique - change selon le type de dialogue */}
-                    <div className={isNarratorScene ? styles.storyBackgroundNarrator : styles.storyBackground}>
-                        <div className={isNarratorScene ? styles.backgroundOverlayNarrator : styles.backgroundOverlay} />
-                    </div>
+                    {/* Fond atmosphérique - change selon l'événement ou le type de dialogue */}
+                    {eventBackgroundImage ? (
+                        // Image de fond personnalisée de l'événement
+                        <div
+                            className={styles.storyBackgroundCustom}
+                            style={{ backgroundImage: `url('${eventBackgroundImage}')` }}
+                        >
+                            <div className={isNarratorScene ? styles.backgroundOverlayNarrator : styles.backgroundOverlay} />
+                        </div>
+                    ) : (
+                        // Images par défaut selon le type de scène
+                        <div className={isNarratorScene ? styles.storyBackgroundNarrator : styles.storyBackground}>
+                            <div className={isNarratorScene ? styles.backgroundOverlayNarrator : styles.backgroundOverlay} />
+                        </div>
+                    )}
 
                     {/* Transition entre scènes */}
                     {showTransition && <div className={styles.sceneTransition} />}
