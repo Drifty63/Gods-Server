@@ -1687,7 +1687,7 @@
     /* Ajustement chevauchement */
     .hand>div {
         flex-shrink: 0;
-        margin-right: -15px;
+        margin-right: -5px;
         /* Moins agressif que -20px */
         box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
         /* Ombre pour détacher */

@@ -330,11 +330,19 @@
     .card {
         width: 110px;
         height: 156px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header {
+        flex-shrink: 0;
+        /* Header compact */
+        padding: 4px 6px;
     }
 
     .name {
         font-size: 0.55rem;
-        max-width: 70px;
+        max-width: 75px;
     }
 
     .element {
@@ -342,36 +350,63 @@
     }
 
     .cost {
-        width: 22px;
-        height: 22px;
-        top: 24px;
-        left: 5px;
+        width: 24px;
+        height: 24px;
+        top: 26px;
+        /* Ajusté sous le header */
+        left: 4px;
     }
 
     .costValue {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
 
+    /* FULL ART: L'image prend tout l'espace central */
     .imageContainer {
-        height: 50px;
+        flex: 1;
+        /* Remplit l'espace entre header et footer */
+        height: auto;
+        min-height: 0;
+        position: relative;
     }
 
     .imagePlaceholder {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
     }
 
+    /* Description par dessus l'image (Overlay) */
+    .descriptionOverlay {
+        top: 40%;
+        /* Commence un peu plus haut */
+        background: linear-gradient(to top,
+                rgba(0, 0, 0, 0.95) 0%,
+                rgba(0, 0, 0, 0.7) 70%,
+                transparent 100%);
+        padding: 4px;
+        align-items: flex-end;
+        /* Texte en bas */
+    }
+
+    .descriptionOverlay p {
+        font-size: 0.55rem;
+        line-height: 1.2;
+        padding-bottom: 2px;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 1);
+    }
+
+    /* Legacy caché */
     .description {
-        height: 48px;
-        padding: 5px 6px;
-    }
-
-    .description p {
-        font-size: 0.5rem;
-        -webkit-line-clamp: 3;
+        display: none;
     }
 
     .footer {
+        flex-shrink: 0;
         padding: 4px 6px;
+        z-index: 2;
+        /* Au dessus de l'image si besoin */
+        background: rgba(0, 0, 0, 0.8);
+        /* Fond plus opaque */
     }
 }
 
