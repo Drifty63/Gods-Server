@@ -1651,72 +1651,92 @@
     /* 1. Fix Background : doit couvrir tout l'écran */
     .board::before {
         width: 100vh;
-        /* Inverser width/height cause rotation */
         height: 100vw;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(90deg);
         background-size: cover;
-        /* Cover pour remplir */
     }
 
-    /* 2. Cartes en main plus grandes */
+    /* 2. Cartes en main BEAUCOUP plus grandes */
     .hand {
-        /* Zoomer sur la main */
-        transform: scale(1.15);
+        /* Zoomer fortement sur la main */
+        transform: scale(1.45);
         transform-origin: bottom center;
-        margin-bottom: 15px;
-        width: 90%;
-        /* Permettre le scroll horizontal si trop de cartes */
+        margin-bottom: 30px;
+        width: 85%;
+        /* Permettre le scroll horizontal */
         flex-wrap: nowrap;
         overflow-x: auto;
         justify-content: flex-start;
-        padding: 10px;
+        padding: 20px 10px;
         /* Masquer la barre de scroll */
         scrollbar-width: none;
-        /* Firefox */
         -ms-overflow-style: none;
-        /* IE/Edge */
     }
 
     .hand::-webkit-scrollbar {
         display: none;
-        /* Chrome/Safari */
     }
 
-    /* Ajuster l'espacement entre les cartes en main */
     .hand>div {
         flex-shrink: 0;
-        margin-right: -10px;
-        /* Chevauchement léger */
+        margin-right: -20px;
+        /* Chevauchement plus important */
+        transition: margin-right 0.2s;
     }
+
+    /* Quand on clique/touche une carte, on l'écarte un peu ? Difficile en CSS pur sans hover */
 
     .hand>div:last-child {
-        margin-right: 20px;
+        margin-right: 30px;
     }
 
-    /* 3. Optimiser l'espace vertical */
-    .board {
-        padding: 4px;
-        gap: 4px;
+    /* 3. Zone Adversaire plus grande et remplissant le haut */
+    .opponentZone {
+        transform: scale(1.15);
+        transform-origin: top center;
+        width: 100%;
+        margin-bottom: 5px;
+        padding-top: 15px;
+        /* Compenser la barre de statut téléphone */
     }
 
-    .centerZone {
-        /* Comprimer un peu la zone centrale */
-        flex: 1;
+    /* Adapter la main adverse aussi */
+    .opponentHand {
+        transform: scale(1.1);
+        margin-bottom: 5px;
+    }
+
+    /* 4. Zone Joueur plus grande */
+    .playerInfo {
+        transform: scale(1.1);
+        width: 95%;
+        margin: 5px auto;
+    }
+
+    /* 5. Dieux plus gros pour remplir le vide */
+    .godsRow {
+        transform: scale(1.2);
+        gap: 6px;
+        margin: 10px 0;
+        width: 100%;
         justify-content: center;
     }
 
-    /* Réduire taille info joueur/adversaire */
-    .playerInfo,
-    .opponentZone {
-        transform: scale(0.9);
-        width: 100%;
-        box-sizing: border-box;
+    /* 6. Zone centrale (Timer) plus visible */
+    .centerZone {
+        flex: 1;
+        justify-content: center;
+        transform: scale(1.25);
     }
 
-    .godsRow {
-        gap: 4px;
-        transform: scale(0.95);
+    /* Optimiser l'espace vertical global */
+    .board {
+        padding: 0;
+        /* Maximiser l'espace */
+        gap: 2px;
+        overflow: hidden;
+        /* Empêcher le scroll global */
     }
 }
