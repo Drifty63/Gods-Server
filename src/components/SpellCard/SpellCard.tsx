@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { SpellCard as SpellCardType } from '@/types/cards';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
+import { getGodById } from '@/data/gods';
 import styles from './SpellCard.module.css';
 
 interface SpellCardProps {
@@ -25,6 +26,10 @@ export default function SpellCard({
 }: SpellCardProps) {
     const colors = ELEMENT_COLORS[card.element];
     const [imageError, setImageError] = useState(false);
+
+    // Récupérer le nom du dieu associé pour l'affichage mobile Full Art
+    const god = getGodById(card.godId);
+    const godName = god ? god.name.split(',')[0] : '';
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -49,7 +54,10 @@ export default function SpellCard({
         >
             {/* Header */}
             <div className={styles.header}>
-                <span className={styles.name}>{card.name}</span>
+                <div className={styles.nameContainer}>
+                    <span className={styles.spellName}>{card.name}</span>
+                    <span className={styles.godName}>{godName.toUpperCase()}</span>
+                </div>
                 <span className={styles.element} title={ELEMENT_NAMES[card.element]}>
                     {ELEMENT_SYMBOLS[card.element]}
                 </span>

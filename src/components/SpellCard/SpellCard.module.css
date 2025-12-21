@@ -117,7 +117,13 @@
     border-bottom: 1px solid rgba(212, 175, 55, 0.1);
 }
 
-.name {
+.nameContainer {
+    flex: 1;
+    overflow: hidden;
+    margin-right: 4px;
+}
+
+.spellName {
     font-family: 'Cinzel', serif;
     font-size: 0.6rem;
     font-weight: 700;
@@ -125,8 +131,21 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 85px;
+    display: block;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.godName {
+    display: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
 }
 
 .element {
@@ -336,35 +355,54 @@
 
     .header {
         flex-shrink: 0;
-        /* Header compact */
-        padding: 4px 6px;
+        padding: 2px 4px;
+        /* Bandeau plus fin demandé */
+        height: 18px;
+        /* Hauteur fixe réduite */
+        align-items: center;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
     }
 
     .name {
-        font-size: 0.55rem;
-        max-width: 75px;
+        display: none;
+    }
+
+    /* Au cas où */
+
+    /* Switch: Affiche le nom du Dieu, cache le nom du Sort */
+    .spellName {
+        display: none;
+    }
+
+    .godName {
+        display: block;
+        font-size: 0.5rem;
+        font-weight: 800;
+        line-height: 1;
+        width: 100%;
+        text-align: left;
     }
 
     .element {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
     }
 
     .cost {
-        width: 24px;
-        height: 24px;
-        top: 26px;
-        /* Ajusté sous le header */
+        width: 22px;
+        height: 22px;
+        top: 20px;
+        /* Remonté sous le header fin */
         left: 4px;
+        z-index: 5;
     }
 
     .costValue {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
-    /* FULL ART: L'image prend tout l'espace central */
+    /* FULL ART: Image prend toute la place */
     .imageContainer {
         flex: 1;
-        /* Remplit l'espace entre header et footer */
         height: auto;
         min-height: 0;
         position: relative;
@@ -374,44 +412,48 @@
         font-size: 1.5rem;
     }
 
-    /* Description par dessus l'image (Overlay) */
+    /* Description Overlay: En bas de l'image ("texte plus bas") */
     .descriptionOverlay {
-        top: 40%;
-        /* Commence un peu plus haut */
+        top: auto;
+        bottom: 0px;
+        height: auto;
+        min-height: 25px;
+        width: 100%;
         background: linear-gradient(to top,
                 rgba(0, 0, 0, 0.95) 0%,
-                rgba(0, 0, 0, 0.7) 70%,
+                rgba(0, 0, 0, 0.7) 80%,
                 transparent 100%);
-        padding: 4px;
+        padding: 4px 4px 2px 4px;
+        display: flex;
         align-items: flex-end;
-        /* Texte en bas */
+        justify-content: center;
     }
 
     .descriptionOverlay p {
-        font-size: 0.55rem;
-        line-height: 1.2;
-        padding-bottom: 2px;
+        font-size: 0.5rem;
+        /* Ajusté */
+        line-height: 1.1;
+        padding-bottom: 0;
         font-weight: 600;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 1);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 1);
+        text-align: center;
+        margin: 0;
     }
 
-    /* Legacy caché */
     .description {
         display: none;
     }
 
     .footer {
         flex-shrink: 0;
-        padding: 4px 6px;
-        z-index: 2;
-        /* Au dessus de l'image si besoin */
-        background: rgba(0, 0, 0, 0.8);
-        /* Fond plus opaque */
-        min-height: 10px;
-        /* S'assurer qu'il existe même vide ? Ou le cacher ? */
+        padding: 2px 4px;
+        min-height: 12px;
+        background: rgba(0, 0, 0, 0.95);
+        border-top: none;
+        justify-content: center;
+        /* Centrer l'énergie si seule */
     }
 
-    /* Cacher le texte du type (COMPÉTENCE, ETC) en mobile */
     .type {
         display: none;
     }
