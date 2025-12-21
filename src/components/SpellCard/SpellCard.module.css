@@ -407,6 +407,13 @@
         /* Au dessus de l'image si besoin */
         background: rgba(0, 0, 0, 0.8);
         /* Fond plus opaque */
+        min-height: 10px;
+        /* S'assurer qu'il existe même vide ? Ou le cacher ? */
+    }
+
+    /* Cacher le texte du type (COMPÉTENCE, ETC) en mobile */
+    .type {
+        display: none;
     }
 }
 
