@@ -12,7 +12,8 @@ export interface DialogueLine {
 export interface BattleCondition {
     type: 'half_hp' | 'three_quarter_hp' | 'no_energy' | 'debuff' | 'normal' | 'stunned';
     description: string;
-    duration?: number;  // Durée en tours pour les effets temporaires
+    duration?: number;     // Durée en tours pour les effets temporaires
+    targetGod?: string;    // ID du dieu ciblé (si non défini, tous les dieux sont affectés)
 }
 
 export interface BattleConfig {

@@ -128,6 +128,7 @@ const chapter1Battle2Events: StoryEvent[] = [
     {
         id: 'ch1_battle2',
         type: 'battle',
+        backgroundImage: '/assets/story/hestia_cabin.png',  // Garder l'image de la cabane
         battle: {
             id: 'battle_zeus_hestia_vs_ares',
             name: "L'Attaque d'Arès",
@@ -138,7 +139,8 @@ const chapter1Battle2Events: StoryEvent[] = [
             enemyDeckMultiplier: 4,               // x4 pour Arès (20 cartes)
             playerCondition: {
                 type: 'three_quarter_hp',
-                description: "Zeus n'a pas eu le temps de récupérer complètement (75% PV)"
+                description: "Zeus n'a pas eu le temps de récupérer complètement (75% PV)",
+                targetGod: 'zeus'  // Seulement Zeus, pas Hestia
             },
             continueOnDefeat: false,  // Doit gagner pour continuer
             rewards: [

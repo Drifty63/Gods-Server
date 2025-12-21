@@ -236,22 +236,46 @@ export const PROLOGUE_AFTER_BATTLE_1_LOSE: DialogueLine[] = [
         emotion: 'determined'
     },
     {
-        speakerId: 'hades',
-        speakerName: 'Hadès',
-        text: "Savoure ta défaite. Tu l'as bien méritée après des millénaires d'arrogance et de mépris.",
-        emotion: 'angry'
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Soudain, les ténèbres s'épaississent. Une silhouette émerge de l'obscurité, se matérialisant aux côtés d'Hadès...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'nyx',
+        speakerName: 'Nyx',
+        text: "*apparaît dans un voile de nuit* Ton frère n'aurait jamais pu te vaincre seul, Zeus. Il lui fallait... un avantage.",
+        emotion: 'happy'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*à genoux, respirant difficilement* Ce n'est pas... terminé... Hadès...",
-        emotion: 'determined'
+        text: "*écarquille les yeux* Nyx ?! C'était donc toi... Cette ombre, cette oppression, cette fatigue avant le combat...",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'nyx',
+        speakerName: 'Nyx',
+        text: "J'ai drainé ton essence divine pendant que tu dormais, nuit après nuit. Tu ne t'en es même pas rendu compte.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*réalisation amère* Je pensais que c'était Hadès qui projetait cette aura menaçante... Mais c'était toi, cachée dans l'ombre !",
+        emotion: 'angry'
     },
     {
         speakerId: 'hades',
         speakerName: 'Hadès',
-        text: "Oh, mais ça l'est. Regarde autour de toi. Mes ombres ont déjà envahi l'Olympe pendant notre combat.",
+        text: "*ricane* Tu vois, frère ? Tu n'es pas le seul à avoir des alliés puissants. Sauf que les miens sont plus... discrets.",
         emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*à genoux* Deux traîtres... Ce n'est pas terminé, Hadès. Je reviendrai...",
+        emotion: 'determined'
     }
 ];
 

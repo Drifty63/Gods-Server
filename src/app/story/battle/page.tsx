@@ -78,17 +78,24 @@ function StoryBattleContent() {
         if (!engine || !gameState) return;
 
         const internalState = engine.getState();
+        const targetGod = battleConfig.playerCondition.targetGod;
 
         if (battleConfig.playerCondition.type === 'half_hp') {
             // Réduire les PV du joueur à 50% dans l'état interne de l'engine
-            // players[0] = joueur 1 (nous)
-            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
-                god.currentHealth = Math.floor(god.card.maxHealth / 2);
+            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { id: string; maxHealth: number } }) => {
+                // Si targetGod est défini, ne modifier que ce dieu
+                if (!targetGod || god.card.id === targetGod) {
+                    god.currentHealth = Math.floor(god.card.maxHealth / 2);
+                }
             });
         } else if (battleConfig.playerCondition.type === 'three_quarter_hp') {
             // Réduire les PV du joueur à 75% (Zeus pas complètement guéri)
-            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
-                god.currentHealth = Math.floor(god.card.maxHealth * 0.75);
+            internalState.players[0].gods.forEach((god: { currentHealth: number; card: { id: string; maxHealth: number } }) => {
+                // Si targetGod est défini, ne modifier que ce dieu (Zeus)
+                if (!targetGod || god.card.id === targetGod) {
+                    god.currentHealth = Math.floor(god.card.maxHealth * 0.75);
+                    console.log(`⚡ ${god.card.id} commence avec 75% PV`);
+                }
             });
         } else if (battleConfig.playerCondition.type === 'stunned') {
             // Zeus est immobilisé - on marque le premier dieu (Zeus) comme étant stun
@@ -504,13 +511,33 @@ function StoryBattleContent() {
         );
     }
 
+    // Fonction pour obtenir l'image de fond appropriée selon le combat
+    const getResultBackgroundImage = (isVictory: boolean): string => {
+        if (battleConfig?.id === 'battle_test_of_valor') {
+            // Combat 3 : Zeus + Hestia vs Déméter + Artémis
+            return isVictory
+                ? '/assets/story/battle3_victory.png'
+                : '/assets/story/battle3_defeat.png';
+        } else if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
+            // Combat 2 : Zeus + Hestia vs Arès
+            return isVictory
+                ? '/assets/story/battle2_victory.png'
+                : '/assets/story/battle2_defeat.png';
+        } else {
+            // Combat 1 : Zeus vs Hadès
+            return isVictory
+                ? '/assets/story/victory_nyx.png'
+                : '/assets/story/defeat_underworld.png';
+        }
+    };
+
     // Phase: Victoire
     if (phase === 'victory') {
         return (
             <main className={styles.main}>
                 <div
                     className={styles.storyBackground}
-                    style={{ backgroundImage: "url('/assets/story/victory_nyx.png')" }}
+                    style={{ backgroundImage: `url('${getResultBackgroundImage(true)}')` }}
                 >
                     <div className={styles.backgroundOverlayLight} />
                 </div>
@@ -550,7 +577,7 @@ function StoryBattleContent() {
             <main className={styles.main}>
                 <div
                     className={styles.storyBackground}
-                    style={{ backgroundImage: "url('/assets/story/defeat_underworld.png')" }}
+                    style={{ backgroundImage: `url('${getResultBackgroundImage(false)}')` }}
                 >
                     <div className={styles.backgroundOverlayDark} />
                 </div>
