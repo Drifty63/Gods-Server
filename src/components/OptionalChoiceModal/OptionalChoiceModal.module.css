@@ -103,23 +103,44 @@
 }
 
 @media (max-width: 768px) {
+    .overlay {
+        height: 100dvh;
+        /* Meilleur support mobile */
+        align-items: center;
+        /* Centrer verticalement */
+    }
+
     .modal {
-        max-height: 85vh;
+        max-height: 80vh;
         overflow-y: auto;
-        padding: 1.5rem;
-        width: 95%;
+        padding: 1rem;
+        width: 90%;
+        margin: auto;
+        /* Centrage sécurité */
     }
 
     .title {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+        margin: 0 0 0.8rem 0;
     }
 
     .description {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
+        margin: 0 0 1.2rem 0;
     }
 
     .buttonContainer {
-        flex-direction: column;
+        flex-direction: row;
+        /* Garder en ligne si possible pour gagner de la hauteur */
+        flex-wrap: wrap;
         gap: 0.8rem;
+    }
+
+    .acceptButton,
+    .declineButton {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        flex: 1;
+        /* Boutons largeur égale */
     }
 }
