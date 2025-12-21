@@ -148,17 +148,29 @@ function StoryContent() {
         if (!requiredBattle) return true;
 
         // Debug: afficher les événements complétés
-        console.log('Checking unlock for', battle.id);
+        console.log('Checking unlock for', battle.id, 'requires:', battle.requiresBattleId);
         console.log('completedEvents:', progress.completedEvents);
 
-        // Le combat est débloqué si:
-        // - L'événement de bataille du combat 1 (ch1_battle1) est dans completedEvents
-        // - OU n'importe quel événement post-bataille a été vu
+        // Le combat est débloqué si un événement de victoire du combat requis a été complété
+        // On cherche:
+        // - Pour battle1: ch1_battle1, ch1_after_battle_win, ch1_hades_throne
+        // - Pour battle2: ch1_battle2, ch1_battle2_win
+        // - Pour battle3: ch1_battle3, ch1_battle3_win
         const hasBattleCompleted = progress.completedEvents.some(eventId => {
-            return eventId === 'ch1_battle1' ||
-                eventId.includes('after_battle') ||
-                eventId.includes('hades_throne') ||
-                eventId.includes('end_battle');
+            // Vérification générique basée sur l'ID du combat requis
+            if (battle.requiresBattleId === 'battle1') {
+                return eventId === 'ch1_battle1' ||
+                    eventId === 'ch1_after_battle_win' ||
+                    eventId === 'ch1_after_battle_lose' ||
+                    eventId === 'ch1_hades_throne';
+            } else if (battle.requiresBattleId === 'battle2') {
+                return eventId === 'ch1_battle2' ||
+                    eventId === 'ch1_battle2_win';
+            } else if (battle.requiresBattleId === 'battle3') {
+                return eventId === 'ch1_battle3' ||
+                    eventId === 'ch1_battle3_win';
+            }
+            return false;
         });
 
         console.log('Battle completed?', hasBattleCompleted);

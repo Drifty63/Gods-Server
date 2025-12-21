@@ -12,6 +12,13 @@ import {
     PROLOGUE_BATTLE2_INTRO,
     PROLOGUE_BATTLE2_WIN,
     PROLOGUE_BATTLE2_LOSE,
+    // Combat 3 du prologue
+    PROLOGUE_BATTLE3_NARRATOR,
+    PROLOGUE_BATTLE3_ARTEMIS_INTRO,
+    PROLOGUE_BATTLE3_AFTER_REST,
+    PROLOGUE_BATTLE3_DEMETER_INTRO,
+    PROLOGUE_BATTLE3_WIN,
+    PROLOGUE_BATTLE3_LOSE,
     // Chapitre 2 (dialogues gardés mais combats supprimés)
     CHAPTER2_INTRO,
     CHAPTER2_END,
@@ -145,13 +152,13 @@ const chapter1Battle2Events: StoryEvent[] = [
         nextEventOnWin: 'ch1_battle2_win',
         nextEventOnLose: 'ch1_battle2_lose'
     },
-    // Après combat - Victoire
+    // Après combat - Victoire -> Continue vers combat 3
     {
         id: 'ch1_battle2_win',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE2_WIN,
         backgroundImage: '/assets/story/battle2_victory.png',
-        nextEventId: undefined  // Fin du combat 2
+        nextEventId: undefined  // Fin du combat 2, déblocage du combat 3
     },
     // Après combat - Défaite
     {
@@ -163,10 +170,94 @@ const chapter1Battle2Events: StoryEvent[] = [
     }
 ];
 
+// ===========================================
+// Combat 3 : Zeus + Hestia vs Déméter + Artémis (2v2)
+// ===========================================
+const chapter1Battle3Events: StoryEvent[] = [
+    // Narrateur - Le voyage vers Artémis
+    {
+        id: 'ch1_battle3_narrator',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE3_NARRATOR,
+        backgroundImage: '/assets/story/forest_path_journey.png',
+        nextEventId: 'ch1_battle3_artemis'
+    },
+    // Rencontre avec Artémis dans sa grotte
+    {
+        id: 'ch1_battle3_artemis',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE3_ARTEMIS_INTRO,
+        backgroundImage: '/assets/story/artemis_cave_hideout.png',
+        nextEventId: 'ch1_battle3_after_rest'
+    },
+    // Après le repos - Direction Déméter
+    {
+        id: 'ch1_battle3_after_rest',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE3_AFTER_REST,
+        backgroundImage: '/assets/story/artemis_cave_hideout.png',
+        nextEventId: 'ch1_battle3_demeter_intro'
+    },
+    // Arrivée chez Déméter
+    {
+        id: 'ch1_battle3_demeter_intro',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE3_DEMETER_INTRO,
+        backgroundImage: '/assets/story/confrontation_wheat_field.png',
+        nextEventId: 'ch1_battle3'
+    },
+    // Combat contre Déméter et Artémis
+    {
+        id: 'ch1_battle3',
+        type: 'battle',
+        battle: {
+            id: 'battle_test_of_valor',
+            name: "Test de Bravoure",
+            description: "Déméter et Artémis vous testent. Prouvez votre valeur !",
+            playerTeam: ['zeus', 'hestia'],
+            enemyTeam: ['demeter', 'artemis'],
+            deckMultiplier: 2,           // x2 pour le joueur
+            enemyDeckMultiplier: 2,      // x2 pour l'ennemi aussi
+            playerCondition: {
+                type: 'stunned',
+                description: "Zeus est immobilisé par les racines de Déméter au premier tour !",
+                duration: 1
+            },
+            continueOnDefeat: false,     // Doit gagner pour continuer
+            rewards: [
+                {
+                    type: 'ambroisie',
+                    amount: 200,
+                    description: '200 Ambroisie'
+                }
+            ]
+        },
+        nextEventOnWin: 'ch1_battle3_win',
+        nextEventOnLose: 'ch1_battle3_lose'
+    },
+    // Après combat - Victoire
+    {
+        id: 'ch1_battle3_win',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE3_WIN,
+        backgroundImage: '/assets/story/battle3_victory.png',
+        nextEventId: undefined  // Fin du prologue
+    },
+    // Après combat - Défaite
+    {
+        id: 'ch1_battle3_lose',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE3_LOSE,
+        backgroundImage: '/assets/story/battle3_defeat.png',
+        nextEventId: undefined  // Doit réessayer
+    }
+];
+
 // Tous les événements du chapitre 1
 const chapter1Events: StoryEvent[] = [
     ...chapter1Battle1Events,
-    ...chapter1Battle2Events
+    ...chapter1Battle2Events,
+    ...chapter1Battle3Events
 ];
 
 // Configuration des combats du chapitre 1 (pour l'affichage de sélection)
@@ -185,6 +276,14 @@ export const CHAPTER_1_BATTLES = [
         firstEventId: 'ch1_battle2_narrator',
         unlocked: false,  // Débloqué après le combat 1
         requiresBattleId: 'battle1'
+    },
+    {
+        id: 'battle3',
+        name: "Test de Bravoure",
+        description: "Déméter et Artémis testent la valeur de Zeus",
+        firstEventId: 'ch1_battle3_narrator',
+        unlocked: false,  // Débloqué après le combat 2
+        requiresBattleId: 'battle2'
     }
 ];
 

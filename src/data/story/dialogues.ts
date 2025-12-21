@@ -543,6 +543,412 @@ export const PROLOGUE_BATTLE2_LOSE: DialogueLine[] = [
 ];
 
 // ===========================================
+// COMBAT 3 - CHEZ ARTÉMIS
+// ===========================================
+
+// Narrateur - Le voyage vers Artémis
+export const PROLOGUE_BATTLE3_NARRATOR: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La victoire contre Arès n'a apporté qu'un bref répit. Zeus, épuisé et encore affaibli, doit fuir à nouveau.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Hestia guide son frère à travers les sentiers cachés de la forêt. Elle qui d'ordinaire ne quitte jamais son foyer, n'a pas hésité une seconde.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Car telle est sa nature : protectrice, bienveillante, toujours prête à aider les siens sans poser de questions. Le feu de son cœur brûle pour sa famille.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Elle n'a pas cherché à comprendre tous les détails de la trahison d'Hadès. Pour Hestia, seul compte le présent : son frère a besoin d'elle.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les deux dieux marchent en silence, évitant les routes principales. Chaque bruissement de feuilles pourrait cacher un ennemi...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Enfin, après des heures de marche, ils aperçoivent le territoire d'Artémis : une forêt plus dense, plus ancienne, où même les dieux hésitent à pénétrer sans invitation.",
+        emotion: 'neutral'
+    }
+];
+
+// Dialogue avec Artémis
+export const PROLOGUE_BATTLE3_ARTEMIS_INTRO: DialogueLine[] = [
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*surgit des fourrés, arc bandé* Qui ose pénétrer dans mon domaine sans... Hestia ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*sourit malgré la fatigue* Artémis, ma chère... Pardonne cette intrusion. Nous avons besoin de ton aide.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*baisse son arc, remarque Zeus* Et tu amènes... lui. *ton froid* Que s'est-il passé ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "C'est une longue histoire. Hadès a trahi Zeus avec l'aide de Nyx. Il a pris le contrôle de l'Olympe.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Zeus a fui chez moi, mais Arès nous a retrouvés. Nous l'avons repoussé, mais d'autres viendront.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*croise les bras* Hadès, roi de l'Olympe ? Et Arès qui chasse pour lui ? Les temps changent vite...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Artémis, je sais que tu n'as aucune raison de m'aider. Notre passé n'a pas toujours été... harmonieux.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*regard perçant* En effet. Tu n'as pas toujours fait honneur à ta position, Zeus. Tes... écarts sont légendaires.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*pose sa main sur le bras d'Artémis* Ma chère amie, je ne te demande pas de pardonner le passé. Seulement de nous cacher quelques heures.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*soupire, son expression s'adoucit vers Hestia* Pour toi, Hestia... Pour toi seule, je le ferai.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Ma forêt sait masquer les présences. Même les sbires d'Hadès ne pourront pas vous trouver ici.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Je peux brouiller vos traces, surveiller chaque sentier. Rien n'échappe à mes sens dans cette forêt.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Je te remercie, Artémis. Je n'oublierai pas cette dette.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*détourne le regard* Ne me remercie pas encore. Suivez-moi, j'ai un abri où vous pourrez vous reposer.",
+        emotion: 'neutral'
+    }
+];
+
+// Après le repos - Direction Déméter
+export const PROLOGUE_BATTLE3_AFTER_REST: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Plusieurs heures s'écoulent dans le calme de la forêt d'Artémis. Zeus récupère lentement ses forces...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*entre dans l'abri* Vous avez dormi suffisamment. Mes éclaireurs rapportent des mouvements suspects aux frontières.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*se lève, plus vigoureux* Je me sens mieux. Merci pour ce répit, Artémis.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Que devons-nous faire maintenant ? Nous ne pouvons pas rester cachés éternellement.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*hésite* J'ai réfléchi pendant votre repos. Il n'y a qu'une personne qui peut vraiment vous aider.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Quelqu'un qui connaît chaque dieu, chaque sanctuaire, chaque refuge caché... Quelqu'un qui peut rallier les autres à votre cause.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Tu parles de Déméter, n'est-ce pas ? Notre sœur...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Exactement. Déméter connaît les secrets de la terre et de ses habitants. Elle a des contacts partout.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Je sais où la trouver. Elle vit dans un corps de ferme près d'Éleusis, supervisant les moissons des mortels.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Éleusis... Le lieu de ses mystères. Elle y sera protégée par ses fidèles.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*soupire* Je... Je suis réticente à quitter ma forêt. Ma place est ici, parmi mes animaux et mes arbres.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Mais... *regarde le ciel* L'équilibre du monde est en jeu. Si Hadès règne sur l'Olympe, les saisons, la chasse, tout sera perturbé.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Je vous guiderai moi-même jusqu'à Déméter. C'est trop important pour que je reste les bras croisés.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*prend les mains d'Artémis* Merci, chère amie. Ton aide nous est précieuse.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*petit sourire* Hestia, tu es la seule à pouvoir me faire quitter mes bois. Allez, en route. Le temps presse.",
+        emotion: 'neutral'
+    }
+];
+
+// Arrivée chez Déméter - Confrontation
+export const PROLOGUE_BATTLE3_DEMETER_INTRO: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Après un long voyage à travers les plaines de Grèce, les trois dieux atteignent enfin les champs dorés d'Éleusis...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*sort de la ferme, surprise* Artémis ? Et... Zeus ?! Que faites-vous ici ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Ma sœur ! *l'étreint* Nous avons besoin de ton aide. Hadès a pris le contrôle de l'Olympe.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*recule* Hadès ? Le maître des Enfers... a conquis le Ciel ? *regarde Zeus avec méfiance*",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Déméter, je sais que notre relation n'a pas toujours été simple. Mais je—",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*l'interrompt* Simple ?! Tu m'as pris ma fille ! Perséphone est aux Enfers à cause de tes décisions !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Déméter, l'équilibre du monde est en jeu. Si nous ne faisons rien, les saisons, les récoltes... tout sera compromis.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*réfléchit* Tu as raison, Artémis. Mais... *regarde Zeus* Comment savoir s'il est digne de reprendre le trône ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "S'il est trop faible pour nous vaincre, comment pourrait-il espérer défier Hadès et Nyx ?",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*hoche la tête* Un test de bravoure. Je suis d'accord. Zeus doit prouver sa valeur.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Attendez ! Vous voulez l'affronter maintenant ? Il n'est pas encore complètement rétabli !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Raison de plus. S'il ne peut nous vaincre affaibli, il mourra face à Hadès de toute façon.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*se redresse* Soit. Je comprends ton besoin de certitude, ma sœur. Hestia et moi acceptons ce défi.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*fait surgir des racines du sol qui immobilisent Zeus* Et ne compte pas sur tes éclairs pour commencer...",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*bande son arc* Montrez-nous de quoi vous êtes capables !",
+        emotion: 'determined'
+    }
+];
+
+// Victoire contre Déméter et Artémis
+export const PROLOGUE_BATTLE3_WIN: DialogueLine[] = [
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*à genoux, essoufflée* Impressionnant... Même enchaîné par mes racines, tu as su te libérer.",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*abaisse son arc* Je dois admettre... tu es plus fort que je ne le pensais, Zeus.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*tend la main à Déméter* Ce n'était pas facile. Vous êtes redoutables, mes sœurs.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*épuisée mais souriante* Alors ? Êtes-vous convaincues maintenant ?",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*prend la main de Zeus et se relève* Oui. Je vois en toi la même flamme qu'autrefois... celle d'un vrai roi.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Tu as gagné mon respect, Zeus. Et mon arc sera à tes côtés pour reprendre l'Olympe.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Je connais d'autres dieux qui pourraient se rallier à notre cause. Ensemble, nous formerons une résistance.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*sourire déterminé* Alors le combat pour l'Olympe ne fait que commencer. Hadès... je reviens.",
+        emotion: 'determined'
+    }
+];
+
+// Défaite contre Déméter et Artémis
+export const PROLOGUE_BATTLE3_LOSE: DialogueLine[] = [
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*secoue la tête tristement* Comme je le craignais... Tu es trop faible, Zeus.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*croise les bras* Si tu ne peux même pas nous vaincre, comment espères-tu défier Hadès ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*à genoux, lié par les racines* Je... Je refuse d'abandonner...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*affaiblie* Mes sœurs, s'il vous plaît... Laissez-lui une autre chance...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*soupire* Une autre chance... Très bien. Mais prouve-nous que tu mérites notre confiance.",
+        emotion: 'neutral'
+    }
+];
+
+// ===========================================
 // CHAPITRE 2 - LA RÉSISTANCE
 // ===========================================
 

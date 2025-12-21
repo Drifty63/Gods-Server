@@ -15,7 +15,9 @@ import {
     PROLOGUE_AFTER_BATTLE_1_LOSE,
     PROLOGUE_HADES_TAKES_THRONE,
     PROLOGUE_BATTLE2_WIN,
-    PROLOGUE_BATTLE2_LOSE
+    PROLOGUE_BATTLE2_LOSE,
+    PROLOGUE_BATTLE3_WIN,
+    PROLOGUE_BATTLE3_LOSE
 } from '@/data/story/dialogues';
 import styles from './page.module.css';
 
@@ -88,6 +90,13 @@ function StoryBattleContent() {
             internalState.players[0].gods.forEach((god: { currentHealth: number; card: { maxHealth: number } }) => {
                 god.currentHealth = Math.floor(god.card.maxHealth * 0.75);
             });
+        } else if (battleConfig.playerCondition.type === 'stunned') {
+            // Zeus est immobilisé - on marque le premier dieu (Zeus) comme étant stun
+            // L'ennemi doit commencer et le joueur passe son premier tour
+            console.log('⚡ Zeus est immobilisé par les racines de Déméter !');
+            // On va forcer le joueur à passer son tour après que l'ennemi joue
+            // Stockons cette info pour l'utiliser plus tard
+            (window as unknown as { zeusStunned: boolean }).zeusStunned = true;
         }
 
         // Créer une copie profonde de l'état pour React
@@ -236,7 +245,10 @@ function StoryBattleContent() {
             // Déterminer quels dialogues utiliser selon le combat
             let allDialogues;
 
-            if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
+            if (battleConfig?.id === 'battle_test_of_valor') {
+                // Combat 3 : Zeus + Hestia vs Déméter + Artémis
+                allDialogues = won ? PROLOGUE_BATTLE3_WIN : PROLOGUE_BATTLE3_LOSE;
+            } else if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
                 // Combat 2 : Zeus + Hestia vs Arès
                 allDialogues = won ? PROLOGUE_BATTLE2_WIN : PROLOGUE_BATTLE2_LOSE;
             } else {
@@ -421,7 +433,12 @@ function StoryBattleContent() {
 
         // Utiliser l'image de fond appropriée selon le combat
         let backgroundImage: string;
-        if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
+        if (battleConfig?.id === 'battle_test_of_valor') {
+            // Combat 3 : Zeus + Hestia vs Déméter + Artémis
+            backgroundImage = playerWon
+                ? '/assets/story/battle3_victory.png'
+                : '/assets/story/battle3_defeat.png';
+        } else if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
             // Combat 2 : Zeus + Hestia vs Arès
             backgroundImage = playerWon
                 ? '/assets/story/battle2_victory.png'

@@ -10,8 +10,9 @@ export interface DialogueLine {
 }
 
 export interface BattleCondition {
-    type: 'half_hp' | 'three_quarter_hp' | 'no_energy' | 'debuff' | 'normal';
+    type: 'half_hp' | 'three_quarter_hp' | 'no_energy' | 'debuff' | 'normal' | 'stunned';
     description: string;
+    duration?: number;  // Durée en tours pour les effets temporaires
 }
 
 export interface BattleConfig {
