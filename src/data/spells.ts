@@ -1610,7 +1610,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 2, target: 'enemy_god' },
-            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' }
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
         imageUrl: '/cards/spells/spell_chione_toucher.png',
         description: '2🩸 → ⚔️ | +❄️1⏳',
@@ -1641,7 +1641,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'damage', value: 4, target: 'enemy_god' },
-            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'enemy_god' }
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
         imageUrl: '/cards/spells/spell_chione_lance.png',
         description: '4🩸 → ⚔️ | +❄️1⏳',

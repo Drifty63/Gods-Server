@@ -1738,6 +1738,14 @@ export class GameEngine {
      * Ajoute un effet de statut à un dieu
      */
     private addStatus(god: GodState, status: StatusEffect, stacks: number, duration?: number): void {
+        // La régénération (soin) retire le poison
+        if (status === 'regen') {
+            const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
+            if (poisonIndex !== -1) {
+                god.statusEffects.splice(poisonIndex, 1);
+            }
+        }
+
         const existing = god.statusEffects.find(s => s.type === status);
         if (existing) {
             existing.stacks += stacks;

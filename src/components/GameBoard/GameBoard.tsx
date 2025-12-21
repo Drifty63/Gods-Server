@@ -267,7 +267,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 return {
                     needed: true,
                     title: '🌊 Marée Basse',
-                    description: 'Dans quel sens coule la rivière de soin ?\n\n⬅️ Gauche → Droite (3/2/1)\n➡️ Droite → Gauche (1/2/3)',
+                    description: 'Choisissez la direction du flux lunaire :\n\n⬅️ Flux Ouest (Gauche → Droite)\nLe dieu le plus à gauche reçoit 3 PV, le suivant 2, le dernier 1.\n\n➡️ Flux Est (Droite → Gauche)\nLe dieu le plus à droite reçoit 3 PV, le précédent 2, le dernier 1.',
                     effectId: 'cascade_heal_choice'
                 };
             }
@@ -1193,6 +1193,27 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             }
         };
     }, [isPlayerTurn, gameState?.turnNumber, gameState?.status, gameState?.players]);
+
+    // Démarrage automatique quand le nombre de cibles est atteint pour les cartes multi-cibles
+    useEffect(() => {
+        if (!isSelectingTarget || !selectedCard || requiredTargets <= 1) return;
+
+        if (selectedTargetGods.length === requiredTargets) {
+            // Petite pause pour que l'utilisateur voiye la sélection
+            const timer = setTimeout(() => {
+                // Si pas besoin de choix supplémentaire (foudre ou élément), on lance !
+                if (!needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard)) {
+                    // On ne passe pas d'arguments explicites pour utiliser les cibles sélectionnées dans le store
+                    handlePlayCard(selectedCard.id);
+                } else {
+                    // Si besoin de choix foudre/élément, on marque l'intention de jouer
+                    // Ce qui fera apparaître les options foudre/élément (si applicable)
+                    setWantsToPlay(true);
+                }
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [selectedTargetGods.length, isSelectingTarget, requiredTargets, selectedCard]);
 
     const handleBlindDiscard = (cardId: string) => {
         if (!isPlayerTurn) return;

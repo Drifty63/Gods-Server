@@ -1110,17 +1110,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (pendingOptionalEffect === 'cascade_heal_choice') {
             // Récupérer les dieux alliés vivants
             const aliveAllies = player.gods.filter(g => !g.isDead);
+            const healAmounts = [3, 2, 1]; // Toujours 3, 2, 1 en partant de la source du flux
 
-            // Définir les montants de soin selon la direction
-            // accepted = true → 3/2/1 (gauche vers droite)
-            // accepted = false → 1/2/3 (droite vers gauche)
-            const healAmounts = accepted ? [3, 2, 1] : [1, 2, 3];
-
-            // Appliquer le soin à chaque allié selon sa position
-            for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
-                const god = aliveAllies[i];
-                const healAmount = healAmounts[i];
-                god.currentHealth = Math.min(god.currentHealth + healAmount, god.card.maxHealth);
+            if (accepted) {
+                // Gauche vers Droite (Flux Ouest) : On parcourt normalement [0, 1, 2]
+                for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
+                    const god = aliveAllies[i];
+                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
+                    // Le soin retire le poison
+                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
+                    if (poisonIndex !== -1) {
+                        god.statusEffects.splice(poisonIndex, 1);
+                    }
+                }
+            } else {
+                // Droite vers Gauche (Flux Est) : On parcourt en sens inverse (du dernier au premier)
+                // Le dernier (tout à droite) prend le max (healAmounts[0] = 3)
+                const reversedAllies = [...aliveAllies].reverse();
+                for (let i = 0; i < reversedAllies.length && i < healAmounts.length; i++) {
+                    const god = reversedAllies[i];
+                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
+                    // Le soin retire le poison
+                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
+                    if (poisonIndex !== -1) {
+                        god.statusEffects.splice(poisonIndex, 1);
+                    }
+                }
             }
         }
 
