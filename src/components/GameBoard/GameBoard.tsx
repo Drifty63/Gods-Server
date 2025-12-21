@@ -1195,6 +1195,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     }, [isPlayerTurn, gameState?.turnNumber, gameState?.status, gameState?.players]);
 
     // Démarrage automatique quand le nombre de cibles est atteint pour les cartes multi-cibles
+    // DÉSACTIVÉ SUR DEMANDE UTILISATEUR :"le modal n'attend plus la validation des cibles pour lancer le sort"
+    /*
     useEffect(() => {
         if (!isSelectingTarget || !selectedCard || requiredTargets <= 1) return;
 
@@ -1214,6 +1216,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             return () => clearTimeout(timer);
         }
     }, [selectedTargetGods.length, isSelectingTarget, requiredTargets, selectedCard]);
+    */
 
     const handleBlindDiscard = (cardId: string) => {
         if (!isPlayerTurn) return;
@@ -1333,7 +1336,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     {opponent.gods.map((god) => {
                         // Vérifier si le sort a réellement besoin de cibler un ennemi
                         const needsEnemyTarget = selectedCard?.effects.some(e =>
-                            e.target === 'enemy_god' || e.target === 'any_god'
+                            e.target === 'enemy_god' ||
+                            e.target === 'any_god' ||
+                            (e.type === 'custom' && e.customEffectId === 'vision_tartare')
                         );
 
                         // Vérifier si ce dieu est une cible valide (en tenant compte de la provocation et du multi-ciblage)
