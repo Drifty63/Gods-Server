@@ -1470,3 +1470,417 @@ export const CHAPTER3_EPILOGUE: DialogueLine[] = [
         emotion: 'neutral'
     }
 ];
+
+// ===========================================
+// COMBAT 4 - L'EMBUSCADE D'ARÈS
+// ===========================================
+
+// Narrateur - Introduction combat 4
+export const PROLOGUE_BATTLE4_NARRATOR: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Depuis le test de bravoure, l'alliance fragile entre Zeus, Hestia, Artémis et Déméter s'est consolidée.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Mais Déméter a été claire : pour vaincre Hadès, ils ont absolument besoin de Poséidon, frère de Zeus et Hadès.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Toute autre aide sera bienvenue, mais Poséidon est indispensable. Sa maîtrise des océans pourrait renverser l'équilibre.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La seule capable de le trouver est Athéna, fille de Zeus. Ces deux-là ont toujours partagé un lien unique... une rivalité teintée de respect mutuel.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le groupe décide donc de se rendre à Athènes, où Athéna se trouve certainement.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Mais sur la route, ils doivent s'arrêter pour la nuit. Une ferme isolée leur offre un refuge temporaire...",
+        emotion: 'neutral'
+    }
+];
+
+// Dialogue du conseil des 4 dieux
+export const PROLOGUE_BATTLE4_COUNCIL: DialogueLine[] = [
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*inquiète* Nous ne pouvons pas traverser Thèbes. C'est une ville guerrière où Arès est vénéré comme un dieu suprême.",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Il sera sûrement là-bas, et cette fois il ne sera pas seul. Des hommes lui sont fidèles, des guerriers qui tueraient pour lui.",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*pensive* Justement... Thèbes. J'y ai réfléchi. Nous devrions y faire un détour.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Quoi ? Mais je viens de dire que—",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Écoute-moi. À Thèbes se trouve Dionysos. J'ai des contacts avec lui pour le commerce agricole — le blé pour son vin.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Il pourrait être un allié précieux. Si l'équilibre du monde change, il ne pourra plus s'amuser, festoyer, vivre...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*acquiesce* Je savais que mon frère Apollon traînait souvent avec lui là-bas. Ils se querellent gentiment, mais ils sont proches.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Apollon est le dieu de la lumière et de la raison. Il serait logique qu'il rejoigne notre cause. J'y avais déjà pensé...",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Et il y a autre chose. Aphrodite entretient une relation... intime avec Arès. Elle pourrait être dans les parages.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*hausse un sourcil* Aphrodite ? Tu penses qu'elle pourrait le raisonner ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Peut-être. Ce n'est pas à négliger. Dionysos est aussi attiré par elle... et tout le monde s'est toujours demandé si c'était réciproque.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "La déesse de l'amour est contre le conflit par nature. Si elle rejoint notre cause...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*voix grave, fatiguée* Arès...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Tous se tournent vers Zeus, qui est resté silencieux pendant toute la discussion, le regard perdu dans les flammes.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Je suis... déçu de mon fils. De ce qu'il est devenu.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*froidement* Je ne suis pas surprise de mon frère. Il veut la gloire, le pouvoir, la reconnaissance.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Il pense être le plus fort, pouvoir tout se permettre. Mais au fond... il est faible. Il n'a rien d'un leader.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*regarde Artémis* Ma fille...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Je suis fier de la femme forte que tu es devenue. Tu es logique, réfléchie, juste... compétente. Tout ce qu'un père peut espérer.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Un long silence s'installe dans la pièce. Les flammes crépitent. Les événements récents font sortir beaucoup de vérités et de choses non dites...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*émue, surprise* Zeus... Je ne t'ai jamais entendu parler ainsi. Tu... tu as changé.",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Avec tout ce qui se passe... je m'inquiète pour ma fille Perséphone. Elle est là-bas, aux Enfers avec Hadès...",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*pose sa main sur celle de Déméter* Nous la ramènerons. Je te le promets.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Ce moment solennel montre que malgré le passé de tous, cette alliance est possible. Et peut-être que l'avenir sera radieux à la fin de tout ça.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Alors nous sommes d'accord. Demain à l'aube, nous partons pour Thèbes.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*soupire* Que les dieux nous protègent... même si nous sommes les dieux. Bonne nuit à tous.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Bonne nuit. Reposez-vous bien. Demain sera une longue journée.",
+        emotion: 'neutral'
+    }
+];
+
+// L'attaque nocturne d'Arès
+export const PROLOGUE_BATTLE4_AMBUSH: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La nuit est profonde. Tous dorment d'un sommeil agité...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Soudain, un bruit sourd et assourdissant déchire le silence !",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*défonce la porte* PÈRE ! Tu pensais pouvoir te cacher de moi ?!",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Arès n'est pas seul. Deux guerriers en armure l'accompagnent — des hommes fidèles, prêts à mourir pour leur dieu.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*se lève brusquement* Arès ! Tu nous as suivis ?!",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*rire cruel* Je n'étais jamais loin. Ta défaite lors de notre dernier combat... Je n'ai pas digéré cette humiliation !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Où est Hestia ?! HESTIA !",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*montre le corps inconscient* La douce Hestia ? Elle m'avait humilié en m'aidant à me battre. Mes soldats l'ont assommée en premier.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*attrape son arc* Tu vas payer pour ça, Arès !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "Cette fois, c'est VOUS qui allez tomber ! Soldats, à l'attaque !",
+        emotion: 'angry'
+    }
+];
+
+// Victoire combat 4
+export const PROLOGUE_BATTLE4_WIN: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Malgré l'effet de surprise, Zeus, Déméter et Artémis parviennent à repousser Arès et ses soldats.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*à genoux, blessé* Impossible... Encore une fois...",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*le domine de toute sa hauteur* Tu aurais pu choisir la famille, Arès. Tu as choisi la guerre.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*pointe une flèche* Donne-moi une raison de ne pas te transpercer le cœur.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*crache du sang* Fais-le. Mais sache que d'autres viendront. Hadès ne s'arrêtera jamais.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Hestia ! *court vers elle* Elle respire... Elle va s'en sortir.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*reprend conscience* Ma tête... Qu'est-ce qui s'est passé ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Arès a tenté de nous éliminer. Mais nous avons tenu bon. *se tourne vers Arès* Pars. Et ne reviens plus.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*se relève péniblement* Ce n'est pas fini, père. Loin de là...",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Arès bat en retraite avec ses soldats blessés. L'aube se lève sur la ferme en ruines.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Nous devons partir immédiatement pour Thèbes. Avant qu'il ne revienne avec des renforts.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*hoche la tête* Tu as raison. La route sera dangereuse, mais nous n'avons pas le choix.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Ainsi s'achève le prologue. L'alliance des dieux résiste, et leur quête continue vers Thèbes...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "FIN DU CHAPITRE 1 - LA TRAHISON",
+        emotion: 'neutral'
+    }
+];
+
+// Défaite combat 4
+export const PROLOGUE_BATTLE4_LOSE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "L'attaque surprise a été trop efficace. Sans Hestia, l'équilibre de l'équipe est rompu.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "*triomphant* HA ! Voyez comme ils tombent ! Le grand Zeus, à mes pieds !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*à bout de forces* Arès... Tu aurais pu être... un grand guerrier...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "Je SUIS un grand guerrier ! Et maintenant, père, tu vas comprendre ce que ça fait d'être vaincu et humilié !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*s'effondre* Non... Nous avons échoué...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*protège Hestia inconsciente* Perséphone... Je ne te reverrai jamais...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'ares',
+        speakerName: 'Arès',
+        text: "Emmenez-les à Hadès. Il sera ravi de ces... cadeaux.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "L'espoir s'éteint. L'alliance naissante des dieux est brisée avant même d'avoir pu accomplir sa mission...",
+        emotion: 'neutral'
+    }
+];

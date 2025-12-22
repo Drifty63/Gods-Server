@@ -17,7 +17,9 @@ import {
     PROLOGUE_BATTLE2_WIN,
     PROLOGUE_BATTLE2_LOSE,
     PROLOGUE_BATTLE3_WIN,
-    PROLOGUE_BATTLE3_LOSE
+    PROLOGUE_BATTLE3_LOSE,
+    PROLOGUE_BATTLE4_WIN,
+    PROLOGUE_BATTLE4_LOSE
 } from '@/data/story/dialogues';
 import styles from './page.module.css';
 
@@ -264,7 +266,10 @@ function StoryBattleContent() {
             // Déterminer quels dialogues utiliser selon le combat
             let allDialogues;
 
-            if (battleConfig?.id === 'battle_test_of_valor') {
+            if (battleConfig?.id === 'battle_ambush_ares') {
+                // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
+                allDialogues = won ? PROLOGUE_BATTLE4_WIN : PROLOGUE_BATTLE4_LOSE;
+            } else if (battleConfig?.id === 'battle_test_of_valor') {
                 // Combat 3 : Zeus + Hestia vs Déméter + Artémis
                 allDialogues = won ? PROLOGUE_BATTLE3_WIN : PROLOGUE_BATTLE3_LOSE;
             } else if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
@@ -459,7 +464,12 @@ function StoryBattleContent() {
 
         // Utiliser l'image de fond appropriée selon le combat
         let backgroundImage: string;
-        if (battleConfig?.id === 'battle_test_of_valor') {
+        if (battleConfig?.id === 'battle_ambush_ares') {
+            // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
+            backgroundImage = playerWon
+                ? '/assets/story/battle4_victory.png'
+                : '/assets/story/battle4_defeat.png';
+        } else if (battleConfig?.id === 'battle_test_of_valor') {
             // Combat 3 : Zeus + Hestia vs Déméter + Artémis
             backgroundImage = playerWon
                 ? '/assets/story/battle3_victory.png'
@@ -537,7 +547,12 @@ function StoryBattleContent() {
 
     // Fonction pour obtenir l'image de fond appropriée selon le combat
     const getResultBackgroundImage = (isVictory: boolean): string => {
-        if (battleConfig?.id === 'battle_test_of_valor') {
+        if (battleConfig?.id === 'battle_ambush_ares') {
+            // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
+            return isVictory
+                ? '/assets/story/battle4_victory.png'
+                : '/assets/story/battle4_defeat.png';
+        } else if (battleConfig?.id === 'battle_test_of_valor') {
             // Combat 3 : Zeus + Hestia vs Déméter + Artémis
             return isVictory
                 ? '/assets/story/battle3_victory.png'

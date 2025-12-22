@@ -272,6 +272,22 @@ export const ALL_GODS: GodCard[] = [
         flavorText: '"Mon froid gèle le temps lui-même. Tes actions seront figées dans la glace."',
         hidden: true,
     },
+
+    // =====================================================
+    // ENNEMIS SPÉCIAUX - MODE HISTOIRE
+    // =====================================================
+
+    // SOLDAT D'ARÈS (Terre 🌿) - Ennemi histoire
+    {
+        id: 'soldier_ares',
+        name: 'Soldat d\'Arès',
+        element: 'earth',
+        weakness: 'air',
+        maxHealth: 16,
+        imageUrl: '/cards/gods/soldier_ares.png',
+        flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
+        hidden: true,  // Non jouable par le joueur
+    },
 ];
 
 // Helper pour obtenir un dieu par son ID

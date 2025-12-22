@@ -1682,6 +1682,89 @@ export const ALL_SPELLS: SpellCard[] = [
         imageUrl: '/cards/spells/spell_chione_age.png',
         description: '8🩸 → ⚔️ | 2🩸 → ⚔️↔️',
     },
+
+    // =====================================================
+    // SORTS DU SOLDAT D'ARÈS (Terre 🌿) - Ennemi mode histoire
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'soldier_ares_generator_1',
+        name: 'Pluie de Lances',
+        element: 'earth',
+        godId: 'soldier_ares',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/soldier_rain_of_spears.png',
+        description: '1🩸 → 👊',
+    },
+    {
+        id: 'soldier_ares_generator_2',
+        name: 'Coup de Lance',
+        element: 'earth',
+        godId: 'soldier_ares',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/soldier_precise_thrust.png',
+        description: '3🩸 → ⚔️',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'soldier_ares_skill_1',
+        name: 'Double Frappe',
+        element: 'earth',
+        godId: 'soldier_ares',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/soldier_double_strike.png',
+        description: '2🩸 → ⚔️⚔️',
+    },
+    {
+        id: 'soldier_ares_skill_2',
+        name: 'Coup Dévastateur',
+        element: 'earth',
+        godId: 'soldier_ares',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 5, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/soldier_heavy_blow.png',
+        description: '5🩸 → ⚔️',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'soldier_ares_utility_1',
+        name: 'Mur de Boucliers',
+        element: 'earth',
+        godId: 'soldier_ares',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 3, target: 'self' },
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/soldier_shield_wall.png',
+        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+    },
 ];
 
 // Helper pour obtenir les sorts d'un dieu

@@ -6,7 +6,7 @@ export interface DialogueLine {
     speakerId: string;       // ID du dieu qui parle
     speakerName: string;     // Nom affiché
     text: string;            // Texte du dialogue
-    emotion?: 'neutral' | 'angry' | 'sad' | 'happy' | 'surprised' | 'determined';
+    emotion?: 'neutral' | 'angry' | 'sad' | 'happy' | 'surprised' | 'determined' | 'worried';
 }
 
 export interface BattleCondition {

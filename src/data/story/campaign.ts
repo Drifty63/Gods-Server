@@ -19,6 +19,12 @@ import {
     PROLOGUE_BATTLE3_DEMETER_INTRO,
     PROLOGUE_BATTLE3_WIN,
     PROLOGUE_BATTLE3_LOSE,
+    // Combat 4 du prologue
+    PROLOGUE_BATTLE4_NARRATOR,
+    PROLOGUE_BATTLE4_COUNCIL,
+    PROLOGUE_BATTLE4_AMBUSH,
+    PROLOGUE_BATTLE4_WIN,
+    PROLOGUE_BATTLE4_LOSE,
     // Chapitre 2 (dialogues gardés mais combats supprimés)
     CHAPTER2_INTRO,
     CHAPTER2_END,
@@ -256,11 +262,83 @@ const chapter1Battle3Events: StoryEvent[] = [
     }
 ];
 
+// ===========================================
+// Combat 4 : Zeus + Déméter + Artémis vs Arès + 2 Soldats (3v3)
+// ===========================================
+const chapter1Battle4Events: StoryEvent[] = [
+    // Narrateur - Le chemin vers Athènes
+    {
+        id: 'ch1_battle4_narrator',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE4_NARRATOR,
+        backgroundImage: '/assets/story/farm_night_exterior.png',
+        nextEventId: 'ch1_battle4_council'
+    },
+    // Conseil des 4 dieux autour de la table
+    {
+        id: 'ch1_battle4_council',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE4_COUNCIL,
+        backgroundImage: '/assets/story/gods_council_table.png',
+        nextEventId: 'ch1_battle4_ambush'
+    },
+    // L'attaque nocturne d'Arès
+    {
+        id: 'ch1_battle4_ambush',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE4_AMBUSH,
+        backgroundImage: '/assets/story/gods_council_table.png',
+        nextEventId: 'ch1_battle4'
+    },
+    // Combat 3v3 : Zeus + Déméter + Artémis vs Arès + 2 Soldats
+    {
+        id: 'ch1_battle4',
+        type: 'battle',
+        backgroundImage: '/assets/story/gods_council_table.png',
+        battle: {
+            id: 'battle_ambush_ares',
+            name: "L'Embuscade d'Arès",
+            description: "Arès attaque avec ses soldats ! Hestia est hors combat !",
+            playerTeam: ['zeus', 'demeter', 'artemis'],
+            enemyTeam: ['ares', 'soldier_ares', 'soldier_ares'],
+            deckMultiplier: 2,           // x2 pour le joueur
+            enemyDeckMultiplier: 2,      // x2 pour l'ennemi
+            continueOnDefeat: false,     // Doit gagner pour continuer
+            rewards: [
+                {
+                    type: 'ambroisie',
+                    amount: 300,
+                    description: '300 Ambroisie'
+                }
+            ]
+        },
+        nextEventOnWin: 'ch1_battle4_win',
+        nextEventOnLose: 'ch1_battle4_lose'
+    },
+    // Après combat - Victoire
+    {
+        id: 'ch1_battle4_win',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE4_WIN,
+        backgroundImage: '/assets/story/battle4_victory.png',
+        nextEventId: undefined  // Fin du prologue
+    },
+    // Après combat - Défaite
+    {
+        id: 'ch1_battle4_lose',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE4_LOSE,
+        backgroundImage: '/assets/story/battle4_defeat.png',
+        nextEventId: undefined  // Doit réessayer
+    }
+];
+
 // Tous les événements du chapitre 1
 const chapter1Events: StoryEvent[] = [
     ...chapter1Battle1Events,
     ...chapter1Battle2Events,
-    ...chapter1Battle3Events
+    ...chapter1Battle3Events,
+    ...chapter1Battle4Events
 ];
 
 // Configuration des combats du chapitre 1 (pour l'affichage de sélection)
@@ -287,6 +365,14 @@ export const CHAPTER_1_BATTLES = [
         firstEventId: 'ch1_battle3_narrator',
         unlocked: false,  // Débloqué après le combat 2
         requiresBattleId: 'battle2'
+    },
+    {
+        id: 'battle4',
+        name: "L'Embuscade d'Arès",
+        description: "Arès attaque de nuit avec ses soldats",
+        firstEventId: 'ch1_battle4_narrator',
+        unlocked: false,  // Débloqué après le combat 3
+        requiresBattleId: 'battle3'
     }
 ];
 

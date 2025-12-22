@@ -156,6 +156,7 @@ function StoryContent() {
         // - Pour battle1: ch1_battle1, ch1_after_battle_win, ch1_hades_throne
         // - Pour battle2: ch1_battle2, ch1_battle2_win
         // - Pour battle3: ch1_battle3, ch1_battle3_win
+        // - Pour battle4: ch1_battle4, ch1_battle4_win
         const hasBattleCompleted = progress.completedEvents.some(eventId => {
             // Vérification générique basée sur l'ID du combat requis
             if (battle.requiresBattleId === 'battle1') {
@@ -169,6 +170,9 @@ function StoryContent() {
             } else if (battle.requiresBattleId === 'battle3') {
                 return eventId === 'ch1_battle3' ||
                     eventId === 'ch1_battle3_win';
+            } else if (battle.requiresBattleId === 'battle4') {
+                return eventId === 'ch1_battle4' ||
+                    eventId === 'ch1_battle4_win';
             }
             return false;
         });
