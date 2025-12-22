@@ -277,9 +277,21 @@ export const ALL_GODS: GodCard[] = [
     // ENNEMIS SPÉCIAUX - MODE HISTOIRE
     // =====================================================
 
-    // SOLDAT D'ARÈS (Terre 🌿) - Ennemi histoire
+    // SOLDAT D'ARÈS 1 (Terre 🌿) - Ennemi histoire
     {
-        id: 'soldier_ares',
+        id: 'soldier_ares_1',
+        name: 'Soldat d\'Arès',
+        element: 'earth',
+        weakness: 'air',
+        maxHealth: 16,
+        imageUrl: '/cards/gods/soldier_ares.png',
+        flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
+        hidden: true,  // Non jouable par le joueur
+    },
+
+    // SOLDAT D'ARÈS 2 (Terre 🌿) - Ennemi histoire
+    {
+        id: 'soldier_ares_2',
         name: 'Soldat d\'Arès',
         element: 'earth',
         weakness: 'air',

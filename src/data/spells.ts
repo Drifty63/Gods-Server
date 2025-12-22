@@ -1690,10 +1690,10 @@ export const ALL_SPELLS: SpellCard[] = [
 
     // --- GÉNÉRATEURS ---
     {
-        id: 'soldier_ares_generator_1',
+        id: 'soldier_ares_1_generator_1',
         name: 'Pluie de Lances',
         element: 'earth',
-        godId: 'soldier_ares',
+        godId: 'soldier_ares_1',
         type: 'generator',
         energyCost: 0,
         energyGain: 1,
@@ -1704,10 +1704,10 @@ export const ALL_SPELLS: SpellCard[] = [
         description: '1🩸 → 👊',
     },
     {
-        id: 'soldier_ares_generator_2',
+        id: 'soldier_ares_1_generator_2',
         name: 'Coup de Lance',
         element: 'earth',
-        godId: 'soldier_ares',
+        godId: 'soldier_ares_1',
         type: 'generator',
         energyCost: 0,
         energyGain: 1,
@@ -1720,10 +1720,10 @@ export const ALL_SPELLS: SpellCard[] = [
 
     // --- COMPÉTENCES ---
     {
-        id: 'soldier_ares_skill_1',
+        id: 'soldier_ares_1_skill_1',
         name: 'Double Frappe',
         element: 'earth',
-        godId: 'soldier_ares',
+        godId: 'soldier_ares_1',
         type: 'competence',
         energyCost: 1,
         energyGain: 0,
@@ -1735,10 +1735,10 @@ export const ALL_SPELLS: SpellCard[] = [
         description: '2🩸 → ⚔️⚔️',
     },
     {
-        id: 'soldier_ares_skill_2',
+        id: 'soldier_ares_1_skill_2',
         name: 'Coup Dévastateur',
         element: 'earth',
-        godId: 'soldier_ares',
+        godId: 'soldier_ares_1',
         type: 'competence',
         energyCost: 3,
         energyGain: 0,
@@ -1751,10 +1751,93 @@ export const ALL_SPELLS: SpellCard[] = [
 
     // --- UTILITAIRE ---
     {
-        id: 'soldier_ares_utility_1',
+        id: 'soldier_ares_1_utility_1',
         name: 'Mur de Boucliers',
         element: 'earth',
-        godId: 'soldier_ares',
+        godId: 'soldier_ares_1',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 3, target: 'self' },
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/soldier_shield_wall.png',
+        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+    },
+
+    // =====================================================
+    // SORTS DU SOLDAT D'ARÈS 2 (Terre 🌿) - Ennemi mode histoire
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'soldier_ares_2_generator_1',
+        name: 'Pluie de Lances',
+        element: 'earth',
+        godId: 'soldier_ares_2',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/soldier_rain_of_spears.png',
+        description: '1🩸 → 👊',
+    },
+    {
+        id: 'soldier_ares_2_generator_2',
+        name: 'Coup de Lance',
+        element: 'earth',
+        godId: 'soldier_ares_2',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/soldier_precise_thrust.png',
+        description: '3🩸 → ⚔️',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'soldier_ares_2_skill_1',
+        name: 'Double Frappe',
+        element: 'earth',
+        godId: 'soldier_ares_2',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/soldier_double_strike.png',
+        description: '2🩸 → ⚔️⚔️',
+    },
+    {
+        id: 'soldier_ares_2_skill_2',
+        name: 'Coup Dévastateur',
+        element: 'earth',
+        godId: 'soldier_ares_2',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 5, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/soldier_heavy_blow.png',
+        description: '5🩸 → ⚔️',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'soldier_ares_2_utility_1',
+        name: 'Mur de Boucliers',
+        element: 'earth',
+        godId: 'soldier_ares_2',
         type: 'utility',
         energyCost: 1,
         energyGain: 0,

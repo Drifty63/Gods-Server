@@ -300,7 +300,7 @@ const chapter1Battle4Events: StoryEvent[] = [
             name: "L'Embuscade d'Arès",
             description: "Arès attaque avec ses soldats ! Hestia est hors combat !",
             playerTeam: ['zeus', 'demeter', 'artemis'],
-            enemyTeam: ['ares', 'soldier_ares', 'soldier_ares'],
+            enemyTeam: ['ares', 'soldier_ares_1', 'soldier_ares_2'],
             deckMultiplier: 2,           // x2 pour le joueur
             enemyDeckMultiplier: 2,      // x2 pour l'ennemi
             continueOnDefeat: false,     // Doit gagner pour continuer

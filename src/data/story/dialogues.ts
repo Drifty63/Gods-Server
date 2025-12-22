@@ -1480,19 +1480,19 @@ export const PROLOGUE_BATTLE4_NARRATOR: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Depuis le test de bravoure, l'alliance fragile entre Zeus, Hestia, Artémis et Déméter s'est consolidée.",
+        text: "Dès la fin du test de bravoure, les quatre dieux ont pris la route sans attendre.",
         emotion: 'neutral'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Mais Déméter a été claire : pour vaincre Hadès, ils ont absolument besoin de Poséidon, frère de Zeus et Hadès.",
+        text: "Durant le trajet, ils ont beaucoup discuté. Déméter a été formelle : pour vaincre Hadès, ils ont absolument besoin de Poséidon.",
         emotion: 'neutral'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Toute autre aide sera bienvenue, mais Poséidon est indispensable. Sa maîtrise des océans pourrait renverser l'équilibre.",
+        text: "Poséidon, frère de Zeus et Hadès. Sa maîtrise des océans pourrait renverser l'équilibre. Toute autre aide sera bienvenue, mais lui est indispensable.",
         emotion: 'neutral'
     },
     {
@@ -1510,7 +1510,7 @@ export const PROLOGUE_BATTLE4_NARRATOR: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Mais sur la route, ils doivent s'arrêter pour la nuit. Une ferme isolée leur offre un refuge temporaire...",
+        text: "La nuit tombe. Une ferme isolée leur offre un refuge temporaire pour se reposer avant de reprendre la route...",
         emotion: 'neutral'
     }
 ];
@@ -1520,7 +1520,13 @@ export const PROLOGUE_BATTLE4_COUNCIL: DialogueLine[] = [
     {
         speakerId: 'hestia',
         speakerName: 'Hestia',
-        text: "*inquiète* Nous ne pouvons pas traverser Thèbes. C'est une ville guerrière où Arès est vénéré comme un dieu suprême.",
+        text: "*regarde la carte* En regardant la route... Je réalise que nous allons devoir passer par Thèbes. C'est le chemin le plus rapide vers Athènes.",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*inquiète* Mais nous ne pouvons pas ! Thèbes est une ville guerrière où Arès est vénéré comme un dieu suprême.",
         emotion: 'worried'
     },
     {
@@ -1556,7 +1562,7 @@ export const PROLOGUE_BATTLE4_COUNCIL: DialogueLine[] = [
     {
         speakerId: 'artemis',
         speakerName: 'Artémis',
-        text: "*acquiesce* Je savais que mon frère Apollon traînait souvent avec lui là-bas. Ils se querellent gentiment, mais ils sont proches.",
+        text: "*acquiesce* Je sais que mon frère Apollon traîne souvent avec lui là-bas. Ils se querellent gentiment, mais ils sont proches.",
         emotion: 'neutral'
     },
     {
@@ -1628,7 +1634,7 @@ export const PROLOGUE_BATTLE4_COUNCIL: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Je suis fier de la femme forte que tu es devenue. Tu es logique, réfléchie, juste... compétente. Tout ce qu'un père peut espérer.",
+        text: "Je suis fier de la femme que tu es devenue. Tu es courageuse, brillante, inébranlable... Une véritable guerrière. Tout ce qu'un père peut rêver.",
         emotion: 'happy'
     },
     {
@@ -1646,13 +1652,13 @@ export const PROLOGUE_BATTLE4_COUNCIL: DialogueLine[] = [
     {
         speakerId: 'demeter',
         speakerName: 'Déméter',
-        text: "Avec tout ce qui se passe... je m'inquiète pour ma fille Perséphone. Elle est là-bas, aux Enfers avec Hadès...",
+        text: "Avec tout ce qui se passe... je m'inquiète pour ma fille Perséphone. Elle est toujours prisonnière des Enfers...",
         emotion: 'worried'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*pose sa main sur celle de Déméter* Nous la ramènerons. Je te le promets.",
+        text: "*pose sa main sur celle de Déméter* Quand tout cela sera terminé, je m'engage à t'aider. Nous trouverons une solution pour la libérer.",
         emotion: 'determined'
     },
     {
@@ -1716,7 +1722,7 @@ export const PROLOGUE_BATTLE4_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'ares',
         speakerName: 'Arès',
-        text: "*rire cruel* Je n'étais jamais loin. Ta défaite lors de notre dernier combat... Je n'ai pas digéré cette humiliation !",
+        text: "*rire cruel* Je n'étais jamais loin. Ma défaite lors de notre dernier combat... Je n'ai pas digéré cette humiliation !",
         emotion: 'angry'
     },
     {
@@ -1728,7 +1734,7 @@ export const PROLOGUE_BATTLE4_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'ares',
         speakerName: 'Arès',
-        text: "*montre le corps inconscient* La douce Hestia ? Elle m'avait humilié en m'aidant à me battre. Mes soldats l'ont assommée en premier.",
+        text: "*montre le corps inconscient* La douce Hestia ? Elle m'avait humilié en aidant mon père à me battre. Mes soldats l'ont assommée en premier.",
         emotion: 'happy'
     },
     {
