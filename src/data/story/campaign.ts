@@ -212,6 +212,7 @@ const chapter1Battle3Events: StoryEvent[] = [
     {
         id: 'ch1_battle3',
         type: 'battle',
+        backgroundImage: '/assets/story/confrontation_wheat_field.png',  // Garder l'image de la confrontation
         battle: {
             id: 'battle_test_of_valor',
             name: "Test de Bravoure",
@@ -222,8 +223,8 @@ const chapter1Battle3Events: StoryEvent[] = [
             enemyDeckMultiplier: 2,      // x2 pour l'ennemi aussi
             playerCondition: {
                 type: 'stunned',
-                description: "Zeus est immobilisé par les racines de Déméter au premier tour !",
-                duration: 1
+                description: "Zeus est immobilisé par les racines de Déméter pendant 2 tours !",
+                duration: 2  // 2 tours de stun au lieu de 1
             },
             continueOnDefeat: false,     // Doit gagner pour continuer
             rewards: [
