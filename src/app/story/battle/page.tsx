@@ -246,7 +246,7 @@ function StoryBattleContent() {
                     speaker: d.speakerId,
                     speakerName: d.speakerName,
                     text: d.text,
-                    portrait: d.speakerId === 'narrator' ? 'zeus' : d.speakerId
+                    portrait: d.speakerId  // Garder l'ID du speaker pour le portrait (inclut 'narrator')
                 }));
 
             // Déterminer quels dialogues utiliser selon le combat
@@ -383,9 +383,16 @@ function StoryBattleContent() {
         const playerTeam = currentBattleConfig?.playerTeam || getPlayerTeam();
         const enemyTeam = currentBattleConfig?.enemyTeam || [];
 
+        // Récupérer l'image de fond depuis l'événement actuel (si disponible)
+        const currentEvent = getCurrentEvent();
+        const introBackgroundImage = currentEvent?.backgroundImage || '/assets/story/olympus_storm.png';
+
         return (
             <main className={styles.main}>
-                <div className={styles.storyBackground}>
+                <div
+                    className={styles.storyBackground}
+                    style={{ backgroundImage: `url('${introBackgroundImage}')` }}
+                >
                     <div className={styles.backgroundOverlay} />
                 </div>
                 <div className={styles.introScreen}>
@@ -456,40 +463,45 @@ function StoryBattleContent() {
                 ? '/assets/story/victory_nyx.png'
                 : '/assets/story/defeat_underworld.png';
         }
+        const isNarrator = dialogue.speaker === 'narrator';
 
         return (
             <main className={styles.main}>
                 <div
-                    className={styles.storyBackground}
+                    className={isNarrator ? styles.storyBackgroundNarrator : styles.storyBackground}
                     style={{ backgroundImage: `url('${backgroundImage}')` }}
                 >
-                    <div className={styles.backgroundOverlay} />
+                    <div className={isNarrator ? styles.backgroundOverlayNarrator : styles.backgroundOverlay} />
                 </div>
                 <div className={styles.postBattleDialogue} onClick={handleNextPostDialogue}>
-                    {/* Portrait du personnage */}
-                    <div
-                        className={styles.portraitWrapper}
-                        style={{ '--glow-color': glowColor } as React.CSSProperties}
-                    >
-                        <div className={styles.portrait}>
-                            <Image
-                                src={`/cards/gods/${dialogue.portrait}.png`}
-                                alt={dialogue.speakerName}
-                                fill
-                                className={styles.portraitImage}
-                            />
+                    {/* Portrait du personnage (pas pour le narrateur) */}
+                    {!isNarrator && (
+                        <div
+                            className={styles.portraitWrapper}
+                            style={{ '--glow-color': glowColor } as React.CSSProperties}
+                        >
+                            <div className={styles.portrait}>
+                                <Image
+                                    src={`/cards/gods/${dialogue.portrait}.png`}
+                                    alt={dialogue.speakerName}
+                                    fill
+                                    className={styles.portraitImage}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Boîte de dialogue */}
-                    <div className={styles.dialogueBoxNew}>
-                        <div
-                            className={styles.speakerNameNew}
-                            style={{ color: glowColor }}
-                        >
-                            {dialogue.speakerName}
-                        </div>
-                        <div className={styles.dialogueTextNew}>
+                    <div className={isNarrator ? styles.narratorBoxNew : styles.dialogueBoxNew}>
+                        {!isNarrator && (
+                            <div
+                                className={styles.speakerNameNew}
+                                style={{ color: glowColor }}
+                            >
+                                {dialogue.speakerName}
+                            </div>
+                        )}
+                        <div className={isNarrator ? styles.narratorTextNew : styles.dialogueTextNew}>
                             {displayedText}
                             {isTyping && <span className={styles.cursor}>|</span>}
                         </div>

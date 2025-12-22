@@ -487,6 +487,65 @@
     z-index: 1;
 }
 
+/* Styles spécifiques pour le narrateur */
+.storyBackgroundNarrator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/assets/story/olympus_storm.png') center/cover no-repeat;
+    background-size: cover;
+    z-index: 0;
+    filter: brightness(0.6) saturate(0.7);
+}
+
+.backgroundOverlayNarrator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(10, 0, 30, 0.85),
+            rgba(20, 0, 50, 0.75),
+            rgba(5, 5, 16, 0.95));
+    z-index: 1;
+}
+
+.narratorBoxNew {
+    flex: 1;
+    background: rgba(10, 10, 30, 0.9);
+    border: 2px solid rgba(150, 100, 200, 0.5);
+    border-radius: 16px;
+    padding: 30px 40px;
+    position: relative;
+    backdrop-filter: blur(15px);
+    box-shadow:
+        0 10px 50px rgba(100, 50, 150, 0.3),
+        inset 0 1px 0 rgba(200, 150, 255, 0.1);
+    text-align: center;
+}
+
+.narratorBoxNew::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(150, 100, 200, 0.6), transparent);
+}
+
+.narratorTextNew {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    line-height: 1.9;
+    color: rgba(220, 200, 255, 0.95);
+    font-style: italic;
+    text-shadow: 0 0 20px rgba(100, 50, 150, 0.3);
+}
+
 /* ================================ */
 /* NEW Post Battle Dialogue Styles  */
 /* ================================ */
