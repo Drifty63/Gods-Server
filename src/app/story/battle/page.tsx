@@ -98,12 +98,24 @@ function StoryBattleContent() {
                 }
             });
         } else if (battleConfig.playerCondition.type === 'stunned') {
-            // Zeus est immobilisé - on marque le premier dieu (Zeus) comme étant stun
-            // L'ennemi doit commencer et le joueur passe son premier tour
-            console.log('⚡ Zeus est immobilisé par les racines de Déméter !');
-            // On va forcer le joueur à passer son tour après que l'ennemi joue
-            // Stockons cette info pour l'utiliser plus tard
-            (window as unknown as { zeusStunned: boolean }).zeusStunned = true;
+            // Zeus est immobilisé - appliquer le stun via statusEffects comme les cartes d'Athéna
+            const stunDuration = battleConfig.playerCondition.duration || 1;
+            const targetGodId = battleConfig.playerCondition.targetGod || 'zeus';
+
+            internalState.players[0].gods.forEach((god: {
+                card: { id: string };
+                statusEffects: Array<{ type: string; stacks: number; duration?: number }>
+            }) => {
+                // Appliquer le stun à Zeus (ou au dieu ciblé)
+                if (god.card.id === targetGodId) {
+                    god.statusEffects.push({
+                        type: 'stun',
+                        stacks: 1,
+                        duration: stunDuration
+                    });
+                    console.log(`⚡ ${god.card.id} est immobilisé pour ${stunDuration} tour(s) !`);
+                }
+            });
         }
 
         // Créer une copie profonde de l'état pour React
