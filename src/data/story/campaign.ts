@@ -287,7 +287,7 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_ambush',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_AMBUSH,
-        backgroundImage: '/assets/story/gods_council_table.png',
+        backgroundImage: '/assets/story/ares_ambush.png',
         nextEventId: 'ch1_battle4'
     },
     // Combat 3v3 : Zeus + Déméter + Artémis vs Arès + 2 Soldats
