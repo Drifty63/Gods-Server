@@ -300,6 +300,18 @@ export const ALL_GODS: GodCard[] = [
         flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
         hidden: true,  // Non jouable par le joueur
     },
+
+    // SOLDAT D'ARÈS 3 (Terre 🌿) - Ennemi histoire
+    {
+        id: 'soldier_ares_3',
+        name: 'Soldat d\'Arès',
+        element: 'earth',
+        weakness: 'air',
+        maxHealth: 16,
+        imageUrl: '/cards/gods/soldier_ares_3.png',
+        flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
+        hidden: true,  // Non jouable par le joueur
+    },
 ];
 
 // Helper pour obtenir un dieu par son ID

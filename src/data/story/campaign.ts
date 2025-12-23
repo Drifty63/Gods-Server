@@ -67,8 +67,8 @@ const chapter1Battle1Events: StoryEvent[] = [
             enemyTeam: ['hades'],
             deckMultiplier: 4,
             playerCondition: {
-                type: 'half_hp',
-                description: "L'attaque surprise d'Hadès a affaibli Zeus (50% PV)"
+                type: 'no_energy',
+                description: "L'attaque surprise d'Hadès a affaibli Zeus (0 énergie de départ)"
             },
             continueOnDefeat: true,
             rewards: [
@@ -290,7 +290,7 @@ const chapter1Battle4Events: StoryEvent[] = [
         backgroundImage: '/assets/story/ares_ambush.png',
         nextEventId: 'ch1_battle4'
     },
-    // Combat 3v3 : Zeus + Déméter + Artémis vs Arès + 2 Soldats
+    // Combat 3v4 : Zeus + Déméter + Artémis vs Arès + 3 Soldats
     {
         id: 'ch1_battle4',
         type: 'battle',
@@ -300,7 +300,7 @@ const chapter1Battle4Events: StoryEvent[] = [
             name: "L'Embuscade d'Arès",
             description: "Arès attaque avec ses soldats ! Hestia est hors combat !",
             playerTeam: ['zeus', 'demeter', 'artemis'],
-            enemyTeam: ['ares', 'soldier_ares_1', 'soldier_ares_2'],
+            enemyTeam: ['ares', 'soldier_ares_1', 'soldier_ares_2', 'soldier_ares_3'],
             deckMultiplier: 1,           // x1 pour le joueur (15 cartes: 5 en main, 10 dans deck)
             enemyDeckMultiplier: 1,      // x1 pour l'ennemi
             continueOnDefeat: false,     // Doit gagner pour continuer
