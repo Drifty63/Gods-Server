@@ -145,8 +145,15 @@ export class GameEngine {
             const needsSingleTarget = effect.target === 'enemy_god' || effect.target === 'ally_god' || effect.target === 'any_god' || effect.target === 'dead_ally_god';
 
             if (needsSingleTarget && targetIds.length > 0) {
+                // CORRECTION: Si on a épuisé toutes les cibles disponibles, ne pas appliquer les effets restants
+                // Cela empêche une seule cible de recevoir 2x les dégâts sur un sort multi-cible
+                if (targetIndex >= targetIds.length) {
+                    // Plus de cibles disponibles, ignorer cet effet
+                    continue;
+                }
+
                 // Utiliser la prochaine cible disponible dans la liste
-                const currentTarget = targetIds[Math.min(targetIndex, targetIds.length - 1)];
+                const currentTarget = targetIds[targetIndex];
                 this.applyEffect(effect, card, currentTarget, action.selectedElement, action.lightningAction, [currentTarget]);
                 lastUsedTargetId = currentTarget;
                 targetIndex++;
@@ -1364,21 +1371,10 @@ export class GameEngine {
             // DEMETER - Distribution de soins
             // ========================================
             case 'distribute_heal_5':
-                // Distribue 5 soins également entre tous les alliés vivants
-                const aliveAllies = player.gods.filter(g => !g.isDead);
-                if (aliveAllies.length > 0) {
-                    const healPerAlly = Math.floor(5 / aliveAllies.length);
-                    const remainder = 5 % aliveAllies.length;
-
-                    aliveAllies.forEach((ally, index) => {
-                        // Les premiers alliés reçoivent 1 soin de plus pour distribuer le reste
-                        const healAmount = healPerAlly + (index < remainder ? 1 : 0);
-                        ally.currentHealth = Math.min(
-                            ally.currentHealth + healAmount,
-                            ally.card.maxHealth
-                        );
-                    });
-                }
+                // NE RIEN FAIRE ICI - La distribution des soins est gérée par le modal
+                // dans confirmHealDistribution du gameStore.
+                // L'ancienne implémentation distribuait automatiquement les soins,
+                // ce qui causait un DOUBLE SOIN (moteur + modal).
                 break;
 
             // ========================================
