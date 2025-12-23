@@ -1371,10 +1371,27 @@ export class GameEngine {
             // DEMETER - Distribution de soins
             // ========================================
             case 'distribute_heal_5':
-                // NE RIEN FAIRE ICI - La distribution des soins est gérée par le modal
+                // Pour le joueur humain (player1), le modal gère la distribution
                 // dans confirmHealDistribution du gameStore.
-                // L'ancienne implémentation distribuait automatiquement les soins,
-                // ce qui causait un DOUBLE SOIN (moteur + modal).
+                // Pour l'IA (player2), on distribue automatiquement et équitablement.
+                if (player.id !== 'player1') {
+                    // Mode IA : distribution automatique
+                    const aliveAllies = player.gods.filter(g => !g.isDead);
+                    if (aliveAllies.length > 0) {
+                        const healPerAlly = Math.floor(5 / aliveAllies.length);
+                        const remainder = 5 % aliveAllies.length;
+
+                        aliveAllies.forEach((ally, index) => {
+                            // Les premiers alliés reçoivent 1 soin de plus pour distribuer le reste
+                            const healAmount = healPerAlly + (index < remainder ? 1 : 0);
+                            ally.currentHealth = Math.min(
+                                ally.currentHealth + healAmount,
+                                ally.card.maxHealth
+                            );
+                        });
+                    }
+                }
+                // Pour player1, ne rien faire - le modal gère
                 break;
 
             // ========================================
