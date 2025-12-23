@@ -562,6 +562,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isDistributingHeal: false,
             healDistributionTotal: 0,
         });
+
+        // En mode solo, finir le tour automatiquement après la confirmation
+        const { isSoloMode } = get();
+        if (isSoloMode) {
+            setTimeout(() => {
+                get().endTurn();
+            }, 500);
+        }
     },
 
     cancelHealDistribution: () => {
@@ -831,6 +839,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         // Vérifier l'état actuel (peut avoir changé depuis le lancement du timeout)
                         const freshState = engine.getState();
                         const freshPlayer = freshState.players.find(p => p.id === playerId);
+                        const currentStoreState = get();
+
+                        // NE PAS finir le tour si un modal est ouvert
+                        const hasActiveModal =
+                            currentStoreState.isDistributingHeal ||
+                            currentStoreState.isSelectingCards ||
+                            currentStoreState.isSelectingEnemyCards ||
+                            currentStoreState.isShowingOptionalChoice ||
+                            currentStoreState.isSelectingPlayer ||
+                            currentStoreState.isSelectingDeadGod ||
+                            currentStoreState.isSelectingGod ||
+                            currentStoreState.isShowingZombieDamage;
+
+                        if (hasActiveModal) {
+                            // Un modal est ouvert, ne pas finir le tour
+                            // La fin de tour sera gérée par la confirmation du modal
+                            return;
+                        }
 
                         // On ne finit le tour que si :
                         // 1. C'est toujours notre tour
