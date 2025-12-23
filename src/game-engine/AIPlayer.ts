@@ -180,6 +180,16 @@ export class AIPlayer {
                 return false;
             }
 
+            // NOUVEAU: Empêcher l'IA de se suicider avec des cartes infligeant des dégâts à soi-même
+            const selfDamage = card.effects
+                .filter(e => e.type === 'damage' && e.target === 'self')
+                .reduce((total, e) => total + (e.value || 0), 0);
+
+            if (selfDamage > 0 && god.currentHealth <= selfDamage) {
+                // Cette carte tuerait le dieu, ne pas la jouer
+                return false;
+            }
+
             return true;
         });
     }

@@ -294,15 +294,15 @@ const chapter1Battle4Events: StoryEvent[] = [
     {
         id: 'ch1_battle4',
         type: 'battle',
-        backgroundImage: '/assets/story/gods_council_table.png',
+        backgroundImage: '/assets/story/ares_ambush.png',
         battle: {
             id: 'battle_ambush_ares',
             name: "L'Embuscade d'Arès",
             description: "Arès attaque avec ses soldats ! Hestia est hors combat !",
             playerTeam: ['zeus', 'demeter', 'artemis'],
             enemyTeam: ['ares', 'soldier_ares_1', 'soldier_ares_2'],
-            deckMultiplier: 2,           // x2 pour le joueur
-            enemyDeckMultiplier: 2,      // x2 pour l'ennemi
+            deckMultiplier: 1,           // x1 pour le joueur (15 cartes: 5 en main, 10 dans deck)
+            enemyDeckMultiplier: 1,      // x1 pour l'ennemi
             continueOnDefeat: false,     // Doit gagner pour continuer
             rewards: [
                 {
