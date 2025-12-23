@@ -118,6 +118,10 @@ function StoryBattleContent() {
                     console.log(`⚡ ${god.card.id} est immobilisé pour ${stunDuration} tour(s) !`);
                 }
             });
+        } else if (battleConfig.playerCondition.type === 'no_energy') {
+            // Le joueur commence avec 0 énergie
+            internalState.players[0].energy = 0;
+            console.log(`⚡ Le joueur commence avec 0 énergie !`);
         }
 
         // Créer une copie profonde de l'état pour React
