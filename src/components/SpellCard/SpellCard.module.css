@@ -3,8 +3,9 @@
 
 .card {
     position: relative;
-    width: 105px;
-    height: 150px;
+    /* Dimensions unifiées avec GodCard pour cohérence */
+    width: 72px;
+    height: 100px;
     border-radius: 6px;
     background:
         linear-gradient(145deg, #0d0d1f 0%, #16213e 50%, #1a1a3a 100%);
@@ -186,7 +187,9 @@
    IMAGE / ILLUSTRATION
    ================================ */
 .imageContainer {
-    height: 120px;
+    /* Prend tout l'espace restant */
+    flex: 1;
+    min-height: 0;
     background: linear-gradient(to bottom,
             rgba(0, 0, 0, 0.1) 0%,
             rgba(0, 0, 0, 0.4) 100%);
@@ -347,8 +350,9 @@
    ================================ */
 @media (max-width: 768px) {
     .card {
-        width: 110px;
-        height: 156px;
+        /* Tablette - même taille que GodCard */
+        width: 72px;
+        height: 100px;
         display: flex;
         flex-direction: column;
     }
@@ -356,9 +360,7 @@
     .header {
         flex-shrink: 0;
         padding: 2px 4px;
-        /* Bandeau plus fin demandé */
-        height: 18px;
-        /* Hauteur fixe réduite */
+        height: 16px;
         align-items: center;
         background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
     }
@@ -367,16 +369,13 @@
         display: none;
     }
 
-    /* Au cas où */
-
-    /* Switch: Affiche le nom du Dieu, cache le nom du Sort */
     .spellName {
         display: none;
     }
 
     .godName {
         display: block;
-        font-size: 0.5rem;
+        font-size: 0.45rem;
         font-weight: 800;
         line-height: 1;
         width: 100%;
@@ -384,23 +383,21 @@
     }
 
     .element {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
 
     .cost {
-        width: 22px;
-        height: 22px;
-        top: 20px;
-        /* Remonté sous le header fin */
-        left: 4px;
+        width: 18px;
+        height: 18px;
+        top: 18px;
+        left: 3px;
         z-index: 5;
     }
 
     .costValue {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
     }
 
-    /* FULL ART: Image prend toute la place */
     .imageContainer {
         flex: 1;
         height: auto;
@@ -409,29 +406,27 @@
     }
 
     .imagePlaceholder {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
     }
 
-    /* Description Overlay: En bas de l'image ("texte plus bas") */
     .descriptionOverlay {
         top: auto;
         bottom: 0px;
         height: auto;
-        min-height: 25px;
+        min-height: 20px;
         width: 100%;
         background: linear-gradient(to top,
                 rgba(0, 0, 0, 0.95) 0%,
                 rgba(0, 0, 0, 0.7) 80%,
                 transparent 100%);
-        padding: 4px 4px 2px 4px;
+        padding: 3px 3px 2px 3px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
     }
 
     .descriptionOverlay p {
-        font-size: 0.5rem;
-        /* Ajusté */
+        font-size: 0.4rem;
         line-height: 1.1;
         padding-bottom: 0;
         font-weight: 600;
@@ -446,8 +441,8 @@
 
     .footer {
         position: absolute;
-        bottom: 6px;
-        right: 4px;
+        bottom: 4px;
+        right: 3px;
         width: auto;
         padding: 0;
         background: transparent;
@@ -463,111 +458,115 @@
 
 @media (max-width: 480px) {
     .card {
+        /* Mobile - dimensions identiques aux GodCard */
         width: 60px;
         height: 85px;
     }
 
     .header {
-        padding: 2px 3px;
+        padding: 1px 2px;
+        height: 14px;
     }
 
     .name {
+        font-size: 0.3rem;
+        max-width: 30px;
+    }
+
+    .godName {
         font-size: 0.35rem;
-        max-width: 35px;
     }
 
     .cost {
         width: 14px;
         height: 14px;
+        top: 15px;
+        left: 2px;
     }
 
     .costValue {
         font-size: 0.5rem;
-    }
-
-    .imageContainer {
-        height: 28px;
     }
 
     .imagePlaceholder {
         font-size: 0.9rem;
     }
 
-    .description {
-        height: 22px;
-        padding: 2px 3px;
+    .descriptionOverlay {
+        min-height: 16px;
+        padding: 2px 2px 1px 2px;
     }
 
-    .description p {
+    .descriptionOverlay p {
         font-size: 0.3rem;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
 
     .footer {
-        padding: 1px 3px;
+        bottom: 3px;
+        right: 2px;
     }
 
-    .godName {
-        font-size: 0.3rem;
-    }
-
-    .elementIcon {
-        font-size: 0.5rem;
+    .element {
+        font-size: 0.55rem;
     }
 }
 
 /* Très petits écrans (360px et moins) */
 @media (max-width: 380px) {
     .card {
+        /* Très petit mobile - dimensions identiques aux GodCard */
         width: 50px;
         height: 72px;
     }
 
     .header {
         padding: 1px 2px;
+        height: 12px;
     }
 
     .name {
-        font-size: 0.3rem;
-        max-width: 28px;
+        font-size: 0.25rem;
+        max-width: 25px;
+    }
+
+    .godName {
+        font-size: 0.28rem;
     }
 
     .cost {
         width: 12px;
         height: 12px;
+        top: 13px;
+        left: 2px;
     }
 
     .costValue {
-        font-size: 0.45rem;
-    }
-
-    .imageContainer {
-        height: 22px;
+        font-size: 0.4rem;
     }
 
     .imagePlaceholder {
         font-size: 0.7rem;
     }
 
-    .description {
-        height: 18px;
-        padding: 1px 2px;
+    .descriptionOverlay {
+        min-height: 14px;
+        padding: 1px 2px 1px 2px;
     }
 
-    .description p {
+    .descriptionOverlay p {
         font-size: 0.25rem;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
 
     .footer {
-        padding: 1px 2px;
+        bottom: 2px;
+        right: 2px;
     }
 
-    .godName {
-        font-size: 0.25rem;
-    }
-
-    .elementIcon {
-        font-size: 0.4rem;
+    .element {
+        font-size: 0.45rem;
     }
 }

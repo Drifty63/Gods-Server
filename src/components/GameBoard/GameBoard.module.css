@@ -63,8 +63,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 6px 10px;
+    gap: 8px;
+    padding: 8px 10px;
     background: linear-gradient(180deg,
             rgba(220, 38, 38, 0.12) 0%,
             transparent 100%);
@@ -97,8 +97,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 6px 10px;
+    gap: 8px;
+    padding: 8px 10px;
     background: linear-gradient(0deg,
             rgba(212, 175, 55, 0.1) 0%,
             transparent 100%);
@@ -146,8 +146,9 @@
 }
 
 .cardBack {
-    width: 90px;
-    height: 126px;
+    /* Dimensions unifiées avec GodCard et SpellCard */
+    width: 72px;
+    height: 100px;
     background:
         linear-gradient(145deg, #1e3a5f, #0f1f33),
         repeating-linear-gradient(45deg,
@@ -166,15 +167,16 @@
         inset 0 0 30px rgba(212, 175, 55, 0.1);
     position: relative;
     transition: transform 0.2s ease;
+    flex-shrink: 0;
 }
 
 .cardBack::before {
     content: '';
     position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
     border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 4px;
 }
@@ -187,15 +189,15 @@
 }
 
 .cardBackIcon {
-    font-size: 2rem;
+    font-size: 1.5rem;
     opacity: 0.6;
     filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
 }
 
 .cardBackNumber {
     position: absolute;
-    bottom: 6px;
-    font-size: 0.75rem;
+    bottom: 4px;
+    font-size: 0.65rem;
     color: rgba(212, 175, 55, 0.5);
     font-weight: bold;
     font-family: 'Cinzel', serif;
@@ -205,14 +207,16 @@
    CARTE AVEUGLE (NYX)
    ================================ */
 .blindCard {
-    width: 90px;
-    height: 126px;
+    /* Dimensions unifiées */
+    width: 72px;
+    height: 100px;
     cursor: pointer;
     background: linear-gradient(145deg, #4a1a4a, #2d0f2d);
     border-color: #9333ea;
     box-shadow:
         0 4px 12px rgba(0, 0, 0, 0.4),
         inset 0 0 30px rgba(147, 51, 234, 0.2);
+    flex-shrink: 0;
 }
 
 .blindCard:hover {
@@ -243,6 +247,690 @@
     font-style: italic;
     font-size: 0.8rem;
     font-family: 'Cinzel', serif;
+}
+
+/* ================================
+   SÉLECTION DIRECTE CARTES ADVERSES
+   ================================ */
+.enemySelectionIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: linear-gradient(145deg, rgba(147, 51, 234, 0.3), rgba(107, 33, 168, 0.3));
+    border: 2px solid rgba(147, 51, 234, 0.6);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    animation: selectionPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes selectionPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(147, 51, 234, 0.6);
+    }
+}
+
+/* Indicateur de sélection de dieu (Zéphyr Vent de Face) */
+.godSelectionIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3));
+    border: 2px solid rgba(59, 130, 246, 0.6);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    animation: godSelectionPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes godSelectionPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.7);
+    }
+}
+
+.godSelectionIndicator span {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ================================
+   DISTRIBUTION DE SOINS (Fertilisation)
+   ================================ */
+.healDistributionIndicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, rgba(34, 197, 94, 0.25), rgba(22, 163, 74, 0.25));
+    border: 2px solid rgba(34, 197, 94, 0.6);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    animation: healPulse 2s ease-in-out infinite;
+}
+
+@keyframes healPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 35px rgba(34, 197, 94, 0.6);
+    }
+}
+
+.healTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #22c55e;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+.healProgress {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    color: #fff;
+    font-weight: 600;
+    background: rgba(34, 197, 94, 0.3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(34, 197, 94, 0.5);
+}
+
+.healButtons {
+    display: flex;
+    gap: 10px;
+}
+
+.resetHealBtn,
+.confirmHealBtn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.resetHealBtn {
+    background: rgba(100, 100, 100, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.resetHealBtn:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.6);
+}
+
+.resetHealBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.confirmHealBtn {
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    border: 1px solid rgba(34, 197, 94, 0.8);
+    color: #fff;
+}
+
+.confirmHealBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.5);
+}
+
+.confirmHealBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Wrapper pour le dieu avec badge de soins */
+.godWithHealBadge {
+    position: relative;
+    display: inline-block;
+}
+
+/* Badge de soins assignés sur un dieu */
+.healAssignedBadge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border: 2px solid white;
+    z-index: 20;
+    animation: healBadgePop 0.3s ease-out;
+    box-shadow: 0 2px 10px rgba(34, 197, 94, 0.5);
+}
+
+@keyframes healBadgePop {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ================================
+   SÉLECTION DE CARTES (Défausse)
+   ================================ */
+.discardSelectionZone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: linear-gradient(145deg, rgba(30, 30, 60, 0.95), rgba(20, 20, 45, 0.95));
+    border: 2px solid rgba(212, 175, 55, 0.5);
+    border-radius: 12px;
+    max-width: 90%;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.discardSelectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.discardSelectionTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: #d4af37;
+    font-weight: 600;
+}
+
+.discardSelectionProgress {
+    background: rgba(212, 175, 55, 0.3);
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #fff;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+}
+
+.discardCardsScroll {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    overflow-x: auto;
+    max-width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.5) rgba(0, 0, 0, 0.2);
+}
+
+.discardCardsScroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.discardCardsScroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.discardCardsScroll::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.5);
+    border-radius: 4px;
+}
+
+.discardSelectableCard {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.discardSelectableCard:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+}
+
+.discardCardSelected {
+    box-shadow:
+        0 0 20px rgba(34, 197, 94, 0.6),
+        0 0 40px rgba(34, 197, 94, 0.3);
+}
+
+.discardSelectedBadge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border: 2px solid white;
+    z-index: 10;
+    animation: badgePop 0.3s ease-out;
+}
+
+.emptyDiscardText {
+    color: rgba(212, 175, 55, 0.5);
+    font-style: italic;
+    font-family: 'Cinzel', serif;
+    padding: 20px;
+}
+
+.discardSelectionButtons {
+    display: flex;
+    gap: 12px;
+}
+
+.discardCancelBtn,
+.discardConfirmBtn {
+    font-family: 'Cinzel', serif;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.discardCancelBtn {
+    background: rgba(100, 100, 100, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.discardCancelBtn:hover {
+    background: rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.6);
+}
+
+.discardConfirmBtn {
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    border: 1px solid rgba(34, 197, 94, 0.8);
+    color: #fff;
+}
+
+.discardConfirmBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.5);
+}
+
+.discardConfirmBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ================================
+   INDICATEUR PERSÉPHONE (Dieu mort)
+   ================================ */
+.deadGodIndicator {
+    background: linear-gradient(145deg, rgba(88, 28, 135, 0.4), rgba(46, 16, 101, 0.4)) !important;
+    border-color: rgba(147, 51, 234, 0.8) !important;
+}
+
+.deadGodIndicator span {
+    color: #d8b4fe !important;
+}
+
+/* ================================
+   INDICATEUR DÉGÂTS ZOMBIE
+   ================================ */
+.zombieDamageIndicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, rgba(202, 138, 4, 0.25), rgba(161, 98, 7, 0.25));
+    border: 2px solid rgba(234, 179, 8, 0.6);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    animation: zombiePulse 2s ease-in-out infinite;
+}
+
+@keyframes zombiePulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(234, 179, 8, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 35px rgba(234, 179, 8, 0.6);
+    }
+}
+
+.zombieTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: #eab308;
+    /* Yellow-500 */
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+}
+
+.zombieInstruction {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: #fff;
+    text-align: center;
+}
+
+.zombieButtons {
+    display: flex;
+    gap: 10px;
+}
+
+.zombieSkipBtn,
+.zombieConfirmBtn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zombieSkipBtn {
+    background: rgba(100, 100, 100, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.zombieSkipBtn:hover {
+    background: rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.6);
+}
+
+.zombieConfirmBtn {
+    background: linear-gradient(145deg, #eab308, #ca8a04);
+    border: 1px solid rgba(234, 179, 8, 0.8);
+    color: #fff;
+}
+
+.zombieConfirmBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(234, 179, 8, 0.5);
+}
+
+.zombieConfirmBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #444;
+    border-color: #666;
+}
+
+/* Badge de cible Zombie sur un dieu ennemi */
+.targetBadge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(145deg, #eab308, #ca8a04);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: 2px solid white;
+    z-index: 20;
+    animation: targetPop 0.3s ease-out;
+    box-shadow: 0 2px 10px rgba(234, 179, 8, 0.5);
+}
+
+@keyframes targetPop {
+    0% {
+        transform: translateX(-50%) scale(0);
+    }
+
+    50% {
+        transform: translateX(-50%) scale(1.2);
+    }
+
+    100% {
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+/* Container pour god + badge (utilisé pour l'ennemi) */
+.godContainer {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+/* ================================
+   CHOIX OPTIONNEL (Vision Tartare / Marée Basse)
+   ================================ */
+.optionalChoiceContainer {
+    position: fixed;
+    bottom: 220px;
+    /* Au dessus de la main */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 15, 30, 0.95);
+    border: 2px solid rgba(139, 92, 246, 0.6);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: auto;
+    min-width: 300px;
+    max-width: 500px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.optionalInfo {
+    text-align: center;
+}
+
+.optionalTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: #e9d5ff;
+    /* Purple-200 */
+    margin: 0 0 4px 0;
+    font-weight: bold;
+}
+
+.optionalDesc {
+    font-size: 0.75rem;
+    color: #cbd5e1;
+    /* Slate-300 */
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.optionalButtons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.confirmOptionalBtn,
+.cancelOptionalBtn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirmOptionalBtn {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    border: 1px solid #8b5cf6;
+    color: white;
+}
+
+.confirmOptionalBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+.cancelOptionalBtn {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid #475569;
+    color: #e2e8f0;
+}
+
+.cancelOptionalBtn:hover {
+    background: rgba(51, 65, 85, 0.9);
+    border-color: #64748b;
+}
+
+.enemySelectionIndicator span {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: #fff;
+}
+
+.selectionProgress {
+    background: rgba(147, 51, 234, 0.4);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold !important;
+}
+
+.cancelSelectionBtn {
+    background: rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelSelectionBtn:hover {
+    background: rgba(239, 68, 68, 0.6);
+}
+
+/* Carte sélectionnable (hover/cliquable) */
+.selectableCard {
+    cursor: pointer;
+    animation: selectablePulse 1s ease-in-out infinite;
+    position: relative;
+}
+
+.selectableCard:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow:
+        0 12px 30px rgba(147, 51, 234, 0.5),
+        0 0 20px rgba(147, 51, 234, 0.4);
+}
+
+@keyframes selectablePulse {
+
+    0%,
+    100% {
+        border-color: rgba(147, 51, 234, 0.4);
+    }
+
+    50% {
+        border-color: rgba(147, 51, 234, 0.9);
+    }
+}
+
+/* Carte adverse sélectionnée */
+.selectedEnemyCard {
+    border: 3px solid #22c55e !important;
+    box-shadow:
+        0 0 20px rgba(34, 197, 94, 0.6),
+        inset 0 0 15px rgba(34, 197, 94, 0.2) !important;
+    transform: translateY(-5px);
+}
+
+/* Badge de sélection sur la carte */
+.selectedBadge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(145deg, #22c55e, #16a34a);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border: 2px solid white;
+    z-index: 10;
+    animation: badgePop 0.3s ease-out;
+}
+
+@keyframes badgePop {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .blindClickable {
@@ -371,10 +1059,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    padding: 4px;
+    gap: 8px;
+    padding: 12px;
     flex: 1;
-    min-height: 0;
+    min-height: 180px;
+    /* Espace réservé pour le modal de détail */
 }
 
 .turnInfo {
@@ -713,6 +1402,60 @@
 .lightningRemove:hover {
     transform: scale(1.05);
     box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+}
+
+/* ================================
+   VERSION COMPACTE CHOIX FOUDRE
+   ================================ */
+.lightningChoiceCompact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: linear-gradient(145deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 10px;
+}
+
+.lightningLabel {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #FFD700;
+}
+
+.lightningApplyBtn,
+.lightningRemoveBtn {
+    font-family: 'Cinzel', serif;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lightningApplyBtn {
+    color: #0a0a1a;
+    background: linear-gradient(145deg, #FFD700, #FFA500);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.lightningApplyBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.lightningRemoveBtn {
+    color: #fff;
+    background: linear-gradient(145deg, #ef4444, #dc2626);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.lightningRemoveBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
 }
 
 /* ================================
@@ -1766,5 +2509,66 @@
         overflow: hidden;
         justify-content: space-between;
         /* Répartir l'espace verticalement */
+    }
+}
+
+/* ================================
+   RESPONSIVE POUR CARDBACK
+   ================================ */
+@media (max-width: 480px) {
+    .cardBack {
+        /* Mobile - dimensions identiques aux autres cartes */
+        width: 60px;
+        height: 85px;
+    }
+
+    .cardBack::before {
+        top: 4px;
+        left: 4px;
+        right: 4px;
+        bottom: 4px;
+    }
+
+    .cardBackIcon {
+        font-size: 1.2rem;
+    }
+
+    .cardBackNumber {
+        bottom: 3px;
+        font-size: 0.5rem;
+    }
+
+    .blindCard {
+        width: 60px;
+        height: 85px;
+    }
+}
+
+@media (max-width: 380px) {
+    .cardBack {
+        /* Très petit mobile - dimensions identiques aux autres cartes */
+        width: 50px;
+        height: 72px;
+    }
+
+    .cardBack::before {
+        top: 3px;
+        left: 3px;
+        right: 3px;
+        bottom: 3px;
+    }
+
+    .cardBackIcon {
+        font-size: 1rem;
+    }
+
+    .cardBackNumber {
+        bottom: 2px;
+        font-size: 0.4rem;
+    }
+
+    .blindCard {
+        width: 50px;
+        height: 72px;
     }
 }

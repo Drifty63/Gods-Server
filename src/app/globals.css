@@ -1,80 +1,82 @@
+@import "tailwindcss";
+
+/* Google Fonts loaded via layout.tsx <link> tag instead of @import to avoid Tailwind v4 injection order issues */
+
 /* GODS - Global Design System */
 /* Direction artistique : Mythologie grecque antique avec touche épique et moderne */
-
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
   /* ================================
      PALETTE PRINCIPALE
      ================================ */
-  
+
   /* Couleurs nobles et divines */
   --gold-divine: #D4AF37;
   --gold-light: #F5D76E;
   --gold-dark: #B8860B;
   --bronze-antique: #CD7F32;
   --bronze-dark: #8B5A2B;
-  
+
   /* Marbre et pierre */
   --marble-white: #F5F5F0;
   --marble-cream: #FAF8F5;
   --stone-gray: #6B7280;
   --stone-dark: #374151;
   --obsidian: #1a1a2e;
-  
+
   /* Arrière-plans */
   --bg-olympus: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #2a1a4a 100%);
   --bg-temple: linear-gradient(180deg, #0d0d1f 0%, #16213e 100%);
   --bg-sunset: linear-gradient(180deg, #2a1a0a 0%, #1a0a1a 50%, #0a0a1a 100%);
   --bg-card: rgba(22, 33, 62, 0.9);
   --bg-overlay: rgba(10, 10, 26, 0.85);
-  
+
   /* ================================
      COULEURS ÉLÉMENTAIRES
      ================================ */
   --fire: #E63946;
   --fire-glow: rgba(230, 57, 70, 0.4);
   --fire-gradient: linear-gradient(135deg, #E63946, #FF6B6B);
-  
+
   --water: #0077B6;
   --water-glow: rgba(0, 119, 182, 0.4);
   --water-gradient: linear-gradient(135deg, #0077B6, #00B4D8);
-  
+
   --earth: #2D6A4F;
   --earth-glow: rgba(45, 106, 79, 0.4);
   --earth-gradient: linear-gradient(135deg, #2D6A4F, #40916C);
-  
+
   --air: #F1C40F;
   --air-glow: rgba(241, 196, 15, 0.4);
   --air-gradient: linear-gradient(135deg, #F1C40F, #F9E79F);
-  
+
   --lightning: #FFD700;
   --lightning-glow: rgba(255, 215, 0, 0.5);
   --lightning-gradient: linear-gradient(135deg, #FFD700, #FFA500);
-  
+
   --light: #FFFACD;
   --light-glow: rgba(255, 250, 205, 0.5);
   --light-gradient: linear-gradient(135deg, #FFFACD, #FFF8DC);
-  
+
   --darkness: #2B2D42;
   --darkness-glow: rgba(43, 45, 66, 0.6);
   --darkness-gradient: linear-gradient(135deg, #2B2D42, #4A4E69);
-  
+
   /* ================================
      COULEURS D'INTERFACE
      ================================ */
   --success: #06D6A0;
   --success-glow: rgba(6, 214, 160, 0.3);
-  
+
   --error: #EF233C;
   --error-glow: rgba(239, 35, 60, 0.3);
-  
+
   --warning: #FFA500;
   --warning-glow: rgba(255, 165, 0, 0.3);
-  
+
   --info: #4A90E2;
   --info-glow: rgba(74, 144, 226, 0.3);
-  
+
   /* ================================
      TEXTE
      ================================ */
@@ -83,7 +85,7 @@
   --text-muted: rgba(255, 255, 255, 0.45);
   --text-gold: var(--gold-divine);
   --text-divine: var(--gold-light);
-  
+
   /* ================================
      ESPACEMENTS
      ================================ */
@@ -94,7 +96,7 @@
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
   --spacing-3xl: 64px;
-  
+
   /* ================================
      BORDER RADIUS
      ================================ */
@@ -104,7 +106,7 @@
   --radius-xl: 20px;
   --radius-2xl: 32px;
   --radius-full: 9999px;
-  
+
   /* ================================
      OMBRES
      ================================ */
@@ -112,11 +114,11 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
-  
+
   --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.4);
   --shadow-gold-intense: 0 0 40px rgba(212, 175, 55, 0.6);
   --shadow-divine: 0 0 60px rgba(245, 215, 110, 0.3);
-  
+
   --shadow-fire: 0 0 30px var(--fire-glow);
   --shadow-water: 0 0 30px var(--water-glow);
   --shadow-earth: 0 0 30px var(--earth-glow);
@@ -124,7 +126,7 @@
   --shadow-lightning: 0 0 30px var(--lightning-glow);
   --shadow-light: 0 0 30px var(--light-glow);
   --shadow-darkness: 0 0 30px var(--darkness-glow);
-  
+
   /* ================================
      BORDURES
      ================================ */
@@ -132,7 +134,7 @@
   --border-gold-light: 1px solid rgba(212, 175, 55, 0.3);
   --border-marble: 1px solid rgba(245, 245, 240, 0.15);
   --border-divine: 3px solid var(--gold-light);
-  
+
   /* ================================
      TRANSITIONS
      ================================ */
@@ -140,7 +142,7 @@
   --transition-normal: 250ms ease;
   --transition-slow: 400ms ease;
   --transition-divine: 600ms cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   /* ================================
      Z-INDEX
      ================================ */
@@ -176,7 +178,12 @@ body {
 /* ================================
    TYPOGRAPHY
    ================================ */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Cinzel', 'Times New Roman', serif;
   font-weight: 700;
   line-height: 1.2;
@@ -395,8 +402,13 @@ button {
    ANIMATIONS
    ================================ */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInUp {
@@ -404,6 +416,7 @@ button {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -415,6 +428,7 @@ button {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -422,28 +436,46 @@ button {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 @keyframes pulse-gold {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(212, 175, 55, 0.8);
   }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes divine-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
   }
+
   50% {
     filter: drop-shadow(0 0 25px rgba(245, 215, 110, 0.8));
   }
@@ -454,12 +486,15 @@ button {
     transform: translateY(100vh) rotate(0deg);
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(-100vh) rotate(720deg);
     opacity: 0;
@@ -540,13 +575,62 @@ button {
   opacity: 0;
 }
 
-.particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 12s; }
-.particle:nth-child(2) { left: 20%; animation-delay: 2s; animation-duration: 14s; }
-.particle:nth-child(3) { left: 30%; animation-delay: 4s; animation-duration: 16s; }
-.particle:nth-child(4) { left: 40%; animation-delay: 1s; animation-duration: 13s; }
-.particle:nth-child(5) { left: 50%; animation-delay: 3s; animation-duration: 15s; }
-.particle:nth-child(6) { left: 60%; animation-delay: 5s; animation-duration: 17s; }
-.particle:nth-child(7) { left: 70%; animation-delay: 2s; animation-duration: 14s; }
-.particle:nth-child(8) { left: 80%; animation-delay: 4s; animation-duration: 16s; }
-.particle:nth-child(9) { left: 90%; animation-delay: 1s; animation-duration: 13s; }
-.particle:nth-child(10) { left: 95%; animation-delay: 3s; animation-duration: 15s; }
+.particle:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 12s;
+}
+
+.particle:nth-child(2) {
+  left: 20%;
+  animation-delay: 2s;
+  animation-duration: 14s;
+}
+
+.particle:nth-child(3) {
+  left: 30%;
+  animation-delay: 4s;
+  animation-duration: 16s;
+}
+
+.particle:nth-child(4) {
+  left: 40%;
+  animation-delay: 1s;
+  animation-duration: 13s;
+}
+
+.particle:nth-child(5) {
+  left: 50%;
+  animation-delay: 3s;
+  animation-duration: 15s;
+}
+
+.particle:nth-child(6) {
+  left: 60%;
+  animation-delay: 5s;
+  animation-duration: 17s;
+}
+
+.particle:nth-child(7) {
+  left: 70%;
+  animation-delay: 2s;
+  animation-duration: 14s;
+}
+
+.particle:nth-child(8) {
+  left: 80%;
+  animation-delay: 4s;
+  animation-duration: 16s;
+}
+
+.particle:nth-child(9) {
+  left: 90%;
+  animation-delay: 1s;
+  animation-duration: 13s;
+}
+
+.particle:nth-child(10) {
+  left: 95%;
+  animation-delay: 3s;
+  animation-duration: 15s;
+}

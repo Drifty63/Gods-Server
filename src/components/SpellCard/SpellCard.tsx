@@ -11,9 +11,9 @@ interface SpellCardProps {
     card: SpellCardType;
     canPlay?: boolean;
     isSelected?: boolean;
-    isSmall?: boolean; // Version réduite pour l'affichage de la main adverse
+    isSmall?: boolean;
     onClick?: () => void;
-    onRightClick?: () => void; // Pour défausser (PC only)
+    onRightClick?: () => void;
 }
 
 export default function SpellCard({
@@ -27,13 +27,11 @@ export default function SpellCard({
     const colors = ELEMENT_COLORS[card.element];
     const [imageError, setImageError] = useState(false);
 
-    // Récupérer le nom du dieu associé pour l'affichage mobile Full Art
     const god = getGodById(card.godId);
     const godName = god ? god.name.split(',')[0] : '';
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
-        // Le clic droit reste pour PC mais n'est plus essentiel
         onRightClick?.();
     };
 

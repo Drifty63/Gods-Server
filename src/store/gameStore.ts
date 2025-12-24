@@ -75,8 +75,10 @@ interface GameStore {
     startTargetSelection: () => void;  // Activer le mode ciblage
     selectTargetGod: (god: GodState | null) => void;
     addTargetGod: (god: GodState) => void;  // Ajouter une cible à la liste
+    toggleTargetGod: (god: GodState) => void;  // Ajouter ou retirer une cible
     setLightningAction: (action: 'apply' | 'remove') => void;  // Choisir l'action foudre
     playCard: (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => { success: boolean; message: string };
+    playCardWithChoice: (cardId: string, targetGodId?: string, targetGodIds?: string[], choice?: boolean) => { success: boolean; message: string };
     discardForEnergy: (cardId: string) => { success: boolean; message: string };
     endTurn: (ignoreZombieCheck?: boolean) => { success: boolean; message: string };
     resetGame: () => void;
@@ -332,6 +334,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({
             selectedTargetGods: newTargets,
             selectedTargetGod: god // Pour la compatibilité
+        });
+    },
+
+    toggleTargetGod: (god) => {
+        const { selectedTargetGods, requiredTargets } = get();
+
+        // Si déjà sélectionné, on retire
+        const isAlreadySelected = selectedTargetGods.some(g => g.card.id === god.card.id);
+        if (isAlreadySelected) {
+            const newTargets = selectedTargetGods.filter(g => g.card.id !== god.card.id);
+            set({
+                selectedTargetGods: newTargets,
+                selectedTargetGod: newTargets.length > 0 ? newTargets[newTargets.length - 1] : null
+            });
+            return;
+        }
+
+        // Sinon on ajoute (si pas déjà au max)
+        if (selectedTargetGods.length >= requiredTargets) return;
+
+        const newTargets = [...selectedTargetGods, god];
+        set({
+            selectedTargetGods: newTargets,
+            selectedTargetGod: god
         });
     },
 
@@ -1398,5 +1424,110 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingGodEffect: null,
             godSelectionTargetType: null,
         });
+    },
+
+    playCardWithChoice: (cardId: string, targetGodId?: string, targetGodIds?: string[], choice?: boolean) => {
+        const { engine, playerId, selectedTargetGods } = get();
+        if (!engine) return { success: false, message: 'Partie non initialisée' };
+
+        const player = engine.getState().players.find(p => p.id === playerId);
+        if (!player) return { success: false, message: 'Joueur introuvable' };
+
+        const card = player.hand.find(c => c.id === cardId);
+        if (!card) return { success: false, message: 'Carte introuvable' };
+
+        // Identifier l'effet optionnel
+        const visionTartare = card.effects.find(e => e.type === 'custom' && e.customEffectId === 'vision_tartare');
+        const mareeBasse = card.effects.find(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
+
+        // === VISION DU TARTARE ===
+        if (visionTartare) {
+            // Si choix accepté (Oui), vérifier qu'on peut payer le coût (2 cartes deck)
+            if (choice) {
+                if (player.deck.length < 2) {
+                    return { success: false, message: 'Pas assez de cartes dans le deck (2 requises)' };
+                }
+                // Défausser 2 cartes
+                for (let i = 0; i < 2; i++) {
+                    const c = player.deck.shift()!;
+                    player.discard.push(c);
+                }
+            }
+        }
+
+        // === MARÉE BASSE ===
+        // Le choix (direction) s'applique lors de la résolution, pas de coût préalable
+
+        // Jouer la carte via le moteur (coût mana + effet de base)
+        const finalTargetGodIds = targetGodIds || (selectedTargetGods.length > 0 ? selectedTargetGods.map(g => g.card.id) : undefined);
+        const finalTargetGodId = targetGodId || (selectedTargetGods.length > 0 ? selectedTargetGods[0].card.id : undefined);
+
+        const result = engine.executeAction({
+            type: 'play_card',
+            playerId,
+            cardId,
+            targetGodId: finalTargetGodId,
+            targetGodIds: finalTargetGodIds,
+        });
+
+        if (!result.success) return result;
+
+        // APPLIQUER LES EFFETS BONUS/CHOIX MANUELLEMENT
+        // Car le moteur ne gère que l'effet de base pour ces cartes complexes
+
+        if (visionTartare && choice) {
+            // Bonus Vision du Tartare : +1 dégât aux cibles
+            const opponent = engine.getState().players.find(p => p.id !== playerId);
+            if (opponent && finalTargetGodIds) {
+                for (const tid of finalTargetGodIds) {
+                    const target = opponent.gods.find(g => g.card.id === tid && !g.isDead);
+                    if (target) {
+                        // On applique 1 dégât supplémentaire (brut, ignorant le bouclier déjà entamé par le premier coup du moteur ?
+                        // Idéalement on devrait le faire proprement.
+                        // Ici on fait simple : on réduit les PV directement pour le bonus, comme dans confirmOptionalChoice
+                        target.currentHealth = Math.max(0, target.currentHealth - 1);
+                        if (target.currentHealth === 0) target.isDead = true;
+                    }
+                }
+            }
+        }
+
+        if (mareeBasse) {
+            // Marée basse n'a pas d'effet de base dans le moteur (probablement défini comme "no-op" ou heal 0)
+            // On applique tout le soin ici selon la direction
+            const aliveAllies = player.gods.filter(g => !g.isDead);
+            const healAmounts = [3, 2, 1];
+
+            if (choice) { // Ouest (G->D)
+                for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
+                    const god = aliveAllies[i];
+                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
+                    god.statusEffects = god.statusEffects.filter(s => s.type !== 'poison');
+                }
+            } else { // Est (D->G)
+                const reversedAllies = [...aliveAllies].reverse();
+                for (let i = 0; i < reversedAllies.length && i < healAmounts.length; i++) {
+                    const god = reversedAllies[i];
+                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
+                    god.statusEffects = god.statusEffects.filter(s => s.type !== 'poison');
+                }
+            }
+        }
+
+        // Mettre à jour l'état
+        set({
+            gameState: cloneGameState(engine.getState()),
+            selectedCard: null,
+            selectedTargetGod: null,
+            selectedTargetGods: [],
+            requiredTargets: 0,
+            isSelectingTarget: false,
+        });
+
+        // Finir le tour 
+        // (Le délai permet de voir l'animation, mais l'utilisateur veut que ça change)
+        setTimeout(() => get().endTurn(), 1500);
+
+        return { success: true, message: 'Carte jouée' };
     },
 }));

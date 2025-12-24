@@ -99,7 +99,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         startDeadGodSelection,
         confirmDeadGodSelection,
         cancelDeadGodSelection,
-        // Zombie damage de fin de tour
+        // Dégâts zombie (fin de tour)
         isShowingZombieDamage,
         zombieDamageGodId,
         startZombieDamage,
@@ -112,6 +112,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         startGodSelection,
         confirmGodSelection,
         cancelGodSelection,
+        playCardWithChoice,
         // Sort copié (Perséphone ulti)
         pendingEnemyCardEffect,
         // IA
@@ -267,7 +268,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 return {
                     needed: true,
                     title: '🌊 Marée Basse',
-                    description: 'Choisissez la direction du flux lunaire :\n\n⬅️ Flux Ouest (Gauche → Droite)\nLe dieu le plus à gauche reçoit 3 PV, le suivant 2, le dernier 1.\n\n➡️ Flux Est (Droite → Gauche)\nLe dieu le plus à droite reçoit 3 PV, le précédent 2, le dernier 1.',
+                    description: 'Choisissez le sens du soin en cascade (3, 2, 1 PV).',
                     effectId: 'cascade_heal_choice'
                 };
             }
@@ -341,6 +342,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Modal de détail de carte
     const [showCardDetail, setShowCardDetail] = useState(false);
     const [isForcedDetail, setIsForcedDetail] = useState(false);
+    // Sélection directe des cartes adverses (au lieu du modal)
+    const [selectedEnemyCardIds, setSelectedEnemyCardIds] = useState<string[]>([]);
+    // Distribution de soins directe (au lieu du modal) - stocke le nombre de soins par dieu
+    const [healDistribution, setHealDistribution] = useState<Record<string, number>>({});
+    // Sélection directe de cartes de la défausse (au lieu du modal)
+    const [selectedDiscardCardIds, setSelectedDiscardCardIds] = useState<string[]>([]);
+    // Cible des dégâts zombie (fin de tour)
+    const [zombieDamageTargetId, setZombieDamageTargetId] = useState<string | null>(null);
 
     // Système de toast pour les messages d'erreur
     const [toast, setToast] = useState<{ message: string; type: 'warning' | 'error' | 'info' } | null>(null);
@@ -482,6 +491,161 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             setPendingCardForEnemySelection(null);
         }
     }, [pendingCardForEnemySelection, startEnemyCardSelection]);
+
+    // Effet pour réinitialiser la sélection directe quand on quitte le mode
+    useEffect(() => {
+        if (!isSelectingEnemyCards) {
+            setSelectedEnemyCardIds([]);
+        }
+    }, [isSelectingEnemyCards]);
+
+    // Effet pour confirmer automatiquement quand le bon nombre de cartes est sélectionné
+    useEffect(() => {
+        if (isSelectingEnemyCards && selectedEnemyCardIds.length === enemyCardSelectionCount) {
+            // Confirmer la sélection
+            confirmEnemyCardSelection(selectedEnemyCardIds);
+            setSelectedEnemyCardIds([]);
+        }
+    }, [selectedEnemyCardIds, isSelectingEnemyCards, enemyCardSelectionCount, confirmEnemyCardSelection]);
+
+    // Fonction pour toggle la sélection d'une carte adverse
+    const handleEnemyCardClick = (cardId: string) => {
+        if (!isSelectingEnemyCards) return;
+
+        setSelectedEnemyCardIds(prev => {
+            if (prev.includes(cardId)) {
+                // Désélectionner
+                return prev.filter(id => id !== cardId);
+            } else if (prev.length < enemyCardSelectionCount) {
+                // Sélectionner si on n'a pas atteint la limite
+                return [...prev, cardId];
+            }
+            return prev;
+        });
+    };
+
+    // Effet pour réinitialiser la distribution de soins quand on quitte le mode
+    useEffect(() => {
+        if (!isDistributingHeal) {
+            setHealDistribution({});
+        }
+    }, [isDistributingHeal]);
+
+    // Calculer le total de soins distribués
+    const totalHealDistributed = Object.values(healDistribution).reduce((sum, val) => sum + val, 0);
+
+    // Fonction pour ajouter un soin à un dieu (clic)
+    const handleHealGodClick = (godId: string) => {
+        if (!isDistributingHeal) return;
+        if (totalHealDistributed >= healDistributionTotal) return; // Déjà au max
+
+        setHealDistribution(prev => ({
+            ...prev,
+            [godId]: (prev[godId] || 0) + 1
+        }));
+    };
+
+    // Fonction pour réinitialiser la distribution
+    const handleResetHealDistribution = () => {
+        setHealDistribution({});
+    };
+
+    // Fonction pour confirmer la distribution de soins
+    const handleConfirmDirectHealDistribution = () => {
+        const distribution = Object.entries(healDistribution)
+            .filter(([, amount]) => amount > 0)
+            .map(([godId, amount]) => ({ godId, amount }));
+
+        confirmHealDistribution(distribution);
+        setHealDistribution({});
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
+        autoEndTurnMultiplayer();
+    };
+
+    // Effet pour réinitialiser la sélection de cartes de défausse quand on quitte le mode
+    useEffect(() => {
+        if (!isSelectingCards) {
+            setSelectedDiscardCardIds([]);
+        }
+    }, [isSelectingCards]);
+
+    // Fonction pour toggle la sélection d'une carte de la défausse
+    const handleDiscardCardSelect = (cardId: string) => {
+        if (!isSelectingCards) return;
+
+        setSelectedDiscardCardIds(prev => {
+            if (prev.includes(cardId)) {
+                // Désélectionner
+                return prev.filter(id => id !== cardId);
+            } else if (prev.length < cardSelectionCount) {
+                // Sélectionner si on n'a pas atteint la limite
+                return [...prev, cardId];
+            }
+            return prev;
+        });
+    };
+
+    // Fonction pour confirmer la sélection de cartes de défausse
+    const handleConfirmDirectCardSelection = () => {
+        const cards = getCardsForSelection().filter(c => selectedDiscardCardIds.includes(c.id));
+        confirmCardSelection(cards);
+        setSelectedDiscardCardIds([]);
+        if (pendingCardForOverlay) {
+            showPlayedCard(pendingCardForOverlay);
+            setPendingCardForOverlay(null);
+        }
+        autoEndTurnMultiplayer();
+    };
+
+    // Effet pour réinitialiser la cible zombie quand on quitte le mode
+    useEffect(() => {
+        if (!isShowingZombieDamage) {
+            setZombieDamageTargetId(null);
+        }
+    }, [isShowingZombieDamage]);
+
+    // Handler pour le clic sur un dieu mort (Perséphone)
+    const handleDeadGodClick = (godId: string) => {
+        if (isSelectingDeadGod) {
+            confirmDeadGodSelection(godId);
+            if (pendingCardForOverlay) {
+                showPlayedCard(pendingCardForOverlay);
+                setPendingCardForOverlay(null);
+            }
+            autoEndTurnMultiplayer();
+        }
+    };
+
+    // Handler pour le clic sur une cible zombie
+    const handleZombieTargetClick = (godId: string) => {
+        if (isShowingZombieDamage) {
+            if (zombieDamageTargetId === godId) {
+                setZombieDamageTargetId(null); // Désélectionner
+            } else {
+                setZombieDamageTargetId(godId);
+            }
+        }
+    };
+
+    // Handler pour confirmer les dégâts zombie
+    const handleConfirmDirectZombieDamage = () => {
+        // null si on passe (annuler/skip), id si on a choisi
+        // Mais ici le bouton confirmer ne sera actif que si une cible est choisie ou si on veut passer (bouton skip séparé)
+
+        // Si une cible est sélectionnée, on confirme
+        if (zombieDamageTargetId) {
+            confirmZombieDamage(zombieDamageTargetId);
+        } else {
+            // Si aucune cible, c'est comme passer le tour (si autorisé par les règles, mais le bouton "Confirmer" devrait être "Passer" dans ce cas ?)
+            // Généralement Zombie oblige à attaquer si possible. Le bouton Annuler/Passer appelera confirmZombieDamage(null).
+            confirmZombieDamage(null);
+        }
+        setZombieDamageTargetId(null);
+        autoEndTurnMultiplayer();
+    };
 
     // Effet pour détecter les changements de HP et afficher les animations
     useEffect(() => {
@@ -1307,23 +1471,51 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             )}
             {/* Zone adversaire */}
             <div className={styles.opponentZone}>
+                {/* Indicateur de sélection de cartes adverses */}
+                {isSelectingEnemyCards && (
+                    <div className={styles.enemySelectionIndicator}>
+                        <span>{enemyCardSelectionTitle}</span>
+                        <span className={styles.selectionProgress}>
+                            {selectedEnemyCardIds.length}/{enemyCardSelectionCount}
+                        </span>
+                        <button
+                            className={styles.cancelSelectionBtn}
+                            onClick={cancelEnemyCardSelection}
+                        >
+                            ❌ Annuler
+                        </button>
+                    </div>
+                )}
+
                 {/* Main de l'adversaire EN HAUT (dos de cartes ou face visible si effet Nyx) */}
                 <div className={styles.opponentHand}>
                     {opponent.hand.map((card, index) => {
                         // On peut voir la carte si elle a été révélée à notre playerId
                         const canSeeCard = card.revealedToPlayerId === playerId;
+                        const isCardSelected = selectedEnemyCardIds.includes(card.id);
+                        const isSelectable = isSelectingEnemyCards;
 
                         return canSeeCard ? (
                             // Carte visible pour nous (effet Nyx actif sur l'adversaire)
-                            <div key={card.id} className={styles.revealedEnemyCard}>
-                                <SpellCard card={card} isSelected={false} />
+                            <div
+                                key={card.id}
+                                className={`${styles.revealedEnemyCard} ${isSelectable ? styles.selectableCard : ''} ${isCardSelected ? styles.selectedEnemyCard : ''}`}
+                                onClick={() => isSelectable && handleEnemyCardClick(card.id)}
+                            >
+                                <SpellCard card={card} isSelected={isCardSelected} />
                                 <span className={styles.nyxRevealBadge}>👁️</span>
+                                {isCardSelected && <span className={styles.selectedBadge}>✓</span>}
                             </div>
                         ) : (
-                            // Dos de carte normal
-                            <div key={card.id || index} className={styles.cardBack}>
+                            // Dos de carte - maintenant cliquable si en mode sélection
+                            <div
+                                key={card.id || index}
+                                className={`${styles.cardBack} ${isSelectable ? styles.selectableCard : ''} ${isCardSelected ? styles.selectedEnemyCard : ''}`}
+                                onClick={() => isSelectable && handleEnemyCardClick(card.id)}
+                            >
                                 <span className={styles.cardBackIcon}>🎴</span>
                                 <span className={styles.cardBackNumber}>{index + 1}</span>
+                                {isCardSelected && <span className={styles.selectedBadge}>✓</span>}
                             </div>
                         );
                     })}
@@ -1332,38 +1524,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     )}
                 </div>
 
-                <div className={styles.godsRow}>
-                    {opponent.gods.map((god) => {
-                        // Vérifier si le sort a réellement besoin de cibler un ennemi
-                        const needsEnemyTarget = selectedCard?.effects.some(e =>
-                            e.target === 'enemy_god' ||
-                            e.target === 'any_god' ||
-                            (e.type === 'custom' && e.customEffectId === 'vision_tartare')
-                        );
-
-                        // Vérifier si ce dieu est une cible valide (en tenant compte de la provocation et du multi-ciblage)
-                        const validTargets = getValidEnemyTargets(isMultiTarget);
-                        const isValidTarget = needsEnemyTarget && validTargets.some(t => t.card.id === god.card.id);
-
-                        // Vérifier si c'est une cible obligatoire (provocateur)
-                        const isRequiredTarget = requiredEnemyTargets.some(t => t.card.id === god.card.id);
-
-                        const uniqueId = getUniqueGodId(god.card.id, true);
-                        return (
-                            <GodCard
-                                key={uniqueId}
-                                god={god}
-                                isEnemy
-                                isSelectable={isSelectingTarget && isValidTarget}
-                                isSelected={isTargetSelected(uniqueId)}
-                                isRequired={isSelectingTarget && isRequiredTarget && isMultiTarget}
-                                healthChange={healthChanges[god.card.id]}
-                                onClick={() => handleSingleTargetSelect(uniqueId)}
-                            />
-                        );
-                    })}
-                </div>
-
+                {/* Barre d'info adversaire - ENTRE la main et les dieux */}
                 <div className={styles.playerInfo}>
                     <span className={styles.playerName}>{opponent.name}</span>
                     <div className={styles.energy}>
@@ -1383,6 +1544,59 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         🗑️ {opponent.discard.length}
                     </button>
                 </div>
+
+                {/* Dieux adversaires EN BAS de leur zone */}
+                <div className={styles.godsRow}>
+                    {opponent.gods.map((god) => {
+                        // Vérifier si le sort a réellement besoin de cibler un ennemi
+                        const needsEnemyTarget = selectedCard?.effects.some(e =>
+                            e.target === 'enemy_god' ||
+                            e.target === 'any_god' ||
+                            (e.type === 'custom' && e.customEffectId === 'vision_tartare')
+                        );
+
+                        // Vérifier si ce dieu est une cible valide (en tenant compte de la provocation et du multi-ciblage)
+                        const validTargets = getValidEnemyTargets(isMultiTarget);
+                        const isValidTarget = needsEnemyTarget && validTargets.some(t => t.card.id === god.card.id);
+
+                        // Vérifier si c'est une cible obligatoire (provocateur)
+                        const isRequiredTarget = requiredEnemyTargets.some(t => t.card.id === god.card.id);
+
+                        // Sélection de dieu (Zéphyr Vent de Face) - dieu ennemi sélectionnable si mode actif et targetType permet
+                        const isGodSelectableForZephyr = isSelectingGod && !god.isDead &&
+                            (godSelectionTargetType === 'any' || godSelectionTargetType === 'enemy');
+
+                        // Sélection de cible pour dégâts Zombie
+                        const isGodSelectableForZombie = isShowingZombieDamage && !god.isDead;
+                        const isZombieTarget = zombieDamageTargetId === god.card.id;
+
+                        const uniqueId = getUniqueGodId(god.card.id, true);
+                        return (
+                            <div key={uniqueId} className={styles.godContainer}>
+                                <GodCard
+                                    god={god}
+                                    isEnemy
+                                    isSelectable={(isSelectingTarget && isValidTarget) || isGodSelectableForZephyr || isGodSelectableForZombie}
+                                    isSelected={isTargetSelected(uniqueId) || isZombieTarget}
+                                    isRequired={isSelectingTarget && isRequiredTarget && isMultiTarget}
+                                    healthChange={healthChanges[god.card.id]}
+                                    onClick={() => {
+                                        if (isGodSelectableForZombie) {
+                                            handleZombieTargetClick(god.card.id);
+                                        } else if (isGodSelectableForZephyr) {
+                                            handleConfirmGodSelection(god.card.id);
+                                        } else {
+                                            handleSingleTargetSelect(uniqueId);
+                                        }
+                                    }}
+                                />
+                                {isZombieTarget && (
+                                    <span className={styles.targetBadge}>🎯</span>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Overlay de la carte jouée au centre du terrain */}
@@ -1396,6 +1610,133 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
             {/* Zone centrale - Informations de jeu */}
             <div className={styles.centerZone}>
+                {/* Indicateur de sélection de dieu (Zéphyr Vent de Face) */}
+                {isSelectingGod && (
+                    <div className={styles.godSelectionIndicator}>
+                        <span>💨 {godSelectionTitle}</span>
+                        <button
+                            className={styles.cancelSelectionBtn}
+                            onClick={cancelGodSelection}
+                        >
+                            ❌ Annuler
+                        </button>
+                    </div>
+                )}
+
+                {/* Indicateur de sélection de dieu mort (Perséphone Brûlure Rémanente) */}
+                {isSelectingDeadGod && (
+                    <div className={`${styles.godSelectionIndicator} ${styles.deadGodIndicator}`}>
+                        <span>💀 {deadGodSelectionTitle}</span>
+                        <button
+                            className={styles.cancelSelectionBtn}
+                            onClick={cancelDeadGodSelection}
+                        >
+                            ❌ Annuler
+                        </button>
+                    </div>
+                )}
+
+                {/* Indicateur de dégâts Zombie */}
+                {isShowingZombieDamage && (
+                    <div className={styles.zombieDamageIndicator}>
+                        <span className={styles.zombieTitle}>🧟 Dégâts Zombie</span>
+                        <span className={styles.zombieInstruction}>
+                            {zombieDamageTargetId
+                                ? "Cible sélectionnée : prêt à attaquer"
+                                : "Choisissez une cible ennemie pour infliger 10 dégâts"}
+                        </span>
+                        <div className={styles.zombieButtons}>
+                            <button
+                                className={styles.zombieSkipBtn}
+                                onClick={() => confirmZombieDamage(null)}
+                            >
+                                ⏭️ Passer
+                            </button>
+                            <button
+                                className={styles.zombieConfirmBtn}
+                                onClick={handleConfirmDirectZombieDamage}
+                                disabled={!zombieDamageTargetId}
+                            >
+                                ⚔️ Attaquer
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Indicateur de distribution de soins (Fertilisation) */}
+                {isDistributingHeal && (
+                    <div className={styles.healDistributionIndicator}>
+                        <span className={styles.healTitle}>🌿 Fertilisation</span>
+                        <span className={styles.healProgress}>
+                            💚 Soin conféré {totalHealDistributed}/{healDistributionTotal}
+                        </span>
+                        <div className={styles.healButtons}>
+                            <button
+                                className={styles.resetHealBtn}
+                                onClick={handleResetHealDistribution}
+                                disabled={totalHealDistributed === 0}
+                            >
+                                🔄 Réinitialiser
+                            </button>
+                            <button
+                                className={styles.confirmHealBtn}
+                                onClick={handleConfirmDirectHealDistribution}
+                                disabled={totalHealDistributed === 0}
+                            >
+                                ✅ Confirmer
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Sélection de cartes de la défausse (Repos mérité, Prophétie, etc.) */}
+                {isSelectingCards && (
+                    <div className={styles.discardSelectionZone}>
+                        <div className={styles.discardSelectionHeader}>
+                            <span className={styles.discardSelectionTitle}>{cardSelectionTitle}</span>
+                            <span className={styles.discardSelectionProgress}>
+                                {selectedDiscardCardIds.length}/{cardSelectionCount}
+                            </span>
+                        </div>
+
+                        <div className={styles.discardCardsScroll}>
+                            {getCardsForSelection().map(card => (
+                                <div
+                                    key={card.id}
+                                    className={`${styles.discardSelectableCard} ${selectedDiscardCardIds.includes(card.id) ? styles.discardCardSelected : ''}`}
+                                    onClick={() => handleDiscardCardSelect(card.id)}
+                                >
+                                    <SpellCard card={card} isSelected={selectedDiscardCardIds.includes(card.id)} isSmall />
+                                    {selectedDiscardCardIds.includes(card.id) && (
+                                        <span className={styles.discardSelectedBadge}>✓</span>
+                                    )}
+                                </div>
+                            ))}
+                            {getCardsForSelection().length === 0 && (
+                                <span className={styles.emptyDiscardText}>Aucune carte disponible</span>
+                            )}
+                        </div>
+
+                        <div className={styles.discardSelectionButtons}>
+                            {pendingCardSelectionEffect !== 'put_cards_bottom' && (
+                                <button
+                                    className={styles.discardCancelBtn}
+                                    onClick={cancelCardSelection}
+                                >
+                                    ❌ Annuler
+                                </button>
+                            )}
+                            <button
+                                className={styles.discardConfirmBtn}
+                                onClick={handleConfirmDirectCardSelection}
+                                disabled={selectedDiscardCardIds.length !== cardSelectionCount}
+                            >
+                                ✅ Confirmer
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <div className={styles.turnInfo}>
                     <span className={styles.turnNumber}>Tour {gameState.turnNumber}</span>
                     <div className={styles.turnRow}>
@@ -1463,30 +1804,28 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         }
                         {
                             canConfirm && selectedCard && needsLightningChoice(selectedCard) && (
-                                <div className={styles.lightningChoice}>
-                                    <p>⚡ Que voulez-vous faire avec les marques de foudre ?</p>
-                                    <div className={styles.lightningButtons}>
-                                        <button
-                                            className={styles.lightningApply}
-                                            onClick={() => {
-                                                setLightningAction('apply');
-                                                handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
-                                                setWantsToPlay(false);
-                                            }}
-                                        >
-                                            ⚡ Appliquer des marques
-                                        </button>
-                                        <button
-                                            className={styles.lightningRemove}
-                                            onClick={() => {
-                                                setLightningAction('remove');
-                                                handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
-                                                setWantsToPlay(false);
-                                            }}
-                                        >
-                                            💥 Retirer & infliger dégâts
-                                        </button>
-                                    </div>
+                                <div className={styles.lightningChoiceCompact}>
+                                    <span className={styles.lightningLabel}>⚡ Marque de foudre :</span>
+                                    <button
+                                        className={styles.lightningApplyBtn}
+                                        onClick={() => {
+                                            setLightningAction('apply');
+                                            handlePlayCard(selectedCard.id, undefined, undefined, 'apply');
+                                            setWantsToPlay(false);
+                                        }}
+                                    >
+                                        ⚡ Appliquer
+                                    </button>
+                                    <button
+                                        className={styles.lightningRemoveBtn}
+                                        onClick={() => {
+                                            setLightningAction('remove');
+                                            handlePlayCard(selectedCard.id, undefined, undefined, 'remove');
+                                            setWantsToPlay(false);
+                                        }}
+                                    >
+                                        💥 Retirer
+                                    </button>
                                 </div>
                             )
                         }
@@ -1514,8 +1853,43 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 </div>
                             )
                         }
+
+                        {/* Choix optionnel (Vision du Tartare / Marée Basse) */}
                         {
-                            canConfirm && selectedCard && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard) && (
+                            canConfirm && selectedCard && getOptionalChoiceRequired(selectedCard) && (
+                                <div className={styles.optionalChoiceContainer}>
+                                    <div className={styles.optionalInfo}>
+                                        <p className={styles.optionalTitle}>{getOptionalChoiceRequired(selectedCard)?.title}</p>
+                                        <p className={styles.optionalDesc}>{getOptionalChoiceRequired(selectedCard)?.description}</p>
+                                    </div>
+                                    <div className={styles.optionalButtons}>
+                                        <button
+                                            className={styles.confirmOptionalBtn}
+                                            onClick={() => {
+                                                const res = playCardWithChoice(selectedCard.id, undefined, selectedTargetGods.map(t => t.card.id), true);
+                                                if (res.success) setWantsToPlay(false);
+                                                else setToast({ type: 'error', message: res.message });
+                                            }}
+                                        >
+                                            {getOptionalChoiceRequired(selectedCard)?.effectId === 'vision_tartare' ? '🩸 Oui (+1 Dégât, -2 Cartes)' : '⬅️ Ouest (G → D)'}
+                                        </button>
+                                        <button
+                                            className={styles.cancelOptionalBtn}
+                                            onClick={() => {
+                                                const res = playCardWithChoice(selectedCard.id, undefined, selectedTargetGods.map(t => t.card.id), false);
+                                                if (res.success) setWantsToPlay(false);
+                                                else setToast({ type: 'error', message: res.message });
+                                            }}
+                                        >
+                                            {getOptionalChoiceRequired(selectedCard)?.effectId === 'vision_tartare' ? '🛡️ Non (Standard)' : '➡️ Est (D → G)'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {
+                            canConfirm && selectedCard && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard) && !getOptionalChoiceRequired(selectedCard) && (
                                 <button className={styles.confirmButton} onClick={handleConfirmPlay}>
                                     ✅ Confirmer ({selectedTargetGods.length} cible{selectedTargetGods.length > 1 ? 's' : ''})
                                 </button>
@@ -1593,16 +1967,42 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             isValidAllyTarget = true;
                         }
 
+                        // Sélection de dieu (Zéphyr Vent de Face) - dieu allié sélectionnable si mode actif et targetType permet
+                        const isGodSelectableForZephyr = isSelectingGod && !god.isDead &&
+                            (godSelectionTargetType === 'any' || godSelectionTargetType === 'ally');
+
+                        // Distribution de soins (Fertilisation) - dieu allié sélectionnable si mode actif et pas mort
+                        const isGodSelectableForHeal = isDistributingHeal && !god.isDead && totalHealDistributed < healDistributionTotal;
+                        const healAssigned = healDistribution[god.card.id] || 0;
+
+                        // Sélection de dieu mort (Perséphone Brûlure Rémanente) - dieu mort non-zombie sélectionnable
+                        const isDeadGodSelectable = isSelectingDeadGod && god.isDead && !god.isZombie;
+
                         const uniqueId = getUniqueGodId(god.card.id, false);
                         return (
-                            <GodCard
-                                key={uniqueId}
-                                god={god}
-                                isSelectable={isSelectingTarget && isValidAllyTarget}
-                                isSelected={isTargetSelected(uniqueId)}
-                                healthChange={healthChanges[god.card.id]}
-                                onClick={() => handleSingleTargetSelect(uniqueId)}
-                            />
+                            <div key={uniqueId} className={styles.godWithHealBadge}>
+                                <GodCard
+                                    god={god}
+                                    isSelectable={(isSelectingTarget && isValidAllyTarget) || isGodSelectableForZephyr || isGodSelectableForHeal || isDeadGodSelectable}
+                                    isSelected={isTargetSelected(uniqueId)}
+                                    healthChange={healthChanges[god.card.id]}
+                                    onClick={() => {
+                                        if (isGodSelectableForHeal) {
+                                            handleHealGodClick(god.card.id);
+                                        } else if (isGodSelectableForZephyr) {
+                                            handleConfirmGodSelection(god.card.id);
+                                        } else if (isDeadGodSelectable) {
+                                            handleDeadGodClick(god.card.id);
+                                        } else {
+                                            handleSingleTargetSelect(uniqueId);
+                                        }
+                                    }}
+                                />
+                                {/* Badge de soins assignés */}
+                                {isDistributingHeal && healAssigned > 0 && (
+                                    <span className={styles.healAssignedBadge}>+{healAssigned}💚</span>
+                                )}
+                            </div>
                         );
                     })}
                 </div>
@@ -1663,9 +2063,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 </div>
             </div >
 
-            {/* Barre d'action mobile - s'affiche quand une carte est sélectionnée */}
+            {/* Barre d'action mobile - s'affiche quand une carte est sélectionnée (mais pas si le modal de détail est ouvert) */}
             {
-                selectedCard && isPlayerTurn && !isSelectingTarget && (
+                selectedCard && isPlayerTurn && !isSelectingTarget && !showCardDetail && (
                     <div className={styles.mobileActionBar}>
                         <div className={styles.selectedCardInfo}>
                             <span className={styles.selectedCardName}>{selectedCard.name}</span>
@@ -1692,36 +2092,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 )
             }
 
-            {/* Modal de sélection de cartes */}
-            <CardSelectionModal
-                isOpen={isSelectingCards}
-                title={cardSelectionTitle}
-                cards={getCardsForSelection()}
-                requiredCount={cardSelectionCount}
-                onConfirm={handleConfirmCardSelection}
-                // Désactiver l'annulation pour les effets obligatoires comme put_cards_bottom
-                onCancel={pendingCardSelectionEffect === 'put_cards_bottom' ? undefined : cancelCardSelection}
-            />
+            {/* Modal de sélection de cartes - DÉSACTIVÉ: sélection directe dans la zone centrale */}
+            {/* Anciennement: CardSelectionModal */}
 
-            {/* Modal de distribution de soins */}
-            <HealDistributionModal
-                isOpen={isDistributingHeal}
-                totalHeal={healDistributionTotal}
-                allies={player.gods.filter(g => !g.isDead)}
-                onConfirm={handleConfirmHealDistribution}
-                onCancel={cancelHealDistribution}
-            />
+            {/* Modal de distribution de soins - DÉSACTIVÉ: sélection directe sur les dieux alliés */}
+            {/* Anciennement: HealDistributionModal */}
 
-            {/* Modal de sélection de cartes adverses (Nyx) */}
-            <CardSelectionModal
-                isOpen={isSelectingEnemyCards}
-                title={enemyCardSelectionTitle}
-                cards={opponent.hand}
-                requiredCount={enemyCardSelectionCount}
-                onConfirm={(cards) => handleConfirmEnemyCardSelection(cards.map(c => c.id))}
-                onCancel={cancelEnemyCardSelection}
-                blindMode={true}
-            />
+            {/* Modal de sélection de cartes adverses (Nyx) - DÉSACTIVÉ: sélection directe sur les dos de carte */}
+            {/* Anciennement: CardSelectionModal avec blindMode={true} */}
 
             {/* Modal de détail de carte */}
             <CardDetailModal
@@ -1764,34 +2142,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 onCancel={cancelPlayerSelection}
             />
 
-            {/* Modal de sélection de dieu mort (Perséphone Brûlure Rémanente) */}
-            <DeadGodSelectionModal
-                isOpen={isSelectingDeadGod}
-                title={deadGodSelectionTitle}
-                deadGods={player?.gods.filter(g => g.isDead && !g.isZombie) || []}
-                onSelectGod={handleConfirmDeadGodSelection}
-                onCancel={cancelDeadGodSelection}
-            />
+            {/* Modal de sélection de dieu mort (Perséphone Brûlure Rémanente) - DÉSACTIVÉ: sélection directe sur le terrain */}
+            {/* Anciennement: DeadGodSelectionModal */}
 
-            {/* Modal de dégâts zombie (fin de tour) */}
-            <ZombieDamageModal
-                isOpen={isShowingZombieDamage}
-                zombieGod={zombieForModal || null}
-                enemyGods={opponent?.gods || []}
-                onSelectTarget={handleConfirmZombieDamage}
-                onSkip={() => handleConfirmZombieDamage(null)}
-            />
+            {/* Modal de dégâts zombie (fin de tour) - DÉSACTIVÉ: sélection directe sur le terrain */}
+            {/* Anciennement: ZombieDamageModal */}
 
-            {/* Modal de sélection de dieu vivant (Zéphyr Vent de Face) */}
-            <GodSelectionModal
-                isOpen={isSelectingGod}
-                title={godSelectionTitle}
-                allyGods={player?.gods || []}
-                enemyGods={opponent?.gods || []}
-                targetType={godSelectionTargetType}
-                onSelectGod={handleConfirmGodSelection}
-                onCancel={cancelGodSelection}
-            />
+            {/* Modal de sélection de dieu vivant (Zéphyr Vent de Face) - DÉSACTIVÉ: sélection directe sur le terrain */}
+            {/* Anciennement: GodSelectionModal */}
 
             {/* Toast de notification */}
             {

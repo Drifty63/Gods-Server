@@ -126,21 +126,5 @@ export default function GamePage() {
     }
 
     // Phase: Jeu en cours
-    return (
-        <main className={styles.main}>
-            {/* Header */}
-            <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>
-                    ← Retour
-                </Link>
-                <h1 className={styles.title}>GODS</h1>
-                <button onClick={handleNewGame} className={styles.resetButton}>
-                    🔄 Nouvelle partie
-                </button>
-            </header>
-
-            {/* Plateau de jeu */}
-            <GameBoard />
-        </main>
-    );
+    return <GameBoard />;
 }

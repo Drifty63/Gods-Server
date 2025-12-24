@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Cinzel, Cinzel_Decorative } from "next/font/google";
 import "./globals.css";
 
 import GlobalUI from "@/components/GlobalUI/GlobalUI";
@@ -8,6 +8,18 @@ import { AuthProvider } from "@/contexts/AuthContext";
 const inter = Inter({
   subsets: ["latin"],
   variable: '--font-inter',
+});
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  variable: '--font-cinzel',
+  weight: ['400', '500', '600', '700', '800', '900'],
+});
+
+const cinzelDecorative = Cinzel_Decorative({
+  subsets: ["latin"],
+  variable: '--font-cinzel-decorative',
+  weight: ['400', '700', '900'],
 });
 
 export const metadata: Metadata = {
@@ -29,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={inter.variable}>
+      <body className={`${inter.variable} ${cinzel.variable} ${cinzelDecorative.variable}`}>
         <AuthProvider>
           <GlobalUI />
           {children}

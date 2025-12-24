@@ -5,8 +5,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: 100px;
-  height: 130px;
+  /* Cartes de dieux légèrement plus grandes que les SpellCard */
+  width: 82px;
+  height: 115px;
   border-radius: 8px;
   background:
     linear-gradient(145deg, #0d0d1f 0%, #1a1a3a 50%, #16213e 100%);
@@ -17,6 +18,7 @@
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
+  flex-shrink: 0;
 }
 
 /* Bordure dorée supérieure */
@@ -503,8 +505,9 @@
    ================================ */
 @media (max-width: 768px) {
   .card {
-    width: 140px;
-    height: 200px;
+    /* Tablette - dieux légèrement plus grands */
+    width: 82px;
+    height: 115px;
   }
 
   .name {
@@ -525,7 +528,7 @@
   }
 
   .healthBar {
-    height: 20px;
+    height: 16px;
   }
 
   .healthText {
@@ -540,55 +543,14 @@
 
 @media (max-width: 480px) {
   .card {
-    width: 80px;
-    height: 105px;
-  }
-
-  .elementBadge {
-    font-size: 0.8rem;
-    padding: 1px 3px;
-  }
-
-  .healthOverlay {
-    padding: 3px 4px;
-    gap: 3px;
-  }
-
-  .healthBar {
-    height: 14px;
-  }
-
-  .healthText {
-    font-size: 0.5rem;
-  }
-
-  .weaknessBadge {
-    font-size: 0.75rem;
-  }
-
-  .statusEffects {
-    padding: 0 4px 2px;
-    gap: 2px;
-  }
-
-  .statusBadge {
-    font-size: 0.45rem;
-    padding: 1px 3px;
-  }
-}
-
-/* Très petits écrans (360px et moins) */
-@media (max-width: 380px) {
-  .card {
+    /* Mobile - dieux légèrement plus grands que SpellCard */
     width: 68px;
-    height: 88px;
+    height: 95px;
   }
 
   .elementBadge {
     font-size: 0.7rem;
     padding: 1px 2px;
-    top: 2px;
-    left: 2px;
   }
 
   .healthOverlay {
@@ -598,15 +560,58 @@
 
   .healthBar {
     height: 12px;
-    border-radius: 6px;
   }
 
   .healthText {
-    font-size: 0.4rem;
+    font-size: 0.45rem;
   }
 
   .weaknessBadge {
     font-size: 0.65rem;
+  }
+
+  .statusEffects {
+    padding: 0 3px 1px;
+    gap: 1px;
+  }
+
+  .statusBadge {
+    font-size: 0.4rem;
+    padding: 1px 2px;
+  }
+}
+
+/* Très petits écrans (360px et moins) */
+@media (max-width: 380px) {
+  .card {
+    /* Très petit mobile - dieux légèrement plus grands */
+    width: 56px;
+    height: 80px;
+  }
+
+  .elementBadge {
+    font-size: 0.6rem;
+    padding: 1px 2px;
+    top: 2px;
+    left: 2px;
+  }
+
+  .healthOverlay {
+    padding: 2px 2px;
+    gap: 2px;
+  }
+
+  .healthBar {
+    height: 10px;
+    border-radius: 5px;
+  }
+
+  .healthText {
+    font-size: 0.35rem;
+  }
+
+  .weaknessBadge {
+    font-size: 0.55rem;
   }
 
   .statusEffects {
@@ -615,7 +620,7 @@
   }
 
   .statusBadge {
-    font-size: 0.35rem;
+    font-size: 0.3rem;
     padding: 0px 2px;
   }
 }
