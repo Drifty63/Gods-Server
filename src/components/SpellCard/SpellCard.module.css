@@ -570,3 +570,264 @@
         font-size: 0.45rem;
     }
 }
+
+/* ================================
+   #5 PARTICLE EFFECTS - Particules élémentaires
+   ================================ */
+.cardParticles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 10;
+}
+
+/* Particules de feu */
+.cardParticles.fire::before,
+.cardParticles.fire::after {
+    content: '🔥';
+    position: absolute;
+    font-size: 0.7rem;
+    animation: particleFire 1.5s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+.cardParticles.fire::before {
+    top: -5px;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.cardParticles.fire::after {
+    top: -8px;
+    right: 15%;
+    animation-delay: 0.5s;
+}
+
+@keyframes particleFire {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: translateY(-8px) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Particules d'eau */
+.cardParticles.water::before,
+.cardParticles.water::after {
+    content: '💧';
+    position: absolute;
+    font-size: 0.6rem;
+    animation: particleWater 2s ease-in-out infinite;
+}
+
+.cardParticles.water::before {
+    top: 0;
+    left: 5%;
+    animation-delay: 0s;
+}
+
+.cardParticles.water::after {
+    top: -5px;
+    right: 10%;
+    animation-delay: 0.7s;
+}
+
+@keyframes particleWater {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translateY(-6px) rotate(10deg);
+        opacity: 1;
+    }
+}
+
+/* Particules de foudre */
+.cardParticles.lightning::before,
+.cardParticles.lightning::after {
+    content: '⚡';
+    position: absolute;
+    font-size: 0.8rem;
+    animation: particleLightning 0.8s ease-in-out infinite;
+}
+
+.cardParticles.lightning::before {
+    top: -6px;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.cardParticles.lightning::after {
+    top: -4px;
+    right: 20%;
+    animation-delay: 0.4s;
+}
+
+@keyframes particleLightning {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Particules de terre */
+.cardParticles.earth::before,
+.cardParticles.earth::after {
+    content: '🌿';
+    position: absolute;
+    font-size: 0.6rem;
+    animation: particleEarth 2.5s ease-in-out infinite;
+}
+
+.cardParticles.earth::before {
+    bottom: -4px;
+    left: 10%;
+}
+
+.cardParticles.earth::after {
+    bottom: -3px;
+    right: 10%;
+    animation-delay: 1s;
+}
+
+@keyframes particleEarth {
+
+    0%,
+    100% {
+        transform: rotate(-5deg) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: rotate(5deg) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Particules d'air */
+.cardParticles.air::before,
+.cardParticles.air::after {
+    content: '💨';
+    position: absolute;
+    font-size: 0.6rem;
+    animation: particleAir 1.8s ease-in-out infinite;
+}
+
+.cardParticles.air::before {
+    top: -4px;
+    left: 0;
+}
+
+.cardParticles.air::after {
+    top: 50%;
+    right: -4px;
+    animation-delay: 0.6s;
+}
+
+@keyframes particleAir {
+    0% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translateX(4px) rotate(15deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 0.5;
+    }
+}
+
+/* Particules de lumière */
+.cardParticles.light::before,
+.cardParticles.light::after {
+    content: '✨';
+    position: absolute;
+    font-size: 0.7rem;
+    animation: particleLight 1.2s ease-in-out infinite;
+}
+
+.cardParticles.light::before {
+    top: -6px;
+    left: 30%;
+}
+
+.cardParticles.light::after {
+    top: -4px;
+    right: 25%;
+    animation-delay: 0.4s;
+}
+
+@keyframes particleLight {
+
+    0%,
+    100% {
+        transform: scale(0.8) rotate(0deg);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.1) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+/* Particules de ténèbres */
+.cardParticles.darkness::before,
+.cardParticles.darkness::after {
+    content: '💀';
+    position: absolute;
+    font-size: 0.6rem;
+    animation: particleDarkness 2s ease-in-out infinite;
+}
+
+.cardParticles.darkness::before {
+    top: -4px;
+    left: 15%;
+}
+
+.cardParticles.darkness::after {
+    top: -6px;
+    right: 15%;
+    animation-delay: 0.8s;
+}
+
+@keyframes particleDarkness {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.5;
+        filter: brightness(0.8);
+    }
+
+    50% {
+        transform: translateY(-4px) scale(1.1);
+        opacity: 1;
+        filter: brightness(1.2);
+    }
+}

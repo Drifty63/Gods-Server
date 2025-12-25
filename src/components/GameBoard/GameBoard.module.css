@@ -2572,3 +2572,764 @@
         height: 72px;
     }
 }
+
+/* ================================
+   #1 SCREEN SHAKE - Effet de tremblement
+   ================================ */
+@keyframes screenShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10% {
+        transform: translateX(-8px) rotate(-0.5deg);
+    }
+
+    20% {
+        transform: translateX(8px) rotate(0.5deg);
+    }
+
+    30% {
+        transform: translateX(-6px) rotate(-0.3deg);
+    }
+
+    40% {
+        transform: translateX(6px) rotate(0.3deg);
+    }
+
+    50% {
+        transform: translateX(-4px);
+    }
+
+    60% {
+        transform: translateX(4px);
+    }
+
+    70% {
+        transform: translateX(-2px);
+    }
+
+    80% {
+        transform: translateX(2px);
+    }
+
+    90% {
+        transform: translateX(-1px);
+    }
+}
+
+.boardShaking {
+    animation: screenShake 0.5s ease-out;
+}
+
+/* Shake léger pour petits dégâts */
+@keyframes screenShakeLight {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
+
+    75% {
+        transform: translateX(-2px);
+    }
+}
+
+.boardShakingLight {
+    animation: screenShakeLight 0.3s ease-out;
+}
+
+/* ================================
+   #2 DAMAGE NUMBERS - Chiffres flottants
+   ================================ */
+.damageNumber {
+    position: absolute;
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    text-shadow:
+        2px 2px 0 #000,
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        0 0 10px currentColor;
+    pointer-events: none;
+    z-index: 1000;
+    animation: damageFloat 1.2s ease-out forwards;
+}
+
+.damageNumber.damage {
+    color: #ef4444;
+}
+
+.damageNumber.heal {
+    color: #22c55e;
+}
+
+.damageNumber.critical {
+    color: #f59e0b;
+    font-size: 2.2rem;
+    animation: damageCritical 1.2s ease-out forwards;
+}
+
+@keyframes damageFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.5);
+    }
+
+    20% {
+        transform: translateY(-20px) scale(1.2);
+    }
+
+    40% {
+        transform: translateY(-40px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(0.8);
+    }
+}
+
+@keyframes damageCritical {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.3) rotate(-10deg);
+    }
+
+    15% {
+        transform: translateY(-15px) scale(1.5) rotate(5deg);
+    }
+
+    30% {
+        transform: translateY(-30px) scale(1.1) rotate(-3deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-90px) scale(0.9) rotate(0deg);
+    }
+}
+
+/* Container pour les damage numbers */
+.damageNumbersContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    overflow: visible;
+}
+
+/* ================================
+   #4 TURN TRANSITION - Bannière de tour
+   ================================ */
+.turnTransitionOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    animation: fadeInOut 1.8s ease-in-out forwards;
+    pointer-events: none;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.turnTransitionBanner {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 8px;
+    padding: 20px 60px;
+    border-radius: 8px;
+    animation: bannerSlide 1.8s ease-out forwards;
+}
+
+.turnTransitionBanner.playerTurn {
+    color: #ffd700;
+    background: linear-gradient(145deg, rgba(212, 175, 55, 0.3), rgba(161, 134, 42, 0.2));
+    border: 3px solid rgba(212, 175, 55, 0.8);
+    box-shadow:
+        0 0 30px rgba(212, 175, 55, 0.5),
+        inset 0 0 30px rgba(212, 175, 55, 0.1);
+    text-shadow:
+        0 0 20px rgba(212, 175, 55, 0.8),
+        0 0 40px rgba(212, 175, 55, 0.5);
+}
+
+.turnTransitionBanner.enemyTurn {
+    color: #ef4444;
+    background: linear-gradient(145deg, rgba(220, 38, 38, 0.3), rgba(185, 28, 28, 0.2));
+    border: 3px solid rgba(220, 38, 38, 0.8);
+    box-shadow:
+        0 0 30px rgba(220, 38, 38, 0.5),
+        inset 0 0 30px rgba(220, 38, 38, 0.1);
+    text-shadow:
+        0 0 20px rgba(220, 38, 38, 0.8),
+        0 0 40px rgba(220, 38, 38, 0.5);
+}
+
+@keyframes bannerSlide {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-30px);
+    }
+
+    20% {
+        opacity: 1;
+        transform: scale(1.1) translateY(0);
+    }
+
+    30% {
+        transform: scale(1) translateY(0);
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+}
+
+/* ================================
+   #5 PARTICLE EFFECTS - Particules sur cartes
+   ================================ */
+.cardWithParticles {
+    position: relative;
+}
+
+.cardParticles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 10;
+}
+
+/* Particules de feu */
+.cardParticles.fire::before,
+.cardParticles.fire::after {
+    content: '🔥';
+    position: absolute;
+    font-size: 0.8rem;
+    animation: particleFire 1.5s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+.cardParticles.fire::before {
+    top: -5px;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.cardParticles.fire::after {
+    top: -8px;
+    right: 15%;
+    animation-delay: 0.5s;
+}
+
+@keyframes particleFire {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: translateY(-10px) scale(1.2);
+        opacity: 1;
+    }
+}
+
+/* Particules d'eau */
+.cardParticles.water::before,
+.cardParticles.water::after {
+    content: '💧';
+    position: absolute;
+    font-size: 0.7rem;
+    animation: particleWater 2s ease-in-out infinite;
+}
+
+.cardParticles.water::before {
+    top: 0;
+    left: 5%;
+    animation-delay: 0s;
+}
+
+.cardParticles.water::after {
+    top: -5px;
+    right: 10%;
+    animation-delay: 0.7s;
+}
+
+@keyframes particleWater {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(10deg);
+        opacity: 1;
+    }
+}
+
+/* Particules de foudre */
+.cardParticles.lightning::before,
+.cardParticles.lightning::after {
+    content: '⚡';
+    position: absolute;
+    font-size: 0.9rem;
+    animation: particleLightning 0.8s ease-in-out infinite;
+}
+
+.cardParticles.lightning::before {
+    top: -8px;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.cardParticles.lightning::after {
+    top: -5px;
+    right: 20%;
+    animation-delay: 0.4s;
+}
+
+@keyframes particleLightning {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.3);
+    }
+}
+
+/* Particules de terre */
+.cardParticles.earth::before,
+.cardParticles.earth::after {
+    content: '🌿';
+    position: absolute;
+    font-size: 0.7rem;
+    animation: particleEarth 2.5s ease-in-out infinite;
+}
+
+.cardParticles.earth::before {
+    bottom: -5px;
+    left: 10%;
+}
+
+.cardParticles.earth::after {
+    bottom: -3px;
+    right: 10%;
+    animation-delay: 1s;
+}
+
+@keyframes particleEarth {
+
+    0%,
+    100% {
+        transform: rotate(-5deg) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: rotate(5deg) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Particules d'air */
+.cardParticles.air::before,
+.cardParticles.air::after {
+    content: '💨';
+    position: absolute;
+    font-size: 0.7rem;
+    animation: particleAir 1.8s ease-in-out infinite;
+}
+
+.cardParticles.air::before {
+    top: -5px;
+    left: 0;
+}
+
+.cardParticles.air::after {
+    top: 50%;
+    right: -5px;
+    animation-delay: 0.6s;
+}
+
+@keyframes particleAir {
+    0% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translateX(5px) rotate(15deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 0.5;
+    }
+}
+
+/* Particules de lumière */
+.cardParticles.light::before,
+.cardParticles.light::after {
+    content: '✨';
+    position: absolute;
+    font-size: 0.8rem;
+    animation: particleLight 1.2s ease-in-out infinite;
+}
+
+.cardParticles.light::before {
+    top: -8px;
+    left: 30%;
+}
+
+.cardParticles.light::after {
+    top: -5px;
+    right: 25%;
+    animation-delay: 0.4s;
+}
+
+@keyframes particleLight {
+
+    0%,
+    100% {
+        transform: scale(0.8) rotate(0deg);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+/* Particules de ténèbres */
+.cardParticles.darkness::before,
+.cardParticles.darkness::after {
+    content: '💀';
+    position: absolute;
+    font-size: 0.7rem;
+    animation: particleDarkness 2s ease-in-out infinite;
+}
+
+.cardParticles.darkness::before {
+    top: -5px;
+    left: 15%;
+}
+
+.cardParticles.darkness::after {
+    top: -8px;
+    right: 15%;
+    animation-delay: 0.8s;
+}
+
+@keyframes particleDarkness {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.5;
+        filter: brightness(0.8);
+    }
+
+    50% {
+        transform: translateY(-5px) scale(1.1);
+        opacity: 1;
+        filter: brightness(1.2);
+    }
+}
+
+/* ================================
+   #8 STATUS EFFECTS - Effets visuels sur dieux
+   ================================ */
+.godStatusOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Poison - Aura verte toxique */
+.godStatusOverlay.poison {
+    box-shadow: inset 0 0 15px rgba(34, 197, 94, 0.6);
+    animation: statusPoison 2s ease-in-out infinite;
+}
+
+.godStatusOverlay.poison::before {
+    content: '☠️';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.9rem;
+    animation: statusIconPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes statusPoison {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 15px rgba(34, 197, 94, 0.4);
+    }
+
+    50% {
+        box-shadow: inset 0 0 25px rgba(34, 197, 94, 0.7);
+    }
+}
+
+/* Foudre - Étincelles électriques */
+.godStatusOverlay.lightning {
+    box-shadow: inset 0 0 15px rgba(234, 179, 8, 0.6);
+    animation: statusLightning 0.5s ease-in-out infinite;
+}
+
+.godStatusOverlay.lightning::before {
+    content: '⚡';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.9rem;
+    animation: statusIconFlash 0.3s ease-in-out infinite;
+}
+
+@keyframes statusLightning {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 10px rgba(234, 179, 8, 0.3);
+    }
+
+    50% {
+        box-shadow: inset 0 0 20px rgba(234, 179, 8, 0.8);
+    }
+}
+
+@keyframes statusIconFlash {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Bouclier - Aura protectrice bleue */
+.godStatusOverlay.shield {
+    box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.6);
+    border: 2px solid rgba(59, 130, 246, 0.5);
+    animation: statusShield 2s ease-in-out infinite;
+}
+
+.godStatusOverlay.shield::before {
+    content: '🛡️';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.9rem;
+    animation: statusIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusShield {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+
+    50% {
+        box-shadow: inset 0 0 25px rgba(59, 130, 246, 0.7);
+    }
+}
+
+/* Provocation - Aura rouge menaçante */
+.godStatusOverlay.provocation {
+    box-shadow: inset 0 0 15px rgba(220, 38, 38, 0.6);
+    animation: statusProvocation 1s ease-in-out infinite;
+}
+
+.godStatusOverlay.provocation::before {
+    content: '🗡️';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.9rem;
+}
+
+@keyframes statusProvocation {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 10px rgba(220, 38, 38, 0.4);
+    }
+
+    50% {
+        box-shadow: inset 0 0 20px rgba(220, 38, 38, 0.8);
+    }
+}
+
+/* Stun - Effet gelé/paralysé */
+.godStatusOverlay.stun {
+    box-shadow: inset 0 0 20px rgba(147, 197, 253, 0.7);
+    background: rgba(147, 197, 253, 0.15);
+    animation: statusStun 1.5s ease-in-out infinite;
+}
+
+.godStatusOverlay.stun::before {
+    content: '❄️';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.9rem;
+}
+
+@keyframes statusStun {
+
+    0%,
+    100% {
+        filter: brightness(0.9);
+    }
+
+    50% {
+        filter: brightness(1.1);
+    }
+}
+
+/* Régénération - Aura verte de soin */
+.godStatusOverlay.regen {
+    box-shadow: inset 0 0 15px rgba(34, 197, 94, 0.5);
+    animation: statusRegen 2s ease-in-out infinite;
+}
+
+.godStatusOverlay.regen::before {
+    content: '💚';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.9rem;
+    animation: statusIconPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes statusRegen {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+
+    50% {
+        box-shadow: inset 0 0 20px rgba(34, 197, 94, 0.6);
+    }
+}
+
+/* Animation commune pour les icônes de statut */
+@keyframes statusIconPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
+/* Faiblesse temporaire */
+.godStatusOverlay.weakness {
+    box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.5);
+}
+
+.godStatusOverlay.weakness::before {
+    content: '💔';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.9rem;
+}
+
+/* Multi-status: plusieurs statuts empilés */
+.godStatusIcons {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 20;
+}
+
+.godStatusIcon {
+    font-size: 0.75rem;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    padding: 1px 3px;
+    animation: statusIconPulse 2s ease-in-out infinite;
+}

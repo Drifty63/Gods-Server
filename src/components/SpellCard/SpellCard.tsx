@@ -105,6 +105,11 @@ export default function SpellCard({
                     ▶
                 </div>
             )}
+
+            {/* #5 - Particules élémentaires (quand la carte est jouable) */}
+            {canPlay && (
+                <div className={`${styles.cardParticles} ${styles[card.element]}`} />
+            )}
         </div>
     );
 }

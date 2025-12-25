@@ -27,7 +27,7 @@
     overflow: hidden;
     position: relative;
     border: 3px solid var(--glow-color, #ffd700);
-    box-shadow: 
+    box-shadow:
         0 0 20px var(--glow-color, #ffd700),
         0 0 40px rgba(0, 0, 0, 0.5),
         inset 0 0 20px rgba(0, 0, 0, 0.3);
@@ -36,12 +36,13 @@
 
 @keyframes portraitGlow {
     from {
-        box-shadow: 
+        box-shadow:
             0 0 20px var(--glow-color, #ffd700),
             0 0 40px rgba(0, 0, 0, 0.5);
     }
+
     to {
-        box-shadow: 
+        box-shadow:
             0 0 30px var(--glow-color, #ffd700),
             0 0 60px var(--glow-color, #ffd700);
     }
@@ -96,7 +97,7 @@
     padding: 20px 24px;
     position: relative;
     backdrop-filter: blur(10px);
-    box-shadow: 
+    box-shadow:
         0 10px 40px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
@@ -155,9 +156,12 @@
 }
 
 @keyframes bounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-5px);
     }
@@ -214,5 +218,217 @@
     .dialogueText {
         font-size: 1rem;
         min-height: 50px;
+    }
+}
+
+/* ================================
+   #7 DIALOGUE ANIMATIONS - Entrée/Sortie personnages
+   ================================ */
+
+/* Animation d'entrée du portrait depuis la gauche */
+.portraitEnter {
+    animation: portraitSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes portraitSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-80px) scale(0.8) rotate(-10deg);
+    }
+
+    60% {
+        transform: translateX(10px) scale(1.05) rotate(2deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotate(0deg);
+    }
+}
+
+/* Animation de sortie du portrait */
+.portraitExit {
+    animation: portraitSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes portraitSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50px) scale(0.8);
+    }
+}
+
+/* Animation d'entrée de la boîte de dialogue depuis le bas */
+.dialogueBoxEnter {
+    animation: dialogueSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation-delay: 0.1s;
+    opacity: 0;
+}
+
+@keyframes dialogueSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Animation quand le personnage change (new speaker) */
+.newSpeaker {
+    animation: speakerChange 0.4s ease-out;
+}
+
+@keyframes speakerChange {
+    0% {
+        transform: scale(1);
+    }
+
+    30% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Animation du texte qui apparaît mot par mot (optionnel enhancement) */
+.textReveal {
+    animation: textFadeIn 0.3s ease-out;
+}
+
+@keyframes textFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Effet de parole - légère animation quand le personnage parle */
+.speaking {
+    animation: speakingPulse 0.15s ease-in-out;
+}
+
+@keyframes speakingPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+/* Animation du nom du personnage */
+.speakerNameEnter {
+    animation: nameSlideIn 0.3s ease-out;
+}
+
+@keyframes nameSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Effet de respiration sur le portrait (idle) */
+.portraitIdle {
+    animation: portraitBreathing 3s ease-in-out infinite;
+}
+
+@keyframes portraitBreathing {
+
+    0%,
+    100% {
+        transform: scale(1) translateY(0);
+    }
+
+    50% {
+        transform: scale(1.01) translateY(-2px);
+    }
+}
+
+/* Flash dramatique pour les moments importants */
+.dramaticMoment {
+    animation: dramaticFlash 0.6s ease-out;
+}
+
+@keyframes dramaticFlash {
+    0% {
+        filter: brightness(1);
+    }
+
+    20% {
+        filter: brightness(1.8);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
+}
+
+/* Tremblement pour les moments de colère */
+.angryShake {
+    animation: angryShake 0.4s ease-out;
+}
+
+@keyframes angryShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10% {
+        transform: translateX(-4px) rotate(-1deg);
+    }
+
+    20% {
+        transform: translateX(4px) rotate(1deg);
+    }
+
+    30% {
+        transform: translateX(-4px) rotate(-1deg);
+    }
+
+    40% {
+        transform: translateX(4px) rotate(1deg);
+    }
+
+    50% {
+        transform: translateX(-2px);
+    }
+
+    60% {
+        transform: translateX(2px);
+    }
+
+    70% {
+        transform: translateX(-1px);
+    }
+
+    80% {
+        transform: translateX(1px);
     }
 }

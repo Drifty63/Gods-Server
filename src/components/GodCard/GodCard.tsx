@@ -36,6 +36,7 @@ export default function GodCard({
                 '--element-gradient': colors.gradient,
             } as React.CSSProperties}
             onClick={isSelectable ? onClick : undefined}
+            data-god-id={card.id}
         >
             {/* Image du dieu avec barre de vie overlay */}
             <div className={styles.imageContainer}>

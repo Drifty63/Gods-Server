@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import styles from './DialogueBox.module.css';
 import { DialogueLine } from '@/types/story';
@@ -51,8 +51,31 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
     const [isTyping, setIsTyping] = useState(true);
     const [showContinue, setShowContinue] = useState(false);
 
+    // #7 - Animation states
+    const [isNewSpeaker, setIsNewSpeaker] = useState(true);
+    const [animationKey, setAnimationKey] = useState(0);
+    const previousSpeakerRef = useRef<string | null>(null);
+
     const currentDialogue = dialogues[currentIndex];
     const isLastDialogue = currentIndex >= dialogues.length - 1;
+
+    // #7 - Détecter changement de speaker pour animer
+    useEffect(() => {
+        if (!currentDialogue) return;
+
+        const currentSpeaker = currentDialogue.speakerId;
+        const previousSpeaker = previousSpeakerRef.current;
+
+        // Si le speaker a changé, déclencher l'animation d'entrée
+        if (currentSpeaker !== previousSpeaker) {
+            setIsNewSpeaker(true);
+            setAnimationKey(prev => prev + 1);
+            // Reset après l'animation
+            const timer = setTimeout(() => setIsNewSpeaker(false), 500);
+            previousSpeakerRef.current = currentSpeaker;
+            return () => clearTimeout(timer);
+        }
+    }, [currentDialogue]);
 
     // Effet de machine à écrire
     useEffect(() => {
@@ -111,14 +134,22 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
     const portraitUrl = GOD_PORTRAITS[currentDialogue.speakerId] || '/cards/gods/zeus.png';
     const glowColor = GOD_COLORS[currentDialogue.speakerId] || '#ffd700';
 
+    // #7 - Classes dynamiques pour les animations
+    const portraitClasses = `${styles.portrait} ${isNewSpeaker ? styles.portraitEnter : styles.portraitIdle}`;
+    const dialogueBoxClasses = `${styles.dialogueBox} ${isNewSpeaker ? styles.dialogueBoxEnter : ''}`;
+    const speakerNameClasses = `${styles.speakerName} ${isNewSpeaker ? styles.speakerNameEnter : ''}`;
+    // Animation spéciale pour les émotions fortes
+    const emotionClasses = currentDialogue.emotion === 'angry' ? styles.angryShake : '';
+
     return (
         <div className={styles.dialogueContainer} onClick={handleClick}>
-            {/* Portrait du personnage */}
+            {/* Portrait du personnage avec animation */}
             <div
-                className={styles.portraitWrapper}
+                key={`portrait-${animationKey}`}
+                className={`${styles.portraitWrapper} ${emotionClasses}`}
                 style={{ '--glow-color': glowColor } as React.CSSProperties}
             >
-                <div className={styles.portrait}>
+                <div className={portraitClasses}>
                     <Image
                         src={portraitUrl}
                         alt={currentDialogue.speakerName}
@@ -126,14 +157,14 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
                         className={styles.portraitImage}
                     />
                 </div>
-                <div className={`styles.emotionIndicator ${styles[currentDialogue.emotion || 'neutral']}`} />
+                <div className={`${styles.emotionIndicator} ${styles[currentDialogue.emotion || 'neutral']}`} />
             </div>
 
-            {/* Boîte de dialogue */}
-            <div className={styles.dialogueBox}>
+            {/* Boîte de dialogue avec animation */}
+            <div key={`dialogue-${animationKey}`} className={dialogueBoxClasses}>
                 {/* Nom du personnage */}
                 <div
-                    className={styles.speakerName}
+                    className={speakerNameClasses}
                     style={{ color: glowColor }}
                 >
                     {currentDialogue.speakerName}
@@ -163,3 +194,4 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
         </div>
     );
 }
+

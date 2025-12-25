@@ -14,6 +14,9 @@ import PlayerSelectionModal from '@/components/PlayerSelectionModal/PlayerSelect
 import DeadGodSelectionModal from '@/components/DeadGodSelectionModal/DeadGodSelectionModal';
 import GodSelectionModal from '@/components/GodSelectionModal/GodSelectionModal';
 import ZombieDamageModal from '@/components/ZombieDamageModal/ZombieDamageModal';
+import DamageNumber from './DamageNumber';
+import TurnTransition from './TurnTransition';
+import { useCombatAnimations, useGameStateAnimations } from './useCombatAnimations';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { recordVictory, recordDefeat, recordGodsPlayed } from '@/services/firebase';
@@ -122,6 +125,10 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     // Récupérer l'utilisateur connecté pour enregistrer les stats
     const { user, refreshProfile } = useAuth();
+
+    // #1, #2, #4 - Animations de combat
+    const combatAnimations = useCombatAnimations();
+    useGameStateAnimations(gameState, playerId, combatAnimations);
 
     // Helper local pour la détection fiable du choix de foudre
     const needsLightningChoice = (card: import('@/types/cards').SpellCard): boolean => {
@@ -1408,7 +1415,30 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     };
 
     return (
-        <div className={styles.board}>
+        <div className={`${styles.board} ${combatAnimations.isShaking ? (combatAnimations.shakeIntensity === 'light' ? styles.boardShakingLight : styles.boardShaking) : ''}`}>
+            {/* #4 - Turn Transition Overlay */}
+            {combatAnimations.showTurnTransition && (
+                <TurnTransition
+                    isPlayerTurn={combatAnimations.isPlayerTurnTransition}
+                    onComplete={combatAnimations.hideTurnTransition}
+                />
+            )}
+
+            {/* #2 - Damage Numbers Container */}
+            <div className={styles.damageNumbersContainer}>
+                {combatAnimations.damageNumbers.map(dn => (
+                    <DamageNumber
+                        key={dn.id}
+                        id={dn.id}
+                        amount={dn.amount}
+                        type={dn.type}
+                        x={dn.x}
+                        y={dn.y}
+                        onComplete={combatAnimations.removeDamageNumber}
+                    />
+                ))}
+            </div>
+
             {/* Modal de Défausse */}
             {viewDiscard && (
                 <div className={styles.modalOverlay} onClick={() => setViewDiscard(null)}>
