@@ -311,6 +311,11 @@ export default function GlobalUI() {
                         <h2>⚙️ Options</h2>
 
                         <div className={styles.optionsContent}>
+                            {/* Bouton Retour à l'accueil */}
+                            <Link href="/" className={styles.homeButton} onClick={closeOptionsModal}>
+                                🏠 Retour à l&apos;accueil
+                            </Link>
+
                             {/* Section Audio */}
                             <div className={styles.optionsSection}>
                                 <h3 className={styles.optionsSectionTitle}>

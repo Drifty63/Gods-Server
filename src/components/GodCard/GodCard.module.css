@@ -439,64 +439,323 @@
 }
 
 /* ================================
-   ANIMATION DE DÉGÂTS/SOINS
+   #1 ANIMATION SHAKE - Quand le dieu reçoit des dégâts
    ================================ */
-.healthChangeAnimation {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Cinzel', serif;
-  font-size: 2.8rem;
-  font-weight: 900;
-  z-index: 100;
-  text-shadow:
-    0 2px 10px rgba(0, 0, 0, 1),
-    0 0 30px currentColor;
-  pointer-events: none;
-  animation: healthChangeFloat 4s ease-out forwards;
-}
+@keyframes godShake {
 
-.healthChangeAnimation.damage {
-  color: #ff3333;
-  text-shadow:
-    0 2px 10px rgba(0, 0, 0, 1),
-    0 0 25px rgba(255, 51, 51, 0.9),
-    0 0 50px rgba(255, 51, 51, 0.6);
-}
-
-.healthChangeAnimation.heal {
-  color: #00ff66;
-  text-shadow:
-    0 2px 10px rgba(0, 0, 0, 1),
-    0 0 25px rgba(0, 255, 102, 0.9),
-    0 0 50px rgba(0, 255, 102, 0.6);
-}
-
-@keyframes healthChangeFloat {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.3);
+  0%,
+  100% {
+    transform: translateX(0);
   }
 
   10% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.4);
+    transform: translateX(-6px) rotate(-2deg);
   }
 
   20% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translateX(6px) rotate(2deg);
+  }
+
+  30% {
+    transform: translateX(-5px) rotate(-1deg);
+  }
+
+  40% {
+    transform: translateX(5px) rotate(1deg);
+  }
+
+  50% {
+    transform: translateX(-3px);
+  }
+
+  60% {
+    transform: translateX(3px);
+  }
+
+  70% {
+    transform: translateX(-2px);
   }
 
   80% {
+    transform: translateX(2px);
+  }
+
+  90% {
+    transform: translateX(-1px);
+  }
+}
+
+.shaking {
+  animation: godShake 0.5s ease-out;
+}
+
+/* Shake léger pour petits dégâts */
+@keyframes godShakeLight {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-3px);
+  }
+
+  50% {
+    transform: translateX(3px);
+  }
+
+  75% {
+    transform: translateX(-2px);
+  }
+}
+
+.shakingLight {
+  animation: godShakeLight 0.3s ease-out;
+}
+
+/* ================================
+   #4 PARTICULES ÉLÉMENTAIRES - Sur le dieu ciblé
+   ================================ */
+.elementParticles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 50;
+}
+
+/* Particules de feu */
+.elementParticles.fire::before,
+.elementParticles.fire::after {
+  content: '🔥';
+  position: absolute;
+  font-size: 1rem;
+  animation: particleFireGod 0.8s ease-out forwards;
+}
+
+.elementParticles.fire::before {
+  top: 20%;
+  left: 10%;
+}
+
+.elementParticles.fire::after {
+  top: 30%;
+  right: 10%;
+  animation-delay: 0.1s;
+}
+
+@keyframes particleFireGod {
+  0% {
     opacity: 1;
-    transform: translate(-50%, -80%) scale(1);
+    transform: translateY(0) scale(1.5);
   }
 
   100% {
     opacity: 0;
-    transform: translate(-50%, -150%) scale(0.8);
+    transform: translateY(-30px) scale(0.5);
+  }
+}
+
+/* Particules d'eau */
+.elementParticles.water::before,
+.elementParticles.water::after {
+  content: '💧';
+  position: absolute;
+  font-size: 0.9rem;
+  animation: particleWaterGod 0.8s ease-out forwards;
+}
+
+.elementParticles.water::before {
+  top: 15%;
+  left: 15%;
+}
+
+.elementParticles.water::after {
+  top: 25%;
+  right: 15%;
+  animation-delay: 0.15s;
+}
+
+@keyframes particleWaterGod {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1.3);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.5);
+  }
+}
+
+/* Particules de foudre */
+.elementParticles.lightning::before,
+.elementParticles.lightning::after {
+  content: '⚡';
+  position: absolute;
+  font-size: 1.2rem;
+  animation: particleLightningGod 0.6s ease-out forwards;
+}
+
+.elementParticles.lightning::before {
+  top: 10%;
+  left: 20%;
+}
+
+.elementParticles.lightning::after {
+  top: 20%;
+  right: 20%;
+  animation-delay: 0.1s;
+}
+
+@keyframes particleLightningGod {
+  0% {
+    opacity: 1;
+    transform: scale(2);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+/* Particules de terre */
+.elementParticles.earth::before,
+.elementParticles.earth::after {
+  content: '🌿';
+  position: absolute;
+  font-size: 0.9rem;
+  animation: particleEarthGod 0.8s ease-out forwards;
+}
+
+.elementParticles.earth::before {
+  bottom: 30%;
+  left: 10%;
+}
+
+.elementParticles.earth::after {
+  bottom: 35%;
+  right: 10%;
+  animation-delay: 0.1s;
+}
+
+@keyframes particleEarthGod {
+  0% {
+    opacity: 1;
+    transform: scale(1.5) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(30deg);
+  }
+}
+
+/* Particules d'air */
+.elementParticles.air::before,
+.elementParticles.air::after {
+  content: '💨';
+  position: absolute;
+  font-size: 0.9rem;
+  animation: particleAirGod 0.7s ease-out forwards;
+}
+
+.elementParticles.air::before {
+  top: 20%;
+  left: 0;
+}
+
+.elementParticles.air::after {
+  top: 30%;
+  right: 0;
+  animation-delay: 0.1s;
+}
+
+@keyframes particleAirGod {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1.3);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(20px) scale(0.5);
+  }
+}
+
+/* Particules de lumière */
+.elementParticles.light::before,
+.elementParticles.light::after {
+  content: '✨';
+  position: absolute;
+  font-size: 1rem;
+  animation: particleLightGod 0.8s ease-out forwards;
+}
+
+.elementParticles.light::before {
+  top: 15%;
+  left: 25%;
+}
+
+.elementParticles.light::after {
+  top: 25%;
+  right: 25%;
+  animation-delay: 0.15s;
+}
+
+@keyframes particleLightGod {
+  0% {
+    opacity: 1;
+    transform: scale(1.5) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(180deg);
+  }
+}
+
+/* Particules de ténèbres */
+.elementParticles.darkness::before,
+.elementParticles.darkness::after {
+  content: '💀';
+  position: absolute;
+  font-size: 0.9rem;
+  animation: particleDarknessGod 0.8s ease-out forwards;
+}
+
+.elementParticles.darkness::before {
+  top: 20%;
+  left: 15%;
+}
+
+.elementParticles.darkness::after {
+  top: 30%;
+  right: 15%;
+  animation-delay: 0.1s;
+}
+
+@keyframes particleDarknessGod {
+  0% {
+    opacity: 1;
+    transform: scale(1.5);
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+    filter: brightness(0.5);
   }
 }
 

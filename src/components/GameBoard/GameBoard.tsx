@@ -128,7 +128,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
     // #1, #2, #4 - Animations de combat
     const combatAnimations = useCombatAnimations();
-    useGameStateAnimations(gameState, playerId, combatAnimations);
+    const [lastPlayedElement, setLastPlayedElement] = useState<import('@/types/cards').Element | null>(null);
+    useGameStateAnimations(gameState, playerId, combatAnimations, lastPlayedElement);
 
     // Helper local pour la détection fiable du choix de foudre
     const needsLightningChoice = (card: import('@/types/cards').SpellCard): boolean => {
@@ -1415,7 +1416,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     };
 
     return (
-        <div className={`${styles.board} ${combatAnimations.isShaking ? (combatAnimations.shakeIntensity === 'light' ? styles.boardShakingLight : styles.boardShaking) : ''}`}>
+        <div className={styles.board}>
             {/* #4 - Turn Transition Overlay */}
             {combatAnimations.showTurnTransition && (
                 <TurnTransition
@@ -1609,7 +1610,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                     isSelectable={(isSelectingTarget && isValidTarget) || isGodSelectableForZephyr || isGodSelectableForZombie}
                                     isSelected={isTargetSelected(uniqueId) || isZombieTarget}
                                     isRequired={isSelectingTarget && isRequiredTarget && isMultiTarget}
-                                    healthChange={healthChanges[god.card.id]}
+                                    isShaking={combatAnimations.shakingGods.has(god.card.id)}
+                                    shakeIntensity={combatAnimations.shakingGods.get(god.card.id) || 'normal'}
+                                    showParticle={combatAnimations.particleGods.get(god.card.id) || null}
                                     onClick={() => {
                                         if (isGodSelectableForZombie) {
                                             handleZombieTargetClick(god.card.id);
@@ -2015,7 +2018,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                     god={god}
                                     isSelectable={(isSelectingTarget && isValidAllyTarget) || isGodSelectableForZephyr || isGodSelectableForHeal || isDeadGodSelectable}
                                     isSelected={isTargetSelected(uniqueId)}
-                                    healthChange={healthChanges[god.card.id]}
+                                    isShaking={combatAnimations.shakingGods.has(god.card.id)}
+                                    shakeIntensity={combatAnimations.shakingGods.get(god.card.id) || 'normal'}
+                                    showParticle={combatAnimations.particleGods.get(god.card.id) || null}
                                     onClick={() => {
                                         if (isGodSelectableForHeal) {
                                             handleHealGodClick(god.card.id);

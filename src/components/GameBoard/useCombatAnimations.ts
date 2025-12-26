@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { GameState } from '@/types/cards';
+import { GameState, Element } from '@/types/cards';
 
 interface DamageNumberData {
     id: string;
@@ -11,18 +11,33 @@ interface DamageNumberData {
     y: number;
 }
 
-interface UseCombatAnimationsReturn {
-    // Screen shake
-    isShaking: boolean;
-    shakeIntensity: 'light' | 'normal';
-    triggerShake: (intensity?: 'light' | 'normal') => void;
+// #1 - Shake data pour chaque dieu
+interface GodShakeData {
+    godId: string;
+    intensity: 'light' | 'normal';
+}
 
-    // Damage numbers
+// #4 - Particule data pour chaque dieu
+interface GodParticleData {
+    godId: string;
+    element: Element;
+}
+
+interface UseCombatAnimationsReturn {
+    // #1 God shake (remplace screen shake)
+    shakingGods: Map<string, 'light' | 'normal'>;
+    triggerGodShake: (godId: string, intensity?: 'light' | 'normal') => void;
+
+    // #4 Element particles on god
+    particleGods: Map<string, Element>;
+    triggerGodParticle: (godId: string, element: Element) => void;
+
+    // #2 Damage numbers
     damageNumbers: DamageNumberData[];
     addDamageNumber: (godId: string, amount: number, type: 'damage' | 'heal' | 'critical') => void;
     removeDamageNumber: (id: string) => void;
 
-    // Turn transition
+    // #4 Turn transition
     showTurnTransition: boolean;
     isPlayerTurnTransition: boolean;
     triggerTurnTransition: (isPlayerTurn: boolean) => void;
@@ -31,12 +46,14 @@ interface UseCombatAnimationsReturn {
 
 /**
  * Hook personnalisé pour gérer toutes les animations de combat
- * Inclut: screen shake (#1), damage numbers (#2), turn transition (#4)
+ * Inclut: god shake (#1), damage numbers (#2), turn transition (#4), element particles (#4)
  */
 export function useCombatAnimations(): UseCombatAnimationsReturn {
-    // #1 - Screen Shake state
-    const [isShaking, setIsShaking] = useState(false);
-    const [shakeIntensity, setShakeIntensity] = useState<'light' | 'normal'>('normal');
+    // #1 - God Shake state (par dieu)
+    const [shakingGods, setShakingGods] = useState<Map<string, 'light' | 'normal'>>(new Map());
+
+    // #4 - Particules élémentaires (par dieu)
+    const [particleGods, setParticleGods] = useState<Map<string, Element>>(new Map());
 
     // #2 - Damage Numbers state
     const [damageNumbers, setDamageNumbers] = useState<DamageNumberData[]>([]);
@@ -46,25 +63,48 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
     const [showTurnTransition, setShowTurnTransition] = useState(false);
     const [isPlayerTurnTransition, setIsPlayerTurnTransition] = useState(true);
 
-    // Ref pour stocker les positions des dieux
-    const godPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+    // #1 - Trigger god shake
+    const triggerGodShake = useCallback((godId: string, intensity: 'light' | 'normal' = 'normal') => {
+        setShakingGods(prev => {
+            const newMap = new Map(prev);
+            newMap.set(godId, intensity);
+            return newMap;
+        });
 
-    // #1 - Trigger screen shake
-    const triggerShake = useCallback((intensity: 'light' | 'normal' = 'normal') => {
-        setShakeIntensity(intensity);
-        setIsShaking(true);
-
-        // Durée de l'animation shake
+        // Retirer le shake après l'animation
         const duration = intensity === 'light' ? 300 : 500;
-        setTimeout(() => setIsShaking(false), duration);
+        setTimeout(() => {
+            setShakingGods(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(godId);
+                return newMap;
+            });
+        }, duration);
+    }, []);
+
+    // #4 - Trigger god particle
+    const triggerGodParticle = useCallback((godId: string, element: Element) => {
+        setParticleGods(prev => {
+            const newMap = new Map(prev);
+            newMap.set(godId, element);
+            return newMap;
+        });
+
+        // Retirer les particules après l'animation (800ms)
+        setTimeout(() => {
+            setParticleGods(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(godId);
+                return newMap;
+            });
+        }, 800);
     }, []);
 
     // #2 - Add damage number
     const addDamageNumber = useCallback((godId: string, amount: number, type: 'damage' | 'heal' | 'critical') => {
         const id = `dmg-${damageIdCounter.current++}`;
 
-        // Trouver la position du dieu (on utilisera le centre par défaut)
-        // En pratique, on devrait récupérer la position via un ref sur le composant GodCard
+        // Trouver la position du dieu
         const godElement = document.querySelector(`[data-god-id="${godId}"]`);
         let x = window.innerWidth / 2;
         let y = window.innerHeight / 2;
@@ -103,10 +143,13 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
     }, []);
 
     return {
-        // Screen shake
-        isShaking,
-        shakeIntensity,
-        triggerShake,
+        // God shake
+        shakingGods,
+        triggerGodShake,
+
+        // Element particles
+        particleGods,
+        triggerGodParticle,
 
         // Damage numbers
         damageNumbers,
@@ -127,7 +170,8 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
 export function useGameStateAnimations(
     gameState: GameState | null,
     playerId: string,
-    animations: UseCombatAnimationsReturn
+    animations: UseCombatAnimationsReturn,
+    lastPlayedElement?: Element | null // Élément de la dernière carte jouée
 ) {
     const previousStateRef = useRef<GameState | null>(null);
     const previousTurnRef = useRef<string | null>(null);
@@ -144,7 +188,7 @@ export function useGameStateAnimations(
         }
         previousTurnRef.current = gameState.currentPlayerId;
 
-        // Détecter les dégâts pour les damage numbers et screen shake (#1, #2)
+        // Détecter les dégâts pour les damage numbers, god shake et particules (#1, #2, #4)
         if (previousState) {
             // Comparer les HP de chaque dieu
             for (const player of gameState.players) {
@@ -164,9 +208,12 @@ export function useGameStateAnimations(
                             const type = amount >= 5 ? 'critical' : 'damage';
                             animations.addDamageNumber(god.card.id, amount, type);
 
-                            // Screen shake pour les dégâts
-                            if (player.id === playerId) {
-                                animations.triggerShake(amount >= 4 ? 'normal' : 'light');
+                            // #1 - Shake sur la carte du dieu qui reçoit les dégâts
+                            animations.triggerGodShake(god.card.id, amount >= 4 ? 'normal' : 'light');
+
+                            // #4 - Particules élémentaires sur le dieu ciblé
+                            if (lastPlayedElement) {
+                                animations.triggerGodParticle(god.card.id, lastPlayedElement);
                             }
                         } else {
                             // Soins reçus
@@ -179,5 +226,6 @@ export function useGameStateAnimations(
 
         // Stocker l'état actuel pour la prochaine comparaison
         previousStateRef.current = JSON.parse(JSON.stringify(gameState));
-    }, [gameState, playerId, animations]);
+    }, [gameState, playerId, animations, lastPlayedElement]);
 }
+

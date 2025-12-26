@@ -1,6 +1,6 @@
 'use client';
 
-import { GodCard as GodCardType, GodState } from '@/types/cards';
+import { GodState, Element } from '@/types/cards';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
 import Image from 'next/image';
 import styles from './GodCard.module.css';
@@ -11,7 +11,9 @@ interface GodCardProps {
     isSelectable?: boolean;
     isSelected?: boolean;
     isRequired?: boolean; // Cible obligatoire (provocateur)
-    healthChange?: number; // Animation de dégâts/soins
+    isShaking?: boolean; // #1 Animation shake
+    shakeIntensity?: 'light' | 'normal'; // #1 Intensité du shake
+    showParticle?: Element | null; // #4 Élément des particules à afficher
     onClick?: () => void;
 }
 
@@ -21,16 +23,23 @@ export default function GodCard({
     isSelectable = false,
     isSelected = false,
     isRequired = false,
-    healthChange,
+    isShaking = false,
+    shakeIntensity = 'normal',
+    showParticle = null,
     onClick
 }: GodCardProps) {
     const { card, currentHealth, statusEffects, isDead } = god;
     const colors = ELEMENT_COLORS[card.element];
     const healthPercentage = (currentHealth / card.maxHealth) * 100;
 
+    // #1 Classe de shake dynamique
+    const shakeClass = isShaking
+        ? (shakeIntensity === 'light' ? styles.shakingLight : styles.shaking)
+        : '';
+
     return (
         <div
-            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''} ${isEnemy ? styles.enemy : ''}`}
+            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''} ${isEnemy ? styles.enemy : ''} ${shakeClass}`}
             style={{
                 '--element-color': colors.primary,
                 '--element-gradient': colors.gradient,
@@ -70,11 +79,9 @@ export default function GodCard({
                     </div>
                 )}
 
-                {/* Animation de dégâts/soins */}
-                {healthChange !== undefined && healthChange !== 0 && (
-                    <div className={`${styles.healthChangeAnimation} ${healthChange > 0 ? styles.heal : styles.damage}`}>
-                        {healthChange > 0 ? `+${healthChange}` : healthChange}
-                    </div>
+                {/* #4 Particules élémentaires quand le dieu reçoit des dégâts */}
+                {showParticle && (
+                    <div className={`${styles.elementParticles} ${styles[showParticle]}`} />
                 )}
 
                 {/* Barre de vie en bas de l'image avec faiblesse */}
@@ -142,4 +149,5 @@ function getStatusIcon(status: string): string {
         default: return '✨';
     }
 }
+
 

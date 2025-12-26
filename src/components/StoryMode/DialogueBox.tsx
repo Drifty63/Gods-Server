@@ -157,7 +157,6 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
                         className={styles.portraitImage}
                     />
                 </div>
-                <div className={`${styles.emotionIndicator} ${styles[currentDialogue.emotion || 'neutral']}`} />
             </div>
 
             {/* Boîte de dialogue avec animation */}
