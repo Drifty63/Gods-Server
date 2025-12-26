@@ -26,6 +26,7 @@ export interface BattleConfig {
     enemyDeckMultiplier?: number;  // Multiplicateur des cartes du deck ennemi
     playerCondition?: BattleCondition;  // Condition spéciale pour le joueur
     enemyCondition?: BattleCondition;   // Condition spéciale pour l'ennemi
+    maxTurns?: number;             // Limite de tours pour gagner (défaite si dépassé)
     continueOnDefeat: boolean;     // L'histoire continue même en cas de défaite
     rewards?: StoryReward[];
 }

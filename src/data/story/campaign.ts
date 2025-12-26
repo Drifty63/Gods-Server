@@ -222,7 +222,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         battle: {
             id: 'battle_test_of_valor',
             name: "Test de Bravoure",
-            description: "Déméter et Artémis vous testent. Prouvez votre valeur !",
+            description: "Déméter et Artémis vous testent. Prouvez votre valeur en moins de 20 tours !",
             playerTeam: ['zeus', 'hestia'],
             enemyTeam: ['demeter', 'artemis'],
             deckMultiplier: 2,           // x2 pour le joueur
@@ -232,6 +232,7 @@ const chapter1Battle3Events: StoryEvent[] = [
                 description: "Zeus est immobilisé par les racines de Déméter pendant 2 tours !",
                 duration: 2  // 2 tours de stun au lieu de 1
             },
+            maxTurns: 20,                // Condition: gagner en 20 tours max
             continueOnDefeat: false,     // Doit gagner pour continuer
             rewards: [
                 {

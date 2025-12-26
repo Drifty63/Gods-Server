@@ -250,12 +250,8 @@ function StoryBattleContent() {
     useEffect(() => {
         if (!gameState || phase !== 'playing') return;
 
-        // Vérifier que le jeu est vraiment terminé (status === 'finished')
-        // et qu'il y a un gagnant défini
-        if (gameState.status === 'finished' && gameState.winnerId) {
-
-            // Utiliser playerId du store pour comparer correctement
-            const won = gameState.winnerId === playerId;
+        // Fonction pour traiter la fin de combat
+        const handleBattleEnd = (won: boolean) => {
             setPlayerWon(won);
 
             // Convertir les dialogues du format DialogueLine au format utilisé ici
@@ -292,6 +288,21 @@ function StoryBattleContent() {
             setPostBattleIndex(0);
             setPhase('post_battle_dialogue');
             completeBattle(won);
+        };
+
+        // Vérifier si le nombre de tours maximum est dépassé (défaite automatique)
+        if (battleConfig?.maxTurns && gameState.turnNumber > battleConfig.maxTurns) {
+            console.log(`⏰ Limite de tours dépassée (${gameState.turnNumber} > ${battleConfig.maxTurns})`);
+            handleBattleEnd(false);
+            return;
+        }
+
+        // Vérifier que le jeu est vraiment terminé (status === 'finished')
+        // et qu'il y a un gagnant défini
+        if (gameState.status === 'finished' && gameState.winnerId) {
+            // Utiliser playerId du store pour comparer correctement
+            const won = gameState.winnerId === playerId;
+            handleBattleEnd(won);
         }
     }, [gameState, phase, completeBattle, playerId, battleConfig]);
 

@@ -503,7 +503,7 @@ export const PROLOGUE_BATTLE2_WIN: DialogueLine[] = [
     {
         speakerId: 'ares',
         speakerName: 'Arès',
-        text: "*se relève en titubant* Tu as gagné cette manche, Zeus... Mais Hadès a des légions entières à sa disposition !",
+        text: "*se relève en titubant* Tu as gagné cette manche, père... Mais Hadès a des légions entières à sa disposition !",
         emotion: 'angry'
     },
     {
@@ -657,7 +657,7 @@ export const PROLOGUE_BATTLE3_ARTEMIS_INTRO: DialogueLine[] = [
     {
         speakerId: 'artemis',
         speakerName: 'Artémis',
-        text: "*regard perçant* En effet. Tu n'as pas toujours fait honneur à ta position, Zeus. Tes... écarts sont légendaires.",
+        text: "*regard perçant* En effet. Tu n'as pas toujours fait honneur à ta position, père. Tes... écarts sont légendaires.",
         emotion: 'angry'
     },
     {
@@ -897,13 +897,13 @@ export const PROLOGUE_BATTLE3_WIN: DialogueLine[] = [
     {
         speakerId: 'artemis',
         speakerName: 'Artémis',
-        text: "*abaisse son arc* Je dois admettre... tu es plus fort que je ne le pensais, Zeus.",
+        text: "*abaisse son arc* Je dois admettre... tu es plus fort que je ne le pensais, père.",
         emotion: 'neutral'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*tend la main à Déméter* Ce n'était pas facile. Vous êtes redoutables, mes sœurs.",
+        text: "*tend la main à Déméter* Ce n'était pas facile. Vous êtes redoutables.",
         emotion: 'neutral'
     },
     {
@@ -921,7 +921,7 @@ export const PROLOGUE_BATTLE3_WIN: DialogueLine[] = [
     {
         speakerId: 'artemis',
         speakerName: 'Artémis',
-        text: "Tu as gagné mon respect, Zeus. Et mon arc sera à tes côtés pour reprendre l'Olympe.",
+        text: "Tu as gagné mon respect, père. Et mon arc sera à tes côtés pour reprendre l'Olympe.",
         emotion: 'determined'
     },
     {
@@ -961,7 +961,7 @@ export const PROLOGUE_BATTLE3_LOSE: DialogueLine[] = [
     {
         speakerId: 'hestia',
         speakerName: 'Hestia',
-        text: "*affaiblie* Mes sœurs, s'il vous plaît... Laissez-lui une autre chance...",
+        text: "*affaiblie* S'il vous plaît... Laissez-lui une autre chance...",
         emotion: 'sad'
     },
     {
@@ -1562,7 +1562,7 @@ export const PROLOGUE_BATTLE4_COUNCIL: DialogueLine[] = [
     {
         speakerId: 'artemis',
         speakerName: 'Artémis',
-        text: "*acquiesce* Je sais que mon frère Apollon traîne souvent avec lui là-bas. Ils se querellent gentiment, mais ils sont proches.",
+        text: "*acquiesce* Je sais que mon jumeau Apollon traîne souvent avec lui là-bas. Ils se querellent gentiment, mais ils sont proches.",
         emotion: 'neutral'
     },
     {
