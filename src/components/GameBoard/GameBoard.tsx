@@ -126,10 +126,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Récupérer l'utilisateur connecté pour enregistrer les stats
     const { user, refreshProfile } = useAuth();
 
-    // #1, #2, #4 - Animations de combat
+    // #1, #2, #6 - Animations de combat
     const combatAnimations = useCombatAnimations();
-    const [lastPlayedElement, setLastPlayedElement] = useState<import('@/types/cards').Element | null>(null);
-    useGameStateAnimations(gameState, playerId, combatAnimations, lastPlayedElement);
+    useGameStateAnimations(gameState, playerId, combatAnimations);
 
     // Helper local pour la détection fiable du choix de foudre
     const needsLightningChoice = (card: import('@/types/cards').SpellCard): boolean => {
@@ -883,8 +882,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Fonction pour afficher la carte jouée au centre du terrain
     const showPlayedCard = (card: import('@/types/cards').SpellCard) => {
         setDisplayedCard(card);
-        // #4 - Mettre à jour l'élément pour les particules
-        setLastPlayedElement(card.element);
         // Cacher la carte après 4 secondes
         setTimeout(() => {
             setDisplayedCard(null);
@@ -896,11 +893,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const card = player.hand.find(c => c.id === cardId);
         // Récupérer l'élément sélectionné pour l'inclure dans les payloads
         const currentSelectedElement = selectedElement;
-
-        // #4 - Mettre à jour l'élément de la carte jouée pour les particules
-        if (card) {
-            setLastPlayedElement(card.element);
-        }
 
         if (card) {
             // Vérifier si la carte nécessite une sélection de cartes
@@ -1619,7 +1611,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                     isRequired={isSelectingTarget && isRequiredTarget && isMultiTarget}
                                     isShaking={combatAnimations.shakingGods.has(god.card.id)}
                                     shakeIntensity={combatAnimations.shakingGods.get(god.card.id) || 'normal'}
-                                    showParticle={combatAnimations.particleGods.get(god.card.id) || null}
                                     showStatusAura={combatAnimations.statusAuraGods.get(god.card.id) || null}
                                     onClick={() => {
                                         if (isGodSelectableForZombie) {
@@ -2028,7 +2019,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                     isSelected={isTargetSelected(uniqueId)}
                                     isShaking={combatAnimations.shakingGods.has(god.card.id)}
                                     shakeIntensity={combatAnimations.shakingGods.get(god.card.id) || 'normal'}
-                                    showParticle={combatAnimations.particleGods.get(god.card.id) || null}
                                     showStatusAura={combatAnimations.statusAuraGods.get(god.card.id) || null}
                                     onClick={() => {
                                         if (isGodSelectableForHeal) {

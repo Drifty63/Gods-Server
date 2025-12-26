@@ -31,10 +31,6 @@ interface UseCombatAnimationsReturn {
     shakingGods: Map<string, 'light' | 'normal'>;
     triggerGodShake: (godId: string, intensity?: 'light' | 'normal') => void;
 
-    // #4 Element particles on god
-    particleGods: Map<string, Element>;
-    triggerGodParticle: (godId: string, element: Element) => void;
-
     // #6 Status auras
     statusAuraGods: Map<string, StatusAuraType>;
     triggerStatusAura: (godId: string, statusType: StatusAuraType) => void;
@@ -44,7 +40,7 @@ interface UseCombatAnimationsReturn {
     addDamageNumber: (godId: string, amount: number, type: 'damage' | 'heal' | 'critical') => void;
     removeDamageNumber: (id: string) => void;
 
-    // #4 Turn transition
+    // Turn transition
     showTurnTransition: boolean;
     isPlayerTurnTransition: boolean;
     triggerTurnTransition: (isPlayerTurn: boolean) => void;
@@ -58,9 +54,6 @@ interface UseCombatAnimationsReturn {
 export function useCombatAnimations(): UseCombatAnimationsReturn {
     // #1 - God Shake state (par dieu)
     const [shakingGods, setShakingGods] = useState<Map<string, 'light' | 'normal'>>(new Map());
-
-    // #4 - Particules élémentaires (par dieu)
-    const [particleGods, setParticleGods] = useState<Map<string, Element>>(new Map());
 
     // #6 - Status auras (par dieu)
     const [statusAuraGods, setStatusAuraGods] = useState<Map<string, StatusAuraType>>(new Map());
@@ -90,24 +83,6 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
                 return newMap;
             });
         }, duration);
-    }, []);
-
-    // #4 - Trigger god particle
-    const triggerGodParticle = useCallback((godId: string, element: Element) => {
-        setParticleGods(prev => {
-            const newMap = new Map(prev);
-            newMap.set(godId, element);
-            return newMap;
-        });
-
-        // Retirer les particules après l'animation (800ms)
-        setTimeout(() => {
-            setParticleGods(prev => {
-                const newMap = new Map(prev);
-                newMap.delete(godId);
-                return newMap;
-            });
-        }, 800);
     }, []);
 
     // #6 - Trigger status aura
@@ -174,13 +149,8 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
     }, []);
 
     return {
-        // God shake
         shakingGods,
         triggerGodShake,
-
-        // Element particles
-        particleGods,
-        triggerGodParticle,
 
         // Status auras
         statusAuraGods,
@@ -205,8 +175,7 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
 export function useGameStateAnimations(
     gameState: GameState | null,
     playerId: string,
-    animations: UseCombatAnimationsReturn,
-    lastPlayedElement?: Element | null // Élément de la dernière carte jouée
+    animations: UseCombatAnimationsReturn
 ) {
     const previousStateRef = useRef<GameState | null>(null);
     const previousTurnRef = useRef<string | null>(null);
@@ -245,11 +214,6 @@ export function useGameStateAnimations(
 
                             // #1 - Shake sur la carte du dieu qui reçoit les dégâts
                             animations.triggerGodShake(god.card.id, amount >= 4 ? 'normal' : 'light');
-
-                            // #4 - Particules élémentaires sur le dieu ciblé
-                            if (lastPlayedElement) {
-                                animations.triggerGodParticle(god.card.id, lastPlayedElement);
-                            }
                         } else {
                             // Soins reçus
                             animations.addDamageNumber(god.card.id, hpDiff, 'heal');
@@ -277,5 +241,5 @@ export function useGameStateAnimations(
 
         // Stocker l'état actuel pour la prochaine comparaison
         previousStateRef.current = JSON.parse(JSON.stringify(gameState));
-    }, [gameState, playerId, animations, lastPlayedElement]);
+    }, [gameState, playerId, animations]);
 }

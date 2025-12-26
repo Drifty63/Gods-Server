@@ -503,6 +503,7 @@ function StoryBattleContent() {
                     {/* Portrait du personnage (pas pour le narrateur) */}
                     {!isNarrator && (
                         <div
+                            key={`portrait-${postBattleIndex}`}
                             className={styles.portraitWrapper}
                             style={{ '--glow-color': glowColor } as React.CSSProperties}
                         >
@@ -518,7 +519,10 @@ function StoryBattleContent() {
                     )}
 
                     {/* Boîte de dialogue */}
-                    <div className={isNarrator ? styles.narratorBoxNew : styles.dialogueBoxNew}>
+                    <div
+                        key={`dialogue-${postBattleIndex}`}
+                        className={isNarrator ? styles.narratorBoxNew : styles.dialogueBoxNew}
+                    >
                         {!isNarrator && (
                             <div
                                 className={styles.speakerNameNew}

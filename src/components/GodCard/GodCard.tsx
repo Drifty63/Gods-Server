@@ -16,7 +16,6 @@ interface GodCardProps {
     isRequired?: boolean; // Cible obligatoire (provocateur)
     isShaking?: boolean; // #1 Animation shake
     shakeIntensity?: 'light' | 'normal'; // #1 Intensité du shake
-    showParticle?: Element | null; // #4 Élément des particules à afficher
     showStatusAura?: StatusAuraType; // #6 Aura de statut à afficher
     onClick?: () => void;
 }
@@ -29,7 +28,6 @@ export default function GodCard({
     isRequired = false,
     isShaking = false,
     shakeIntensity = 'normal',
-    showParticle = null,
     showStatusAura = null,
     onClick
 }: GodCardProps) {
@@ -87,10 +85,7 @@ export default function GodCard({
                     </div>
                 )}
 
-                {/* #4 Particules élémentaires quand le dieu reçoit des dégâts */}
-                {showParticle && (
-                    <div className={`${styles.elementParticles} ${styles[showParticle]}`} />
-                )}
+
 
                 {/* #6 Aura de statut - Étoiles pour stun */}
                 {showStatusAura === 'stun' && (
