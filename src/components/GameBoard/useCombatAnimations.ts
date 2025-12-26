@@ -23,6 +23,9 @@ interface GodParticleData {
     element: Element;
 }
 
+// #6 - Types de statut avec aura
+export type StatusAuraType = 'shield' | 'poison' | 'stun' | 'provocation' | null;
+
 interface UseCombatAnimationsReturn {
     // #1 God shake (remplace screen shake)
     shakingGods: Map<string, 'light' | 'normal'>;
@@ -31,6 +34,10 @@ interface UseCombatAnimationsReturn {
     // #4 Element particles on god
     particleGods: Map<string, Element>;
     triggerGodParticle: (godId: string, element: Element) => void;
+
+    // #6 Status auras
+    statusAuraGods: Map<string, StatusAuraType>;
+    triggerStatusAura: (godId: string, statusType: StatusAuraType) => void;
 
     // #2 Damage numbers
     damageNumbers: DamageNumberData[];
@@ -46,7 +53,7 @@ interface UseCombatAnimationsReturn {
 
 /**
  * Hook personnalisé pour gérer toutes les animations de combat
- * Inclut: god shake (#1), damage numbers (#2), turn transition (#4), element particles (#4)
+ * Inclut: god shake (#1), damage numbers (#2), turn transition (#4), element particles (#4), status auras (#6)
  */
 export function useCombatAnimations(): UseCombatAnimationsReturn {
     // #1 - God Shake state (par dieu)
@@ -54,6 +61,9 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
 
     // #4 - Particules élémentaires (par dieu)
     const [particleGods, setParticleGods] = useState<Map<string, Element>>(new Map());
+
+    // #6 - Status auras (par dieu)
+    const [statusAuraGods, setStatusAuraGods] = useState<Map<string, StatusAuraType>>(new Map());
 
     // #2 - Damage Numbers state
     const [damageNumbers, setDamageNumbers] = useState<DamageNumberData[]>([]);
@@ -98,6 +108,27 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
                 return newMap;
             });
         }, 800);
+    }, []);
+
+    // #6 - Trigger status aura
+    const triggerStatusAura = useCallback((godId: string, statusType: StatusAuraType) => {
+        if (!statusType) return;
+
+        setStatusAuraGods(prev => {
+            const newMap = new Map(prev);
+            newMap.set(godId, statusType);
+            return newMap;
+        });
+
+        // Durée de l'aura selon le type (stun = 3s, autres = 2s)
+        const duration = statusType === 'stun' ? 3000 : 2000;
+        setTimeout(() => {
+            setStatusAuraGods(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(godId);
+                return newMap;
+            });
+        }, duration);
     }, []);
 
     // #2 - Add damage number
@@ -151,6 +182,10 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
         particleGods,
         triggerGodParticle,
 
+        // Status auras
+        statusAuraGods,
+        triggerStatusAura,
+
         // Damage numbers
         damageNumbers,
         addDamageNumber,
@@ -190,7 +225,7 @@ export function useGameStateAnimations(
 
         // Détecter les dégâts pour les damage numbers, god shake et particules (#1, #2, #4)
         if (previousState) {
-            // Comparer les HP de chaque dieu
+            // Comparer les HP et statuts de chaque dieu
             for (const player of gameState.players) {
                 const previousPlayer = previousState.players.find(p => p.id === player.id);
                 if (!previousPlayer) continue;
@@ -220,6 +255,22 @@ export function useGameStateAnimations(
                             animations.addDamageNumber(god.card.id, hpDiff, 'heal');
                         }
                     }
+
+                    // #6 - Détecter les nouveaux statuts pour les auras
+                    const previousStatuses = previousGod.statusEffects.map(s => s.type);
+                    for (const status of god.statusEffects) {
+                        const wasPresent = previousStatuses.includes(status.type);
+                        const previousStatus = previousGod.statusEffects.find(s => s.type === status.type);
+
+                        // Nouveau statut ou stacks augmentés
+                        if (!wasPresent || (previousStatus && status.stacks > previousStatus.stacks)) {
+                            // Vérifier si c'est un type de statut avec aura
+                            if (status.type === 'shield' || status.type === 'poison' ||
+                                status.type === 'stun' || status.type === 'provocation') {
+                                animations.triggerStatusAura(god.card.id, status.type as StatusAuraType);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -228,4 +279,3 @@ export function useGameStateAnimations(
         previousStateRef.current = JSON.parse(JSON.stringify(gameState));
     }, [gameState, playerId, animations, lastPlayedElement]);
 }
-

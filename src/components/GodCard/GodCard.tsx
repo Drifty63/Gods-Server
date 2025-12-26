@@ -5,6 +5,9 @@ import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/El
 import Image from 'next/image';
 import styles from './GodCard.module.css';
 
+// Types de statuts qui peuvent avoir une aura
+type StatusAuraType = 'shield' | 'poison' | 'stun' | 'provocation' | null;
+
 interface GodCardProps {
     god: GodState;
     isEnemy?: boolean;
@@ -14,6 +17,7 @@ interface GodCardProps {
     isShaking?: boolean; // #1 Animation shake
     shakeIntensity?: 'light' | 'normal'; // #1 Intensité du shake
     showParticle?: Element | null; // #4 Élément des particules à afficher
+    showStatusAura?: StatusAuraType; // #6 Aura de statut à afficher
     onClick?: () => void;
 }
 
@@ -26,6 +30,7 @@ export default function GodCard({
     isShaking = false,
     shakeIntensity = 'normal',
     showParticle = null,
+    showStatusAura = null,
     onClick
 }: GodCardProps) {
     const { card, currentHealth, statusEffects, isDead } = god;
@@ -37,9 +42,12 @@ export default function GodCard({
         ? (shakeIntensity === 'light' ? styles.shakingLight : styles.shaking)
         : '';
 
+    // #6 Classe d'aura de statut dynamique
+    const statusAuraClass = showStatusAura ? styles[`statusAura_${showStatusAura}`] : '';
+
     return (
         <div
-            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''} ${isEnemy ? styles.enemy : ''} ${shakeClass}`}
+            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''} ${isEnemy ? styles.enemy : ''} ${shakeClass} ${statusAuraClass}`}
             style={{
                 '--element-color': colors.primary,
                 '--element-gradient': colors.gradient,
@@ -82,6 +90,15 @@ export default function GodCard({
                 {/* #4 Particules élémentaires quand le dieu reçoit des dégâts */}
                 {showParticle && (
                     <div className={`${styles.elementParticles} ${styles[showParticle]}`} />
+                )}
+
+                {/* #6 Aura de statut - Étoiles pour stun */}
+                {showStatusAura === 'stun' && (
+                    <div className={styles.stunStars}>
+                        <span className={styles.stunStar}>⭐</span>
+                        <span className={styles.stunStar}>⭐</span>
+                        <span className={styles.stunStar}>⭐</span>
+                    </div>
                 )}
 
                 {/* Barre de vie en bas de l'image avec faiblesse */}
@@ -149,5 +166,6 @@ function getStatusIcon(status: string): string {
         default: return '✨';
     }
 }
+
 
 

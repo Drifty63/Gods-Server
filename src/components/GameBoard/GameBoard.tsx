@@ -883,6 +883,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Fonction pour afficher la carte jouée au centre du terrain
     const showPlayedCard = (card: import('@/types/cards').SpellCard) => {
         setDisplayedCard(card);
+        // #4 - Mettre à jour l'élément pour les particules
+        setLastPlayedElement(card.element);
         // Cacher la carte après 4 secondes
         setTimeout(() => {
             setDisplayedCard(null);
@@ -894,6 +896,11 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const card = player.hand.find(c => c.id === cardId);
         // Récupérer l'élément sélectionné pour l'inclure dans les payloads
         const currentSelectedElement = selectedElement;
+
+        // #4 - Mettre à jour l'élément de la carte jouée pour les particules
+        if (card) {
+            setLastPlayedElement(card.element);
+        }
 
         if (card) {
             // Vérifier si la carte nécessite une sélection de cartes
@@ -1613,6 +1620,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                     isShaking={combatAnimations.shakingGods.has(god.card.id)}
                                     shakeIntensity={combatAnimations.shakingGods.get(god.card.id) || 'normal'}
                                     showParticle={combatAnimations.particleGods.get(god.card.id) || null}
+                                    showStatusAura={combatAnimations.statusAuraGods.get(god.card.id) || null}
                                     onClick={() => {
                                         if (isGodSelectableForZombie) {
                                             handleZombieTargetClick(god.card.id);
@@ -2021,6 +2029,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                     isShaking={combatAnimations.shakingGods.has(god.card.id)}
                                     shakeIntensity={combatAnimations.shakingGods.get(god.card.id) || 'normal'}
                                     showParticle={combatAnimations.particleGods.get(god.card.id) || null}
+                                    showStatusAura={combatAnimations.statusAuraGods.get(god.card.id) || null}
                                     onClick={() => {
                                         if (isGodSelectableForHeal) {
                                             handleHealGodClick(god.card.id);
