@@ -502,7 +502,12 @@ function StoryBattleContent() {
 
         // Utiliser l'image de fond appropriée selon le combat
         let backgroundImage: string;
-        if (battleConfig?.id === 'battle_ambush_ares') {
+        if (battleConfig?.id === 'battle_thebes_betrayal') {
+            // Chapitre 2 Combat 1 : La Trahison de Thèbes
+            backgroundImage = playerWon
+                ? '/assets/story/chapter2_battle1_victory.png'
+                : '/assets/story/chapter2_battle1_defeat.png';
+        } else if (battleConfig?.id === 'battle_ambush_ares') {
             // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
             backgroundImage = playerWon
                 ? '/assets/story/battle4_victory.png'
