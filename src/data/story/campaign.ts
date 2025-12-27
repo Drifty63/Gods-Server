@@ -443,21 +443,14 @@ const chapter2Battle1Events: StoryEvent[] = [
             description: "Empoisonnés par le vin de Dionysos, affrontez vos assaillants envoûtés !",
             playerTeam: ['zeus', 'hestia', 'demeter', 'artemis'],
             enemyTeam: ['dionysos', 'apollon', 'aphrodite'],
-            deckMultiplier: 2,           // x2 pour le joueur (4 dieux = beaucoup de cartes)
-            enemyDeckMultiplier: 2,      // x2 pour l'ennemi
+            deckMultiplier: 1,           // x1 - 5 cartes par dieu = 20 cartes joueur (5 main + 15 deck)
+            enemyDeckMultiplier: 1,      // x1 - 5 cartes par dieu = 15 cartes ennemi (5 main + 10 deck)
             playerCondition: {
                 type: 'poisoned',
                 description: "Tous vos dieux sont empoisonnés (2 marques de poison) !",
                 poisonStacks: 2  // Tous les dieux du joueur ont 2 poison
             },
-            continueOnDefeat: false,     // Doit gagner pour continuer
-            rewards: [
-                {
-                    type: 'ambroisie',
-                    amount: 350,
-                    description: '350 Ambroisie'
-                }
-            ]
+            continueOnDefeat: false      // Doit gagner pour continuer
         },
         nextEventOnWin: 'ch2_battle1_win',
         nextEventOnLose: 'ch2_battle1_lose'
@@ -505,6 +498,7 @@ const CHAPTER_2: Chapter = {
     description: "Zeus et ses alliés voyagent vers Thèbes pour rallier Dionysos, mais une trahison les attend...",
     difficulty: 'medium',
     events: chapter2Events,
+    battles: CHAPTER_2_BATTLES,  // Ajout pour affichage dans le modal
     imageUrl: '/story/chapter2.jpg',
     comingSoon: false
 };
