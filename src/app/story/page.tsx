@@ -102,8 +102,8 @@ function StoryContent() {
 
     // Cliquer sur un chapitre
     const handleChapterClick = (chapter: Chapter) => {
-        // Si le chapitre a plusieurs combats, afficher la modal de sélection
-        if (chapter.battles && chapter.battles.length > 1) {
+        // Si le chapitre a des combats définis, afficher la modal de sélection
+        if (chapter.battles && chapter.battles.length >= 1) {
             setSelectedChapter(chapter);
             setShowBattleSelect(true);
         } else {
