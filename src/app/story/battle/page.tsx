@@ -19,7 +19,10 @@ import {
     PROLOGUE_BATTLE3_WIN,
     PROLOGUE_BATTLE3_LOSE,
     PROLOGUE_BATTLE4_WIN,
-    PROLOGUE_BATTLE4_LOSE
+    PROLOGUE_BATTLE4_LOSE,
+    // Chapitre 2
+    CHAPTER2_BATTLE1_WIN,
+    CHAPTER2_BATTLE1_LOSE
 } from '@/data/story/dialogues';
 import styles from './page.module.css';
 
@@ -122,6 +125,23 @@ function StoryBattleContent() {
             // Le joueur commence avec 0 énergie
             internalState.players[0].energy = 0;
             console.log(`⚡ Le joueur commence avec 0 énergie !`);
+        } else if (battleConfig.playerCondition.type === 'poisoned') {
+            // Appliquer du poison à tous les dieux du joueur
+            const poisonStacks = battleConfig.playerCondition.poisonStacks || 2;
+
+            internalState.players[0].gods.forEach((god: {
+                card: { id: string };
+                statusEffects: Array<{ type: string; stacks: number; duration?: number }>
+            }) => {
+                // Si targetGod est défini, ne modifier que ce dieu, sinon tous
+                if (!targetGod || god.card.id === targetGod) {
+                    god.statusEffects.push({
+                        type: 'poison',
+                        stacks: poisonStacks
+                    });
+                    console.log(`🧪 ${god.card.id} est empoisonné (${poisonStacks} marques) !`);
+                }
+            });
         }
 
         // Créer une copie profonde de l'état pour React
@@ -266,7 +286,10 @@ function StoryBattleContent() {
             // Déterminer quels dialogues utiliser selon le combat
             let allDialogues;
 
-            if (battleConfig?.id === 'battle_ambush_ares') {
+            if (battleConfig?.id === 'battle_thebes_betrayal') {
+                // Chapitre 2 Combat 1 : La Trahison de Thèbes
+                allDialogues = won ? CHAPTER2_BATTLE1_WIN : CHAPTER2_BATTLE1_LOSE;
+            } else if (battleConfig?.id === 'battle_ambush_ares') {
                 // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
                 allDialogues = won ? PROLOGUE_BATTLE4_WIN : PROLOGUE_BATTLE4_LOSE;
             } else if (battleConfig?.id === 'battle_test_of_valor') {

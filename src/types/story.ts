@@ -10,10 +10,11 @@ export interface DialogueLine {
 }
 
 export interface BattleCondition {
-    type: 'half_hp' | 'three_quarter_hp' | 'no_energy' | 'debuff' | 'normal' | 'stunned';
+    type: 'half_hp' | 'three_quarter_hp' | 'no_energy' | 'debuff' | 'normal' | 'stunned' | 'poisoned';
     description: string;
     duration?: number;     // Durée en tours pour les effets temporaires
     targetGod?: string;    // ID du dieu ciblé (si non défini, tous les dieux sont affectés)
+    poisonStacks?: number; // Nombre de marques de poison pour le type 'poisoned'
 }
 
 export interface BattleConfig {

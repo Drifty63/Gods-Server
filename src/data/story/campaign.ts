@@ -25,9 +25,13 @@ import {
     PROLOGUE_BATTLE4_AMBUSH,
     PROLOGUE_BATTLE4_WIN,
     PROLOGUE_BATTLE4_LOSE,
-    // Chapitre 2 (dialogues gardés mais combats supprimés)
-    CHAPTER2_INTRO,
-    CHAPTER2_END,
+    // Chapitre 2 - Combat 1 : À Thèbes
+    CHAPTER2_BATTLE1_NARRATOR,
+    CHAPTER2_BATTLE1_THEBES_ARRIVAL,
+    CHAPTER2_BATTLE1_BANQUET,
+    CHAPTER2_BATTLE1_BETRAYAL,
+    CHAPTER2_BATTLE1_WIN,
+    CHAPTER2_BATTLE1_LOSE,
     // Chapitre 3 (dialogues gardés mais combats supprimés)
     CHAPTER3_INTRO,
     CHAPTER3_EPILOGUE
@@ -390,23 +394,106 @@ const CHAPTER_1: Chapter = {
 };
 
 // ===========================================
-// CHAPITRE 2 - LA RÉSISTANCE (À COMPLÉTER)
-// Note: Les combats seront ajoutés dans une future mise à jour
+// CHAPITRE 2 - LA RÉSISTANCE
+// Combat 1 : Zeus + Hestia + Déméter + Artémis vs Dionysos + Apollon + Aphrodite (4v3)
 // ===========================================
-const chapter2Events: StoryEvent[] = [
-    // Introduction - Placeholder
+
+// Événements du Combat 1 : À Thèbes
+const chapter2Battle1Events: StoryEvent[] = [
+    // Narrateur - Le voyage vers Thèbes
     {
-        id: 'ch2_intro',
-        type: 'dialogue',
-        dialogues: CHAPTER2_INTRO,
-        nextEventId: 'ch2_end'
+        id: 'ch2_battle1_narrator',
+        type: 'cutscene',
+        dialogues: CHAPTER2_BATTLE1_NARRATOR,
+        backgroundImage: '/assets/story/thebes_journey.png',
+        nextEventId: 'ch2_battle1_thebes_arrival'
     },
-    // Fin du chapitre 2 (temporaire)
+    // Arrivée à Thèbes - Le satyre
     {
-        id: 'ch2_end',
+        id: 'ch2_battle1_thebes_arrival',
         type: 'dialogue',
-        dialogues: CHAPTER2_END,
-        nextEventId: undefined
+        dialogues: CHAPTER2_BATTLE1_THEBES_ARRIVAL,
+        backgroundImage: '/assets/story/thebes_street_satyr.png',
+        nextEventId: 'ch2_battle1_banquet'
+    },
+    // Arrivée au banquet de Dionysos
+    {
+        id: 'ch2_battle1_banquet',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE1_BANQUET,
+        backgroundImage: '/assets/story/dionysos_banquet.png',
+        nextEventId: 'ch2_battle1_betrayal'
+    },
+    // La trahison - Le vin empoisonné
+    {
+        id: 'ch2_battle1_betrayal',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE1_BETRAYAL,
+        backgroundImage: '/assets/story/betrayal_reveal.png',
+        nextEventId: 'ch2_battle1'
+    },
+    // Combat 4v3 : Zeus + Hestia + Déméter + Artémis vs Dionysos + Apollon + Aphrodite
+    {
+        id: 'ch2_battle1',
+        type: 'battle',
+        backgroundImage: '/assets/story/betrayal_reveal.png',
+        battle: {
+            id: 'battle_thebes_betrayal',
+            name: "La Trahison de Thèbes",
+            description: "Empoisonnés par le vin de Dionysos, affrontez vos assaillants envoûtés !",
+            playerTeam: ['zeus', 'hestia', 'demeter', 'artemis'],
+            enemyTeam: ['dionysos', 'apollon', 'aphrodite'],
+            deckMultiplier: 2,           // x2 pour le joueur (4 dieux = beaucoup de cartes)
+            enemyDeckMultiplier: 2,      // x2 pour l'ennemi
+            playerCondition: {
+                type: 'poisoned',
+                description: "Tous vos dieux sont empoisonnés (2 marques de poison) !",
+                poisonStacks: 2  // Tous les dieux du joueur ont 2 poison
+            },
+            continueOnDefeat: false,     // Doit gagner pour continuer
+            rewards: [
+                {
+                    type: 'ambroisie',
+                    amount: 350,
+                    description: '350 Ambroisie'
+                }
+            ]
+        },
+        nextEventOnWin: 'ch2_battle1_win',
+        nextEventOnLose: 'ch2_battle1_lose'
+    },
+    // Après combat - Victoire
+    {
+        id: 'ch2_battle1_win',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE1_WIN,
+        backgroundImage: '/assets/story/chapter2_battle1_victory.png',
+        nextEventId: undefined  // Fin du combat 1 du chapitre 2
+    },
+    // Après combat - Défaite
+    {
+        id: 'ch2_battle1_lose',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE1_LOSE,
+        backgroundImage: '/assets/story/chapter2_battle1_defeat.png',
+        nextEventId: undefined  // Doit réessayer
+    }
+];
+
+// Tous les événements du chapitre 2
+const chapter2Events: StoryEvent[] = [
+    ...chapter2Battle1Events
+];
+
+// Configuration des combats du chapitre 2
+export const CHAPTER_2_BATTLES = [
+    {
+        id: 'battle1',
+        name: "La Trahison de Thèbes",
+        description: "À Thèbes, une trahison inattendue attend Zeus et ses alliés",
+        firstEventId: 'ch2_battle1_narrator',
+        unlocked: true,              // Débloqué dès le début du chapitre
+        requiresBattleId: undefined  // Pas de prérequis dans le chapitre 2
     }
 ];
 
@@ -414,12 +501,12 @@ const CHAPTER_2: Chapter = {
     id: 'chapter_2',
     number: 2,
     title: 'La Résistance',
-    subtitle: 'À venir...',
-    description: "Zeus et ses alliés doivent rallier les autres dieux à leur cause. (Chapitre en cours de développement)",
+    subtitle: 'Rallier les Alliés',
+    description: "Zeus et ses alliés voyagent vers Thèbes pour rallier Dionysos, mais une trahison les attend...",
     difficulty: 'medium',
     events: chapter2Events,
     imageUrl: '/story/chapter2.jpg',
-    comingSoon: true
+    comingSoon: false
 };
 
 // ===========================================

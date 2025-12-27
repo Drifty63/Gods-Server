@@ -974,50 +974,622 @@ export const PROLOGUE_BATTLE3_LOSE: DialogueLine[] = [
 
 // ===========================================
 // CHAPITRE 2 - LA RÉSISTANCE
+// Combat 1 : Zeus + Hestia + Déméter + Artémis vs Dionysos + Apollon + Aphrodite
 // ===========================================
 
+// Narrateur - Le voyage vers Thèbes
+export const CHAPTER2_BATTLE1_NARRATOR: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Après leur victoire contre l'embuscade d'Arès, l'alliance des dieux reprend la route vers Thèbes, la cité de Dionysos.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Zeus est persuadé qu'Hermès a été capturé et emprisonné par Hadès. Le messager des dieux était trop dangereux pour le nouveau tyran.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Hermès fait le lien entre tous les dieux. Il peut aller où il veut, quand il veut. Et surtout... il aime défier l'autorité.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Sans lui, les dieux sont coupés les uns des autres. C'est exactement ce que voulait Hadès : isoler ses ennemis potentiels.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les quatre dieux voyagent en se montrant discrets, agissant comme de simples mortels. Ils ne savent pas ce qui les attend...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Ils espèrent que le destin n'est pas écrit, que Zeus pourra remonter sur le trône et rétablir l'équilibre du monde avant qu'il ne soit trop tard.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Pour reconquérir l'Olympe, ils devront passer par un des passages vers le ciel. Zeus, figure d'autorité suprême, pouvait autrefois circuler entre tous les royaumes...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Mais depuis qu'il a perdu son trône, il sent que des choses ont changé. Il faudra permettre aux autres dieux de le suivre dans l'Olympe.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le Mont Olympe depuis la Terre est sûrement gardé et piégé par Hadès et les dieux renégats. Trop risqué. Ils devront passer par ailleurs...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Mais d'abord, la priorité est de rallier d'autres dieux à leur alliance. Direction : Thèbes.",
+        emotion: 'neutral'
+    }
+];
 
-// Introduction du Chapitre 2 - Recherche d'alliés
-export const CHAPTER2_INTRO: DialogueLine[] = [
+// Arrivée à Thèbes - Recherche de Dionysos
+export const CHAPTER2_BATTLE1_THEBES_ARRIVAL: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Nous avons trouvé refuge dans les forêts de Thessalie. L'Olympe est sous le contrôle d'Hadès...",
-        emotion: 'sad'
+        text: "*observe la ville depuis une rue animée* Nous voilà enfin à Thèbes. Dionysos doit être quelque part dans cette cité...",
+        emotion: 'neutral'
     },
     {
         speakerId: 'hestia',
         speakerName: 'Hestia',
-        text: "Nous ne sommes que quatre. Comment pourrions-nous reprendre l'Olympe avec si peu de forces ?",
-        emotion: 'sad'
+        text: "C'est une grande ville. Comment allons-nous le trouver sans nous faire remarquer ?",
+        emotion: 'worried'
     },
     {
-        speakerId: 'aphrodite',
-        speakerName: 'Aphrodite',
-        text: "Athéna et Poséidon n'étaient pas présents lors de l'attaque. Ils pourraient nous aider !",
-        emotion: 'determined'
-    },
-    {
-        speakerId: 'dionysos',
-        speakerName: 'Dionysos',
-        text: "Athéna est sage, elle comprendra la gravité de la situation. Quant à Poséidon...",
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Dionysos n'est pas du genre discret. Cherchons les tavernes, les fêtes... les endroits où coule le vin.",
         emotion: 'neutral'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Mon frère Poséidon... Il a toujours été neutre dans les conflits de l'Olympe. Mais cette fois...",
+        text: "Restons prudents. Nous ne savons pas qui pourrait reconnaître des Olympiens en fuite.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*plisse les yeux* Attendez... Là-bas, au fond de la rue !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Qu'as-tu vu, Artémis ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*pointe du doigt* Un satyre ! Au milieu de la foule ! Regardez !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Un satyre en pleine ville ? C'est inhabituel... Ils restent généralement près des forêts.",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "C'est un signe ! Les satyres sont les compagnons de Dionysos. Suivons-le !",
         emotion: 'determined'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Rendons-nous d'abord au temple d'Athéna. Sa sagesse nous sera précieuse.",
+        text: "*hoche la tête* Bien vu, ma fille. Allons-y, mais restons discrets.",
         emotion: 'determined'
     }
 ];
 
-// Rencontre avec Athéna
+// Arrivée au banquet de Dionysos
+export const CHAPTER2_BATTLE1_BANQUET: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les quatre dieux suivent le satyre à travers les ruelles de Thèbes jusqu'à un vaste domaine : une somptueuse villa grecque.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Dans le jardin de la villa, un grand banquet est en cours. Des rires, de la musique, et l'odeur enivrante du vin emplissent l'air.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*écarquille les yeux* Regardez ! À la table principale !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "C'est... c'est Dionysos ! Et il n'est pas seul !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*sourire* Mon jumeau ! Apollon est là aussi !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Et Aphrodite... Le destin est avec nous ! Trois alliés potentiels réunis au même endroit !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Dionysos, Apollon et Aphrodite festoient joyeusement. Tous semblent en bonne santé et de bonne humeur. Un soulagement pour nos héros.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*lève les yeux et aperçoit les arrivants* Par Olympe ! Zeus ! Hestia ! Déméter ! Artémis !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*se lève* Ma sœur ! *court vers Artémis* Que fais-tu ici ? Et... père ?!",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*sourire radieux* Quelle surprise ! Venez, venez, joignez-vous à nous !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*grave* Nous sommes heureux de vous voir tous sains et saufs, mais... nous devons parler. En privé. C'est urgent.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Oui, ce que nous avons à vous dire ne peut pas attendre. Pouvons-nous écourter le banquet ?",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*fait la moue* Écourter MON banquet ? Mais je serais un mauvais hôte !",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Ça peut attendre un peu, non ? Asseyez-vous, mangez, buvez ! Vous avez l'air épuisés par votre voyage !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*soupire* Dionysos... Tu ne changes pas. Très bien, profitons un moment, mais il faudra vite parler.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Sans donner trop de détails pour l'instant... sachez que nous apportons des nouvelles graves de l'Olympe.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*fronce les sourcils* Graves ? Que s'est-il passé ?",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Plus tard, mon fils. Acceptons l'invitation de Dionysos pour l'instant. Nous en parlerons quand nous serons seuls.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*lève son verre* Parfait ! Bienvenue à tous ! Que la fête continue !",
+        emotion: 'happy'
+    }
+];
+
+// Discussion privée - La trahison
+export const CHAPTER2_BATTLE1_BETRAYAL: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le temps passe. Les invités du banquet se retirent peu à peu. Finalement, les sept dieux se retrouvent seuls dans la villa de Dionysos.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*verse du vin dans des coupes* Bien ! Maintenant que nous sommes entre nous... Que vouliez-vous nous dire ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Je vous propose d'en parler en dégustant ce merveilleux cru. C'est ma meilleure réserve !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*prend une coupe* Merci, Dionysos. Ce que nous allons vous révéler est... difficile à entendre.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Zeus explique tout : la trahison d'Hadès, l'attaque surprise de Nyx, la perte de l'Olympe, la fuite, les combats contre Arès...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*choqué* Hadès règne sur l'Olympe ?! Mais c'est impossible !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*pose sa coupe* Et Arès... Il a vraiment rejoint Hadès ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Oui. Arès nous a attaqués deux fois déjà. Il est convaincu qu'Hadès lui donnera plus de pouvoir.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*boit du vin* Nous avons besoin de votre aide pour... pour...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*porte la main à sa tête* Je... Je ne me sens pas bien...",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*chancelle* Moi non plus... Ma tête tourne...",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*se lève brusquement, renversant sa coupe* Non... Non, ce n'est pas possible !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*comprend avec horreur* Le vin... Le vin est EMPOISONNÉ !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*se lève lentement, un sourire froid sur les lèvres* Bravo, Artémis. Toujours aussi perspicace.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*s'appuie sur la table* Aphrodite... Qu'as-tu fait ?!",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*froide* J'ai fait ce qu'il fallait. Arès m'a tout raconté avant vous, vous savez.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "Il m'a dit comment VOUS êtes les véritables traîtres. Comment vous voulez détruire l'équilibre du monde !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*outragée* Des mensonges ! C'est Arès le traître !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "J'ai charmé Dionysos pour qu'il m'aide à venger mon Arès ! Et ça a parfaitement fonctionné.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*regarde Dionysos* Il est... envoûté. Ses yeux sont vides !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*s'accroche à une chaise* Et Apollon ? Où est Apollon ?!",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*rit* Oh, Apollon ? Dionysos lui a servi une dose spéciale. Il délire déjà dans l'autre pièce, le pauvre.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*voix monotone, yeux vitreux* La maîtresse a ordonné. J'obéis. Le poison coule dans vos veines...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*serrant les poings malgré la douleur* Aphrodite... Tu as été manipulée ! Arès t'a menti !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*regard froid* Nous verrons bien qui ment. Finissons-en ! Dionysos, Apollon... ATTAQUEZ !",
+        emotion: 'angry'
+    }
+];
+
+// Victoire du Combat 1 du Chapitre 2
+export const CHAPTER2_BATTLE1_WIN: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Malgré le poison qui affaiblit leurs corps, Zeus, Hestia, Déméter et Artémis parviennent à vaincre leurs assaillants.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*essoufflé, s'appuie sur un pilier* C'est... C'est terminé...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*à genoux, regarde ses mains trembler* Comment... Comment est-ce possible ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*s'approche d'Aphrodite* Écoute-moi bien, Aphrodite. Arès t'a MENTI.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Hadès a pris le trône de l'Olympe par la force et la traîtrise. C'est LUI le véritable ennemi !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*doucement* Arès a rejoint Hadès pour le pouvoir. Il t'a utilisée, Aphrodite. Comme il utilise tout le monde.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*les larmes aux yeux* Mais il m'a dit... Il m'a promis que...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*s'agenouille devant elle* Aphrodite, tu es la déesse de l'amour. Cherche dans ton cœur. Qui ment vraiment ici ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le regard d'Aphrodite vacille. Les vérités de ses actes la frappent comme une vague de clarté...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*effondrée* Je... J'ai été aveuglée... Par mes sentiments pour Arès. Pardonnez-moi !",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Libère Dionysos de ton charme. Maintenant.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*ferme les yeux, une aura rose l'entoure puis se dissipe* C'est fait... Je le libère.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*secoue la tête, hébété* Qu'est-ce que... Où suis-je ? Ma tête... Que s'est-il passé ?!",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Dionysos ! Tu as l'antidote au poison que tu nous as servi ?",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*horrifié* Le poison ?! PAR OLYMPE ! Oui, oui, j'ai l'antidote dans ma cave ! Je... Je me souviens de tout maintenant !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Apollon aussi a été empoisonné. Il est dans l'autre pièce.",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*court vers la porte* Je vais chercher l'antidote immédiatement ! Tenez bon !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Dionysos administre l'antidote à tous. Apollon reprend conscience, confus mais soulagé d'être libéré du délire.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*se relève péniblement* Ma sœur... Père... Qu'est-ce qui m'est arrivé ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*le serre dans ses bras* C'est une longue histoire, mon jumeau. Mais nous sommes ensemble maintenant. C'est l'essentiel.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*regarde le groupe* Nous avons failli nous entre-tuer à cause des machinations d'Hadès et Arès.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Mais le destin nous a réunis. Sept dieux... Sept alliés contre les ténèbres. L'espoir n'est pas perdu.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*essuie ses larmes* Je ferai tout pour réparer mes erreurs. Je vous le jure.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Et moi je vous dois des explications... et beaucoup de vin non empoisonné, cette fois !",
+        emotion: 'happy'
+    }
+];
+
+// Défaite du Combat 1 du Chapitre 2
+export const CHAPTER2_BATTLE1_LOSE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le poison fait son effet. Un par un, Zeus, Hestia, Déméter et Artémis s'effondrent...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*s'écroule au sol* Non... Nous... avons échoué...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*tombe à genoux* Le poison... est trop fort...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*triomphante* Parfait ! Arès sera si fier de moi !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*rampe vers Hestia inconsciente* Ma sœur... Perséphone... je ne te reverrai jamais...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*voix monotone* Les traîtres sont vaincus. La maîtresse a gagné.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*s'approche de Zeus* Le puissant roi des dieux... à mes pieds. Arès avait raison.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "Envoyons un message à Hadès. Ses ennemis ont été... neutralisés.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La résistance s'éteint avant même d'avoir pu rallier ses alliés. Le règne d'Hadès est désormais incontesté...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "L'Olympe sombre dans les ténèbres éternelles. L'équilibre du monde est rompu à jamais...",
+        emotion: 'neutral'
+    }
+];
+
+// Fin du Chapitre 2 (temporaire - gardé pour compatibilité)
 export const CHAPTER2_ATHENA_INTRO: DialogueLine[] = [
     {
         speakerId: 'athena',
