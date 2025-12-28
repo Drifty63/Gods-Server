@@ -57,6 +57,7 @@ const chapter1Battle1Events: StoryEvent[] = [
         id: 'ch1_intro',
         type: 'dialogue',
         dialogues: PROLOGUE_INTRO,
+        backgroundImage: '/assets/story/battle1_intro.png',
         nextEventId: 'ch1_battle1'
     },
     // Combat 1v1 : Zeus vs Hadès
@@ -98,6 +99,7 @@ const chapter1Battle1Events: StoryEvent[] = [
         id: 'ch1_after_battle_lose',
         type: 'dialogue',
         dialogues: PROLOGUE_AFTER_BATTLE_1_LOSE,
+        backgroundImage: '/assets/story/battle1_defeat.png',
         nextEventId: 'ch1_hades_throne'
     },
     // Hadès prend le trône (commun)
