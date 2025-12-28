@@ -526,7 +526,7 @@ function StoryBattleContent() {
             // Combat 1 : Zeus vs Hadès
             backgroundImage = playerWon
                 ? '/assets/story/victory_nyx.png'
-                : '/assets/story/defeat_underworld.png';
+                : '/assets/story/battle1_defeat.png';
         }
         const isNarrator = dialogue.speaker === 'narrator';
 
