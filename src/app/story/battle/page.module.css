@@ -596,7 +596,7 @@
         0 0 20px var(--glow-color, #ffd700),
         0 0 40px rgba(0, 0, 0, 0.5),
         inset 0 0 20px rgba(0, 0, 0, 0.3);
-    animation: portraitGlowNew 2s ease-in-out infinite alternate;
+    animation: portraitGlowNew 2s ease-in-out infinite alternate, portraitFloatNew 4s ease-in-out infinite;
 }
 
 @keyframes portraitGlowNew {
@@ -610,6 +610,19 @@
         box-shadow:
             0 0 30px var(--glow-color, #ffd700),
             0 0 60px var(--glow-color, #ffd700);
+    }
+}
+
+/* Animation de flottement idle pour les portraits */
+@keyframes portraitFloatNew {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
     }
 }
 

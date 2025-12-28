@@ -64,6 +64,7 @@ const chapter1Battle1Events: StoryEvent[] = [
     {
         id: 'ch1_battle1',
         type: 'battle',
+        backgroundImage: '/assets/story/battle1_intro.png',
         battle: {
             id: 'battle_zeus_vs_hades',
             name: "Duel des Frères",
