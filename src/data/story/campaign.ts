@@ -141,7 +141,7 @@ const chapter1Battle2Events: StoryEvent[] = [
     {
         id: 'ch1_battle2',
         type: 'battle',
-        backgroundImage: '/assets/story/hestia_cabin.png',  // Garder l'image de la cabane
+        backgroundImage: '/assets/story/battle2_ares_entrance.png',  // Image d'Arès qui débarque
         battle: {
             id: 'battle_zeus_hestia_vs_ares',
             name: "L'Attaque d'Arès",
