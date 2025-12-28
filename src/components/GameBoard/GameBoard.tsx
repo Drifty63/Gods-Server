@@ -1428,9 +1428,6 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 />
             )}
 
-            {/* Lumière dynamique - effet de nuages passant au-dessus du colisée */}
-            <div className={styles.dynamicLightOverlay} />
-
             {/* #2 - Damage Numbers Container */}
             <div className={styles.damageNumbersContainer}>
                 {combatAnimations.damageNumbers.map(dn => (

@@ -104,7 +104,7 @@ export default function OnlineGamePage() {
 
             const imFirst = multiplayerData.firstPlayer === 'host';
 
-            initGame(myGods, myDeck, opponentGods, opponentDeck, imFirst, false, { isOnlineGame: true, maxTurns: 50 });
+            initGame(myGods, myDeck, opponentGods, opponentDeck, imFirst, false, { isOnlineGame: true, maxTurns: 60 });
             setIsInitialized(true);
 
             const state = useGameStore.getState().gameState;
