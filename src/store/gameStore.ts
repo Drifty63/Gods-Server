@@ -62,7 +62,8 @@ interface GameStore {
         player2Gods: GodCard[],
         player2Deck: SpellCard[],
         isPlayer1First: boolean,
-        soloMode?: boolean
+        soloMode?: boolean,
+        options?: { isOnlineGame?: boolean; maxTurns?: number }
     ) => void;
 
     initWithState: (state: GameState, myPlayerId: string) => void;
@@ -221,7 +222,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     zombieDamageGodId: null,
 
     // Initialiser une nouvelle partie
-    initGame: (player1Gods, player1Deck, player2Gods, player2Deck, isPlayer1First, soloMode = true) => {
+    initGame: (player1Gods, player1Deck, player2Gods, player2Deck, isPlayer1First, soloMode = true, options) => {
         const player1Id = 'player1';
         const player2Id = 'player2';
         const firstPlayerId = isPlayer1First ? player1Id : player2Id;
@@ -235,7 +236,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             'Adversaire (IA)',
             player2Gods,
             player2Deck,
-            firstPlayerId
+            firstPlayerId,
+            options  // Passer les options (isOnlineGame, maxTurns)
         );
 
         const engine = new GameEngine(initialState);

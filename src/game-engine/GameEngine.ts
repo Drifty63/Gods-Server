@@ -327,6 +327,12 @@ export class GameEngine {
         // Incrémenter le numéro de tour
         if (nextIndex === 0) {
             this.state.turnNumber++;
+
+            // Vérifier la limite de tours (pour les parties online)
+            if (this.state.maxTurns && this.state.turnNumber > this.state.maxTurns) {
+                this.endGameByTurnLimit();
+                return { success: true, message: 'Limite de tours atteinte!' };
+            }
         }
 
         // Piocher pour le nouveau joueur actuel
@@ -337,6 +343,56 @@ export class GameEngine {
         this.tickStatusEffects(nextPlayer);
 
         return { success: true, message: 'Tour terminé' };
+    }
+
+    /**
+     * Termine la partie à cause de la limite de tours
+     * Le gagnant est déterminé par:
+     * 1. Nombre de dieux vivants
+     * 2. Si égalité: PV cumulés des dieux vivants
+     */
+    private endGameByTurnLimit(): void {
+        const player1 = this.state.players[0];
+        const player2 = this.state.players[1];
+
+        // Compter les dieux vivants
+        const player1AliveGods = player1.gods.filter(g => !g.isDead);
+        const player2AliveGods = player2.gods.filter(g => !g.isDead);
+
+        const player1AliveCount = player1AliveGods.length;
+        const player2AliveCount = player2AliveGods.length;
+
+        console.log(`⏱️ Limite de ${this.state.maxTurns} tours atteinte!`);
+        console.log(`   Joueur 1: ${player1AliveCount} dieux vivants`);
+        console.log(`   Joueur 2: ${player2AliveCount} dieux vivants`);
+
+        let winnerId: string;
+
+        if (player1AliveCount !== player2AliveCount) {
+            // Le joueur avec le plus de dieux vivants gagne
+            winnerId = player1AliveCount > player2AliveCount ? player1.id : player2.id;
+            console.log(`🏆 Gagnant par nombre de dieux: ${winnerId}`);
+        } else {
+            // Égalité de dieux vivants: compter les PV cumulés
+            const player1TotalHP = player1AliveGods.reduce((sum, g) => sum + g.currentHealth, 0);
+            const player2TotalHP = player2AliveGods.reduce((sum, g) => sum + g.currentHealth, 0);
+
+            console.log(`   Joueur 1: ${player1TotalHP} PV cumulés`);
+            console.log(`   Joueur 2: ${player2TotalHP} PV cumulés`);
+
+            if (player1TotalHP !== player2TotalHP) {
+                winnerId = player1TotalHP > player2TotalHP ? player1.id : player2.id;
+                console.log(`🏆 Gagnant par PV cumulés: ${winnerId}`);
+            } else {
+                // Égalité parfaite: le joueur 1 (hôte) gagne par défaut
+                winnerId = player1.id;
+                console.log(`🏆 Égalité parfaite - Joueur 1 gagne par défaut: ${winnerId}`);
+            }
+        }
+
+        this.state.status = 'finished';
+        this.state.winnerId = winnerId;
+        this.state.winReason = 'turn_limit';
     }
 
     /**
@@ -1937,7 +1993,11 @@ export class GameEngine {
         player2Name: string,
         player2Gods: GodCard[],
         player2Deck: SpellCard[],
-        firstPlayerId: string
+        firstPlayerId: string,
+        options?: {
+            isOnlineGame?: boolean;
+            maxTurns?: number;
+        }
     ): GameState {
         const createPlayerState = (
             id: string,
@@ -1966,13 +2026,17 @@ export class GameEngine {
 
         const isPlayer1First = firstPlayerId === player1Id;
 
-
+        // Pour les parties online: limite de 50 tours par défaut
+        const isOnline = options?.isOnlineGame ?? false;
+        const maxTurns = options?.maxTurns ?? (isOnline ? 50 : undefined);
 
         const state: GameState = {
             id: generateUUID(),
             status: 'playing',
             currentPlayerId: firstPlayerId,
             turnNumber: 1,
+            maxTurns,
+            isOnlineGame: isOnline,
             players: [
                 createPlayerState(player1Id, player1Name, player1Gods, player1Deck, isPlayer1First),
                 createPlayerState(player2Id, player2Name, player2Gods, player2Deck, !isPlayer1First),

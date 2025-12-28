@@ -114,8 +114,11 @@ export interface GameState {
     status: 'waiting' | 'playing' | 'finished';
     currentPlayerId: string;
     turnNumber: number;
+    maxTurns?: number;              // Limite de tours (50 pour online, undefined sinon)
+    isOnlineGame?: boolean;         // Mode online (limite de tours activée)
     players: [PlayerState, PlayerState];
     winnerId?: string;
+    winReason?: 'elimination' | 'turn_limit' | 'surrender';  // Raison de la victoire
     createdAt: Date;
     updatedAt: Date;
 }

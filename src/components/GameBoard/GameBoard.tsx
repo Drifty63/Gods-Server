@@ -1770,7 +1770,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 )}
 
                 <div className={styles.turnInfo}>
-                    <span className={styles.turnNumber}>Tour {gameState.turnNumber}</span>
+                    <span className={styles.turnNumber}>
+                        Tour {gameState.turnNumber}{gameState.maxTurns ? `/${gameState.maxTurns}` : ''}
+                    </span>
                     <div className={styles.turnRow}>
                         <span className={`${styles.turnIndicator} ${isPlayerTurn ? styles.myTurn : styles.opponentTurn} `}>
                             {isPlayerTurn ? '🎮 Votre tour' : '⏳ Tour adverse'}
