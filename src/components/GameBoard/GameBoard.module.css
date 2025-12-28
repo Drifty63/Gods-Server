@@ -1659,6 +1659,14 @@
     color: #fff;
 }
 
+.winReasonText {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
 /* ================================
    MAIN DU JOUEUR
    ================================ */

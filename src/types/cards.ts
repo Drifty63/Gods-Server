@@ -118,7 +118,7 @@ export interface GameState {
     isOnlineGame?: boolean;         // Mode online (limite de tours activée)
     players: [PlayerState, PlayerState];
     winnerId?: string;
-    winReason?: 'elimination' | 'turn_limit' | 'surrender';  // Raison de la victoire
+    winReason?: 'elimination' | 'turn_limit' | 'surrender' | 'draw';  // Raison de la victoire (ou match nul)
     createdAt: Date;
     updatedAt: Date;
 }

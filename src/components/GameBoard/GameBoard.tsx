@@ -743,12 +743,10 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         // Ne rien faire si pas de gameState ou si déjà enregistré
         if (!gameState || gameResultRecorded) return;
 
-        // Détecter la fin de partie
-        if (gameState.status === 'finished' && gameState.winnerId && user) {
+        // Détecter la fin de partie (avec ou sans gagnant - pour les match nuls)
+        if (gameState.status === 'finished' && user) {
             // Marquer immédiatement comme enregistré pour éviter les doubles appels
             setGameResultRecorded(true);
-
-            const isVictory = gameState.winnerId === playerId;
 
             // Vérifier le mode de jeu (ranked, casual, private, ou solo)
             const gameMode = sessionStorage.getItem('gameMode');
@@ -769,15 +767,21 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
             // Enregistrer le résultat
             const recordResult = async () => {
                 try {
-                    if (isVictory) {
-                        await recordVictory(user.uid, isRanked);
-                        console.log(`✅ Victoire enregistrée (${isRanked ? 'classée' : 'amicale'}), quêtes mises à jour`);
-                    } else {
-                        await recordDefeat(user.uid, isRanked);
-                        console.log(`📝 Défaite enregistrée (${isRanked ? 'classée' : 'amicale'}), quêtes mises à jour`);
+                    // Match nul: pas de victoire ni défaite, juste les dieux joués
+                    if (gameState.winReason === 'draw') {
+                        console.log(`🤝 Match nul enregistré - pas de modification des stats victoire/défaite`);
+                    } else if (gameState.winnerId) {
+                        const isVictory = gameState.winnerId === playerId;
+                        if (isVictory) {
+                            await recordVictory(user.uid, isRanked);
+                            console.log(`✅ Victoire enregistrée (${isRanked ? 'classée' : 'amicale'}), quêtes mises à jour`);
+                        } else {
+                            await recordDefeat(user.uid, isRanked);
+                            console.log(`📝 Défaite enregistrée (${isRanked ? 'classée' : 'amicale'}), quêtes mises à jour`);
+                        }
                     }
 
-                    // Enregistrer les dieux joués
+                    // Enregistrer les dieux joués (même en cas de match nul)
                     if (playerGodIds.length > 0) {
                         await recordGodsPlayed(user.uid, playerGodIds);
                         console.log(`🎭 Dieux enregistrés: ${playerGodIds.join(', ')}`);
@@ -1974,10 +1978,18 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                         <div className={styles.gameOver}>
                             <h2>Partie terminée !</h2>
                             <p>
-                                {gameState.winnerId === playerId
-                                    ? '🏆 Victoire !'
-                                    : '💀 Défaite...'}
+                                {gameState.winReason === 'draw'
+                                    ? '🤝 Match Nul !'
+                                    : gameState.winnerId === playerId
+                                        ? '🏆 Victoire !'
+                                        : '💀 Défaite...'}
                             </p>
+                            {gameState.winReason === 'turn_limit' && gameState.winnerId && (
+                                <p className={styles.winReasonText}>Limite de {gameState.maxTurns} tours atteinte</p>
+                            )}
+                            {gameState.winReason === 'draw' && (
+                                <p className={styles.winReasonText}>Égalité parfaite après {gameState.maxTurns} tours</p>
+                            )}
                         </div>
                     )
                 }

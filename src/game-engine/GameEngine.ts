@@ -350,6 +350,7 @@ export class GameEngine {
      * Le gagnant est déterminé par:
      * 1. Nombre de dieux vivants
      * 2. Si égalité: PV cumulés des dieux vivants
+     * 3. Si toujours égalité: Match nul
      */
     private endGameByTurnLimit(): void {
         const player1 = this.state.players[0];
@@ -366,12 +367,13 @@ export class GameEngine {
         console.log(`   Joueur 1: ${player1AliveCount} dieux vivants`);
         console.log(`   Joueur 2: ${player2AliveCount} dieux vivants`);
 
-        let winnerId: string;
+        this.state.status = 'finished';
 
         if (player1AliveCount !== player2AliveCount) {
             // Le joueur avec le plus de dieux vivants gagne
-            winnerId = player1AliveCount > player2AliveCount ? player1.id : player2.id;
-            console.log(`🏆 Gagnant par nombre de dieux: ${winnerId}`);
+            this.state.winnerId = player1AliveCount > player2AliveCount ? player1.id : player2.id;
+            this.state.winReason = 'turn_limit';
+            console.log(`🏆 Gagnant par nombre de dieux: ${this.state.winnerId}`);
         } else {
             // Égalité de dieux vivants: compter les PV cumulés
             const player1TotalHP = player1AliveGods.reduce((sum, g) => sum + g.currentHealth, 0);
@@ -381,18 +383,16 @@ export class GameEngine {
             console.log(`   Joueur 2: ${player2TotalHP} PV cumulés`);
 
             if (player1TotalHP !== player2TotalHP) {
-                winnerId = player1TotalHP > player2TotalHP ? player1.id : player2.id;
-                console.log(`🏆 Gagnant par PV cumulés: ${winnerId}`);
+                this.state.winnerId = player1TotalHP > player2TotalHP ? player1.id : player2.id;
+                this.state.winReason = 'turn_limit';
+                console.log(`🏆 Gagnant par PV cumulés: ${this.state.winnerId}`);
             } else {
-                // Égalité parfaite: le joueur 1 (hôte) gagne par défaut
-                winnerId = player1.id;
-                console.log(`🏆 Égalité parfaite - Joueur 1 gagne par défaut: ${winnerId}`);
+                // Égalité parfaite: MATCH NUL
+                this.state.winnerId = undefined;
+                this.state.winReason = 'draw';
+                console.log(`🤝 Égalité parfaite - MATCH NUL!`);
             }
         }
-
-        this.state.status = 'finished';
-        this.state.winnerId = winnerId;
-        this.state.winReason = 'turn_limit';
     }
 
     /**
