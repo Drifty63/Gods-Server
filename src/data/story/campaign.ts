@@ -9,7 +9,8 @@ import {
     PROLOGUE_END,
     // Combat 2 du prologue
     PROLOGUE_BATTLE2_NARRATOR,
-    PROLOGUE_BATTLE2_INTRO,
+    PROLOGUE_BATTLE2_INTRO_CABIN,
+    PROLOGUE_BATTLE2_ARES_ENTRANCE,
     PROLOGUE_BATTLE2_WIN,
     PROLOGUE_BATTLE2_LOSE,
     // Combat 3 du prologue
@@ -129,19 +130,27 @@ const chapter1Battle2Events: StoryEvent[] = [
         backgroundImage: '/assets/story/earth_view.png',
         nextEventId: 'ch1_battle2_intro'
     },
-    // Dialogue Zeus et Hestia, puis arrivée d'Arès
+    // Dialogue Zeus et Hestia dans la cabane tranquille
     {
         id: 'ch1_battle2_intro',
         type: 'dialogue',
-        dialogues: PROLOGUE_BATTLE2_INTRO,
+        dialogues: PROLOGUE_BATTLE2_INTRO_CABIN,
         backgroundImage: '/assets/story/hestia_cabin.png',
+        nextEventId: 'ch1_battle2_ares'
+    },
+    // Arès débarque et défonce la porte
+    {
+        id: 'ch1_battle2_ares',
+        type: 'dialogue',
+        dialogues: PROLOGUE_BATTLE2_ARES_ENTRANCE,
+        backgroundImage: '/assets/story/battle2_ares_entrance.png',
         nextEventId: 'ch1_battle2'
     },
     // Combat 2v1 : Zeus + Hestia vs Arès
     {
         id: 'ch1_battle2',
         type: 'battle',
-        backgroundImage: '/assets/story/battle2_ares_entrance.png',  // Image d'Arès qui débarque
+        backgroundImage: '/assets/story/battle2_ares_entrance.png',  // Même image que l'entrée d'Arès
         battle: {
             id: 'battle_zeus_hestia_vs_ares',
             name: "L'Attaque d'Arès",

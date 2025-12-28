@@ -380,8 +380,8 @@ export const PROLOGUE_BATTLE2_NARRATOR: DialogueLine[] = [
     }
 ];
 
-// Dialogue Zeus et Hestia avant le combat
-export const PROLOGUE_BATTLE2_INTRO: DialogueLine[] = [
+// Dialogue Zeus et Hestia dans la cabane (AVANT l'arrivée d'Arès)
+export const PROLOGUE_BATTLE2_INTRO_CABIN: DialogueLine[] = [
     {
         speakerId: 'hestia',
         speakerName: 'Hestia',
@@ -441,7 +441,11 @@ export const PROLOGUE_BATTLE2_INTRO: DialogueLine[] = [
         speakerName: 'Hestia',
         text: "Si nous parvenons à rallier Poséidon à notre cause, nous aurons une chance de—",
         emotion: 'determined'
-    },
+    }
+];
+
+// Arrivée d'Arès qui défonce la porte
+export const PROLOGUE_BATTLE2_ARES_ENTRANCE: DialogueLine[] = [
     {
         speakerId: 'ares',
         speakerName: 'Arès',
@@ -478,6 +482,12 @@ export const PROLOGUE_BATTLE2_INTRO: DialogueLine[] = [
         text: "*se lève péniblement* Je ne laisserai pas ma sœur affronter ce monstre seule. Même affaibli... je suis toujours Zeus !",
         emotion: 'determined'
     }
+];
+
+// Garder l'ancien export pour compatibilité (combinaison des deux)
+export const PROLOGUE_BATTLE2_INTRO: DialogueLine[] = [
+    ...PROLOGUE_BATTLE2_INTRO_CABIN,
+    ...PROLOGUE_BATTLE2_ARES_ENTRANCE
 ];
 
 // Après victoire contre Arès
