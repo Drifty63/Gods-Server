@@ -31,9 +31,9 @@
         0 0 20px var(--glow-color, #ffd700),
         0 0 40px rgba(0, 0, 0, 0.5),
         inset 0 0 20px rgba(0, 0, 0, 0.3);
-    animation: portraitGlow 2s ease-in-out infinite alternate;
 }
 
+/* Animation de glow par défaut */
 @keyframes portraitGlow {
     from {
         box-shadow:
@@ -45,6 +45,40 @@
         box-shadow:
             0 0 30px var(--glow-color, #ffd700),
             0 0 60px var(--glow-color, #ffd700);
+    }
+}
+
+/* Animation d'entrée pour nouveau speaker */
+.portraitEnter {
+    animation: portraitSlideIn 0.5s ease-out, portraitGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes portraitSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Animation idle - léger flottement continu */
+.portraitIdle {
+    animation: portraitFloat 4s ease-in-out infinite, portraitGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes portraitFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
     }
 }
 
@@ -121,6 +155,39 @@
     letter-spacing: 2px;
     margin-bottom: 12px;
     text-shadow: 0 0 10px currentColor;
+}
+
+/* Animations d'entrée pour nouveau speaker */
+.dialogueBoxEnter {
+    animation: dialogueBoxSlideIn 0.4s ease-out;
+}
+
+@keyframes dialogueBoxSlideIn {
+    from {
+        opacity: 0.5;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.speakerNameEnter {
+    animation: speakerNameFadeIn 0.3s ease-out;
+}
+
+@keyframes speakerNameFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Texte du dialogue */

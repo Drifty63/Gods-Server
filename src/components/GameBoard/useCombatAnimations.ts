@@ -31,6 +31,10 @@ interface UseCombatAnimationsReturn {
     shakingGods: Map<string, 'light' | 'normal'>;
     triggerGodShake: (godId: string, intensity?: 'light' | 'normal') => void;
 
+    // Screen shake global (10+ dégâts)
+    isScreenShaking: boolean;
+    triggerScreenShake: () => void;
+
     // #6 Status auras
     statusAuraGods: Map<string, StatusAuraType>;
     triggerStatusAura: (godId: string, statusType: StatusAuraType) => void;
@@ -54,6 +58,9 @@ interface UseCombatAnimationsReturn {
 export function useCombatAnimations(): UseCombatAnimationsReturn {
     // #1 - God Shake state (par dieu)
     const [shakingGods, setShakingGods] = useState<Map<string, 'light' | 'normal'>>(new Map());
+
+    // Screen shake global (10+ dégâts)
+    const [isScreenShaking, setIsScreenShaking] = useState(false);
 
     // #6 - Status auras (par dieu)
     const [statusAuraGods, setStatusAuraGods] = useState<Map<string, StatusAuraType>>(new Map());
@@ -83,6 +90,12 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
                 return newMap;
             });
         }, duration);
+    }, []);
+
+    // Screen shake global (gros dégâts)
+    const triggerScreenShake = useCallback(() => {
+        setIsScreenShaking(true);
+        setTimeout(() => setIsScreenShaking(false), 400);
     }, []);
 
     // #6 - Trigger status aura
@@ -152,6 +165,10 @@ export function useCombatAnimations(): UseCombatAnimationsReturn {
         shakingGods,
         triggerGodShake,
 
+        // Screen shake global
+        isScreenShaking,
+        triggerScreenShake,
+
         // Status auras
         statusAuraGods,
         triggerStatusAura,
@@ -214,6 +231,11 @@ export function useGameStateAnimations(
 
                             // #1 - Shake sur la carte du dieu qui reçoit les dégâts
                             animations.triggerGodShake(god.card.id, amount >= 4 ? 'normal' : 'light');
+
+                            // Screen shake global pour les gros dégâts (10+)
+                            if (amount >= 10) {
+                                animations.triggerScreenShake();
+                            }
                         } else {
                             // Soins reçus
                             animations.addDamageNumber(god.card.id, hpDiff, 'heal');

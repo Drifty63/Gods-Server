@@ -1419,7 +1419,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     };
 
     return (
-        <div className={styles.board}>
+        <div className={`${styles.board} ${combatAnimations.isScreenShaking ? styles.screenShake : ''}`}>
             {/* #4 - Turn Transition Overlay */}
             {combatAnimations.showTurnTransition && (
                 <TurnTransition
@@ -1427,6 +1427,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                     onComplete={combatAnimations.hideTurnTransition}
                 />
             )}
+
+            {/* Lumière dynamique - effet de nuages passant au-dessus du colisée */}
+            <div className={styles.dynamicLightOverlay} />
 
             {/* #2 - Damage Numbers Container */}
             <div className={styles.damageNumbersContainer}>

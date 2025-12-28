@@ -35,6 +35,9 @@ export default function GodCard({
     const colors = ELEMENT_COLORS[card.element];
     const healthPercentage = (currentHealth / card.maxHealth) * 100;
 
+    // Dieu gravement blessé (≤25% PV)
+    const isCriticallyWounded = !isDead && healthPercentage <= 25;
+
     // #1 Classe de shake dynamique
     const shakeClass = isShaking
         ? (shakeIntensity === 'light' ? styles.shakingLight : styles.shaking)
@@ -45,7 +48,7 @@ export default function GodCard({
 
     return (
         <div
-            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''} ${isEnemy ? styles.enemy : ''} ${shakeClass} ${statusAuraClass}`}
+            className={`${styles.card} ${isDead ? styles.dead : ''} ${isSelectable ? styles.selectable : ''} ${isSelected ? styles.selected : ''} ${isRequired ? styles.required : ''} ${isEnemy ? styles.enemy : ''} ${shakeClass} ${statusAuraClass} ${isCriticallyWounded ? styles.criticallyWounded : ''}`}
             style={{
                 '--element-color': colors.primary,
                 '--element-gradient': colors.gradient,

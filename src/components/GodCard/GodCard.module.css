@@ -132,6 +132,54 @@
   }
 }
 
+/* Dieu gravement blessé (≤25% PV) */
+.criticallyWounded {
+  border-color: #8b0000 !important;
+  animation: criticallyWoundedPulse 1.5s ease-in-out infinite;
+}
+
+/* Vignette rouge sur l'image */
+.criticallyWounded .imageContainer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(139, 0, 0, 0.4) 100%);
+  pointer-events: none;
+  z-index: 2;
+  animation: woundedVignette 2s ease-in-out infinite;
+}
+
+@keyframes criticallyWoundedPulse {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 15px rgba(139, 0, 0, 0.5),
+      inset 0 0 10px rgba(139, 0, 0, 0.2);
+  }
+
+  50% {
+    box-shadow:
+      0 0 25px rgba(139, 0, 0, 0.7),
+      inset 0 0 15px rgba(139, 0, 0, 0.3);
+  }
+}
+
+@keyframes woundedVignette {
+
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
 /* ================================
    BADGE ÉLÉMENT (en haut à gauche de l'image)
    ================================ */
