@@ -211,7 +211,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_artemis',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_ARTEMIS_INTRO,
-        backgroundImage: '/assets/story/artemis_cave_hideout.png',
+        backgroundImage: '/assets/story/artemis_meeting_v2.png',
         nextEventId: 'ch1_battle3_after_rest'
     },
     // Après le repos - Artémis réveille Zeus et Hestia
@@ -219,7 +219,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_after_rest',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_AFTER_REST,
-        backgroundImage: '/assets/story/battle3_after_rest.png',
+        backgroundImage: '/assets/story/artemis_wakeup_v2.png',
         nextEventId: 'ch1_battle3_demeter_intro'
     },
     // Arrivée chez Déméter
