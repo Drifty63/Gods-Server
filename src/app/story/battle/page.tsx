@@ -534,7 +534,7 @@ function StoryBattleContent() {
         } else {
             // Combat 1 : Zeus vs Hadès
             backgroundImage = playerWon
-                ? '/assets/story/victory_nyx.png'
+                ? '/assets/story/battle1_victory_v2.png'
                 : '/assets/story/battle1_defeat.png';
         }
         const isNarrator = dialogue.speaker === 'narrator';
@@ -621,7 +621,7 @@ function StoryBattleContent() {
         } else {
             // Combat 1 : Zeus vs Hadès
             return isVictory
-                ? '/assets/story/victory_nyx.png'
+                ? '/assets/story/battle1_victory_v2.png'
                 : '/assets/story/battle1_defeat.png';
         }
     };
