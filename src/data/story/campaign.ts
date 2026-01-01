@@ -304,14 +304,14 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_ambush',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_AMBUSH,
-        backgroundImage: '/assets/story/ares_ambush.png',
+        backgroundImage: '/assets/story/battle4_ambush_v2.png',
         nextEventId: 'ch1_battle4'
     },
     // Combat 3v4 : Zeus + Déméter + Artémis vs Arès + 3 Soldats
     {
         id: 'ch1_battle4',
         type: 'battle',
-        backgroundImage: '/assets/story/ares_ambush.png',
+        backgroundImage: '/assets/story/battle4_ambush_v2.png',
         battle: {
             id: 'battle_ambush_ares',
             name: "L'Embuscade d'Arès",
@@ -345,7 +345,7 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_lose',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_LOSE,
-        backgroundImage: '/assets/story/battle4_defeat.png',
+        backgroundImage: '/assets/story/battle4_defeat_v2.png',
         nextEventId: undefined  // Doit réessayer
     }
 ];
