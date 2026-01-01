@@ -33,6 +33,12 @@ import {
     CHAPTER2_BATTLE1_BETRAYAL,
     CHAPTER2_BATTLE1_WIN,
     CHAPTER2_BATTLE1_LOSE,
+    // Chapitre 2 - Combat 2 : Le Dragon de Thèbes
+    CHAPTER2_BATTLE2_NARRATOR,
+    CHAPTER2_BATTLE2_DEPARTURE,
+    CHAPTER2_BATTLE2_DRAGON_ATTACK,
+    CHAPTER2_BATTLE2_WIN,
+    CHAPTER2_BATTLE2_LOSE,
     // Chapitre 3 (dialogues gardés mais combats supprimés)
     CHAPTER3_INTRO,
     CHAPTER3_EPILOGUE
@@ -473,7 +479,7 @@ const chapter2Battle1Events: StoryEvent[] = [
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_WIN,
         backgroundImage: '/assets/story/chapter2_battle1_victory.png',
-        nextEventId: undefined  // Fin du combat 1 du chapitre 2
+        nextEventId: 'ch2_battle2_narrator'  // Continue vers combat 2
     },
     // Après combat - Défaite
     {
@@ -485,9 +491,76 @@ const chapter2Battle1Events: StoryEvent[] = [
     }
 ];
 
+// ===========================================
+// COMBAT 2 DU CHAPITRE 2 - LE DRAGON DE THÈBES
+// Zeus + Aphrodite + Apollon + Dionysos vs Dragon (4v1)
+// ===========================================
+
+const chapter2Battle2Events: StoryEvent[] = [
+    // Narrateur - Le matin à la villa
+    {
+        id: 'ch2_battle2_narrator',
+        type: 'cutscene',
+        dialogues: CHAPTER2_BATTLE2_NARRATOR,
+        backgroundImage: '/assets/story/ch2_villa_morning.png',
+        nextEventId: 'ch2_battle2_departure'
+    },
+    // Départ de Thèbes
+    {
+        id: 'ch2_battle2_departure',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE2_DEPARTURE,
+        backgroundImage: '/assets/story/ch2_leaving_thebes.png',
+        nextEventId: 'ch2_battle2_dragon_attack'
+    },
+    // Attaque du Dragon
+    {
+        id: 'ch2_battle2_dragon_attack',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE2_DRAGON_ATTACK,
+        backgroundImage: '/assets/story/ch2_dragon_attack.png',
+        nextEventId: 'ch2_battle2'
+    },
+    // Combat 4v1 : Zeus + Aphrodite + Apollon + Dionysos vs Dragon de Thèbes
+    {
+        id: 'ch2_battle2',
+        type: 'battle',
+        backgroundImage: '/assets/story/ch2_dragon_attack.png',
+        battle: {
+            id: 'battle_dragon_thebes',
+            name: "Le Dragon de Thèbes",
+            description: "Le descendant du dragon d'Arès attaque ! Hestia, Déméter et Artémis sont inconscientes !",
+            playerTeam: ['zeus', 'aphrodite', 'apollon', 'dionysos'],
+            enemyTeam: ['dragon_thebes'],
+            deckMultiplier: 1,           // x1 pour le joueur (20 cartes)
+            enemyDeckMultiplier: 4,      // x4 pour le dragon (20 cartes aussi)
+            continueOnDefeat: false      // Doit gagner pour continuer
+        },
+        nextEventOnWin: 'ch2_battle2_win',
+        nextEventOnLose: 'ch2_battle2_lose'
+    },
+    // Après combat - Victoire
+    {
+        id: 'ch2_battle2_win',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE2_WIN,
+        backgroundImage: '/assets/story/ch2_dragon_victory.png',
+        nextEventId: undefined  // Fin du chapitre 2 pour l'instant
+    },
+    // Après combat - Défaite
+    {
+        id: 'ch2_battle2_lose',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE2_LOSE,
+        backgroundImage: '/assets/story/ch2_dragon_defeat.png',
+        nextEventId: undefined  // Doit réessayer
+    }
+];
+
 // Tous les événements du chapitre 2
 const chapter2Events: StoryEvent[] = [
-    ...chapter2Battle1Events
+    ...chapter2Battle1Events,
+    ...chapter2Battle2Events
 ];
 
 // Configuration des combats du chapitre 2
@@ -498,7 +571,15 @@ export const CHAPTER_2_BATTLES = [
         description: "À Thèbes, une trahison inattendue attend Zeus et ses alliés",
         firstEventId: 'ch2_battle1_narrator',
         unlocked: true,              // Débloqué dès le début du chapitre
-        requiresBattleId: undefined  // Pas de prérequis dans le chapitre 2
+        requiresBattleId: undefined  // Pas de prérequis
+    },
+    {
+        id: 'battle2',
+        name: "Le Dragon de Thèbes",
+        description: "Un dragon légendaire bloque la route vers Athènes",
+        firstEventId: 'ch2_battle2_narrator',
+        unlocked: false,              // Débloqué après combat 1
+        requiresBattleId: 'battle1'
     }
 ];
 

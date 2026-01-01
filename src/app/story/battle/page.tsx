@@ -22,7 +22,9 @@ import {
     PROLOGUE_BATTLE4_LOSE,
     // Chapitre 2
     CHAPTER2_BATTLE1_WIN,
-    CHAPTER2_BATTLE1_LOSE
+    CHAPTER2_BATTLE1_LOSE,
+    CHAPTER2_BATTLE2_WIN,
+    CHAPTER2_BATTLE2_LOSE
 } from '@/data/story/dialogues';
 import styles from './page.module.css';
 
@@ -286,7 +288,10 @@ function StoryBattleContent() {
             // Déterminer quels dialogues utiliser selon le combat
             let allDialogues;
 
-            if (battleConfig?.id === 'battle_thebes_betrayal') {
+            if (battleConfig?.id === 'battle_dragon_thebes') {
+                // Chapitre 2 Combat 2 : Le Dragon de Thèbes
+                allDialogues = won ? CHAPTER2_BATTLE2_WIN : CHAPTER2_BATTLE2_LOSE;
+            } else if (battleConfig?.id === 'battle_thebes_betrayal') {
                 // Chapitre 2 Combat 1 : La Trahison de Thèbes
                 allDialogues = won ? CHAPTER2_BATTLE1_WIN : CHAPTER2_BATTLE1_LOSE;
             } else if (battleConfig?.id === 'battle_ambush_ares') {
@@ -511,7 +516,12 @@ function StoryBattleContent() {
 
         // Utiliser l'image de fond appropriée selon le combat
         let backgroundImage: string;
-        if (battleConfig?.id === 'battle_thebes_betrayal') {
+        if (battleConfig?.id === 'battle_dragon_thebes') {
+            // Chapitre 2 Combat 2 : Le Dragon de Thèbes
+            backgroundImage = playerWon
+                ? '/assets/story/ch2_dragon_victory.png'
+                : '/assets/story/ch2_dragon_defeat.png';
+        } else if (battleConfig?.id === 'battle_thebes_betrayal') {
             // Chapitre 2 Combat 1 : La Trahison de Thèbes
             backgroundImage = playerWon
                 ? '/assets/story/chapter2_battle1_victory.png'
@@ -603,7 +613,12 @@ function StoryBattleContent() {
 
     // Fonction pour obtenir l'image de fond appropriée selon le combat
     const getResultBackgroundImage = (isVictory: boolean): string => {
-        if (battleConfig?.id === 'battle_thebes_betrayal') {
+        if (battleConfig?.id === 'battle_dragon_thebes') {
+            // Chapitre 2 Combat 2 : Le Dragon de Thèbes
+            return isVictory
+                ? '/assets/story/ch2_dragon_victory.png'
+                : '/assets/story/ch2_dragon_defeat.png';
+        } else if (battleConfig?.id === 'battle_thebes_betrayal') {
             // Chapitre 2 Combat 1 : La Trahison de Thèbes
             return isVictory
                 ? '/assets/story/chapter2_battle1_victory.png'

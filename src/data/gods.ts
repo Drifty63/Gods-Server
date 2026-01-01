@@ -312,6 +312,18 @@ export const ALL_GODS: GodCard[] = [
         flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
         hidden: true,  // Non jouable par le joueur
     },
+
+    // DRAGON DE THÈBES (Air 💨) - Boss histoire Chapitre 2
+    {
+        id: 'dragon_thebes',
+        name: 'Dragon de Thèbes',
+        element: 'air',
+        weakness: 'fire',
+        maxHealth: 60,
+        imageUrl: '/cards/gods/dragon_thebes.png',
+        flavorText: '"Né du sang d\'Arès lui-même, je suis la terreur des cieux. Plus grand, plus puissant que mon ancêtre, je règne sur les vents de la mort."',
+        hidden: true,  // Boss non jouable
+    },
 ];
 
 // Helper pour obtenir un dieu par son ID

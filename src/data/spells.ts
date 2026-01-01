@@ -1931,6 +1931,97 @@ export const ALL_SPELLS: SpellCard[] = [
         imageUrl: '/cards/spells/soldier_shield_wall.png',
         description: '+3🛡️🔄 | +🗡️1⏳🔄',
     },
+
+    // =====================================================
+    // SORTS DU DRAGON DE THÈBES (Air 💨) - Boss mode histoire
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    // Générateur 1 : 1 dégât à tous les ennemis, génère 1 énergie
+    {
+        id: 'dragon_thebes_generator_1',
+        name: 'Souffle Dévastateur',
+        element: 'air',
+        godId: 'dragon_thebes',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_dragon_souffle.png',
+        description: '1🩸 → 👊',
+    },
+    // Générateur 2 : 3 dégâts à une cible, génère 1 énergie
+    {
+        id: 'dragon_thebes_generator_2',
+        name: 'Morsure du Dragon',
+        element: 'air',
+        godId: 'dragon_thebes',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_dragon_morsure.png',
+        description: '3🩸 → ⚔️',
+    },
+
+    // --- COMPÉTENCES ---
+    // Compétence 1 : 3 dégâts à 2 cibles + stun 1 tour
+    {
+        id: 'dragon_thebes_skill_1',
+        name: 'Griffes Foudroyantes',
+        element: 'air',
+        godId: 'dragon_thebes',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' },
+            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_dragon_griffes.png',
+        description: '3🩸 → ⚔️⚔️ | +❄️1⏳',
+    },
+    // Compétence 2 (Ultime) : 2 dégâts à tous + 3 bouclier
+    {
+        id: 'dragon_thebes_skill_2',
+        name: 'Tempête Draconique',
+        element: 'air',
+        godId: 'dragon_thebes',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'all_enemies' },
+            { type: 'shield', value: 3, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_dragon_tempete.png',
+        description: '2🩸 → 👊 | +3🛡️🔄',
+    },
+
+    // --- UTILITAIRE ---
+    // Utilitaire : 3 bouclier + provocation 2 tours
+    {
+        id: 'dragon_thebes_utility_1',
+        name: 'Écailles d\'Arès',
+        element: 'air',
+        godId: 'dragon_thebes',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 3, target: 'self' },
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_dragon_ecailles.png',
+        description: '+3🛡️🔄 | +🗡️2⏳🔄',
+    },
 ];
 
 // Helper pour obtenir les sorts d'un dieu

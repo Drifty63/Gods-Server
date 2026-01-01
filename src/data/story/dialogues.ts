@@ -1599,6 +1599,385 @@ export const CHAPTER2_BATTLE1_LOSE: DialogueLine[] = [
     }
 ];
 
+// ===========================================
+// COMBAT 2 DU CHAPITRE 2 - LE DRAGON DE THÈBES
+// Zeus + Aphrodite + Apollon + Dionysos vs Dragon
+// ===========================================
+
+// Narrateur - Le matin à la villa de Dionysos
+export const CHAPTER2_BATTLE2_NARRATOR: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La nuit a été agitée, mais les sept dieux ont finalement pu se reposer dans la villa de Dionysos.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Au petit matin, rassemblés autour d'une table couverte de cartes et de parchemins, ils font le point sur leur itinéraire.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Leur destination : Athènes, où Athéna les attend. Mais le chemin le plus court depuis Thèbes passe par le Bois de Colone...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Ce bois sacré est fortement lié à Hadès et aux Érinyes, les terribles Furies vengeresses.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "L'autre chemin leur ferait perdre plusieurs jours précieux. Dans l'état actuel des choses, ils n'ont pas le choix : le temps presse.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Ils devront traverser le Bois de Colone avec prudence et vigilance. Les dangers qui les y attendent sont innombrables...",
+        emotion: 'neutral'
+    }
+];
+
+// Dialogue de départ - Les 7 dieux quittent Thèbes
+export const CHAPTER2_BATTLE2_DEPARTURE: DialogueLine[] = [
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*ajuste sa cape* En route. Plus vite nous atteindrons Athènes, mieux ce sera.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*soupire* Adieu ma belle villa... J'espère qu'elle sera encore debout à mon retour.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*marche à côté de lui* Je suis vraiment désolée pour ce que j'ai fait, Dionysos. Arès m'avait promis...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*léger sourire* Tu m'as envoûté, c'est vrai. Mais j'ai connu pire ivresse, crois-moi.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*se frotte les tempes* Ce poison... Ma tête résonne encore comme une lyre mal accordée.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*à son frère jumeau* Tu devrais rester en arrière avec moi. Mes sens sont plus aiguisés.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Comme toujours, sœur, tu me sous-estimes. J'ai survécu à cette folie, non ?",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*observe les champs* La terre ici est fertile. Dommage que nous ne puissions pas rester plus longtemps.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*marche aux côtés de Déméter* Ce qui m'inquiète, c'est le Bois de Colone. Les récits parlent de créatures terrifiantes.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Les Érinyes répondent aux ordres d'Hadès. Elles nous poursuivront si elles nous repèrent.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Pas si je les repère en premier. *tapote son arc* Restez groupés et suivez mes signaux.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les sept dieux s'éloignent de Thèbes, laissant derrière eux la cité et ses souvenirs amers...",
+        emotion: 'neutral'
+    }
+];
+
+// Dialogue avant combat - L'attaque du Dragon
+export const CHAPTER2_BATTLE2_DRAGON_ATTACK: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Plusieurs heures de marche plus tard, le groupe traverse une paisible prairie bordée d'un cours d'eau cristallin.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "L'atmosphère est étrangement calme. Trop calme. Même les oiseaux ont cessé de chanter...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*s'arrête brusquement* Attendez. Quelque chose approche. Quelque chose de... massif.",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Soudain, une ombre gigantesque obscurcit le soleil. Un rugissement primal déchire le silence !",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "BOOOM ! Une créature ailée s'abat au milieu du groupe à une vitesse fulgurante !",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*projetée au sol* AARGH !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*s'effondre* Non... le choc...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*renversée par une aile géante* Je ne l'ai pas vu venir... !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*se relève péniblement* Qu'est-ce que... Par les Titans !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Devant eux se dresse un dragon colossal, ses écailles noires brillant sous le soleil, ses ailes membraneuses déployées.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*pâlit* Non... C'est impossible ! Le Dragon de Thèbes ?!",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Mais Cadmos l'a vaincu il y a des siècles ! C'est dans toutes les chroniques !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*observe la bête* Ce n'est pas le même. Regarde-le... Il est différent. Plus grand. Plus... évolué.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Le dragon originel était une créature d'Arès... né de son sang divin, dit-on.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*recule* Il devait avoir pondu un œuf avant de mourir... Et de cet œuf est né... ça.",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Les récits décrivaient un grand serpent, un reptile. Celui-ci est un véritable dragon ailé !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La créature rugit, ses yeux brûlant d'une intelligence malveillante. Elle a grandi dans l'ombre, plus puissante que son ancêtre.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*invoque sa foudre* Hestia, Déméter et Artémis sont inconscientes. Nous devons protéger nos sœurs !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*fait apparaître ses vignes* Je suis avec toi, Zeus. Ce monstre sera terrassé !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*brandit sa lyre* Ma musique peut l'affaiblir ! Ensemble, nous pouvons le vaincre !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*concentre son pouvoir* Je dois me racheter. Que mon charme devienne une arme !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Quatre dieux face à un dragon légendaire. Le combat s'annonce brutal et impitoyable...",
+        emotion: 'neutral'
+    }
+];
+
+// Victoire du Combat 2
+export const CHAPTER2_BATTLE2_WIN: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Dans un dernier rugissement de douleur, le Dragon de Thèbes s'effondre, vaincu par les quatre dieux.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*essoufflé* C'est... terminé. La bête est morte.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*s'appuie sur ses genoux* Par Bacchus... Quelle créature ! J'ai cru qu'on y passerait tous.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*range sa lyre* Mes harmonies ont trouvé sa faiblesse. Même les dragons ne résistent pas à la musique divine !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*court vers les autres* Artémis ! Hestia ! Déméter ! Réveillez-vous !",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*reprend conscience* Qu'est-ce qui... Le dragon ? Où est-il ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*se relève péniblement* Ma tête... J'ai vu une ombre et puis... plus rien.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*observe la carcasse du dragon* Vous l'avez vaincu ? Tous les quatre ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "La progéniture d'Arès, plus puissante que l'original. Mais nous avons tenu bon.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Cette créature gardait-elle le Bois de Colone ? Arès l'a peut-être envoyée pour nous intercepter.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*vérifie son arc* Peu importe. La route vers Athènes est maintenant dégagée.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les sept dieux, réunis une fois de plus, reprennent leur marche vers Athènes. Leur alliance se forge dans l'adversité...",
+        emotion: 'neutral'
+    }
+];
+
+// Défaite du Combat 2
+export const CHAPTER2_BATTLE2_LOSE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le souffle du dragon balaie les quatre dieux restants. Un par un, ils s'effondrent...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*à genoux* Non... Nous n'étions pas... assez forts...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*lâche sa lyre* La mélodie... s'éteint...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*s'écroule* Les vignes... ne peuvent plus m'aider...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*impuissante* Encore... un échec... Je ne peux pas...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le Dragon de Thèbes rugit victorieusement. Sept dieux gisent inconscients à ses pieds.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La résistance contre Hadès s'effondre ce jour-là, dévorée par le monstre né du sang d'Arès...",
+        emotion: 'neutral'
+    }
+];
+
 // Fin du Chapitre 2 (temporaire - gardé pour compatibilité)
 export const CHAPTER2_ATHENA_INTRO: DialogueLine[] = [
     {
