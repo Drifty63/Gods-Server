@@ -1787,6 +1787,12 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                                 ⏱️ {turnTimer}s
                             </span>
                         )}
+                        {/* Avertissement AFK (mode online uniquement) */}
+                        {gameState.isOnlineGame && player.afkTurns === 1 && isPlayerTurn && (
+                            <span className={styles.afkWarning}>
+                                ⚠️ Jouez ou disqualification!
+                            </span>
+                        )}
                         {isPlayerTurn && gameState.status === 'playing' && !isSelectingTarget && (
                             <button
                                 className={styles.endTurnButton}

@@ -313,6 +313,28 @@ export class GameEngine {
         // Récupérer le joueur qui finit son tour (avant de changer)
         const previousPlayer = this.getCurrentPlayer();
 
+        // === SYSTÈME ANTI-AFK (Mode Online uniquement) ===
+        // Si le joueur n'a pas joué de carte ce tour, incrémenter son compteur AFK
+        // Si le joueur n'a pas joué pendant 2 tours consécutifs, il est disqualifié
+        if (this.state.isOnlineGame) {
+            if (!previousPlayer.hasPlayedCard) {
+                previousPlayer.afkTurns = (previousPlayer.afkTurns || 0) + 1;
+                console.log(`⚠️ ${previousPlayer.name} AFK: ${previousPlayer.afkTurns}/2 tours sans jouer`);
+
+                // Disqualification après 2 tours AFK
+                if (previousPlayer.afkTurns >= 2) {
+                    console.log(`🚫 ${previousPlayer.name} DISQUALIFIÉ pour AFK!`);
+                    this.state.status = 'finished';
+                    this.state.winnerId = this.state.players.find(p => p.id !== previousPlayer.id)?.id;
+                    this.state.winReason = 'surrender'; // On utilise surrender car c'est un abandon implicite
+                    return { success: true, message: `${previousPlayer.name} disqualifié pour inactivité!` };
+                }
+            } else {
+                // Le joueur a joué une carte, reset son compteur AFK
+                previousPlayer.afkTurns = 0;
+            }
+        }
+
         // Passer au joueur suivant
         const currentIndex = this.state.players.findIndex(p => p.id === this.state.currentPlayerId);
         const nextIndex = (currentIndex + 1) % 2;

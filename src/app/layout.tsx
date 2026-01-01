@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Cinzel, Cinzel_Decorative } from "next/font/google";
 import "./globals.css";
 
@@ -21,6 +21,17 @@ const cinzelDecorative = Cinzel_Decorative({
   variable: '--font-cinzel-decorative',
   weight: ['400', '700', '900'],
 });
+
+// Configuration du viewport pour permettre la rotation d'écran sur mobile
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  // Pas de "user-scalable=no" pour permettre le zoom
+  // Pas de restriction d'orientation pour permettre portrait ET paysage
+};
 
 export const metadata: Metadata = {
   title: "GODS - Le Jeu de Cartes des Dieux",

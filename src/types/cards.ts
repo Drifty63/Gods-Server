@@ -106,6 +106,7 @@ export interface PlayerState {
     fatigueCounter: number;              // Compteur de recyclage du deck
     hasPlayedCard: boolean;              // A joué une carte ce tour
     hasDiscardedForEnergy: boolean;      // A défaussé pour énergie ce tour
+    afkTurns?: number;                   // Compteur de tours AFK (sans jouer de carte) - pour anti-AFK online
 }
 
 // État de la partie

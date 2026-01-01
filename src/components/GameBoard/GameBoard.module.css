@@ -1271,6 +1271,35 @@
     }
 }
 
+/* Avertissement AFK (disqualification imminente) */
+.afkWarning {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    animation: afkPulse 0.8s ease-in-out infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@keyframes afkPulse {
+
+    0%,
+    100% {
+        background: rgba(239, 68, 68, 0.3);
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    }
+
+    50% {
+        background: rgba(239, 68, 68, 0.5);
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+    }
+}
+
 .myTurn {
     background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
     color: #0a0a1a;
