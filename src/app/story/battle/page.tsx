@@ -375,8 +375,17 @@ function StoryBattleContent() {
         const event = getCurrentEvent();
         const playerWon = phase === 'victory';
 
-        // Passer à l'événement suivant
+        // Passer l'événement suivant (combat → dialogue victoire/défaite)
         const nextEvent = advanceToNextEvent(playerWon);
+
+        // Si on était sur un événement de bataille, il faut aussi avancer
+        // au-delà du dialogue de victoire/défaite pour terminer le chapitre
+        // Note: nextEvent sera le dialogue de victoire/défaite qui a nextEventId: undefined
+        if (nextEvent && nextEvent.nextEventId === undefined) {
+            // L'événement suivant n'a pas de suite, donc on avance une dernière fois
+            // pour marquer le chapitre comme terminé
+            advanceToNextEvent(playerWon);
+        }
 
         resetGame();
 
@@ -511,7 +520,7 @@ function StoryBattleContent() {
             // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
             backgroundImage = playerWon
                 ? '/assets/story/battle4_victory.png'
-                : '/assets/story/battle4_defeat.png';
+                : '/assets/story/battle4_defeat_v2.png';
         } else if (battleConfig?.id === 'battle_test_of_valor') {
             // Combat 3 : Zeus + Hestia vs Déméter + Artémis
             backgroundImage = playerWon
@@ -598,7 +607,7 @@ function StoryBattleContent() {
             // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
             return isVictory
                 ? '/assets/story/battle4_victory.png'
-                : '/assets/story/battle4_defeat.png';
+                : '/assets/story/battle4_defeat_v2.png';
         } else if (battleConfig?.id === 'battle_test_of_valor') {
             // Combat 3 : Zeus + Hestia vs Déméter + Artémis
             return isVictory
