@@ -441,14 +441,14 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_betrayal',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_BETRAYAL,
-        backgroundImage: '/assets/story/betrayal_reveal.png',
+        backgroundImage: '/assets/story/ch2_betrayal_v2.png',
         nextEventId: 'ch2_battle1'
     },
     // Combat 4v3 : Zeus + Hestia + Déméter + Artémis vs Dionysos + Apollon + Aphrodite
     {
         id: 'ch2_battle1',
         type: 'battle',
-        backgroundImage: '/assets/story/betrayal_reveal.png',
+        backgroundImage: '/assets/story/ch2_betrayal_v2.png',
         battle: {
             id: 'battle_thebes_betrayal',
             name: "La Trahison de Thèbes",
@@ -480,7 +480,7 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_lose',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_LOSE,
-        backgroundImage: '/assets/story/chapter2_battle1_defeat.png',
+        backgroundImage: '/assets/story/ch2_battle1_defeat_v2.png',
         nextEventId: undefined  // Doit réessayer
     }
 ];

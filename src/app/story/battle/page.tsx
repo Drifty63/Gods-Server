@@ -515,7 +515,7 @@ function StoryBattleContent() {
             // Chapitre 2 Combat 1 : La Trahison de Thèbes
             backgroundImage = playerWon
                 ? '/assets/story/chapter2_battle1_victory.png'
-                : '/assets/story/chapter2_battle1_defeat.png';
+                : '/assets/story/ch2_battle1_defeat_v2.png';
         } else if (battleConfig?.id === 'battle_ambush_ares') {
             // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
             backgroundImage = playerWon
@@ -603,7 +603,12 @@ function StoryBattleContent() {
 
     // Fonction pour obtenir l'image de fond appropriée selon le combat
     const getResultBackgroundImage = (isVictory: boolean): string => {
-        if (battleConfig?.id === 'battle_ambush_ares') {
+        if (battleConfig?.id === 'battle_thebes_betrayal') {
+            // Chapitre 2 Combat 1 : La Trahison de Thèbes
+            return isVictory
+                ? '/assets/story/chapter2_battle1_victory.png'
+                : '/assets/story/ch2_battle1_defeat_v2.png';
+        } else if (battleConfig?.id === 'battle_ambush_ares') {
             // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
             return isVictory
                 ? '/assets/story/battle4_victory.png'
