@@ -3451,3 +3451,188 @@
     padding: 1px 3px;
     animation: statusIconPulse 2s ease-in-out infinite;
 }
+
+/* ================================
+   RESPONSIVE - AMÉLIORATION MOBILE
+   Pour les éléments flottants et indicateurs
+   ================================ */
+
+/* Écrans moyens (tablettes) */
+@media (max-width: 768px) {
+    .optionalChoiceContainer {
+        bottom: 180px;
+        min-width: 280px;
+        max-width: 95vw;
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .optionalTitle {
+        font-size: 0.85rem;
+    }
+
+    .optionalDesc {
+        font-size: 0.7rem;
+    }
+
+    .confirmOptionalBtn,
+    .cancelOptionalBtn {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+
+    .zombieDamageIndicator,
+    .deadGodIndicator {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+
+    .healDistributionIndicator {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+
+    .discardSelectionZone {
+        max-width: 95vw;
+        padding: 8px;
+    }
+
+    .discardSelectionTitle {
+        font-size: 0.85rem;
+    }
+
+    .godSelectionIndicator,
+    .enemySelectionIndicator {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+}
+
+/* Petits écrans mobiles */
+@media (max-width: 480px) {
+    .optionalChoiceContainer {
+        bottom: 160px;
+        min-width: 250px;
+        padding: 8px;
+        gap: 4px;
+        border-radius: 8px;
+    }
+
+    .optionalTitle {
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+    }
+
+    .optionalDesc {
+        font-size: 0.65rem;
+        line-height: 1.2;
+    }
+
+    .optionalButtons {
+        gap: 6px;
+    }
+
+    .confirmOptionalBtn,
+    .cancelOptionalBtn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        border-radius: 6px;
+    }
+
+    .zombieDamageIndicator,
+    .deadGodIndicator {
+        padding: 6px 10px;
+        gap: 4px;
+        font-size: 0.75rem;
+    }
+
+    .healDistributionIndicator {
+        padding: 6px 10px;
+        gap: 4px;
+    }
+
+    .healProgressBar {
+        height: 6px;
+    }
+
+    .discardSelectionZone {
+        bottom: 150px;
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .discardSelectionTitle {
+        font-size: 0.75rem;
+    }
+
+    .discardSelectionCards {
+        gap: 4px;
+    }
+
+    .discardSelectionButtons {
+        gap: 6px;
+    }
+
+    .discardConfirmBtn,
+    .discardCancelBtn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+
+    .lightningChoiceCompact {
+        padding: 6px 10px;
+        gap: 6px;
+    }
+
+    .lightningChoiceCompact span {
+        font-size: 0.75rem;
+    }
+
+    .lightningBtn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+/* Très petits écrans (iPhone SE, etc.) */
+@media (max-width: 380px) {
+    .optionalChoiceContainer {
+        bottom: 140px;
+        min-width: 220px;
+        padding: 6px;
+    }
+
+    .optionalTitle {
+        font-size: 0.75rem;
+    }
+
+    .optionalDesc {
+        font-size: 0.6rem;
+    }
+
+    .confirmOptionalBtn,
+    .cancelOptionalBtn {
+        padding: 3px 6px;
+        font-size: 0.65rem;
+    }
+
+    .zombieDamageIndicator,
+    .deadGodIndicator,
+    .healDistributionIndicator,
+    .godSelectionIndicator,
+    .enemySelectionIndicator {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+/* Mode paysage mobile - ajustement vertical */
+@media (max-height: 500px) {
+    .optionalChoiceContainer {
+        bottom: 100px;
+    }
+
+    .discardSelectionZone {
+        bottom: 100px;
+    }
+}

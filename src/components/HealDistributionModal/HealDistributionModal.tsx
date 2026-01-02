@@ -1,3 +1,14 @@
+/**
+ * @deprecated LEGACY COMPONENT - Remplacé par la sélection directe sur le plateau de jeu
+ * 
+ * Ce modal était utilisé pour la distribution de soins (Fertilisation, etc.)
+ * Il a été remplacé par une interface de distribution directe dans GameBoard.tsx
+ * pour une meilleure UX (cliquer directement sur les dieux alliés).
+ * 
+ * Conservé pour référence et potentielle réutilisation.
+ * 
+ * @see GameBoard.tsx - handleHealGodClick, handleConfirmDirectHealDistribution
+ */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';

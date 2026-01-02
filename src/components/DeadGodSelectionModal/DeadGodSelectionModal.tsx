@@ -1,3 +1,13 @@
+/**
+ * @deprecated LEGACY COMPONENT - Remplacé par la sélection directe sur le plateau de jeu
+ * 
+ * Ce modal était utilisé pour la sélection de dieux morts (Perséphone - Brûlure Rémanente)
+ * Il a été remplacé par une interface de sélection directe dans GameBoard.tsx.
+ * 
+ * Conservé pour référence.
+ * 
+ * @see GameBoard.tsx - handleDeadGodClick, isSelectingDeadGod
+ */
 'use client';
 
 import React from 'react';

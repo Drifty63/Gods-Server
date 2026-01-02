@@ -1,3 +1,14 @@
+/**
+ * @deprecated LEGACY COMPONENT - Remplacé par la sélection directe sur le plateau de jeu
+ * 
+ * Ce modal était utilisé pour la sélection de cartes (défausse, recyclage, etc.)
+ * Il a été remplacé par une interface de sélection directe dans GameBoard.tsx
+ * pour une meilleure UX (moins de popups bloquants).
+ * 
+ * Conservé pour référence et potentielle réutilisation dans d'autres contextes.
+ * 
+ * @see GameBoard.tsx - handleDiscardCardSelect, handleConfirmDirectCardSelection
+ */
 'use client';
 
 import { useState, useEffect } from 'react';

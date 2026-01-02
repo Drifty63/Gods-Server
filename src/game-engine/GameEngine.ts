@@ -1,4 +1,38 @@
-// Moteur de jeu principal pour GODS
+/**
+ * ============================================
+ * GODS - MOTEUR DE JEU PRINCIPAL
+ * ============================================
+ * 
+ * Ce fichier contient le cœur de la logique de jeu GODS.
+ * Il gère toutes les actions de jeu, les effets de cartes,
+ * les conditions de victoire et la progression de partie.
+ * 
+ * ARCHITECTURE:
+ * - GameEngine : Classe principale qui maintient l'état du jeu
+ * - executeAction() : Point d'entrée pour toutes les actions
+ * - applyEffect() : Application des effets de base (damage, heal, etc.)
+ * - applyCustomEffect() : Effets spéciaux des dieux (1000+ lignes)
+ * 
+ * FLUX D'UN TOUR:
+ * 1. drawToHandLimit() - Pioche jusqu'à 5 cartes
+ * 2. playCard() ou discardForEnergy() - Action du joueur
+ * 3. endTurn() - Fin de tour, effets de statut, passage au joueur suivant
+ * 
+ * SYSTÈMES GÉRÉS:
+ * - Éléments et faiblesses (ElementSystem.ts)
+ * - Effets de statut (poison, shield, stun, etc.)
+ * - Zombies (Perséphone)
+ * - Fatigue (recyclage du deck)
+ * - Limite de tours (parties online)
+ * - Anti-AFK (parties online)
+ * 
+ * @see ElementSystem.ts - Calcul des dégâts et faiblesses
+ * @see AIPlayer.ts - IA pour le mode solo
+ * @see gameStore.ts - Store Zustand qui utilise ce moteur
+ * 
+ * @version 1.0
+ * @author GODS Team
+ */
 
 import {
     GameState,

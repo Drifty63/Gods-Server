@@ -1,3 +1,13 @@
+/**
+ * @deprecated LEGACY COMPONENT - Remplacé par la sélection directe sur le plateau de jeu
+ * 
+ * Ce modal était utilisé pour le choix de cible des dégâts zombie
+ * Il a été remplacé par une interface de sélection directe dans GameBoard.tsx.
+ * 
+ * Conservé pour référence.
+ * 
+ * @see GameBoard.tsx - handleZombieTargetClick, handleConfirmDirectZombieDamage
+ */
 'use client';
 
 import React from 'react';
