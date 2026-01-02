@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GODS - Audit Contenu et Améliorations</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(15, 15, 35, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 1rem;
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 1.5rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        h3 {
+            color: #8b5cf6;
+            font-size: 1.1rem;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .problem-card {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .problem-card h4 {
+            color: #ef4444;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .problem-card p {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        
+        .solution-card {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .solution-card h4 {
+            color: #22c55e;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(139, 92, 246, 0.2);
+            color: #d4af37;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .priority-high {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .priority-medium {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        
+        .priority-low {
+            color: #22c55e;
+            font-weight: 600;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-box {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #d4af37;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        
+        .phase {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .phase h4 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+        
+        .phase ul {
+            margin-left: 20px;
+            color: #cbd5e1;
+        }
+        
+        .phase li {
+            margin: 8px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        
+        .highlight {
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        .gods-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .god-chip {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .god-chip.hidden {
+            background: rgba(100, 100, 100, 0.2);
+            border-color: rgba(100, 100, 100, 0.4);
+            color: #94a3b8;
+        }
+
+        .god-chip .element {
+            font-size: 1.2rem;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+                padding: 20px;
+            }
+            .container {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+            h1, h2, .stat-value {
+                color: #333;
+            }
+            .problem-card {
+                border-color: #ef4444;
+            }
+            .solution-card {
+                border-color: #22c55e;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ GODS</h1>
+        <p class="subtitle">Audit Contenu & Améliorations Proposées • Janvier 2026</p>
+
+        <!-- État actuel -->
+        <h2>📊 État Actuel du Jeu</h2>
+        
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Dieux Jouables</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">60</div>
+                <div class="stat-label">Sorts Actifs</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">6</div>
+                <div class="stat-label">Combats Histoire</div>
+            </div>
+        </div>
+
+        <h3>Dieux Actuellement Accessibles</h3>
+        <div class="gods-grid">
+            <div class="god-chip"><span class="element">💧</span> Poséidon</div>
+            <div class="god-chip"><span class="element">⚡</span> Zeus</div>
+            <div class="god-chip"><span class="element">💀</span> Nyx</div>
+            <div class="god-chip"><span class="element">🔥</span> Hestia</div>
+            <div class="god-chip"><span class="element">☀️</span> Athéna</div>
+            <div class="god-chip"><span class="element">🌿</span> Déméter</div>
+            <div class="god-chip"><span class="element">🌿</span> Dionysos</div>
+            <div class="god-chip"><span class="element">🔥</span> Hadès</div>
+            <div class="god-chip"><span class="element">💨</span> Apollon</div>
+            <div class="god-chip"><span class="element">🌿</span> Arès</div>
+            <div class="god-chip"><span class="element">💨</span> Artémis</div>
+            <div class="god-chip"><span class="element">☀️</span> Aphrodite</div>
+        </div>
+
+        <h3>Dieux Cachés (Non Accessibles)</h3>
+        <div class="gods-grid">
+            <div class="god-chip hidden"><span class="element">💀</span> Perséphone</div>
+            <div class="god-chip hidden"><span class="element">🔥</span> Héphaïstos</div>
+            <div class="god-chip hidden"><span class="element">💀</span> Thanatos</div>
+            <div class="god-chip hidden"><span class="element">⚡</span> Hermès</div>
+            <div class="god-chip hidden"><span class="element">💧</span> Séléné</div>
+            <div class="god-chip hidden"><span class="element">💨</span> Zéphyr</div>
+            <div class="god-chip hidden"><span class="element">☀️</span> Niké</div>
+            <div class="god-chip hidden"><span class="element">💧</span> Chioné</div>
+        </div>
+
+        <!-- Problèmes identifiés -->
+        <h2>🔴 Problèmes Identifiés</h2>
+
+        <div class="problem-card">
+            <h4>🎭 1. Manque de Variété de Personnages</h4>
+            <p><strong>Constat :</strong> Seulement 12 dieux sur 20 sont accessibles. Les joueurs font rapidement le tour de toutes les combinaisons possibles (220 équipes de 3).</p>
+            <p><strong>Impact :</strong> Lassitude après ~50 parties, sensation de "tout avoir vu".</p>
+        </div>
+
+        <div class="problem-card">
+            <h4>💰 2. Progression Économique Trop Lente</h4>
+            <p><strong>Constat :</strong> 3 quêtes/jour = 150 ambroisie max. Prix d'un dieu = 3000 ambroisie.</p>
+            <p><strong>Impact :</strong> Il faut <span class="highlight">20 jours de jeu quotidien</span> pour acheter un seul dieu.</p>
+        </div>
+
+        <div class="problem-card">
+            <h4>🎮 3. Modes de Jeu Limités</h4>
+            <p><strong>Constat :</strong> Seulement 3 modes (Solo, Local, Online). Pas de Draft, pas de Tournoi, pas de Défi quotidien.</p>
+            <p><strong>Impact :</strong> Expérience répétitive, pas de "raison de revenir" chaque jour.</p>
+        </div>
+
+        <div class="problem-card">
+            <h4>📖 4. Mode Histoire Incomplet</h4>
+            <p><strong>Constat :</strong> Chapitre 3 n'a que des dialogues, pas de combats. Chapitres 4+ absents.</p>
+            <p><strong>Impact :</strong> L'histoire s'arrête brutalement, frustration des joueurs investis dans la narration.</p>
+        </div>
+
+        <div class="problem-card">
+            <h4>🏆 5. Pas de Récompenses de Progression</h4>
+            <p><strong>Constat :</strong> L'XP est accumulée mais ne donne rien. Le système de succès est vide.</p>
+            <p><strong>Impact :</strong> Aucune motivation à "farmer" ou à accomplir des objectifs.</p>
+        </div>
+
+        <div class="problem-card">
+            <h4>🃏 6. Mécaniques Uniques Sous-Exploitées</h4>
+            <p><strong>Constat :</strong> Les zombies (Perséphone), cartes cachées (Nyx), et soins en cascade (Séléné) n'existent que sur un seul dieu chacun.</p>
+            <p><strong>Impact :</strong> Ces mécaniques intéressantes restent des curiosités rares au lieu d'être des piliers du jeu.</p>
+        </div>
+
+        <!-- Solutions proposées -->
+        <h2>🟢 Solutions Proposées</h2>
+
+        <h3>🎭 Débloquer Plus de Dieux</h3>
+        <table>
+            <tr>
+                <th>Dieu</th>
+                <th>Élément</th>
+                <th>Mécanique Unique</th>
+                <th>Priorité</th>
+            </tr>
+            <tr>
+                <td>Hermès</td>
+                <td>⚡ Foudre</td>
+                <td>Vitesse / Double action</td>
+                <td class="priority-high">HAUTE</td>
+            </tr>
+            <tr>
+                <td>Séléné</td>
+                <td>💧 Eau</td>
+                <td>Soin en cascade</td>
+                <td class="priority-high">HAUTE</td>
+            </tr>
+            <tr>
+                <td>Héphaïstos</td>
+                <td>🔥 Feu</td>
+                <td>Forge d'armures</td>
+                <td class="priority-medium">MOYENNE</td>
+            </tr>
+            <tr>
+                <td>Niké</td>
+                <td>☀️ Lumière</td>
+                <td>Boost de victoire</td>
+                <td class="priority-medium">MOYENNE</td>
+            </tr>
+        </table>
+
+        <div class="solution-card">
+            <h4>💰 Améliorer l'Économie</h4>
+            <table>
+                <tr>
+                    <th>Amélioration</th>
+                    <th>Gain</th>
+                </tr>
+                <tr>
+                    <td>5 quêtes journalières (au lieu de 3)</td>
+                    <td>+100 ambroisie/jour</td>
+                </tr>
+                <tr>
+                    <td>Quêtes hebdomadaires</td>
+                    <td>+500 ambroisie/semaine</td>
+                </tr>
+                <tr>
+                    <td>Récompenses de niveau (tous les 5 niveaux)</td>
+                    <td>+100 ambroisie/palier</td>
+                </tr>
+                <tr>
+                    <td>Bonus première victoire du jour</td>
+                    <td>+50 ambroisie</td>
+                </tr>
+            </table>
+            <p style="margin-top: 10px; color: #22c55e;"><strong>Résultat :</strong> Achat d'un dieu en ~10 jours au lieu de 20.</p>
+        </div>
+
+        <div class="solution-card">
+            <h4>🎮 Nouveaux Modes de Jeu</h4>
+            <table>
+                <tr>
+                    <th>Mode</th>
+                    <th>Description</th>
+                    <th>Difficulté</th>
+                </tr>
+                <tr>
+                    <td>Défi Quotidien</td>
+                    <td>Règles spéciales chaque jour (ex: tous les sorts coûtent 1 de plus)</td>
+                    <td class="priority-low">Facile</td>
+                </tr>
+                <tr>
+                    <td>Draft</td>
+                    <td>Pick & Ban alterné avant la partie</td>
+                    <td class="priority-medium">Moyen</td>
+                </tr>
+                <tr>
+                    <td>Arène Aléatoire</td>
+                    <td>Dieux assignés au hasard</td>
+                    <td class="priority-low">Facile</td>
+                </tr>
+                <tr>
+                    <td>Boss Rush</td>
+                    <td>Enchaîner tous les boss de l'histoire</td>
+                    <td class="priority-medium">Moyen</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="solution-card">
+            <h4>📖 Compléter l'Histoire</h4>
+            <table>
+                <tr>
+                    <th>Chapitre</th>
+                    <th>Scénario</th>
+                    <th>Boss</th>
+                </tr>
+                <tr>
+                    <td>Chapitre 3 (à finir)</td>
+                    <td>La bataille d'Athènes</td>
+                    <td>Arès Enragé</td>
+                </tr>
+                <tr>
+                    <td>Chapitre 4</td>
+                    <td>Descente aux Enfers</td>
+                    <td>Hadès + Cerbère</td>
+                </tr>
+                <tr>
+                    <td>Chapitre 5</td>
+                    <td>L'assaut de l'Olympe</td>
+                    <td>Cronos (Titan)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="solution-card">
+            <h4>🏆 Système de Succès</h4>
+            <table>
+                <tr>
+                    <th>Succès</th>
+                    <th>Condition</th>
+                    <th>Récompense</th>
+                </tr>
+                <tr>
+                    <td>Première Victoire</td>
+                    <td>Gagner 1 partie</td>
+                    <td>200 ambroisie</td>
+                </tr>
+                <tr>
+                    <td>Maître Élémentaire</td>
+                    <td>Jouer 10 parties avec chaque élément</td>
+                    <td>500 ambroisie</td>
+                </tr>
+                <tr>
+                    <td>Collection Complète</td>
+                    <td>Posséder tous les dieux</td>
+                    <td>1000 ambroisie + Skin exclusif</td>
+                </tr>
+                <tr>
+                    <td>Sans Défaite</td>
+                    <td>Gagner 10 parties d'affilée</td>
+                    <td>300 ambroisie</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Plan de déploiement -->
+        <h2>📅 Plan de Déploiement</h2>
+
+        <div class="phase">
+            <h4>🚀 Phase 1 : Quick Wins (1-2 semaines)</h4>
+            <ul>
+                <li>Débloquer 4 dieux cachés (Hermès, Séléné, Héphaïstos, Niké)</li>
+                <li>Ajouter 2 quêtes journalières supplémentaires</li>
+                <li>Implémenter les récompenses de niveau</li>
+                <li>Ajouter le bonus "première victoire du jour"</li>
+            </ul>
+        </div>
+
+        <div class="phase">
+            <h4>🎯 Phase 2 : Contenu (2-4 semaines)</h4>
+            <ul>
+                <li>Terminer le Chapitre 3 avec combats</li>
+                <li>Implémenter le mode "Défi Quotidien"</li>
+                <li>Créer le système de succès avec 10 premiers succès</li>
+                <li>Ajouter les quêtes hebdomadaires</li>
+            </ul>
+        </div>
+
+        <div class="phase">
+            <h4>🏆 Phase 3 : Long Terme (1-2 mois)</h4>
+            <ul>
+                <li>Chapitres 4 et 5 de l'histoire</li>
+                <li>Mode Draft/Pick & Ban</li>
+                <li>Sorts alternatifs pour chaque dieu</li>
+                <li>Skins cosmétiques</li>
+            </ul>
+        </div>
+
+        <!-- Résumé -->
+        <h2>📋 Résumé Exécutif</h2>
+        
+        <table>
+            <tr>
+                <th>Problème Clé</th>
+                <th>Solution Prioritaire</th>
+                <th>Impact Attendu</th>
+            </tr>
+            <tr>
+                <td>Trop peu de dieux</td>
+                <td>Débloquer 4 cachés</td>
+                <td>+33% de variété</td>
+            </tr>
+            <tr>
+                <td>Progression lente</td>
+                <td>Plus de quêtes + récompenses</td>
+                <td>Rétention x2</td>
+            </tr>
+            <tr>
+                <td>Parties répétitives</td>
+                <td>Défi quotidien</td>
+                <td>Raison de revenir chaque jour</td>
+            </tr>
+            <tr>
+                <td>Histoire courte</td>
+                <td>Finir Chapitre 3</td>
+                <td>+2h de contenu</td>
+            </tr>
+            <tr>
+                <td>Pas de récompenses</td>
+                <td>Système de succès</td>
+                <td>Objectifs long terme</td>
+            </tr>
+        </table>
+
+        <div class="footer">
+            <p>Document généré le 2 Janvier 2026 • GODS Card Game</p>
+            <p>Pour sauvegarder en PDF : Ctrl+P → Destination "Enregistrer en PDF"</p>
+        </div>
+    </div>
+</body>
+</html>
