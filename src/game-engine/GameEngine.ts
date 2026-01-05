@@ -394,9 +394,10 @@ export class GameEngine {
         // Piocher pour le nouveau joueur actuel
         this.drawToHandLimit(this.getCurrentPlayer());
 
-        // Réduire la durée des effets temporaires de l'ADVERSAIRE du joueur qui vient de jouer
-        // Logique : "3 tours" = 3 tours où l'adversaire joue = tick après chaque tour adverse
-        this.tickStatusEffects(nextPlayer);
+        // Réduire la durée des effets temporaires du joueur qui VIENT DE FINIR son tour
+        // Logique : un stun appliqué par l'ennemi reste actif pendant tout le tour du joueur affecté
+        // puis est décrémenté quand ce joueur termine son tour
+        this.tickStatusEffects(previousPlayer);
 
         return { success: true, message: 'Tour terminé' };
     }

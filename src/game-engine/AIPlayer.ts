@@ -190,6 +190,18 @@ export class AIPlayer {
                 return false;
             }
 
+            // NOUVEAU: Empêcher l'IA de se suicider par poison
+            // Si le dieu a du poison et que jouer une carte déclencherait le tick de poison qui le tue,
+            // l'IA ne joue pas cette carte pour laisser le joueur porter le coup fatal
+            const poisonEffect = god.statusEffects.find(s => s.type === 'poison');
+            if (poisonEffect && poisonEffect.stacks > 0) {
+                const poisonDamage = poisonEffect.stacks;
+                // Si le poison tue le dieu à la fin du tour, ne pas jouer de carte
+                if (god.currentHealth <= poisonDamage) {
+                    return false;
+                }
+            }
+
             return true;
         });
     }

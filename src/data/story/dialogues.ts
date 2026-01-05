@@ -1827,7 +1827,7 @@ export const CHAPTER2_BATTLE2_DRAGON_ATTACK: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*invoque sa foudre* Hestia, Déméter et Artémis sont inconscientes. Nous devons protéger nos sœurs !",
+        text: "*invoque sa foudre* Hestia, Déméter et Artémis sont inconscientes. Nous devons les protéger !",
         emotion: 'determined'
     },
     {

@@ -540,12 +540,12 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 1 }, // S'applique à la même cible
-            { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 1 }  // S'applique à la même cible
+            { type: 'status', status: 'poison', value: 1 }, // 1 marque poison sur la 1ère cible
+            { type: 'damage', value: 1, target: 'enemy_god' }
+            // Pas de poison sur la 2ème cible
         ],
         imageUrl: '/cards/spells/spell_dionysos_ivresse.png',
-        description: '1🩸 +1💀 → ⚔️⚔️',
+        description: '1🩸 +1💀 → ⚔️ | 1🩸 → ⚔️',
     },
 
     // --- COMPÉTENCES ---
