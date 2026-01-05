@@ -1,0 +1,600 @@
+/* GODS - Mode Duel */
+/* Style épique pour le mode PvP en ligne avec système de budget */
+
+.main {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/arena_background.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    position: relative;
+    z-index: 10;
+}
+
+.backButton {
+    color: #d4af37;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: transform 0.2s;
+}
+
+.backButton:hover {
+    transform: translateX(-3px);
+}
+
+.title {
+    font-family: 'Cinzel', serif;
+    color: #d4af37;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.5);
+}
+
+.connectionStatus {
+    font-size: 0.9rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.connected {
+    color: #22c55e;
+}
+
+.disconnected {
+    color: #ef4444;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+    z-index: 5;
+    overflow-y: auto;
+}
+
+.errorBanner {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    border-radius: 10px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.errorBanner button {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* Section accueil */
+.welcomeSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+}
+
+.duelIcon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.welcomeTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: #d4af37;
+    margin-bottom: 10px;
+}
+
+.welcomeDesc {
+    color: #94a3b8;
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+.statsPreview {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 20px 30px;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 15px;
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.statValue {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #d4af37;
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.searchButton {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: white;
+    border: none;
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+.searchButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(139, 92, 246, 0.6);
+}
+
+.searchButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.connectionHint {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-top: 15px;
+}
+
+.rulesBox {
+    margin-top: 40px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 15px;
+    text-align: left;
+    width: 100%;
+}
+
+.rulesBox h3 {
+    color: #d4af37;
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+.rulesBox ul {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.rulesBox li {
+    margin-bottom: 8px;
+}
+
+.soon {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+/* Section sélection */
+.selectSection {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.selectSection h2 {
+    color: #d4af37;
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* Budget Bar */
+.budgetBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.budgetLabel {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.budgetTrack {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.budgetFill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #6366f1);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.budgetValue {
+    color: #d4af37;
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: right;
+}
+
+.selectHint {
+    color: #94a3b8;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.godsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.godCard {
+    position: relative;
+    aspect-ratio: 3/4;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.godCard:hover:not(.disabled) {
+    transform: translateY(-3px);
+    border-color: rgba(212, 175, 55, 0.5);
+}
+
+.godCard.selected {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+.godCard.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.godImage {
+    width: 100%;
+    height: 70%;
+    background-size: cover;
+    background-position: center top;
+}
+
+.godInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.godName {
+    font-size: 0.7rem;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.godCost {
+    font-size: 0.65rem;
+    color: #d4af37;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.selectedBadge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.selectActions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.backBtn {
+    background: rgba(100, 100, 100, 0.3);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 100, 100, 0.5);
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+.backBtn:hover {
+    background: rgba(100, 100, 100, 0.5);
+}
+
+.confirmBtn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+.confirmBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.confirmBtn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
+}
+
+/* Section recherche */
+.searchingSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.searchingAnimation {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.pulseRing {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(139, 92, 246, 0.5);
+    border-radius: 50%;
+    animation: pulseRingAnim 2s ease-out infinite;
+}
+
+@keyframes pulseRingAnim {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.searchIcon {
+    font-size: 4rem;
+    z-index: 1;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.searchingTitle {
+    color: #e2e8f0;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.searchTime {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #d4af37;
+    font-family: monospace;
+    margin-bottom: 20px;
+}
+
+.teamPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.teamPreview span {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.teamIcons {
+    display: flex;
+    gap: 10px;
+}
+
+.teamIcon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(139, 92, 246, 0.5);
+}
+
+.queueInfo {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.cancelButton {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    padding: 12px 30px;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelButton:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.tips {
+    margin-top: 30px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .title {
+        font-size: 1.2rem;
+    }
+
+    .duelIcon {
+        font-size: 4rem;
+    }
+
+    .welcomeTitle {
+        font-size: 1.5rem;
+    }
+
+    .statsPreview {
+        gap: 20px;
+        padding: 15px 20px;
+    }
+
+    .statValue {
+        font-size: 1.4rem;
+    }
+
+    .searchButton {
+        padding: 14px 30px;
+        font-size: 1rem;
+    }
+
+    .godsGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .godName {
+        font-size: 0.6rem;
+    }
+
+    .godCost {
+        font-size: 0.55rem;
+    }
+
+    .selectActions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .backBtn,
+    .confirmBtn {
+        width: 100%;
+    }
+}

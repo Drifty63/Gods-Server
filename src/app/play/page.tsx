@@ -23,16 +23,19 @@ function PlayContent() {
 
             {/* Modes de jeu */}
             <div className={styles.content}>
+                {/* Section PvP */}
+                <h2 className={styles.sectionTitle}>⚔️ Modes Compétitifs</h2>
                 <div className={styles.modesGrid}>
-                    {/* Mode Histoire */}
-                    <Link href="/story" className={styles.modeCard}>
+                    {/* Mode Duel - NOUVEAU */}
+                    <Link href="/duel" className={`${styles.modeCard} ${styles.featured}`}>
+                        <div className={styles.newBadge}>NOUVEAU</div>
                         <div className={styles.modeIconWrapper}>
-                            <span className={styles.modeIcon}>📖</span>
+                            <span className={styles.modeIcon}>⚔️</span>
                         </div>
                         <div className={styles.modeInfo}>
-                            <h2 className={styles.modeTitle}>Histoire</h2>
+                            <h2 className={styles.modeTitle}>Duel</h2>
                             <p className={styles.modeDescription}>
-                                Découvrez l'histoire des dieux à travers des combats épiques
+                                PvP en ligne • Budget 13 points • Parties classées
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
@@ -46,26 +49,44 @@ function PlayContent() {
                         <div className={styles.modeInfo}>
                             <h2 className={styles.modeTitle}>En Ligne</h2>
                             <p className={styles.modeDescription}>
-                                Affrontez des joueurs du monde entier en temps réel
+                                Matchmaking libre • Parties privées
+                            </p>
+                        </div>
+                        <div className={styles.modeArrow}>›</div>
+                    </Link>
+                </div>
+
+                {/* Section Solo */}
+                <h2 className={styles.sectionTitle}>🎮 Modes Solo</h2>
+                <div className={styles.modesGrid}>
+                    {/* Mode Ascension - NOUVEAU */}
+                    <Link href="/ascension" className={`${styles.modeCard} ${styles.featured}`}>
+                        <div className={styles.newBadge}>NOUVEAU</div>
+                        <div className={styles.modeIconWrapper}>
+                            <span className={styles.modeIcon}>🏔️</span>
+                        </div>
+                        <div className={styles.modeInfo}>
+                            <h2 className={styles.modeTitle}>Ascension</h2>
+                            <p className={styles.modeDescription}>
+                                Mode survie • 15 étages • Pas de heal
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
                     </Link>
 
-                    {/* Mode Défis */}
-                    <div className={`${styles.modeCard} ${styles.comingSoon}`}>
-                        <div className={styles.comingSoonBadge}>Bientôt</div>
+                    {/* Mode Histoire */}
+                    <Link href="/story" className={styles.modeCard}>
                         <div className={styles.modeIconWrapper}>
-                            <span className={styles.modeIcon}>⚔️</span>
+                            <span className={styles.modeIcon}>📖</span>
                         </div>
                         <div className={styles.modeInfo}>
-                            <h2 className={styles.modeTitle}>Défis</h2>
+                            <h2 className={styles.modeTitle}>Histoire</h2>
                             <p className={styles.modeDescription}>
-                                Relevez des défis uniques et gagnez des récompenses
+                                Découvrez l'épopée des dieux
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
-                    </div>
+                    </Link>
 
                     {/* Mode Entraînement */}
                     <Link href="/game" className={styles.modeCard}>
@@ -75,21 +96,25 @@ function PlayContent() {
                         <div className={styles.modeInfo}>
                             <h2 className={styles.modeTitle}>Entraînement</h2>
                             <p className={styles.modeDescription}>
-                                Entraînez-vous contre l'intelligence artificielle
+                                Affrontez l'IA
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
                     </Link>
+                </div>
 
+                {/* Section Autres */}
+                <h2 className={styles.sectionTitle}>📚 Autres</h2>
+                <div className={styles.modesGrid}>
                     {/* Mode Tutoriel */}
                     <Link href="/rules" className={styles.modeCard}>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>📚</span>
                         </div>
                         <div className={styles.modeInfo}>
-                            <h2 className={styles.modeTitle}>Tutoriel</h2>
+                            <h2 className={styles.modeTitle}>Règles</h2>
                             <p className={styles.modeDescription}>
-                                Apprenez les règles et les mécaniques du jeu
+                                Apprenez les mécaniques du jeu
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
