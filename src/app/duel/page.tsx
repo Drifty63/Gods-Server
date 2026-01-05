@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
-import { ALL_GODS } from '@/data/gods';
+import { ALL_GODS, getDuelCards } from '@/data/gods';
 import type { GodCard } from '@/types/cards';
 import styles from './page.module.css';
 
@@ -56,19 +56,12 @@ function DuelContent() {
     const [selectedCards, setSelectedCards] = useState<string[]>([]);
     const [searchTime, setSearchTime] = useState(0);
 
-    // Filtrer par catégorie
-    const ownedGods = ALL_GODS.filter(
-        god => !god.hidden && (!god.category || god.category === 'god') &&
-            (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
+    // Obtenir les cartes par catégorie pour le mode Duel
+    const duelCards = getDuelCards(
+        profile?.collection?.godsOwned || [],
+        profile?.isCreator || false
     );
-    const creatures = ALL_GODS.filter(
-        god => !god.hidden && god.category === 'creature' &&
-            (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
-    );
-    const servants = ALL_GODS.filter(
-        god => !god.hidden && god.category === 'servant' &&
-            (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
-    );
+    const { gods: ownedGods, creatures, servants } = duelCards;
 
     // Calcul du budget utilisé
     const budgetUsed = selectedCards.reduce((sum, cardId) => {

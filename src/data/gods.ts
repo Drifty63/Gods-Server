@@ -348,21 +348,48 @@ export function getGodsByElement(element: GodCard['element']): GodCard[] {
     return ALL_GODS.filter(god => god.element === element);
 }
 
-// Helper pour obtenir les dieux visibles selon le statut créateur
+// Helper pour obtenir les dieux visibles (SEULEMENT les dieux, pas créatures/serviteurs)
+// Utilisé par: Boutique, Deck, Entraînement, Accueil
 export function getVisibleGods(isCreator: boolean = false): GodCard[] {
+    const onlyGods = ALL_GODS.filter(god => !god.category || god.category === 'god');
     if (isCreator) {
-        return ALL_GODS; // Les créateurs voient tous les dieux
+        return onlyGods; // Les créateurs voient tous les dieux
     }
-    return ALL_GODS.filter(god => !god.hidden); // Les autres ne voient que les dieux non cachés
+    return onlyGods.filter(god => !god.hidden); // Les autres ne voient que les dieux non cachés
 }
 
-// Helper pour obtenir les dieux possédés par un joueur
+// Helper pour obtenir les dieux possédés par un joueur (SEULEMENT les dieux)
+// Utilisé par: Ascension, Mode En Ligne
 export function getOwnedGods(godsOwned: string[], isCreator: boolean = false): GodCard[] {
+    const onlyGods = ALL_GODS.filter(god => !god.category || god.category === 'god');
+
     // Les créateurs ont accès à tous les dieux
     if (isCreator) {
-        return ALL_GODS;
+        return onlyGods;
     }
 
     // Sinon, retourner seulement les dieux possédés
-    return ALL_GODS.filter(god => godsOwned.includes(god.id));
+    return onlyGods.filter(god => godsOwned.includes(god.id));
+}
+
+// Helper pour obtenir toutes les cartes disponibles pour le mode Duel
+// Inclut: Dieux + Créatures + Serviteurs (possédés ou créateur)
+export function getDuelCards(godsOwned: string[], isCreator: boolean = false): {
+    gods: GodCard[];
+    creatures: GodCard[];
+    servants: GodCard[];
+} {
+    if (isCreator) {
+        return {
+            gods: ALL_GODS.filter(g => !g.hidden && (!g.category || g.category === 'god')),
+            creatures: ALL_GODS.filter(g => !g.hidden && g.category === 'creature'),
+            servants: ALL_GODS.filter(g => !g.hidden && g.category === 'servant'),
+        };
+    }
+
+    return {
+        gods: ALL_GODS.filter(g => (!g.category || g.category === 'god') && godsOwned.includes(g.id)),
+        creatures: ALL_GODS.filter(g => g.category === 'creature' && !g.hidden && godsOwned.includes(g.id)),
+        servants: ALL_GODS.filter(g => g.category === 'servant' && !g.hidden && godsOwned.includes(g.id)),
+    };
 }

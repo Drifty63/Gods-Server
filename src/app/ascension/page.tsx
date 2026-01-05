@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
-import { ALL_GODS } from '@/data/gods';
+import { getOwnedGods } from '@/data/gods';
 import styles from './page.module.css';
 
 // Configuration du mode Ascension
@@ -34,9 +34,10 @@ function AscensionContent() {
     const [currentFloor, setCurrentFloor] = useState(1);
     const [bestFloor, setBestFloor] = useState(0); // À charger depuis le profil plus tard
 
-    // Dieux possédés par le joueur
-    const ownedGods = ALL_GODS.filter(
-        god => !god.hidden && (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
+    // Dieux possédés par le joueur (SEULEMENT les dieux, pas créatures/serviteurs)
+    const ownedGods = getOwnedGods(
+        profile?.collection?.godsOwned || [],
+        profile?.isCreator || false
     );
 
     const handleSelectGod = (godId: string) => {
