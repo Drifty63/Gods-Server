@@ -534,6 +534,7 @@ const chapter2Battle2Events: StoryEvent[] = [
             enemyTeam: ['dragon_thebes'],
             deckMultiplier: 1,           // x1 pour le joueur (20 cartes)
             enemyDeckMultiplier: 4,      // x4 pour le dragon (20 cartes aussi)
+            enemyHealthOverride: { dragon_thebes: 60 }, // 60 PV en mode histoire
             continueOnDefeat: false      // Doit gagner pour continuer
         },
         nextEventOnWin: 'ch2_battle2_win',

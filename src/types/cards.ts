@@ -47,6 +47,9 @@ export interface GodCard {
     carouselImage?: string; // Image spécifique pour le carrousel (optionnelle)
     flavorText: string;
     hidden?: boolean; // True si le dieu est caché (accessible uniquement aux créateurs)
+    category?: 'god' | 'creature' | 'servant'; // Catégorie pour mode Duel (god par défaut)
+    duelCost?: number; // Coût en points pour le mode Duel (5 pour dieux, 3 pour créatures, 2 pour serviteurs)
+    affiliatedTo?: string; // ID du dieu auquel la créature/serviteur est affilié (ex: 'ares')
 }
 
 // Effet d'un sort

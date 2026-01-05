@@ -277,7 +277,7 @@ export const ALL_GODS: GodCard[] = [
     // ENNEMIS SPÉCIAUX - MODE HISTOIRE
     // =====================================================
 
-    // SOLDAT D'ARÈS 1 (Terre 🌿) - Ennemi histoire
+    // SOLDAT D'ARÈS 1 (Terre 🌿) - Serviteur
     {
         id: 'soldier_ares_1',
         name: 'Soldat d\'Arès',
@@ -286,10 +286,13 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 16,
         imageUrl: '/cards/gods/soldier_ares_1.png',
         flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
-        hidden: true,  // Non jouable par le joueur
+        hidden: false,  // Disponible en mode Duel
+        category: 'servant',
+        duelCost: 2,
+        affiliatedTo: 'ares',
     },
 
-    // SOLDAT D'ARÈS 2 (Terre 🌿) - Ennemi histoire
+    // SOLDAT D'ARÈS 2 (Terre 🌿) - Serviteur (dupliqué pour l'histoire)
     {
         id: 'soldier_ares_2',
         name: 'Soldat d\'Arès',
@@ -298,10 +301,13 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 16,
         imageUrl: '/cards/gods/soldier_ares_2.png',
         flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
-        hidden: true,  // Non jouable par le joueur
+        hidden: true,  // Dupliqué pour l'histoire uniquement
+        category: 'servant',
+        duelCost: 2,
+        affiliatedTo: 'ares',
     },
 
-    // SOLDAT D'ARÈS 3 (Terre 🌿) - Ennemi histoire
+    // SOLDAT D'ARÈS 3 (Terre 🌿) - Serviteur (dupliqué pour l'histoire)
     {
         id: 'soldier_ares_3',
         name: 'Soldat d\'Arès',
@@ -310,19 +316,25 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 16,
         imageUrl: '/cards/gods/soldier_ares_3.png',
         flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
-        hidden: true,  // Non jouable par le joueur
+        hidden: true,  // Dupliqué pour l'histoire uniquement
+        category: 'servant',
+        duelCost: 2,
+        affiliatedTo: 'ares',
     },
 
-    // DRAGON DE THÈBES (Air 💨) - Boss histoire Chapitre 2
+    // DRAGON DE THÈBES (Air 💨) - Créature mythique
     {
         id: 'dragon_thebes',
         name: 'Dragon de Thèbes',
         element: 'air',
         weakness: 'fire',
-        maxHealth: 60,
+        maxHealth: 26,  // 26 PV en mode Duel, 60 PV override en mode Histoire
         imageUrl: '/cards/gods/dragon_thebes.png',
         flavorText: '"Né du sang d\'Arès lui-même, je suis la terreur des cieux. Plus grand, plus puissant que mon ancêtre, je règne sur les vents de la mort."',
-        hidden: true,  // Boss non jouable
+        hidden: false,  // Disponible en mode Duel
+        category: 'creature',
+        duelCost: 3,
+        affiliatedTo: 'ares',
     },
 ];
 

@@ -25,6 +25,7 @@ export interface BattleConfig {
     playerTeam?: string[];         // IDs des dieux du joueur (si différent de la campagne)
     deckMultiplier?: number;       // Multiplicateur des cartes du deck du joueur
     enemyDeckMultiplier?: number;  // Multiplicateur des cartes du deck ennemi
+    enemyHealthOverride?: Record<string, number>; // Override des PV ennemis (ex: { dragon_thebes: 60 })
     playerCondition?: BattleCondition;  // Condition spéciale pour le joueur
     enemyCondition?: BattleCondition;   // Condition spéciale pour l'ennemi
     maxTurns?: number;             // Limite de tours pour gagner (défaite si dépassé)

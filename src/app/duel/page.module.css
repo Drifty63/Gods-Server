@@ -294,6 +294,20 @@
     font-size: 0.9rem;
 }
 
+/* Catégories */
+.categorySection {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.categoryTitle {
+    font-size: 1rem;
+    color: #d4af37;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
 .godsGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));

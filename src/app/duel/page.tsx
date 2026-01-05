@@ -7,6 +7,7 @@ import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { ALL_GODS } from '@/data/gods';
+import type { GodCard } from '@/types/cards';
 import styles from './page.module.css';
 
 // Configuration du mode Duel
@@ -15,9 +16,17 @@ const DUEL_CONFIG = {
     MAX_CHARACTERS: 4,
     COSTS: {
         god: 5,
-        creature: 3,  // À venir
-        servant: 2,   // À venir
+        creature: 3,
+        servant: 2,
     }
+};
+
+// Helper pour obtenir le coût d'une carte
+const getCardCost = (card: GodCard): number => {
+    if (card.duelCost) return card.duelCost;
+    if (card.category === 'creature') return DUEL_CONFIG.COSTS.creature;
+    if (card.category === 'servant') return DUEL_CONFIG.COSTS.servant;
+    return DUEL_CONFIG.COSTS.god;
 };
 
 export default function DuelPage() {
@@ -44,18 +53,29 @@ function DuelContent() {
     } = useMultiplayer();
 
     const [view, setView] = useState<'menu' | 'select' | 'searching'>('menu');
-    const [selectedGods, setSelectedGods] = useState<string[]>([]);
+    const [selectedCards, setSelectedCards] = useState<string[]>([]);
     const [searchTime, setSearchTime] = useState(0);
 
-    // Calcul du budget utilisé
-    const budgetUsed = selectedGods.length * DUEL_CONFIG.COSTS.god;
-    const budgetRemaining = DUEL_CONFIG.MAX_BUDGET - budgetUsed;
-    const maxGodsAllowed = Math.floor(DUEL_CONFIG.MAX_BUDGET / DUEL_CONFIG.COSTS.god); // 2 avec 13 pts
-
-    // Dieux possédés par le joueur
+    // Filtrer par catégorie
     const ownedGods = ALL_GODS.filter(
-        god => !god.hidden && (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
+        god => !god.hidden && (!god.category || god.category === 'god') &&
+            (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
     );
+    const creatures = ALL_GODS.filter(
+        god => !god.hidden && god.category === 'creature' &&
+            (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
+    );
+    const servants = ALL_GODS.filter(
+        god => !god.hidden && god.category === 'servant' &&
+            (profile?.collection?.godsOwned?.includes(god.id) || profile?.isCreator)
+    );
+
+    // Calcul du budget utilisé
+    const budgetUsed = selectedCards.reduce((sum, cardId) => {
+        const card = ALL_GODS.find(g => g.id === cardId);
+        return sum + (card ? getCardCost(card) : 0);
+    }, 0);
+    const budgetRemaining = DUEL_CONFIG.MAX_BUDGET - budgetUsed;
 
     // Timer de recherche
     useEffect(() => {
@@ -77,19 +97,24 @@ function DuelContent() {
             sessionStorage.setItem('isHost', String(currentGame.isHost));
             sessionStorage.setItem('playerName', profile?.username || 'Joueur');
             sessionStorage.setItem('gameMode', 'duel');
-            sessionStorage.setItem('selectedGods', JSON.stringify(selectedGods));
+            sessionStorage.setItem('selectedGods', JSON.stringify(selectedCards));
             if (opponentName) {
                 sessionStorage.setItem('opponentName', opponentName);
             }
             router.push('/online/select');
         }
-    }, [currentGame, profile, opponentName, router, selectedGods]);
+    }, [currentGame, profile, opponentName, router, selectedCards]);
 
-    const handleSelectGod = (godId: string) => {
-        if (selectedGods.includes(godId)) {
-            setSelectedGods(selectedGods.filter(id => id !== godId));
-        } else if (selectedGods.length < maxGodsAllowed && selectedGods.length < DUEL_CONFIG.MAX_CHARACTERS) {
-            setSelectedGods([...selectedGods, godId]);
+    const handleSelectCard = (cardId: string) => {
+        const card = ALL_GODS.find(g => g.id === cardId);
+        if (!card) return;
+
+        const cost = getCardCost(card);
+
+        if (selectedCards.includes(cardId)) {
+            setSelectedCards(selectedCards.filter(id => id !== cardId));
+        } else if (selectedCards.length < DUEL_CONFIG.MAX_CHARACTERS && budgetRemaining >= cost) {
+            setSelectedCards([...selectedCards, cardId]);
         }
     };
 
@@ -98,13 +123,13 @@ function DuelContent() {
             alert('Vous devez être connecté pour jouer en Duel');
             return;
         }
-        if (selectedGods.length < 2) {
-            alert('Sélectionnez au moins 2 dieux');
+        if (selectedCards.length < 2) {
+            alert('Sélectionnez au moins 2 cartes');
             return;
         }
         setView('searching');
         sessionStorage.setItem('gameMode', 'duel');
-        sessionStorage.setItem('selectedGods', JSON.stringify(selectedGods));
+        sessionStorage.setItem('selectedGods', JSON.stringify(selectedCards));
         joinQueue(profile.username);
     };
 
@@ -117,6 +142,34 @@ function DuelContent() {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Composant pour afficher une carte sélectionnable
+    const CardItem = ({ card, cost }: { card: GodCard; cost: number }) => {
+        const isSelected = selectedCards.includes(card.id);
+        const canSelect = isSelected || (selectedCards.length < DUEL_CONFIG.MAX_CHARACTERS && budgetRemaining >= cost);
+
+        return (
+            <div
+                key={card.id}
+                className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${!canSelect && !isSelected ? styles.disabled : ''}`}
+                onClick={() => canSelect && handleSelectCard(card.id)}
+            >
+                <div
+                    className={styles.godImage}
+                    style={{ backgroundImage: `url(${card.imageUrl})` }}
+                />
+                <div className={styles.godInfo}>
+                    <span className={styles.godName}>{card.name.split(',')[0]}</span>
+                    <span className={styles.godCost}>{cost} pts</span>
+                </div>
+                {isSelected && (
+                    <div className={styles.selectedBadge}>
+                        {selectedCards.indexOf(card.id) + 1}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     return (
@@ -181,8 +234,8 @@ function DuelContent() {
                             <ul>
                                 <li>💰 Budget maximum : <strong>{DUEL_CONFIG.MAX_BUDGET} points</strong></li>
                                 <li>⚡ Dieu = {DUEL_CONFIG.COSTS.god} points</li>
-                                <li>🐉 Créature = {DUEL_CONFIG.COSTS.creature} points <span className={styles.soon}>(bientôt)</span></li>
-                                <li>👤 Serviteur = {DUEL_CONFIG.COSTS.servant} points <span className={styles.soon}>(bientôt)</span></li>
+                                <li>🐉 Créature = {DUEL_CONFIG.COSTS.creature} points</li>
+                                <li>👤 Serviteur = {DUEL_CONFIG.COSTS.servant} points</li>
                                 <li>🏆 Les victoires augmentent votre classement</li>
                             </ul>
                         </div>
@@ -207,54 +260,59 @@ function DuelContent() {
                         </div>
 
                         <p className={styles.selectHint}>
-                            {selectedGods.length === 0
-                                ? `Sélectionnez jusqu'à ${maxGodsAllowed} dieux (${DUEL_CONFIG.COSTS.god} pts chacun)`
-                                : `${selectedGods.length} dieu${selectedGods.length > 1 ? 'x' : ''} sélectionné${selectedGods.length > 1 ? 's' : ''} • ${budgetRemaining} pts restants`
+                            {selectedCards.length === 0
+                                ? `Sélectionnez vos cartes (max ${DUEL_CONFIG.MAX_CHARACTERS})`
+                                : `${selectedCards.length} carte${selectedCards.length > 1 ? 's' : ''} • ${budgetRemaining} pts restants`
                             }
                         </p>
 
-                        <div className={styles.godsGrid}>
-                            {ownedGods.map(god => {
-                                const isSelected = selectedGods.includes(god.id);
-                                const canSelect = isSelected || (selectedGods.length < maxGodsAllowed && budgetRemaining >= DUEL_CONFIG.COSTS.god);
-
-                                return (
-                                    <div
-                                        key={god.id}
-                                        className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${!canSelect && !isSelected ? styles.disabled : ''}`}
-                                        onClick={() => canSelect && handleSelectGod(god.id)}
-                                    >
-                                        <div
-                                            className={styles.godImage}
-                                            style={{ backgroundImage: `url(${god.imageUrl})` }}
-                                        />
-                                        <div className={styles.godInfo}>
-                                            <span className={styles.godName}>{god.name.split(',')[0]}</span>
-                                            <span className={styles.godCost}>{DUEL_CONFIG.COSTS.god} pts</span>
-                                        </div>
-                                        {isSelected && (
-                                            <div className={styles.selectedBadge}>
-                                                {selectedGods.indexOf(god.id) + 1}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                        {/* Catégorie: Dieux */}
+                        <div className={styles.categorySection}>
+                            <h3 className={styles.categoryTitle}>⚡ Dieux ({DUEL_CONFIG.COSTS.god} pts)</h3>
+                            <div className={styles.godsGrid}>
+                                {ownedGods.map(god => (
+                                    <CardItem key={god.id} card={god} cost={DUEL_CONFIG.COSTS.god} />
+                                ))}
+                            </div>
                         </div>
+
+                        {/* Catégorie: Créatures */}
+                        {creatures.length > 0 && (
+                            <div className={styles.categorySection}>
+                                <h3 className={styles.categoryTitle}>🐉 Créatures Mythiques ({DUEL_CONFIG.COSTS.creature} pts)</h3>
+                                <div className={styles.godsGrid}>
+                                    {creatures.map(creature => (
+                                        <CardItem key={creature.id} card={creature} cost={DUEL_CONFIG.COSTS.creature} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Catégorie: Serviteurs */}
+                        {servants.length > 0 && (
+                            <div className={styles.categorySection}>
+                                <h3 className={styles.categoryTitle}>👤 Serviteurs ({DUEL_CONFIG.COSTS.servant} pts)</h3>
+                                <div className={styles.godsGrid}>
+                                    {servants.map(servant => (
+                                        <CardItem key={servant.id} card={servant} cost={DUEL_CONFIG.COSTS.servant} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <div className={styles.selectActions}>
                             <button
                                 className={styles.backBtn}
-                                onClick={() => { setView('menu'); setSelectedGods([]); }}
+                                onClick={() => { setView('menu'); setSelectedCards([]); }}
                             >
                                 Retour
                             </button>
                             <button
                                 className={styles.confirmBtn}
                                 onClick={handleStartSearch}
-                                disabled={selectedGods.length < 2}
+                                disabled={selectedCards.length < 2}
                             >
-                                🔍 Trouver un adversaire ({selectedGods.length}/{maxGodsAllowed})
+                                🔍 Trouver un adversaire ({selectedCards.length}/4)
                             </button>
                         </div>
                     </section>
@@ -276,14 +334,14 @@ function DuelContent() {
                         <div className={styles.teamPreview}>
                             <span>Votre équipe :</span>
                             <div className={styles.teamIcons}>
-                                {selectedGods.map(godId => {
-                                    const god = ALL_GODS.find(g => g.id === godId);
-                                    return god ? (
+                                {selectedCards.map(cardId => {
+                                    const card = ALL_GODS.find(g => g.id === cardId);
+                                    return card ? (
                                         <div
-                                            key={godId}
+                                            key={cardId}
                                             className={styles.teamIcon}
-                                            style={{ backgroundImage: `url(${god.imageUrl})` }}
-                                            title={god.name}
+                                            style={{ backgroundImage: `url(${card.imageUrl})` }}
+                                            title={card.name}
                                         />
                                     ) : null;
                                 })}

@@ -229,8 +229,19 @@ function StoryBattleContent() {
             // L'ennemi commence (attaque surprise)
             const playerGoesFirst = false;
 
+            // Appliquer l'override des PV ennemis si défini
+            const finalEnemyGods = enemyGods.map(god => {
+                if (localBattleConfig.enemyHealthOverride?.[god.id]) {
+                    return {
+                        ...god,
+                        maxHealth: localBattleConfig.enemyHealthOverride[god.id]
+                    };
+                }
+                return god;
+            });
+
             // Initialiser la partie
-            initGame(playerGods, playerDeck, enemyGods, enemyDeck, playerGoesFirst);
+            initGame(playerGods, playerDeck, finalEnemyGods, enemyDeck, playerGoesFirst);
 
             // Sauvegarder la config localement pour y accéder après le combat
             setBattleConfig(localBattleConfig);

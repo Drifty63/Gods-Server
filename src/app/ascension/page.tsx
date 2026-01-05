@@ -42,13 +42,13 @@ function AscensionContent() {
     const handleSelectGod = (godId: string) => {
         if (selectedGods.includes(godId)) {
             setSelectedGods(selectedGods.filter(id => id !== godId));
-        } else if (selectedGods.length < 3) {
+        } else if (selectedGods.length < 4) {
             setSelectedGods([...selectedGods, godId]);
         }
     };
 
     const handleStartAscension = () => {
-        if (selectedGods.length === 3) {
+        if (selectedGods.length === 4) {
             setCurrentFloor(1);
             setView('climbing');
             // TODO: Initialiser la partie avec les dieux sélectionnés
@@ -129,7 +129,7 @@ function AscensionContent() {
                     <section className={styles.selectSection}>
                         <h2>Choisissez votre équipe</h2>
                         <p className={styles.selectHint}>
-                            Sélectionnez 3 dieux ({selectedGods.length}/3)
+                            Sélectionnez 4 dieux ({selectedGods.length}/4)
                         </p>
 
                         <div className={styles.godsGrid}>
@@ -163,9 +163,9 @@ function AscensionContent() {
                             <button
                                 className={styles.confirmBtn}
                                 onClick={handleStartAscension}
-                                disabled={selectedGods.length !== 3}
+                                disabled={selectedGods.length !== 4}
                             >
-                                Commencer ({selectedGods.length}/3)
+                                Commencer ({selectedGods.length}/4)
                             </button>
                         </div>
                     </section>
