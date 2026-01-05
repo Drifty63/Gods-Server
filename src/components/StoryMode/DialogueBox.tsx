@@ -50,6 +50,7 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(true);
     const [showContinue, setShowContinue] = useState(false);
+    const [isHidden, setIsHidden] = useState(false); // Pour masquer l'UI et voir l'image
 
     // #7 - Animation states
     const [isNewSpeaker, setIsNewSpeaker] = useState(true);
@@ -141,56 +142,77 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
     // Animation spéciale pour les émotions fortes
     const emotionClasses = currentDialogue.emotion === 'angry' ? styles.angryShake : '';
 
+    // Toggle masquage de l'UI
+    const toggleHidden = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Empêche d'avancer le dialogue
+        setIsHidden(!isHidden);
+    };
+
     return (
-        <div className={styles.dialogueContainer} onClick={handleClick}>
-            {/* Portrait du personnage avec animation */}
-            <div
-                key={`portrait-${animationKey}`}
-                className={`${styles.portraitWrapper} ${emotionClasses}`}
-                style={{ '--glow-color': glowColor } as React.CSSProperties}
+        <>
+            {/* Bouton œil pour masquer/afficher l'UI */}
+            <button
+                className={styles.toggleButton}
+                onClick={toggleHidden}
+                title={isHidden ? 'Afficher le dialogue' : 'Masquer le dialogue'}
             >
-                <div className={portraitClasses}>
-                    <Image
-                        src={portraitUrl}
-                        alt={currentDialogue.speakerName}
-                        fill
-                        className={styles.portraitImage}
-                    />
-                </div>
-            </div>
+                {isHidden ? '👁️' : '👁️‍🗨️'}
+            </button>
 
-            {/* Boîte de dialogue avec animation */}
-            <div key={`dialogue-${animationKey}`} className={dialogueBoxClasses}>
-                {/* Nom du personnage */}
+            {/* Container de dialogue (masquable) */}
+            <div
+                className={`${styles.dialogueContainer} ${isHidden ? styles.hidden : ''}`}
+                onClick={handleClick}
+            >
+                {/* Portrait du personnage avec animation */}
                 <div
-                    className={speakerNameClasses}
-                    style={{ color: glowColor }}
+                    key={`portrait-${animationKey}`}
+                    className={`${styles.portraitWrapper} ${emotionClasses}`}
+                    style={{ '--glow-color': glowColor } as React.CSSProperties}
                 >
-                    {currentDialogue.speakerName}
-                </div>
-
-                {/* Texte du dialogue */}
-                <div className={styles.dialogueText}>
-                    {displayedText}
-                    {isTyping && <span className={styles.cursor}>|</span>}
-                </div>
-
-                {/* Indicateur de continuation */}
-                {showContinue && (
-                    <div className={styles.continueIndicator}>
-                        {isLastDialogue ? '▶ Continuer' : '▼ Suite'}
+                    <div className={portraitClasses}>
+                        <Image
+                            src={portraitUrl}
+                            alt={currentDialogue.speakerName}
+                            fill
+                            className={styles.portraitImage}
+                        />
                     </div>
-                )}
+                </div>
 
-                {/* Progression */}
-                <div className={styles.progressBar}>
+                {/* Boîte de dialogue avec animation */}
+                <div key={`dialogue-${animationKey}`} className={dialogueBoxClasses}>
+                    {/* Nom du personnage */}
                     <div
-                        className={styles.progressFill}
-                        style={{ width: `${((currentIndex + 1) / dialogues.length) * 100}%` }}
-                    />
+                        className={speakerNameClasses}
+                        style={{ color: glowColor }}
+                    >
+                        {currentDialogue.speakerName}
+                    </div>
+
+                    {/* Texte du dialogue */}
+                    <div className={styles.dialogueText}>
+                        {displayedText}
+                        {isTyping && <span className={styles.cursor}>|</span>}
+                    </div>
+
+                    {/* Indicateur de continuation */}
+                    {showContinue && (
+                        <div className={styles.continueIndicator}>
+                            {isLastDialogue ? '▶ Continuer' : '▼ Suite'}
+                        </div>
+                    )}
+
+                    {/* Progression */}
+                    <div className={styles.progressBar}>
+                        <div
+                            className={styles.progressFill}
+                            style={{ width: `${((currentIndex + 1) / dialogues.length) * 100}%` }}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

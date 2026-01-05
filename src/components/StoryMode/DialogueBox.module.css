@@ -1,3 +1,36 @@
+/* Bouton œil pour masquer/afficher le dialogue */
+.toggleButton {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(20, 20, 40, 0.85);
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.toggleButton:hover {
+    background: rgba(40, 40, 80, 0.95);
+    border-color: rgba(212, 175, 55, 0.7);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.toggleButton:active {
+    transform: scale(0.95);
+}
+
 .dialogueContainer {
     position: fixed;
     bottom: 0;
@@ -11,6 +44,14 @@
     cursor: pointer;
     z-index: 1000;
     user-select: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Masquer le dialogue */
+.dialogueContainer.hidden {
+    opacity: 0;
+    transform: translateY(100%);
+    pointer-events: none;
 }
 
 /* Portrait du personnage */
