@@ -1369,6 +1369,10 @@
    PROMPT DE CIBLAGE
    ================================ */
 .targetPrompt {
+    position: fixed;
+    bottom: 50%;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1381,6 +1385,7 @@
     animation: bounceTarget 0.6s ease infinite alternate;
     text-align: center;
     box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+    z-index: 40000;
 }
 
 .targetPrompt p {
@@ -1473,6 +1478,8 @@
     background: rgba(255, 215, 0, 0.1);
     border-radius: 12px;
     border: 1px solid rgba(255, 215, 0, 0.2);
+    position: relative;
+    z-index: 40000;
 }
 
 .lightningChoice p {
@@ -1537,6 +1544,8 @@
     background: linear-gradient(145deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
     border: 1px solid rgba(255, 215, 0, 0.4);
     border-radius: 10px;
+    position: relative;
+    z-index: 40000;
 }
 
 .lightningLabel {
@@ -1589,6 +1598,8 @@
     background: rgba(45, 106, 79, 0.15);
     border-radius: 12px;
     border: 1px solid rgba(45, 106, 79, 0.3);
+    position: relative;
+    z-index: 40000;
 }
 
 .elementChoice p {

@@ -1854,6 +1854,14 @@ export class GameEngine {
                 player.hasPlayedCard = false;
                 break;
 
+            // ========================================
+            // ZÉPHYR - Vent de Face (shuffle_god_cards)
+            // ========================================
+            case 'shuffle_god_cards':
+                // Cet effet est géré par le store via le modal de sélection de dieu
+                // Le joueur choisit un dieu, et confirmGodSelection applique l'effet
+                break;
+
             default:
                 console.warn(`Effet custom non implémenté: ${effectId}`);
                 break;

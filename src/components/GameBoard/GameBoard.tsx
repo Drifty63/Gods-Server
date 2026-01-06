@@ -855,32 +855,43 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Pour l'affichage : montrer si toutes les cibles possibles sont sélectionnées
     const allTargetsSelected = selectedTargetGods.length >= maxPossibleTargets && requiredTargets > 0;
 
-    // Fonction pour finir le tour en multijoueur
+    // Fonction pour finir le tour automatiquement (mode solo ET multijoueur)
     const autoEndTurnMultiplayer = () => {
-        if (!isSoloMode) {
-            setTimeout(() => {
-                // Vérifier si c'est toujours le tour du joueur
-                // (le tour peut avoir changé si un dieu est mort du poison)
-                const currentState = useGameStore.getState().gameState;
-                if (currentState && currentState.currentPlayerId === playerId && currentState.status === 'playing') {
-                    // Vérifier si le joueur a un zombie actif pour les dégâts de fin de tour
-                    const currentPlayer = currentState.players.find(p => p.id === playerId);
-                    const activeZombieGod = currentPlayer?.gods.find(g => g.isZombie && !g.isDead);
+        setTimeout(() => {
+            const currentState = useGameStore.getState().gameState;
+            const currentStoreState = useGameStore.getState();
 
-                    if (activeZombieGod) {
-                        // Ouvrir le modal de dégâts zombie au lieu de finir le tour
-                        startZombieDamage(activeZombieGod.card.id);
-                        // La fin de tour sera appelée après le choix du joueur
-                        return;
-                    }
+            // Vérifier si c'est toujours le tour du joueur
+            if (currentState && currentState.currentPlayerId === playerId && currentState.status === 'playing') {
 
-                    endTurn();
+                // NE PAS finir le tour si un modal est ouvert
+                const hasActiveModal =
+                    currentStoreState.isDistributingHeal ||
+                    currentStoreState.isSelectingCards ||
+                    currentStoreState.isSelectingEnemyCards ||
+                    currentStoreState.isShowingOptionalChoice ||
+                    currentStoreState.isSelectingPlayer ||
+                    currentStoreState.isSelectingDeadGod ||
+                    currentStoreState.isSelectingGod;
+
+                if (hasActiveModal) return;
+
+                // Vérifier si le joueur a un zombie actif pour les dégâts de fin de tour
+                const currentPlayer = currentState.players.find(p => p.id === playerId);
+                const activeZombieGod = currentPlayer?.gods.find(g => g.isZombie && !g.isDead);
+
+                if (activeZombieGod) {
+                    // Ouvrir le modal de dégâts zombie au lieu de finir le tour
+                    startZombieDamage(activeZombieGod.card.id);
+                    return;
+                }
+
+                endTurn();
+                if (!isSoloMode) {
                     onAction?.({ type: 'end_turn', payload: {} });
                 }
-                // Si le tour a déjà changé (mort du poison), ne rien faire
-                // L'état a déjà été synchronisé via play_card
-            }, 4500);
-        }
+            }
+        }, isSoloMode ? 1500 : 4500); // Délai plus court en solo
     };
 
     // Fonction pour afficher la carte jouée au centre du terrain
@@ -1898,42 +1909,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             )
                         }
 
-                        {/* Choix optionnel (Vision du Tartare / Marée Basse) */}
+                        {/* Bouton confirmer - s'affiche si cibles OK et pas de choix spécial en attente */}
                         {
-                            canConfirm && selectedCard && getOptionalChoiceRequired(selectedCard) && (
-                                <div className={styles.optionalChoiceContainer}>
-                                    <div className={styles.optionalInfo}>
-                                        <p className={styles.optionalTitle}>{getOptionalChoiceRequired(selectedCard)?.title}</p>
-                                        <p className={styles.optionalDesc}>{getOptionalChoiceRequired(selectedCard)?.description}</p>
-                                    </div>
-                                    <div className={styles.optionalButtons}>
-                                        <button
-                                            className={styles.confirmOptionalBtn}
-                                            onClick={() => {
-                                                const res = playCardWithChoice(selectedCard.id, undefined, selectedTargetGods.map(t => t.card.id), true);
-                                                if (res.success) setWantsToPlay(false);
-                                                else setToast({ type: 'error', message: res.message });
-                                            }}
-                                        >
-                                            {getOptionalChoiceRequired(selectedCard)?.effectId === 'vision_tartare' ? '🩸 Oui (+1 Dégât, -2 Cartes)' : '⬅️ Ouest (G → D)'}
-                                        </button>
-                                        <button
-                                            className={styles.cancelOptionalBtn}
-                                            onClick={() => {
-                                                const res = playCardWithChoice(selectedCard.id, undefined, selectedTargetGods.map(t => t.card.id), false);
-                                                if (res.success) setWantsToPlay(false);
-                                                else setToast({ type: 'error', message: res.message });
-                                            }}
-                                        >
-                                            {getOptionalChoiceRequired(selectedCard)?.effectId === 'vision_tartare' ? '🛡️ Non (Standard)' : '➡️ Est (D → G)'}
-                                        </button>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {
-                            canConfirm && selectedCard && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard) && !getOptionalChoiceRequired(selectedCard) && (
+                            canConfirm && selectedCard && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard) && (
                                 <button className={styles.confirmButton} onClick={handleConfirmPlay}>
                                     ✅ Confirmer ({selectedTargetGods.length} cible{selectedTargetGods.length > 1 ? 's' : ''})
                                 </button>

@@ -804,8 +804,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const cardToCheck = player?.hand.find(c => c.id === cardId);
 
         if (cardToCheck && cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'copy_discard_spell')) {
-            get().startCardSelection('discard', 1, "Copier un sort (devient Ténèbres)", `copy_discard_spell:${cardId}`);
-            return { success: true, message: 'Sélectionnez un sort à copier' };
+            // JOUER LA CARTE D'ABORD (dépense l'énergie, défausse la carte)
+            const playResult = engine.executeAction({
+                type: 'play_card',
+                playerId,
+                cardId,
+            });
+
+            if (playResult.success) {
+                set({ gameState: cloneGameState(engine.getState()) });
+                get().startCardSelection('discard', 1, "Copier un sort (devient Ténèbres)", `copy_discard_spell:${cardId}`);
+            }
+
+            return playResult;
         }
 
         // 3. CAS SPÉCIAL : Interception du sort Zéphyr "Vent de Face" (shuffle_god_cards)

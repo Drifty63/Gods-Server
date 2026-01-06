@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import styles from './OptionalChoiceModal.module.css';
 
 interface OptionalChoiceModalProps {
@@ -20,7 +21,11 @@ export default function OptionalChoiceModal({
 }: OptionalChoiceModalProps) {
     if (!isOpen) return null;
 
-    return (
+    // Utiliser createPortal pour monter le modal dans document.body
+    // afin qu'il passe au-dessus de tous les autres éléments
+    if (typeof window === 'undefined') return null;
+
+    return createPortal(
         <div className={styles.overlay}>
             <div className={styles.modal}>
                 <h2 className={styles.title}>{title}</h2>
@@ -40,6 +45,7 @@ export default function OptionalChoiceModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
