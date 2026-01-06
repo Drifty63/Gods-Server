@@ -27,7 +27,7 @@ const ALL_ELEMENTS: Element[] = ['fire', 'water', 'earth', 'air', 'lightning', '
 
 interface GameBoardProps {
     onAction?: (action: {
-        type: 'play_card' | 'discard' | 'end_turn' | 'game_over' | 'zombie_resurrect';
+        type: 'play_card' | 'discard' | 'end_turn' | 'game_over' | 'zombie_resurrect' | 'shuffle_god_cards';
         payload: Record<string, unknown>;
     }) => void;
 }
@@ -1099,6 +1099,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Handler pour la sélection de dieu vivant (Vent de Face - shuffle_god_cards)
     const handleConfirmGodSelection = (godId: string) => {
         confirmGodSelection(godId);
+        // Envoyer l'action au serveur pour synchroniser le mélange de cartes
+        onAction?.({ type: 'shuffle_god_cards', payload: { godId } });
         if (pendingCardForOverlay) {
             showPlayedCard(pendingCardForOverlay);
             setPendingCardForOverlay(null);

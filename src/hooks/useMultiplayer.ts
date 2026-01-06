@@ -28,7 +28,7 @@ export interface GameStartData {
 }
 
 export interface GameAction {
-    type: 'play_card' | 'discard' | 'end_turn' | 'select_target' | 'select_element' | 'confirm_selection' | 'sync_initial_state' | 'ask_initial_state' | 'game_over' | 'zombie_resurrect';
+    type: 'play_card' | 'discard' | 'end_turn' | 'select_target' | 'select_element' | 'confirm_selection' | 'sync_initial_state' | 'ask_initial_state' | 'game_over' | 'zombie_resurrect' | 'shuffle_god_cards';
     payload: Record<string, unknown>;
 }
 
