@@ -1325,12 +1325,14 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Utiliser des refs pour éviter les problèmes de dépendances
     const endTurnRef = useRef(endTurn);
     const onActionRef = useRef(onAction);
+    const isPlayerTurnRef = useRef(isPlayerTurn);
 
     // Mettre à jour les refs quand les fonctions changent
     useEffect(() => {
         endTurnRef.current = endTurn;
         onActionRef.current = onAction;
-    }, [endTurn, onAction]);
+        isPlayerTurnRef.current = isPlayerTurn;
+    }, [endTurn, onAction, isPlayerTurn]);
 
     useEffect(() => {
         // Nettoyer le timer précédent
@@ -1365,8 +1367,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                             clearInterval(turnTimerRef.current);
                             turnTimerRef.current = null;
                         }
-                        // Forcer la fin du tour UNIQUEMENT si c'est notre tour
-                        if (isPlayerTurn) {
+                        // Forcer la fin du tour UNIQUEMENT si c'est notre tour (via ref)
+                        if (isPlayerTurnRef.current) {
                             endTurnRef.current();
                             onActionRef.current?.({ type: 'end_turn', payload: {} });
                         }
@@ -1384,7 +1386,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 turnTimerRef.current = null;
             }
         };
-    }, [isPlayerTurn, gameState?.turnNumber, gameState?.status, gameState?.players]);
+    }, [gameState?.turnNumber, gameState?.status, gameState?.players]);
 
     // Démarrage automatique quand le nombre de cibles est atteint pour les cartes multi-cibles
     // DÉSACTIVÉ SUR DEMANDE UTILISATEUR :"le modal n'attend plus la validation des cibles pour lancer le sort"
