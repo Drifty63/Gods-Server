@@ -1475,20 +1475,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (!result.success) return result;
 
         // APPLIQUER LES EFFETS BONUS/CHOIX MANUELLEMENT
-        // Car le moteur ne gère que l'effet de base pour ces cartes complexes
+        // Car le moteur ne gère pas ces effets custom
 
-        if (visionTartare && choice) {
-            // Bonus Vision du Tartare : +1 dégât aux cibles
+        if (visionTartare) {
+            // Vision du Tartare : 1 dégât de base + 1 bonus si choice=true = 1 ou 2 dégâts par cible
+            const damagePerTarget = choice ? 2 : 1;
             const opponent = engine.getState().players.find(p => p.id !== playerId);
-            if (opponent && finalTargetGodIds) {
+
+            if (opponent && finalTargetGodIds && finalTargetGodIds.length > 0) {
                 for (const tid of finalTargetGodIds) {
                     const target = opponent.gods.find(g => g.card.id === tid && !g.isDead);
                     if (target) {
-                        // On applique 1 dégât supplémentaire (brut, ignorant le bouclier déjà entamé par le premier coup du moteur ?
-                        // Idéalement on devrait le faire proprement.
-                        // Ici on fait simple : on réduit les PV directement pour le bonus, comme dans confirmOptionalChoice
-                        target.currentHealth = Math.max(0, target.currentHealth - 1);
-                        if (target.currentHealth === 0) target.isDead = true;
+                        // Gestion du bouclier
+                        let remainingDamage = damagePerTarget;
+                        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
+                        if (shieldIndex !== -1) {
+                            const shieldStacks = target.statusEffects[shieldIndex].stacks;
+                            const absorbedDamage = Math.min(shieldStacks, remainingDamage);
+                            target.statusEffects[shieldIndex].stacks -= absorbedDamage;
+                            remainingDamage -= absorbedDamage;
+                            if (target.statusEffects[shieldIndex].stacks <= 0) {
+                                target.statusEffects.splice(shieldIndex, 1);
+                            }
+                        }
+                        // Appliquer les dégâts restants
+                        if (remainingDamage > 0) {
+                            target.currentHealth = Math.max(0, target.currentHealth - remainingDamage);
+                            if (target.currentHealth === 0) {
+                                target.isDead = true;
+                            }
+                        }
                     }
                 }
             }

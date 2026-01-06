@@ -821,35 +821,47 @@
    ================================ */
 .optionalChoiceContainer {
     position: fixed;
-    bottom: 220px;
-    /* Au dessus de la main */
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    background: rgba(15, 15, 30, 0.95);
+    transform: translate(-50%, -50%);
+    background: rgba(15, 15, 30, 0.98);
     border: 2px solid rgba(139, 92, 246, 0.6);
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 16px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
     width: auto;
-    min-width: 300px;
+    min-width: 320px;
     max-width: 500px;
-    z-index: 1000;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 2000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 60px rgba(139, 92, 246, 0.3);
+    backdrop-filter: blur(8px);
+    animation: modalFadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@keyframes slideUp {
+/* Overlay sombre derrière le modal */
+.optionalChoiceContainer::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes modalFadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translate(-50%, -50%) scale(0.9);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 
@@ -3460,11 +3472,10 @@
 /* Écrans moyens (tablettes) */
 @media (max-width: 768px) {
     .optionalChoiceContainer {
-        bottom: 180px;
         min-width: 280px;
         max-width: 95vw;
-        padding: 10px;
-        gap: 6px;
+        padding: 16px;
+        gap: 10px;
     }
 
     .optionalTitle {
@@ -3511,11 +3522,11 @@
 /* Petits écrans mobiles */
 @media (max-width: 480px) {
     .optionalChoiceContainer {
-        bottom: 160px;
         min-width: 250px;
-        padding: 8px;
-        gap: 4px;
-        border-radius: 8px;
+        max-width: 90vw;
+        padding: 12px;
+        gap: 8px;
+        border-radius: 12px;
     }
 
     .optionalTitle {
@@ -3597,9 +3608,9 @@
 /* Très petits écrans (iPhone SE, etc.) */
 @media (max-width: 380px) {
     .optionalChoiceContainer {
-        bottom: 140px;
-        min-width: 220px;
-        padding: 6px;
+        min-width: 200px;
+        max-width: 85vw;
+        padding: 10px;
     }
 
     .optionalTitle {
@@ -3628,10 +3639,6 @@
 
 /* Mode paysage mobile - ajustement vertical */
 @media (max-height: 500px) {
-    .optionalChoiceContainer {
-        bottom: 100px;
-    }
-
     .discardSelectionZone {
         bottom: 100px;
     }
