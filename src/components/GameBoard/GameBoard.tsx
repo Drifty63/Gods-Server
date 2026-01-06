@@ -1077,6 +1077,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     // Handler pour la confirmation de sélection de dieu mort (Brûlure Rémanente)
     const handleConfirmDeadGodSelection = (godId: string) => {
         confirmDeadGodSelection(godId);
+        // Envoyer l'action au serveur pour synchroniser la résurrection zombie
+        onAction?.({ type: 'zombie_resurrect', payload: { godId } });
         if (pendingCardForOverlay) {
             showPlayedCard(pendingCardForOverlay);
             setPendingCardForOverlay(null);
