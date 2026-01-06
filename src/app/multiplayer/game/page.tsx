@@ -77,14 +77,19 @@ export default function MultiplayerGamePage() {
 
             const imFirst = multiplayerData.firstPlayer === 'host';
 
-            // Initialiser localement
+            // Initialiser localement avec les noms des joueurs
             initGame(
                 myGods,
                 myDeck,
                 opponentGods,
                 opponentDeck,
                 imFirst,
-                false // Mode multijoueur
+                false, // Mode multijoueur
+                {
+                    isOnlineGame: true,
+                    player1Name: multiplayerData.hostName || 'Joueur 1',
+                    player2Name: multiplayerData.guestName || 'Joueur 2'
+                }
             );
 
             // Marquer comme initialisé

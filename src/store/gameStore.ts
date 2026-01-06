@@ -63,7 +63,7 @@ interface GameStore {
         player2Deck: SpellCard[],
         isPlayer1First: boolean,
         soloMode?: boolean,
-        options?: { isOnlineGame?: boolean; maxTurns?: number }
+        options?: { isOnlineGame?: boolean; maxTurns?: number; player1Name?: string; player2Name?: string }
     ) => void;
 
     initWithState: (state: GameState, myPlayerId: string) => void;
@@ -227,13 +227,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const player2Id = 'player2';
         const firstPlayerId = isPlayer1First ? player1Id : player2Id;
 
+        // Utiliser les noms depuis options, ou fallback pour mode solo
+        const player1Name = options?.player1Name || 'Vous';
+        const player2Name = options?.player2Name || (soloMode ? 'Adversaire (IA)' : 'Adversaire');
+
         const initialState = GameEngine.createInitialState(
             player1Id,
-            'Vous',
+            player1Name,
             player1Gods,
             player1Deck,
             player2Id,
-            'Adversaire (IA)',
+            player2Name,
             player2Gods,
             player2Deck,
             firstPlayerId,
