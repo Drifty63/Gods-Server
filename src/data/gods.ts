@@ -328,13 +328,69 @@ export const ALL_GODS: GodCard[] = [
         name: 'Dragon de Thèbes',
         element: 'air',
         weakness: 'fire',
-        maxHealth: 26,  // 26 PV en mode Duel, 60 PV override en mode Histoire
+        maxHealth: 26,  // 26 PV en mode Duel, 75 PV override en mode Histoire
         imageUrl: '/cards/gods/dragon_thebes.png',
         flavorText: '"Né du sang d\'Arès lui-même, je suis la terreur des cieux. Plus grand, plus puissant que mon ancêtre, je règne sur les vents de la mort."',
         hidden: false,  // Disponible en mode Duel
         category: 'creature',
         duelCost: 3,
         affiliatedTo: 'ares',
+    },
+
+    // ARACHNÉ (Ténèbres 💀) - Créature mythique
+    {
+        id: 'arachne',
+        name: 'Arachné',
+        element: 'darkness',
+        weakness: 'light',
+        maxHealth: 22,  // 22 PV en mode Duel, 50 PV override en mode Histoire
+        imageUrl: '/cards/gods/arachne.png',
+        flavorText: '"Athéna m\'a maudite, mais ma vengeance sera tissée de leurs propres entrailles. Partout où rampe une araignée, je peux apparaître !"',
+        hidden: false,  // Disponible en mode Duel
+        category: 'creature',
+        duelCost: 3,
+    },
+
+    // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Exclusif Histoire
+    {
+        id: 'giant_spider_1',
+        name: 'Araignée Géante',
+        element: 'darkness',
+        weakness: 'light',
+        maxHealth: 12,
+        imageUrl: '/cards/gods/giant_spider.png',
+        flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
+        hidden: true,  // Exclusif mode Histoire
+        category: 'creature',
+        affiliatedTo: 'arachne',
+    },
+
+    // ARAIGNÉE GÉANTE 2 (Ténèbres 💀) - Exclusif Histoire
+    {
+        id: 'giant_spider_2',
+        name: 'Araignée Géante',
+        element: 'darkness',
+        weakness: 'light',
+        maxHealth: 12,
+        imageUrl: '/cards/gods/giant_spider.png',
+        flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
+        hidden: true,  // Exclusif mode Histoire
+        category: 'creature',
+        affiliatedTo: 'arachne',
+    },
+
+    // ARAIGNÉE GÉANTE 3 (Ténèbres 💀) - Exclusif Histoire
+    {
+        id: 'giant_spider_3',
+        name: 'Araignée Géante',
+        element: 'darkness',
+        weakness: 'light',
+        maxHealth: 12,
+        imageUrl: '/cards/gods/giant_spider.png',
+        flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
+        hidden: true,  // Exclusif mode Histoire
+        category: 'creature',
+        affiliatedTo: 'arachne',
     },
 ];
 

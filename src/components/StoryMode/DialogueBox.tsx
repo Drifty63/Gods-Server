@@ -27,6 +27,7 @@ const GOD_PORTRAITS: Record<string, string> = {
     athena: '/cards/gods/athena.png',
     demeter: '/cards/gods/demeter.png',
     artemis: '/cards/gods/artemis.png',
+    arachne: '/cards/gods/arachne.png',
 };
 
 // Couleurs par dieu pour l'effet de glow
@@ -44,6 +45,7 @@ const GOD_COLORS: Record<string, string> = {
     athena: '#f0e68c',    // Jaune doré
     demeter: '#228b22',   // Vert forêt
     artemis: '#c0c0c0',   // Argent
+    arachne: '#8b0000',   // Rouge sombre (araignée)
 };
 
 export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComplete }: DialogueBoxProps) {

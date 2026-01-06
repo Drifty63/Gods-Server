@@ -39,6 +39,13 @@ import {
     CHAPTER2_BATTLE2_DRAGON_ATTACK,
     CHAPTER2_BATTLE2_WIN,
     CHAPTER2_BATTLE2_LOSE,
+    // Chapitre 2 - Combat 3 : Arachné
+    CHAPTER2_BATTLE3_CAMPFIRE,
+    CHAPTER2_BATTLE3_COLONUS_ENTRANCE,
+    CHAPTER2_BATTLE3_COLONUS_TRAVERSE,
+    CHAPTER2_BATTLE3_ARACHNE_AMBUSH,
+    CHAPTER2_BATTLE3_WIN,
+    CHAPTER2_BATTLE3_LOSE,
     // Chapitre 3 (dialogues gardés mais combats supprimés)
     CHAPTER3_INTRO,
     CHAPTER3_EPILOGUE
@@ -546,7 +553,7 @@ const chapter2Battle2Events: StoryEvent[] = [
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE2_WIN,
         backgroundImage: '/assets/story/ch2_dragon_victory.png',
-        nextEventId: undefined  // Fin du chapitre 2 pour l'instant
+        nextEventId: 'ch2_battle3_campfire'  // Continue vers combat 3
     },
     // Après combat - Défaite
     {
@@ -558,10 +565,87 @@ const chapter2Battle2Events: StoryEvent[] = [
     }
 ];
 
+// ===========================================
+// CHAPITRE 2 - COMBAT 3 : ARACHNÉ
+// ===========================================
+const chapter2Battle3Events: StoryEvent[] = [
+    // Scène 1 : Campement de nuit
+    {
+        id: 'ch2_battle3_campfire',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE3_CAMPFIRE,
+        backgroundImage: '/assets/story/ch2_campfire.png',
+        nextEventId: 'ch2_battle3_colonus_entrance'
+    },
+    // Scène 2 : Arrivée devant le Bois de Colone
+    {
+        id: 'ch2_battle3_colonus_entrance',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE3_COLONUS_ENTRANCE,
+        backgroundImage: '/assets/story/ch2_colonus_entrance.png',
+        nextEventId: 'ch2_battle3_colonus_traverse'
+    },
+    // Scène 3 : Traversée du bois
+    {
+        id: 'ch2_battle3_colonus_traverse',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE3_COLONUS_TRAVERSE,
+        backgroundImage: '/assets/story/ch2_colonus_traverse.png',
+        nextEventId: 'ch2_battle3_ambush'
+    },
+    // Scène 4 : Embuscade d'Arachné
+    {
+        id: 'ch2_battle3_ambush',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE3_ARACHNE_AMBUSH,
+        backgroundImage: '/assets/story/ch2_arachne_ambush.png',
+        nextEventId: 'ch2_battle3_fight'
+    },
+    // Combat contre Arachné
+    {
+        id: 'ch2_battle3_fight',
+        type: 'battle',
+        dialogues: [],
+        backgroundImage: '/assets/story/ch2_arachne_ambush.png',
+        battle: {
+            id: 'battle_arachne',
+            name: "L'Embuscade d'Arachné",
+            description: "Arachné et ses araignées géantes attaquent ! Choisissez votre équipe !",
+            playerTeam: ['zeus'],  // Zeus obligatoire, 3 autres au choix
+            playerTeamChoices: ['hestia', 'demeter', 'artemis', 'aphrodite', 'apollon', 'dionysos'],
+            requiredPlayerTeamSize: 4,
+            enemyTeam: ['arachne', 'giant_spider_1', 'giant_spider_2', 'giant_spider_3'],
+            deckMultiplier: 1,
+            enemyDeckMultiplier: 1,
+            enemyHealthOverride: { arachne: 50 },  // 50 PV en mode histoire
+            continueOnDefeat: false
+        },
+        nextEventOnWin: 'ch2_battle3_win',
+        nextEventOnLose: 'ch2_battle3_lose'
+    },
+    // Victoire
+    {
+        id: 'ch2_battle3_win',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE3_WIN,
+        backgroundImage: '/assets/story/ch2_arachne_victory.png',
+        nextEventId: undefined  // Fin du chapitre 2 pour l'instant
+    },
+    // Défaite
+    {
+        id: 'ch2_battle3_lose',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE3_LOSE,
+        backgroundImage: '/assets/story/ch2_arachne_defeat.png',
+        nextEventId: undefined  // Doit réessayer
+    }
+];
+
 // Tous les événements du chapitre 2
 const chapter2Events: StoryEvent[] = [
     ...chapter2Battle1Events,
-    ...chapter2Battle2Events
+    ...chapter2Battle2Events,
+    ...chapter2Battle3Events
 ];
 
 // Configuration des combats du chapitre 2
@@ -581,6 +665,14 @@ export const CHAPTER_2_BATTLES = [
         firstEventId: 'ch2_battle2_narrator',
         unlocked: false,              // Débloqué après combat 1
         requiresBattleId: 'battle1'
+    },
+    {
+        id: 'battle3',
+        name: "L'Embuscade d'Arachné",
+        description: "Dans le Bois de Colone, Arachné et ses araignées tendent une embuscade",
+        firstEventId: 'ch2_battle3_campfire',
+        unlocked: false,              // Débloqué après combat 2
+        requiresBattleId: 'battle2'
     }
 ];
 

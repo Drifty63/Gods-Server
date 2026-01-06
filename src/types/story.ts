@@ -22,7 +22,9 @@ export interface BattleConfig {
     name: string;
     description: string;
     enemyTeam: string[];           // IDs des dieux ennemis
-    playerTeam?: string[];         // IDs des dieux du joueur (si différent de la campagne)
+    playerTeam?: string[];         // IDs des dieux du joueur (obligatoires)
+    playerTeamChoices?: string[];  // IDs des dieux disponibles au choix
+    requiredPlayerTeamSize?: number; // Nombre total de dieux requis dans l'équipe
     deckMultiplier?: number;       // Multiplicateur des cartes du deck du joueur
     enemyDeckMultiplier?: number;  // Multiplicateur des cartes du deck ennemi
     enemyHealthOverride?: Record<string, number>; // Override des PV ennemis (ex: { dragon_thebes: 60 })

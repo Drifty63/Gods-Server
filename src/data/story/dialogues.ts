@@ -2851,3 +2851,505 @@ export const PROLOGUE_BATTLE4_LOSE: DialogueLine[] = [
         emotion: 'neutral'
     }
 ];
+
+// ===============================================
+// CHAPITRE 2 - COMBAT 3 : ARACHNÉ
+// ===============================================
+
+// Scène 1 : Campement de nuit - Discussions intimes
+export const CHAPTER2_BATTLE3_CAMPFIRE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La nuit est tombée sur la forêt entre Thèbes et Athènes. Les sept dieux ont établi un campement autour d'un feu crépitant.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le combat contre le Dragon de Thèbes les a épuisés. Cette nuit de repos est bienvenue avant de traverser le redouté Bois de Colone.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Artémis s'est éloignée pour monter la garde, scrutant les ténèbres avec vigilance. Les autres se détendent autour du feu.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*s'assoit près d'Apollon* Mon fils... Je voulais te dire quelque chose depuis longtemps.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*surpris* Père ? Qu'y a-t-il ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Tu es mon fils favori, Apollon. Je suis fier de tout ce que tu as accompli à Delphes, de ton oracle, de ta sagesse.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*ému* Père... je ne sais pas quoi dire.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Tu es l'un des dieux les plus forts, les plus intelligents et les plus respectés de l'Olympe. Tes pouvoirs de divination sont rares et précieux.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Je compte sur toi plus que sur quiconque... même plus que sur Poséidon ou Athéna.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*pose sa main sur l'épaule de Zeus* Je ne te décevrai pas, père. Jamais.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "De l'autre côté du feu, Dionysos et Aphrodite sont assis épaule contre épaule, leurs têtes se touchant tendrement.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*doucement* Dionysos... depuis le début de cette aventure, tu m'as impressionnée.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*surpris* Moi ? Le dieu des fêtes et du vin ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "Tu es bien plus que ça. Tu es courageux, sérieux quand il le faut, et valeureux. Je me suis trompée sur toi.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "Et surtout... malgré tes sentiments pour moi, tu m'as toujours respectée. Tu ne m'as jamais forcée à t'aimer.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*sérieux* L'amour ne se force pas, Aphrodite. Tu le sais mieux que personne.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Je te vois telle que tu es réellement. Pas la déesse du désir que tous convoitent, mais une femme forte, blessée par les jugements.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*émue* Personne ne m'a jamais... regardée ainsi.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Quoi que tu aies fait dans le passé, ce qui compte c'est qui tu choisis d'être maintenant.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Plus loin, Hestia et Déméter sont allongées sur un matelas de fortune fait d'herbe et de mousse.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*excitée* J'ai tellement hâte d'arriver à Athènes ! Voir la grande cité, rencontrer Thésée...",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*nerveuse* Oui, mais... nous devons d'abord traverser le Bois de Colone.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Qu'est-ce qui t'inquiète tant, ma sœur ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Ce bois est sacré et maudit à la fois. Les Érinyes y rôdent. C'est un endroit que je crains et redoute.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*rassurante* Nous sommes sept dieux, Déméter. Ensemble, rien ne peut nous arriver.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*soupir* Tu as peut-être raison... Je l'espère.",
+        emotion: 'neutral'
+    }
+];
+
+// Scène 2 : Arrivée devant le Bois de Colone
+export const CHAPTER2_BATTLE3_COLONUS_ENTRANCE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le lendemain matin, les dieux se sont levés tôt. Après des heures de marche, ils arrivent enfin devant le légendaire Bois de Colone.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La forêt se dresse devant eux, sombre et menaçante. Les arbres anciens semblent tordus par des siècles de malédiction.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*observe la forêt* Le Bois de Colone. Peu de mortels en ressortent.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Je sens des présences hostiles à l'intérieur. Nous devrons être prudents.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*yeux brillants* Ma vision me montre un chemin... sinueux mais praticable. Suivez-moi.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*frissonne* Les Érinyes ne sont pas les seules créatures qui hantent ces bois...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "Alors ne perdons pas de temps. Plus vite nous traverserons, mieux ce sera.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "Athènes nous attend de l'autre côté. Allons-y.",
+        emotion: 'determined'
+    }
+];
+
+// Scène 3 : Traversée du bois
+export const CHAPTER2_BATTLE3_COLONUS_TRAVERSE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les sept dieux pénètrent dans le Bois de Colone. L'obscurité les enveloppe malgré le soleil de midi.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Apollon guide le groupe, sa lumière dorée perçant les ténèbres grâce à ses visions divines.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*murmure* Par ici. Je vois le chemin le plus sûr.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*aux aguets* Je perçois des traces d'Érinyes. Elles sont passées par là il y a peu.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*chuchote* Silence. Pas un bruit.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le groupe avance en file indienne, évitant les zones dangereuses signalées par Apollon et Artémis.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*tout bas* Je vois de la lumière devant... La sortie ?",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Oui. Nous y sommes presque. Athènes est juste derrière.",
+        emotion: 'happy'
+    }
+];
+
+// Scène 4 : L'embuscade d'Arachné
+export const CHAPTER2_BATTLE3_ARACHNE_AMBUSH: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les dieux approchent enfin de la sortie du bois. À travers les derniers arbres, ils aperçoivent Athènes qui brille au loin.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*soulagé* Nous avons réussi ! Athènes est là !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Soudain, des dizaines d'araignées géantes surgissent des arbres, encerclant les dieux en quelques secondes !",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*brandit son arc* UNE EMBUSCADE !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*invoque sa foudre* Dos à dos ! Formez un cercle !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les dieux se placent dos à dos, piégés au milieu d'une marée d'araignées monstrueuses.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Puis, une silhouette terrifiante émerge des ombres. Mi-femme, mi-araignée. Une créature de cauchemar.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*horrifiée* Par tous les dieux... C'est... C'est Arachné !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Impossible ! Elle devrait être en Lydie, loin de la Grèce !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "*rire sinistre* Pauvres fous ! Partout où rampe une araignée, je peux apparaître !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Que veux-tu, créature maudite ?",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "*haine pure* VOTRE MORT ! Vous tous ! Je vais vous tuer et empêcher votre pathétique quête !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "Pourquoi ? Nous ne t'avons rien fait !",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "*crache de venin* ATHÉNA m'a maudite ! Transformée en MONSTRE ! Et vous, vous protégez SES intérêts !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "Hadès et Nyx m'ont promis de lever ma malédiction si je vous élimine. Avec mes enfants, nous allons vous déchiqueter !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*foudre crépitante* Ton orgueil t'aveugle, Arachné. C'est l'hubris qui t'a condamnée !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Tu es la plus belle représentation de l'hubris ! Et cette fierté aveugle te fera perdre ce combat !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "*hurle de rage* ASSEZ PARLER ! MES ENFANTS... ATTAQUEZ !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les araignées géantes se jettent sur les dieux. Le combat pour leur survie commence !",
+        emotion: 'neutral'
+    }
+];
+
+// Victoire contre Arachné
+export const CHAPTER2_BATTLE3_WIN: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Dans un dernier effort, les dieux abattent Arachné. Son corps monstrueux s'effondre sur le sol de la forêt.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "*agonisante* Non... Ma vengeance... Athéna... je te maudis...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*essoufflé* C'est terminé. L'hubris t'a perdue, comme je l'avais prédit.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les araignées restantes fuient dans les ombres, leur mère vaincue. Le chemin vers Athènes est enfin libre.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*s'assoit épuisé* Par Olympe... ces créatures étaient coriaces.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*vérifie les autres* Tout le monde va bien ? Hestia ? Déméter ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "Quelques égratignures, mais ça ira. Nous avons eu de la chance.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*vérifie son arc* Hadès et Nyx ont envoyé Arachné. Ils savent où nous sommes.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Ils ne reculeront devant rien pour nous arrêter. Nous devons atteindre Athènes rapidement.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*pointe vers la lumière* Athènes est là, juste devant nous. En avant !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les dieux sortent enfin du Bois de Colone, victorieux mais alertes. La grande cité d'Athènes les attend...",
+        emotion: 'neutral'
+    }
+];
+
+// Défaite contre Arachné
+export const CHAPTER2_BATTLE3_LOSE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Un par un, les dieux tombent sous les assauts d'Arachné et de ses enfants. Le venin et les toiles ont eu raison d'eux.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "*triomphante* OUI ! ENFIN ! L'Olympe va payer pour ce qu'Athéna m'a fait !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*au sol, paralysé* Tu... tu n'as pas gagné... D'autres viendront...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "*s'approche de Zeus* Qu'ils viennent ! Je tisserai leurs tombes aussi !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les araignées enveloppent les dieux vaincus dans des cocons de soie. Athènes brille au loin, inaccessible.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'arachne',
+        speakerName: 'Arachné',
+        text: "Hadès sera content. Sept dieux olympiens... quel magnifique cadeau !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Dans les ténèbres du Bois de Colone, l'espoir de l'Olympe s'éteint...",
+        emotion: 'neutral'
+    }
+];

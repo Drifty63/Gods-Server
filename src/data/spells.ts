@@ -2022,6 +2022,325 @@ export const ALL_SPELLS: SpellCard[] = [
         imageUrl: '/cards/spells/spell_dragon_ecailles.png',
         description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
+
+    // ===========================================
+    // ARACHNÉ - Créature des Ténèbres
+    // ===========================================
+    // Générateur 1 : 1 dégât à tous, génère 1 énergie
+    {
+        id: 'arachne_generator_1',
+        name: 'Toile Mortelle',
+        element: 'darkness',
+        godId: 'arachne',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_arachne_toile.png',
+        description: '1🩸 → 👊',
+    },
+    // Générateur 2 : 3 dégâts à une cible, génère 1 énergie
+    {
+        id: 'arachne_generator_2',
+        name: 'Morsure Venimeuse',
+        element: 'darkness',
+        godId: 'arachne',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_arachne_morsure.png',
+        description: '3🩸 → ⚔️',
+    },
+    // Utilitaire : 1 poison à 2 cibles
+    {
+        id: 'arachne_utility_1',
+        name: 'Venin Paralysant',
+        element: 'darkness',
+        godId: 'arachne',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'status', status: 'poison', value: 1, target: 'enemy_god' },
+            { type: 'status', status: 'poison', value: 1, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_arachne_venin.png',
+        description: '+1💀 → ⚔️⚔️',
+    },
+    // Compétence 1 : 2 dégâts à 2 cibles + stun 1 tour
+    {
+        id: 'arachne_skill_1',
+        name: 'Fils Maudits',
+        element: 'darkness',
+        godId: 'arachne',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'same' },
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_arachne_fils.png',
+        description: '2🩸 +❄️1⏳ → ⚔️⚔️',
+    },
+    // Ultime : 1 poison à tous les ennemis
+    {
+        id: 'arachne_skill_2',
+        name: 'Nuée Toxique',
+        element: 'darkness',
+        godId: 'arachne',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'status', status: 'poison', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_arachne_nuee.png',
+        description: '+1💀 → 👊',
+    },
+
+    // ===========================================
+    // ARAIGNÉE GÉANTE 1 - Créature des Ténèbres
+    // ===========================================
+    // Générateur 1 : 1 dégât à tous, génère 1 énergie
+    {
+        id: 'giant_spider_1_generator_1',
+        name: 'Toile Rapide',
+        element: 'darkness',
+        godId: 'giant_spider_1',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_toile.png',
+        description: '1🩸 → 👊',
+    },
+    // Générateur 2 : 3 dégâts à une cible, génère 1 énergie
+    {
+        id: 'giant_spider_1_generator_2',
+        name: 'Crocs Géants',
+        element: 'darkness',
+        godId: 'giant_spider_1',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_crocs.png',
+        description: '3🩸 → ⚔️',
+    },
+    // Utilitaire : 3 bouclier + provocation 1 tour
+    {
+        id: 'giant_spider_1_utility_1',
+        name: 'Carapace Protectrice',
+        element: 'darkness',
+        godId: 'giant_spider_1',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 3, target: 'self' },
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_carapace.png',
+        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+    },
+    // Compétence 1 : 2 dégâts à 2 cibles
+    {
+        id: 'giant_spider_1_skill_1',
+        name: 'Attaque Coordonnée',
+        element: 'darkness',
+        godId: 'giant_spider_1',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_attaque.png',
+        description: '2🩸 → ⚔️⚔️',
+    },
+    // Ultime : 4 dégâts + 2 poison à 1 cible
+    {
+        id: 'giant_spider_1_skill_2',
+        name: 'Injection Fatale',
+        element: 'darkness',
+        godId: 'giant_spider_1',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 4, target: 'enemy_god' },
+            { type: 'status', status: 'poison', value: 2, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_injection.png',
+        description: '4🩸 +2💀 → ⚔️',
+    },
+
+    // ===========================================
+    // ARAIGNÉE GÉANTE 2 - Créature des Ténèbres
+    // ===========================================
+    {
+        id: 'giant_spider_2_generator_1',
+        name: 'Toile Rapide',
+        element: 'darkness',
+        godId: 'giant_spider_2',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_toile.png',
+        description: '1🩸 → 👊',
+    },
+    {
+        id: 'giant_spider_2_generator_2',
+        name: 'Crocs Géants',
+        element: 'darkness',
+        godId: 'giant_spider_2',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_crocs.png',
+        description: '3🩸 → ⚔️',
+    },
+    {
+        id: 'giant_spider_2_utility_1',
+        name: 'Carapace Protectrice',
+        element: 'darkness',
+        godId: 'giant_spider_2',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 3, target: 'self' },
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_carapace.png',
+        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+    },
+    {
+        id: 'giant_spider_2_skill_1',
+        name: 'Attaque Coordonnée',
+        element: 'darkness',
+        godId: 'giant_spider_2',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_attaque.png',
+        description: '2🩸 → ⚔️⚔️',
+    },
+    {
+        id: 'giant_spider_2_skill_2',
+        name: 'Injection Fatale',
+        element: 'darkness',
+        godId: 'giant_spider_2',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 4, target: 'enemy_god' },
+            { type: 'status', status: 'poison', value: 2, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_injection.png',
+        description: '4🩸 +2💀 → ⚔️',
+    },
+
+    // ===========================================
+    // ARAIGNÉE GÉANTE 3 - Créature des Ténèbres
+    // ===========================================
+    {
+        id: 'giant_spider_3_generator_1',
+        name: 'Toile Rapide',
+        element: 'darkness',
+        godId: 'giant_spider_3',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_toile.png',
+        description: '1🩸 → 👊',
+    },
+    {
+        id: 'giant_spider_3_generator_2',
+        name: 'Crocs Géants',
+        element: 'darkness',
+        godId: 'giant_spider_3',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_crocs.png',
+        description: '3🩸 → ⚔️',
+    },
+    {
+        id: 'giant_spider_3_utility_1',
+        name: 'Carapace Protectrice',
+        element: 'darkness',
+        godId: 'giant_spider_3',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 3, target: 'self' },
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_carapace.png',
+        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+    },
+    {
+        id: 'giant_spider_3_skill_1',
+        name: 'Attaque Coordonnée',
+        element: 'darkness',
+        godId: 'giant_spider_3',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_attaque.png',
+        description: '2🩸 → ⚔️⚔️',
+    },
+    {
+        id: 'giant_spider_3_skill_2',
+        name: 'Injection Fatale',
+        element: 'darkness',
+        godId: 'giant_spider_3',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 4, target: 'enemy_god' },
+            { type: 'status', status: 'poison', value: 2, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_spider_injection.png',
+        description: '4🩸 +2💀 → ⚔️',
+    },
 ];
 
 // Helper pour obtenir les sorts d'un dieu
