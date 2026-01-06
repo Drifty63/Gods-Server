@@ -1342,9 +1342,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         // Reset le timer à 60 secondes au début de chaque tour
         setTurnTimer(TURN_TIME_LIMIT);
 
-        // Ne pas démarrer le timer si le jeu n'est pas en cours ou si ce n'est pas notre tour
+        // Ne pas démarrer le timer si le jeu n'est pas en cours
         // Le timer ne démarre qu'à partir du tour 2 (après la première carte jouée)
-        if (!isPlayerTurn || gameState?.status !== 'playing' || !gameState?.turnNumber || gameState.turnNumber < 2) {
+        if (gameState?.status !== 'playing' || !gameState?.turnNumber || gameState.turnNumber < 2) {
             return;
         }
 
@@ -1356,18 +1356,20 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
         // Délai de 500ms pour laisser la synchronisation se faire
         const startDelay = setTimeout(() => {
-            // Démarrer le compte à rebours
+            // Démarrer le compte à rebours (pour les deux joueurs)
             turnTimerRef.current = setInterval(() => {
                 setTurnTimer(prev => {
                     if (prev <= 1) {
-                        // Temps écoulé - fin de tour automatique
+                        // Temps écoulé
                         if (turnTimerRef.current) {
                             clearInterval(turnTimerRef.current);
                             turnTimerRef.current = null;
                         }
-                        // Forcer la fin du tour via les refs
-                        endTurnRef.current();
-                        onActionRef.current?.({ type: 'end_turn', payload: {} });
+                        // Forcer la fin du tour UNIQUEMENT si c'est notre tour
+                        if (isPlayerTurn) {
+                            endTurnRef.current();
+                            onActionRef.current?.({ type: 'end_turn', payload: {} });
+                        }
                         return TURN_TIME_LIMIT;
                     }
                     return prev - 1;
