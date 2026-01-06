@@ -27,7 +27,7 @@ const ALL_ELEMENTS: Element[] = ['fire', 'water', 'earth', 'air', 'lightning', '
 
 interface GameBoardProps {
     onAction?: (action: {
-        type: 'play_card' | 'discard' | 'end_turn' | 'game_over';
+        type: 'play_card' | 'discard' | 'end_turn' | 'game_over' | 'zombie_resurrect';
         payload: Record<string, unknown>;
     }) => void;
 }
