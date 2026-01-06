@@ -868,3 +868,218 @@
     transform: scale(1.05);
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
 }
+
+/* =================================== */
+/* TEAM SELECTION STYLES               */
+/* =================================== */
+
+.teamSelectionOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+    z-index: 100;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.teamSelectionContent {
+    max-width: 900px;
+    width: 100%;
+    padding: 40px;
+    background: rgba(20, 20, 40, 0.95);
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.1);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.4s ease;
+}
+
+.teamSelectionTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--gold-divine);
+    text-align: center;
+    margin: 0 0 10px 0;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+.teamSelectionSubtitle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    margin: 0 0 30px 0;
+}
+
+.fixedGodsSection,
+.choiceGodsSection {
+    margin-bottom: 25px;
+}
+
+.fixedGodsSection h3,
+.choiceGodsSection h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 15px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.godGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    justify-items: center;
+}
+
+.godCard {
+    width: 120px;
+    background: rgba(30, 30, 50, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.godCard:hover {
+    transform: translateY(-5px);
+    border-color: rgba(212, 175, 55, 0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.godCardFixed {
+    cursor: default;
+    border-color: rgba(212, 175, 55, 0.6);
+    background: rgba(40, 35, 20, 0.8);
+}
+
+.godCardFixed:hover {
+    transform: none;
+}
+
+.godCardSelected {
+    border-color: #32cd32;
+    box-shadow: 0 0 20px rgba(50, 205, 50, 0.4);
+    background: rgba(20, 50, 20, 0.8);
+}
+
+.godImageWrapper {
+    width: 100%;
+    height: 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.godImage {
+    object-fit: cover;
+    object-position: top center;
+}
+
+.selectedOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(50, 205, 50, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    color: #32cd32;
+    text-shadow: 0 0 10px rgba(50, 205, 50, 0.8);
+}
+
+.godName {
+    display: block;
+    padding: 8px 5px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fixedLabel {
+    display: block;
+    padding: 5px;
+    font-size: 0.65rem;
+    color: var(--gold-divine);
+    background: rgba(212, 175, 55, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.confirmButton {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 30px auto 15px;
+    padding: 18px 40px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, var(--gold-divine), #ffd700);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 25px rgba(212, 175, 55, 0.5);
+}
+
+.confirmButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(212, 175, 55, 0.7);
+}
+
+.confirmButtonDisabled {
+    background: rgba(100, 100, 100, 0.5);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.confirmButtonDisabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive team selection */
+@media (max-width: 768px) {
+    .teamSelectionContent {
+        padding: 25px 15px;
+    }
+
+    .teamSelectionTitle {
+        font-size: 1.5rem;
+    }
+
+    .godGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .godCard {
+        width: 100%;
+    }
+
+    .godImageWrapper {
+        height: 80px;
+    }
+
+    .confirmButton {
+        font-size: 1.1rem;
+        padding: 15px 30px;
+    }
+}

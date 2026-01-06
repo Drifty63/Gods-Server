@@ -24,11 +24,13 @@ import {
     CHAPTER2_BATTLE1_WIN,
     CHAPTER2_BATTLE1_LOSE,
     CHAPTER2_BATTLE2_WIN,
-    CHAPTER2_BATTLE2_LOSE
+    CHAPTER2_BATTLE2_LOSE,
+    CHAPTER2_BATTLE3_WIN,
+    CHAPTER2_BATTLE3_LOSE
 } from '@/data/story/dialogues';
 import styles from './page.module.css';
 
-type BattlePhase = 'loading' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
+type BattlePhase = 'loading' | 'team_selection' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
 
 // Mapping des IDs de dieux vers leurs couleurs
 const GOD_COLORS: Record<string, string> = {
@@ -67,6 +69,12 @@ function StoryBattleContent() {
     const [postBattleIndex, setPostBattleIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+
+    // État pour la sélection d'équipe
+    const [selectedGods, setSelectedGods] = useState<string[]>([]);
+    const [availableGods, setAvailableGods] = useState<string[]>([]);
+    const [requiredCount, setRequiredCount] = useState(0);
+    const [fixedGods, setFixedGods] = useState<string[]>([]);
 
     const { initGame, gameState, resetGame, playAITurn, playerId } = useGameStore();
     const {
@@ -171,9 +179,31 @@ function StoryBattleContent() {
             return;
         }
 
+        // Sauvegarder la config localement
+        setBattleConfig(localBattleConfig);
+
+        // Vérifier si le joueur doit choisir son équipe
+        if (localBattleConfig.playerTeamChoices && localBattleConfig.playerTeamChoices.length > 0) {
+            const fixed = localBattleConfig.playerTeam || [];
+            const choices = localBattleConfig.playerTeamChoices;
+            const required = localBattleConfig.requiredPlayerTeamSize || 4;
+            const needToSelect = required - fixed.length;
+
+            setFixedGods(fixed);
+            setAvailableGods(choices);
+            setRequiredCount(needToSelect);
+            setSelectedGods([]);
+            setPhase('team_selection');
+            return;
+        }
+
+        // Pas de sélection nécessaire, lancer le combat directement
+        startBattleWithTeam(localBattleConfig, localBattleConfig.playerTeam || getPlayerTeam());
+    }, [currentBattleConfig, getCurrentEvent, getPlayerTeam]);
+
+    // Lancer le combat avec une équipe définie
+    const startBattleWithTeam = useCallback((localBattleConfig: NonNullable<typeof currentBattleConfig>, playerTeamIds: string[]) => {
         try {
-            // Équipe du joueur - utilise la config de bataille si définie, sinon l'équipe par défaut
-            const playerTeamIds = localBattleConfig.playerTeam || getPlayerTeam();
             const playerGods = playerTeamIds.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
             // Équipe ennemie
@@ -243,9 +273,6 @@ function StoryBattleContent() {
             // Initialiser la partie
             initGame(playerGods, playerDeck, finalEnemyGods, enemyDeck, playerGoesFirst);
 
-            // Sauvegarder la config localement pour y accéder après le combat
-            setBattleConfig(localBattleConfig);
-
             // Appliquer les conditions spéciales APRÈS l'initialisation
             // On passe battleConfig à la fonction
             setTimeout(() => {
@@ -270,7 +297,7 @@ function StoryBattleContent() {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erreur lors de l\'initialisation du combat');
         }
-    }, [currentBattleConfig, getCurrentEvent, getPlayerTeam, initGame, applyBattleConditions]);
+    }, [initGame, applyBattleConditions]);
 
     // Lancer le combat au chargement
     useEffect(() => {
@@ -299,7 +326,10 @@ function StoryBattleContent() {
             // Déterminer quels dialogues utiliser selon le combat
             let allDialogues;
 
-            if (battleConfig?.id === 'battle_dragon_thebes') {
+            if (battleConfig?.id === 'battle_arachne') {
+                // Chapitre 2 Combat 3 : Arachné
+                allDialogues = won ? CHAPTER2_BATTLE3_WIN : CHAPTER2_BATTLE3_LOSE;
+            } else if (battleConfig?.id === 'battle_dragon_thebes') {
                 // Chapitre 2 Combat 2 : Le Dragon de Thèbes
                 allDialogues = won ? CHAPTER2_BATTLE2_WIN : CHAPTER2_BATTLE2_LOSE;
             } else if (battleConfig?.id === 'battle_thebes_betrayal') {
@@ -422,6 +452,27 @@ function StoryBattleContent() {
         router.push('/story');
     };
 
+    // Sélection d'équipe : basculer un dieu
+    const toggleGodSelection = (godId: string) => {
+        setSelectedGods(prev => {
+            if (prev.includes(godId)) {
+                return prev.filter(id => id !== godId);
+            } else if (prev.length < requiredCount) {
+                return [...prev, godId];
+            }
+            return prev;
+        });
+    };
+
+    // Sélection d'équipe : confirmer et lancer le combat
+    const confirmTeamSelection = () => {
+        if (!battleConfig) return;
+        if (selectedGods.length !== requiredCount) return;
+
+        const fullTeam = [...fixedGods, ...selectedGods];
+        startBattleWithTeam(battleConfig, fullTeam);
+    };
+
     // Phase: Chargement
     if (phase === 'loading') {
         return (
@@ -451,6 +502,102 @@ function StoryBattleContent() {
                         <Link href="/story" className={styles.backButton}>
                             ← Retour à l'histoire
                         </Link>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    // Phase: Sélection d'équipe
+    if (phase === 'team_selection') {
+        const currentEvent = getCurrentEvent();
+        const bgImage = currentEvent?.backgroundImage || '/assets/story/olympus_storm.png';
+
+        return (
+            <main className={styles.main}>
+                <div
+                    className={styles.storyBackground}
+                    style={{ backgroundImage: `url('${bgImage}')` }}
+                >
+                    <div className={styles.teamSelectionOverlay}>
+                        <div className={styles.teamSelectionContent}>
+                            <h2 className={styles.teamSelectionTitle}>⚔️ Choisissez votre équipe</h2>
+                            <p className={styles.teamSelectionSubtitle}>
+                                Sélectionnez {requiredCount} dieu{requiredCount > 1 ? 'x' : ''} pour accompagner votre équipe
+                            </p>
+
+                            {/* Dieux fixes (obligatoires) */}
+                            {fixedGods.length > 0 && (
+                                <div className={styles.fixedGodsSection}>
+                                    <h3>Dieux obligatoires :</h3>
+                                    <div className={styles.godGrid}>
+                                        {fixedGods.map(godId => {
+                                            const god = getGodById(godId);
+                                            if (!god) return null;
+                                            return (
+                                                <div key={godId} className={`${styles.godCard} ${styles.godCardFixed}`}>
+                                                    <div className={styles.godImageWrapper}>
+                                                        <Image
+                                                            src={god.imageUrl}
+                                                            alt={god.name}
+                                                            fill
+                                                            className={styles.godImage}
+                                                        />
+                                                    </div>
+                                                    <span className={styles.godName}>{god.name.split(',')[0]}</span>
+                                                    <span className={styles.fixedLabel}>Obligatoire</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Dieux à choisir */}
+                            <div className={styles.choiceGodsSection}>
+                                <h3>Choisissez {requiredCount} dieu{requiredCount > 1 ? 'x' : ''} ({selectedGods.length}/{requiredCount}) :</h3>
+                                <div className={styles.godGrid}>
+                                    {availableGods.map(godId => {
+                                        const god = getGodById(godId);
+                                        if (!god) return null;
+                                        const isSelected = selectedGods.includes(godId);
+                                        return (
+                                            <div
+                                                key={godId}
+                                                className={`${styles.godCard} ${isSelected ? styles.godCardSelected : ''}`}
+                                                onClick={() => toggleGodSelection(godId)}
+                                            >
+                                                <div className={styles.godImageWrapper}>
+                                                    <Image
+                                                        src={god.imageUrl}
+                                                        alt={god.name}
+                                                        fill
+                                                        className={styles.godImage}
+                                                    />
+                                                    {isSelected && <div className={styles.selectedOverlay}>✓</div>}
+                                                </div>
+                                                <span className={styles.godName}>{god.name.split(',')[0]}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Bouton de confirmation */}
+                            <button
+                                className={`${styles.confirmButton} ${selectedGods.length === requiredCount ? '' : styles.confirmButtonDisabled}`}
+                                onClick={confirmTeamSelection}
+                                disabled={selectedGods.length !== requiredCount}
+                            >
+                                {selectedGods.length === requiredCount
+                                    ? '⚔️ Lancer le combat !'
+                                    : `Sélectionnez encore ${requiredCount - selectedGods.length} dieu${requiredCount - selectedGods.length > 1 ? 'x' : ''}`}
+                            </button>
+
+                            <button className={styles.backButton} onClick={handleQuit}>
+                                ← Retour à l'histoire
+                            </button>
+                        </div>
                     </div>
                 </div>
             </main>
