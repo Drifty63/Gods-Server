@@ -283,30 +283,17 @@ export class GameEngine {
 
     /**
      * Lance un sort copié de la défausse (Perséphone - Utlity)
+     * Note: La carte originale "Pouvoirs des Âmes" a DÉJÀ été jouée par le store
+     * avant d'ouvrir le modal de sélection. On ne la cherche plus dans la main.
      */
     private castCopiedSpell(action: GameAction): { success: boolean; message: string } {
         const player = this.getCurrentPlayer();
 
-        // 1. Vérifier les cartes
-        const originalCardIndex = player.hand.findIndex(c => c.id === action.originalCardId);
-        if (originalCardIndex === -1) return { success: false, message: "Carte originale non trouvée" };
-
+        // 1. Vérifier la carte à copier dans la défausse
         const copiedCard = player.discard.find(c => c.id === action.copiedCardId);
         if (!copiedCard) return { success: false, message: "Carte à copier non trouvée" };
 
-        const originalCard = player.hand[originalCardIndex];
-
-        if (player.energy < originalCard.energyCost) {
-            return { success: false, message: "Pas assez d'énergie" };
-        }
-
-        // 2. Payer et défausser l'originale
-        player.energy -= originalCard.energyCost;
-        player.hand.splice(originalCardIndex, 1);
-        this.cleanBlindCard(originalCard);
-        player.discard.push(originalCard);
-
-        // 3. Préparer et jouer la copie
+        // 2. Préparer et jouer la copie (pas besoin de payer l'énergie, déjà fait)
         const clonedCard = JSON.parse(JSON.stringify(copiedCard));
         clonedCard.id = `copy_${Date.now()}_${clonedCard.id}`;
         clonedCard.element = 'darkness'; // Transformé en Ténèbres
@@ -314,7 +301,7 @@ export class GameEngine {
 
         player.hand.push(clonedCard);
 
-        // Hack pour autoriser le jeu immédiat
+        // Hack pour autoriser le jeu immédiat (la carte originale a été jouée, donc hasPlayedCard est true)
         player.hasPlayedCard = false;
 
         const playAction: GameAction = {
