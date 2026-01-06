@@ -769,11 +769,62 @@ export const useGameStore = create<GameStore>((set, get) => ({
             const parts = pendingEnemyCardEffect.split(':');
             const originalCardId = parts[1];
             const copiedCardId = parts[2];
+            // Vérifier si on a déjà fait le choix optionnel (stocké dans parts[3])
+            const optionalChoiceMade = parts.length > 3 ? parts[3] === 'true' : undefined;
 
             // Récupérer les cibles depuis l'appel (qui viennent de selectedTargetGods)
             const finalTargetGodIds = targetGodIds || (selectedTargetGods.length > 0 ? selectedTargetGods.map(g => g.card.id) : undefined);
             const finalTargetGodId = targetGodId || (selectedTargetGods.length > 0 ? selectedTargetGods[0].card.id : undefined);
 
+            // Récupérer le sort copié pour vérifier ses effets spéciaux
+            const player = engine.getState().players.find(p => p.id === playerId);
+            const copiedCard = player?.discard.find(c => c.id === copiedCardId);
+
+            // Si le sort a un effet optionnel et qu'on n'a pas encore fait le choix, ouvrir le modal
+            if (copiedCard && optionalChoiceMade === undefined) {
+                const hasVisionTartare = copiedCard.effects.some(e => e.type === 'custom' && e.customEffectId === 'vision_tartare');
+                const hasCascadeHeal = copiedCard.effects.some(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
+
+                if (hasVisionTartare && player && player.deck.length >= 2) {
+                    // Vision du Tartare : proposer de défausser 2 cartes pour +1 dégât
+                    // Stocker le contexte pour après le choix
+                    set({
+                        isShowingOptionalChoice: true,
+                        optionalChoiceTitle: "Pouvoir des ténèbres",
+                        optionalChoiceDescription: "Défausser 2 cartes du deck pour +1 dégât par cible ?",
+                        pendingOptionalEffect: `copy_vision_tartare:${originalCardId}:${copiedCardId}`,
+                        pendingOptionalTargetGodIds: finalTargetGodIds || [],
+                        // Garder le contexte
+                        selectedCard: null,
+                        selectedTargetGod: null,
+                        selectedTargetGods: [],
+                        requiredTargets: 0,
+                        isSelectingTarget: false,
+                        pendingEnemyCardEffect: null
+                    });
+                    return { success: true, message: "Choisissez l'option bonus" };
+                }
+
+                if (hasCascadeHeal) {
+                    // Marée Basse : proposer le choix de direction
+                    set({
+                        isShowingOptionalChoice: true,
+                        optionalChoiceTitle: "Direction du flux",
+                        optionalChoiceDescription: "Gauche (Ouest) ou Droite (Est) ?",
+                        pendingOptionalEffect: `copy_cascade_heal:${originalCardId}:${copiedCardId}`,
+                        pendingOptionalTargetGodIds: [],
+                        selectedCard: null,
+                        selectedTargetGod: null,
+                        selectedTargetGods: [],
+                        requiredTargets: 0,
+                        isSelectingTarget: false,
+                        pendingEnemyCardEffect: null
+                    });
+                    return { success: true, message: "Choisissez la direction" };
+                }
+            }
+
+            // Exécuter le sort copié (avec le choix optionnel si applicable)
             const result = engine.executeAction({
                 type: 'cast_copied_spell',
                 playerId,
@@ -783,6 +834,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 targetGodIds: finalTargetGodIds,
                 lightningAction: lightningAction || selectedLightningAction || undefined,
                 selectedElement: selectedElement || undefined,
+                optionalChoice: optionalChoiceMade,
             });
 
             // Reset l'état
@@ -1200,6 +1252,78 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     const god = reversedAllies[i];
                     god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
                     // Le soin retire le poison
+                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
+                    if (poisonIndex !== -1) {
+                        god.statusEffects.splice(poisonIndex, 1);
+                    }
+                }
+            }
+        }
+
+        // === SORTS COPIÉS : Vision du Tartare ===
+        if (pendingOptionalEffect?.startsWith('copy_vision_tartare:')) {
+            const parts = pendingOptionalEffect.split(':');
+            const copiedCardId = parts[2];
+
+            let damagePerTarget = 1; // Dégât de base
+
+            if (accepted) {
+                // Défausser 2 cartes du dessus du deck
+                for (let i = 0; i < 2 && player.deck.length > 0; i++) {
+                    const card = player.deck.shift()!;
+                    player.discard.push(card);
+                }
+                damagePerTarget = 2; // Dégât de base + bonus
+            }
+
+            // Infliger les dégâts aux cibles
+            for (const targetId of pendingOptionalTargetGodIds) {
+                const target = opponent.gods.find(g => g.card.id === targetId && !g.isDead);
+                if (target) {
+                    // Gestion du bouclier
+                    let remainingDamage = damagePerTarget;
+                    const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
+                    if (shieldIndex !== -1) {
+                        const shieldStacks = target.statusEffects[shieldIndex].stacks;
+                        const absorbedDamage = Math.min(shieldStacks, remainingDamage);
+                        target.statusEffects[shieldIndex].stacks -= absorbedDamage;
+                        remainingDamage -= absorbedDamage;
+                        if (target.statusEffects[shieldIndex].stacks <= 0) {
+                            target.statusEffects.splice(shieldIndex, 1);
+                        }
+                    }
+                    if (remainingDamage > 0) {
+                        target.currentHealth -= remainingDamage;
+                        if (target.currentHealth <= 0) {
+                            target.isDead = true;
+                            target.currentHealth = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        // === SORTS COPIÉS : Marée Basse ===
+        if (pendingOptionalEffect?.startsWith('copy_cascade_heal:')) {
+            const aliveAllies = player.gods.filter(g => !g.isDead);
+            const healAmounts = [3, 2, 1];
+
+            if (accepted) {
+                // Gauche vers Droite (Flux Ouest)
+                for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
+                    const god = aliveAllies[i];
+                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
+                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
+                    if (poisonIndex !== -1) {
+                        god.statusEffects.splice(poisonIndex, 1);
+                    }
+                }
+            } else {
+                // Droite vers Gauche (Flux Est)
+                const reversedAllies = [...aliveAllies].reverse();
+                for (let i = 0; i < reversedAllies.length && i < healAmounts.length; i++) {
+                    const god = reversedAllies[i];
+                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
                     const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
                     if (poisonIndex !== -1) {
                         god.statusEffects.splice(poisonIndex, 1);
