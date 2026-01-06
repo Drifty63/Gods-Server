@@ -43,6 +43,18 @@ export const metadata: Metadata = {
     description: "Affrontez vos adversaires dans un duel épique entre divinités.",
     type: "website",
   },
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: [
+      { url: '/favicon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'GODS',
+  },
 };
 
 export default function RootLayout({
