@@ -954,12 +954,12 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
                 onAction?.({ type: 'play_card', payload: { cardId, targetGodId, targetGodIds, lightningAction, selectedElement: currentSelectedElement } });
 
                 // Récupérer les cibles pour les passer au modal
-                // Pour all_enemies, on récupère tous les dieux ennemis vivants
-                let targetIds = targetGodIds || (targetGodId ? [targetGodId] : []);
-                if (targetIds.length === 0) {
-                    // Si pas de cibles spécifiées, c'est probablement un all_enemies
-                    targetIds = opponent.gods.filter(g => !g.isDead).map(g => g.card.id);
-                }
+                // Priorité : targetGodIds passés > selectedTargetGods (sélection multi-cibles) > targetGodId unique
+                let targetIds = targetGodIds && targetGodIds.length > 0
+                    ? targetGodIds
+                    : selectedTargetGods.length > 0
+                        ? selectedTargetGods.map(g => g.card.id)
+                        : (targetGodId ? [targetGodId] : []);
 
                 startOptionalChoice(optionalChoice.title, optionalChoice.description, optionalChoice.effectId, targetIds);
                 setPendingCardForOverlay(card);
