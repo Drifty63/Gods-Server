@@ -4,25 +4,16 @@
 .main {
     min-height: 100vh;
     min-height: 100dvh;
-    background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    background:
+        linear-gradient(180deg, rgba(15, 15, 35, 0.85) 0%, rgba(26, 26, 46, 0.8) 50%, rgba(22, 33, 62, 0.85) 100%),
+        url('/assets/ascension_background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-.main::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('/arena_background.png');
-    background-size: cover;
-    background-position: center;
-    opacity: 0.1;
-    pointer-events: none;
 }
 
 .header {

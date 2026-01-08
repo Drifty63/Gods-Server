@@ -4,15 +4,14 @@
 .main {
     min-height: 100vh;
     background:
-        /* Overlay */
         linear-gradient(180deg,
-            rgba(10, 10, 26, 0.95) 0%,
-            rgba(26, 26, 58, 0.9) 50%,
-            rgba(10, 10, 26, 0.95) 100%),
-        /* Texture parchemin subtil */
-        radial-gradient(ellipse at 50% 0%,
-            rgba(212, 175, 55, 0.08) 0%,
-            transparent 50%);
+            rgba(10, 10, 26, 0.9) 0%,
+            rgba(26, 26, 58, 0.85) 50%,
+            rgba(10, 10, 26, 0.9) 100%),
+        url('/assets/rules_background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 /* ================================

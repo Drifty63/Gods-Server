@@ -1,6 +1,11 @@
 .main {
     min-height: 100vh;
-    background: linear-gradient(to bottom, #050510, #1a1a2e);
+    background:
+        linear-gradient(to bottom, rgba(5, 5, 16, 0.85), rgba(26, 26, 46, 0.9)),
+        url('/assets/deck_background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     color: white;
     padding: 20px;
     padding-bottom: 100px;
