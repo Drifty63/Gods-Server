@@ -169,9 +169,12 @@ export class GameEngine {
 
         // Appliquer les effets
         for (const effect of card.effects) {
-            // Pour target 'same', utiliser la dernière cible
-            if (effect.target === 'same' && lastUsedTargetId) {
-                this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
+            // Pour target 'same', utiliser la dernière cible OU ignorer si pas de cible valide
+            if (effect.target === 'same') {
+                if (lastUsedTargetId) {
+                    this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
+                }
+                // Si lastUsedTargetId est undefined, on ignore l'effet 'same' (pas de cible précédente valide)
                 continue;
             }
 
