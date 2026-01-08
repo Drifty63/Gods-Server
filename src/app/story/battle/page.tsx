@@ -674,7 +674,12 @@ function StoryBattleContent() {
 
         // Utiliser l'image de fond appropriée selon le combat
         let backgroundImage: string;
-        if (battleConfig?.id === 'battle_dragon_thebes') {
+        if (battleConfig?.id === 'battle_arachne') {
+            // Chapitre 2 Combat 3 : Arachné
+            backgroundImage = playerWon
+                ? '/assets/story/ch2_arachne_victory.png'
+                : '/assets/story/ch2_arachne_defeat.png';
+        } else if (battleConfig?.id === 'battle_dragon_thebes') {
             // Chapitre 2 Combat 2 : Le Dragon de Thèbes
             backgroundImage = playerWon
                 ? '/assets/story/ch2_dragon_victory.png'
@@ -771,7 +776,12 @@ function StoryBattleContent() {
 
     // Fonction pour obtenir l'image de fond appropriée selon le combat
     const getResultBackgroundImage = (isVictory: boolean): string => {
-        if (battleConfig?.id === 'battle_dragon_thebes') {
+        if (battleConfig?.id === 'battle_arachne') {
+            // Chapitre 2 Combat 3 : Arachné
+            return isVictory
+                ? '/assets/story/ch2_arachne_victory.png'
+                : '/assets/story/ch2_arachne_defeat.png';
+        } else if (battleConfig?.id === 'battle_dragon_thebes') {
             // Chapitre 2 Combat 2 : Le Dragon de Thèbes
             return isVictory
                 ? '/assets/story/ch2_dragon_victory.png'

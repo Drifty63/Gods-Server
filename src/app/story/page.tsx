@@ -208,17 +208,7 @@ function StoryContent() {
             <header className={styles.header}>
                 <Link href="/play" className={styles.backButton}>‹ Retour</Link>
                 <h1 className={styles.title}>HISTOIRE</h1>
-                <button
-                    className={styles.resetButton}
-                    onClick={() => {
-                        if (confirm('Êtes-vous sûr de vouloir recommencer l\'histoire ?')) {
-                            resetProgress();
-                        }
-                    }}
-                    title="Recommencer"
-                >
-                    🔄
-                </button>
+                <div className={styles.headerSpacer} />
             </header>
 
             {/* Sélection de chapitre ou histoire en cours */}
@@ -282,12 +272,7 @@ function StoryContent() {
                                         {chapter.description}
                                     </p>
 
-                                    {/* Difficulté */}
-                                    <div className={`${styles.difficulty} ${styles[chapter.difficulty]}`}>
-                                        {chapter.difficulty === 'easy' && '⭐ Facile'}
-                                        {chapter.difficulty === 'medium' && '⭐⭐ Normal'}
-                                        {chapter.difficulty === 'hard' && '⭐⭐⭐ Difficile'}
-                                    </div>
+
 
                                     {/* Nombre d'événements */}
                                     {chapter.events.length > 0 && (

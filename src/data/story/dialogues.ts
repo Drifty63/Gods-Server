@@ -3249,7 +3249,7 @@ export const CHAPTER2_BATTLE3_WIN: DialogueLine[] = [
     {
         speakerId: 'arachne',
         speakerName: 'Arachné',
-        text: "*agonisante* Non... Ma vengeance... Athéna... je te maudis...",
+        text: "*agonisante* Non... Ma vengeance... je vous maudis...",
         emotion: 'sad'
     },
     {
