@@ -103,9 +103,11 @@ export class AIPlayer {
                 selectedCard = playableCards[0];
         }
 
-        // Trouver une cible valide
-        // Trouver une cible valide
-        const targetGodId = this.selectTarget(selectedCard, engine);
+        // Compter le nombre de cibles requises pour cette carte
+        const requiredTargetCount = this.getRequiredTargetCount(selectedCard);
+
+        // Sélectionner les cibles appropriées
+        const targetGodIds = this.selectMultipleTargets(selectedCard, engine, requiredTargetCount);
 
         // Déterminer lightningAction si nécessaire
         let lightningAction: 'apply' | 'remove' | undefined;
@@ -120,9 +122,8 @@ export class AIPlayer {
         if (hasLightningToggle) {
             let shouldRemove = false;
 
-            if (targetGodId) {
-                const target = [...opponent.gods, ...player.gods].find(g => g.card.id === targetGodId);
-                // Utiliser la méthode publique ou accéder aux statusEffects (l'IA a accès à l'état complet via engine.getState())
+            if (targetGodIds.length > 0) {
+                const target = [...opponent.gods, ...player.gods].find(g => g.card.id === targetGodIds[0]);
                 if (target) {
                     const lightning = target.statusEffects.find(s => s.type === 'lightning');
                     if (lightning && lightning.stacks > 0) shouldRemove = true;
@@ -142,7 +143,8 @@ export class AIPlayer {
             type: 'play_card',
             playerId: player.id,
             cardId: selectedCard.id,
-            targetGodId,
+            targetGodId: targetGodIds[0], // Garder pour compatibilité
+            targetGodIds, // Nouvelles cibles multiples
             lightningAction,
         };
 
@@ -274,46 +276,96 @@ export class AIPlayer {
     }
 
     /**
-     * Sélectionne une cible pour la carte
+     * Compte le nombre de cibles requises pour une carte
      */
-    private selectTarget(card: SpellCard, engine: GameEngine): string | undefined {
+    private getRequiredTargetCount(card: SpellCard): number {
+        let count = 0;
+        for (const effect of card.effects) {
+            if (effect.target === 'enemy_god' || effect.target === 'ally_god' || effect.target === 'any_god' || effect.target === 'dead_ally_god') {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Sélectionne plusieurs cibles pour une carte multi-cibles
+     */
+    private selectMultipleTargets(card: SpellCard, engine: GameEngine, count: number): string[] {
         const opponent = engine.getOpponent();
         const player = engine.getCurrentPlayer();
+        const targets: string[] = [];
 
-        // Vérifier si la carte a besoin d'une cible
+        if (count === 0) {
+            return targets;
+        }
+
+        // Déterminer les types de cibles nécessaires
         const needsEnemyTarget = card.effects.some(e => e.target === 'enemy_god');
         const needsAllyTarget = card.effects.some(e => e.target === 'ally_god' || e.target === 'any_god');
         const needsDeadAlly = card.effects.some(e => e.target === 'dead_ally_god');
 
-        if (needsDeadAlly) {
-            // Sélectionner un dieu mort allié
-            const deadGods = player.gods.filter(g => g.isDead);
-            if (deadGods.length > 0) {
-                return deadGods[0].card.id;
-            }
-        }
+        // Collecter les cibles disponibles par type
+        let enemyTargets: GodState[] = [];
+        let allyTargets: GodState[] = [];
+        let deadAllyTargets: GodState[] = [];
 
         if (needsEnemyTarget) {
-            // Cibler le dieu adverse avec le moins de PV
-            const validTargets = engine.getValidTargets('enemy_god');
-            if (validTargets.length > 0) {
-                // Trier par PV croissant
-                validTargets.sort((a, b) => a.currentHealth - b.currentHealth);
-                return validTargets[0].card.id;
-            }
+            enemyTargets = engine.getValidTargets('enemy_god');
+            // Trier par PV croissant (priorité aux cibles faibles)
+            enemyTargets.sort((a, b) => a.currentHealth - b.currentHealth);
         }
 
         if (needsAllyTarget) {
-            // Cibler l'allié avec le moins de PV (pour soin)
-            const validTargets = engine.getValidTargets('ally_god');
-            if (validTargets.length > 0) {
-                // Trier par PV croissant
-                validTargets.sort((a, b) => a.currentHealth - b.currentHealth);
-                return validTargets[0].card.id;
+            allyTargets = engine.getValidTargets('ally_god');
+            // Trier par PV croissant (priorité aux alliés blessés pour soin)
+            allyTargets.sort((a, b) => a.currentHealth - b.currentHealth);
+        }
+
+        if (needsDeadAlly) {
+            deadAllyTargets = player.gods.filter(g => g.isDead);
+        }
+
+        // Distribuer les cibles selon les effets de la carte
+        for (const effect of card.effects) {
+            if (targets.length >= count) break;
+
+            if (effect.target === 'enemy_god' && enemyTargets.length > 0) {
+                // Prendre la prochaine cible ennemie non utilisée
+                const nextTarget = enemyTargets.find(t => !targets.includes(t.card.id));
+                if (nextTarget) {
+                    targets.push(nextTarget.card.id);
+                } else if (enemyTargets.length > 0) {
+                    // Si toutes les cibles sont déjà utilisées mais qu'il en reste, 
+                    // on utilise quand même une cible (fallback pour sorts avec plus d'effets que de cibles)
+                    targets.push(enemyTargets[0].card.id);
+                }
+            } else if ((effect.target === 'ally_god' || effect.target === 'any_god') && allyTargets.length > 0) {
+                const nextTarget = allyTargets.find(t => !targets.includes(t.card.id));
+                if (nextTarget) {
+                    targets.push(nextTarget.card.id);
+                } else if (allyTargets.length > 0) {
+                    targets.push(allyTargets[0].card.id);
+                }
+            } else if (effect.target === 'dead_ally_god' && deadAllyTargets.length > 0) {
+                const nextTarget = deadAllyTargets.find(t => !targets.includes(t.card.id));
+                if (nextTarget) {
+                    targets.push(nextTarget.card.id);
+                } else if (deadAllyTargets.length > 0) {
+                    targets.push(deadAllyTargets[0].card.id);
+                }
             }
         }
 
-        return undefined;
+        return targets;
+    }
+
+    /**
+     * Sélectionne une cible pour la carte (méthode legacy, garde pour compatibilité)
+     */
+    private selectTarget(card: SpellCard, engine: GameEngine): string | undefined {
+        const targets = this.selectMultipleTargets(card, engine, 1);
+        return targets.length > 0 ? targets[0] : undefined;
     }
 }
 
