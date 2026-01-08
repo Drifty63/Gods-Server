@@ -1794,20 +1794,20 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
 
                 <div className={styles.turnInfo}>
                     <span className={styles.turnNumber}>
-                        Tour {gameState.turnNumber}{gameState.maxTurns ? `/${gameState.maxTurns}` : ''}
+                        Tour {gameState.turnNumber}{gameState.maxTurns && !gameState.isOnlineGame ? `/${gameState.maxTurns}` : ''}
                     </span>
                     <div className={styles.turnRow}>
                         <span className={`${styles.turnIndicator} ${isPlayerTurn ? styles.myTurn : styles.opponentTurn} `}>
                             {isPlayerTurn ? '🎮 Votre tour' : '⏳ Tour adverse'}
                         </span>
-                        {/* Chronomètre de tour */}
+                        {/* Chronomètre de tour - 4 niveaux de couleur */}
                         {gameState.status === 'playing' && (
-                            <span className={`${styles.turnTimer} ${turnTimer <= 10 ? styles.timerWarning : ''} ${turnTimer <= 5 ? styles.timerCritical : ''}`}>
+                            <span className={`${styles.turnTimer} ${turnTimer <= 15 ? styles.timerCritical : turnTimer <= 30 ? styles.timerDanger : turnTimer <= 45 ? styles.timerWarning : ''}`}>
                                 ⏱️ {turnTimer}s
                             </span>
                         )}
-                        {/* Avertissement AFK (mode online uniquement) */}
-                        {gameState.isOnlineGame && player.afkTurns === 1 && isPlayerTurn && (
+                        {/* Avertissement AFK (mode online uniquement) - affiché au 4ème tour avant disqualification au 5ème */}
+                        {gameState.isOnlineGame && player.afkTurns === 4 && isPlayerTurn && (
                             <span className={styles.afkWarning}>
                                 ⚠️ Jouez ou disqualification!
                             </span>

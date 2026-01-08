@@ -540,12 +540,12 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 1,
         effects: [
             { type: 'damage', value: 1, target: 'enemy_god' },
-            { type: 'status', status: 'poison', value: 1 }, // 1 marque poison sur la 1ère cible
-            { type: 'damage', value: 1, target: 'enemy_god' }
-            // Pas de poison sur la 2ème cible
+            { type: 'status', status: 'poison', value: 1, target: 'same' }, // 1 poison sur la 1ère cible
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'status', status: 'poison', value: 1, target: 'same' }  // 1 poison sur la 2ème cible
         ],
         imageUrl: '/cards/spells/spell_dionysos_ivresse.png',
-        description: '1🩸 +1💀 → ⚔️ | 1🩸 → ⚔️',
+        description: '1🩸 +1💀 → ⚔️⚔️',
     },
 
     // --- COMPÉTENCES ---
@@ -2150,7 +2150,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'shield', value: 3, target: 'self' },
-            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_spider_carapace.png',
         description: '+3🛡️🔄 | +🗡️1⏳🔄',
@@ -2229,7 +2229,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'shield', value: 3, target: 'self' },
-            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_spider_carapace.png',
         description: '+3🛡️🔄 | +🗡️1⏳🔄',
@@ -2306,7 +2306,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'shield', value: 3, target: 'self' },
-            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_spider_carapace.png',
         description: '+3🛡️🔄 | +🗡️1⏳🔄',

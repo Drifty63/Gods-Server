@@ -69,6 +69,7 @@ function StoryBattleContent() {
     const [postBattleIndex, setPostBattleIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [isDialogueHidden, setIsDialogueHidden] = useState(false);
 
     // État pour la sélection d'équipe
     const [selectedGods, setSelectedGods] = useState<string[]>([]);
@@ -720,7 +721,24 @@ function StoryBattleContent() {
                 >
                     <div className={isNarrator ? styles.backgroundOverlayNarrator : styles.backgroundOverlay} />
                 </div>
-                <div className={styles.postBattleDialogue} onClick={handleNextPostDialogue}>
+
+                {/* Bouton œil pour masquer/afficher le dialogue */}
+                <button
+                    className={styles.toggleButton}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsDialogueHidden(!isDialogueHidden);
+                    }}
+                    title={isDialogueHidden ? 'Afficher le dialogue' : 'Masquer le dialogue'}
+                >
+                    {isDialogueHidden ? '👁️' : '👁️‍🗨️'}
+                </button>
+
+                {/* Container de dialogue (masquable) */}
+                <div
+                    className={`${styles.postBattleDialogue} ${isDialogueHidden ? styles.dialogueHidden : ''}`}
+                    onClick={handleNextPostDialogue}
+                >
                     {/* Portrait du personnage (pas pour le narrateur) */}
                     {!isNarrator && (
                         <div

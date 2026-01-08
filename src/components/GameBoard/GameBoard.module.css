@@ -1229,9 +1229,7 @@
     transform: scale(1.05);
 }
 
-/* ================================
-   CHRONOMÈTRE DE TOUR
-   ================================ */
+/* 60-46 secondes : Blanc (défaut - pas de classe supplémentaire) */
 .turnTimer {
     font-family: 'Cinzel', serif;
     font-size: 0.9rem;
@@ -1239,21 +1237,30 @@
     padding: 6px 14px;
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+/* 45-31 secondes : Jaune foncé */
 .timerWarning {
-    background: rgba(251, 191, 36, 0.2);
-    color: #fbbf24;
-    border-color: rgba(251, 191, 36, 0.4);
+    background: rgba(202, 138, 4, 0.25);
+    color: #ca8a04;
+    border-color: rgba(202, 138, 4, 0.5);
+}
+
+/* 30-16 secondes : Orange foncé */
+.timerDanger {
+    background: rgba(234, 88, 12, 0.25);
+    color: #ea580c;
+    border-color: rgba(234, 88, 12, 0.5);
     animation: timerPulse 1s ease-in-out infinite;
 }
 
+/* 15-0 secondes : Rouge */
 .timerCritical {
-    background: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.35);
     color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.5);
+    border-color: rgba(239, 68, 68, 0.6);
     animation: timerCriticalPulse 0.5s ease-in-out infinite;
 }
 

@@ -70,6 +70,27 @@ export default function OnlineSelectPage() {
         }
     }, [rpsPhase, hasSubmitted, router, currentGame?.isHost]);
 
+    // Mode DUEL : auto-confirmer avec les dieux pré-sélectionnés
+    useEffect(() => {
+        const gameMode = sessionStorage.getItem('gameMode');
+        if (gameMode === 'duel' && hasRejoined && !hasSubmitted && currentGame) {
+            const savedGodsJson = sessionStorage.getItem('selectedGods');
+            if (savedGodsJson) {
+                const savedGodIds: string[] = JSON.parse(savedGodsJson);
+                const gods = savedGodIds
+                    .map(id => getGodById(id))
+                    .filter((g): g is GodCard => g !== undefined);
+
+                if (gods.length >= 2) {
+                    console.log('Duel mode: auto-confirming with pre-selected gods', gods);
+                    setSelectedGods(gods);
+                    selectGods(gods);
+                    setHasSubmitted(true);
+                }
+            }
+        }
+    }, [hasRejoined, hasSubmitted, currentGame, selectGods]);
+
     // Rediriger vers le jeu si gameStartData arrive (fallback ou reconnexion)
     useEffect(() => {
         if (gameStartData && hasSubmitted) {
