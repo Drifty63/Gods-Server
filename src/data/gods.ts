@@ -358,7 +358,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 12,
-        imageUrl: '/cards/gods/giant_spider.png',
+        imageUrl: '/cards/gods/giant_spider_1.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         hidden: true,  // Exclusif mode Histoire
         category: 'creature',
@@ -372,7 +372,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 12,
-        imageUrl: '/cards/gods/giant_spider.png',
+        imageUrl: '/cards/gods/giant_spider_2.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         hidden: true,  // Exclusif mode Histoire
         category: 'creature',
@@ -386,7 +386,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 12,
-        imageUrl: '/cards/gods/giant_spider.png',
+        imageUrl: '/cards/gods/giant_spider_3.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         hidden: true,  // Exclusif mode Histoire
         category: 'creature',

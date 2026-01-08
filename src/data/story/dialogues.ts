@@ -3261,6 +3261,24 @@ export const CHAPTER2_BATTLE3_WIN: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
+        text: "Sous les yeux des dieux, le corps monstrueux d'Arachné se transforme. La carapace d'araignée se fissure et tombe en morceaux, révélant la forme humaine qu'elle possédait autrefois.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*observe avec compassion* La malédiction... En mourant, elle s'est brisée. Elle a retrouvé son apparence humaine.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*doucement* Quelle tragédie... Elle était une mortelle talentueuse avant qu'Athéna ne la transforme.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
         text: "Les araignées restantes fuient dans les ombres, leur mère vaincue. Le chemin vers Athènes est enfin libre.",
         emotion: 'neutral'
     },
