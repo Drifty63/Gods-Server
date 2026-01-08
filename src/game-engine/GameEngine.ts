@@ -183,6 +183,8 @@ export class GameEngine {
                 // Cela empêche une seule cible de recevoir 2x les dégâts sur un sort multi-cible
                 if (targetIndex >= targetIds.length) {
                     // Plus de cibles disponibles, ignorer cet effet
+                    // IMPORTANT: Réinitialiser lastUsedTargetId pour que les effets 'same' suivants soient aussi ignorés
+                    lastUsedTargetId = undefined;
                     continue;
                 }
 
