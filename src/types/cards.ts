@@ -22,7 +22,8 @@ export type StatusEffect =
     | 'stun'        // Stun (étourdi/gel)
     | 'weakness'    // Faiblesse élémentaire temporaire
     | 'weakness_immunity' // Immunité aux faiblesses
-    | 'regen';      // Régénération (soin par tour)
+    | 'regen'       // Régénération (soin par tour)
+    | 'untargetable'; // Inciblable (ne peut pas être ciblé)
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi

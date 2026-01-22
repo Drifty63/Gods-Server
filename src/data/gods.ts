@@ -392,6 +392,38 @@ export const ALL_GODS: GodCard[] = [
         category: 'creature',
         affiliatedTo: 'arachne',
     },
+
+    // =====================
+    // ULYSSE (Créature - Eau 💧) - Combat 4 Chapitre 2
+    // =====================
+    {
+        id: 'ulysses',
+        name: 'Ulysse, Roi d\'Ithaque',
+        element: 'water',
+        weakness: 'lightning',
+        maxHealth: 20,
+        imageUrl: '/cards/gods/card_ulysses.png',
+        flavorText: '"Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies."',
+        hidden: true,  // Exclusif mode Histoire
+        category: 'creature',
+        affiliatedTo: 'athena',
+    },
+
+    // =====================
+    // CHEVALIER D'ATHÉNA (Serviteur - Lumière ☀️) - Combat 4 Chapitre 2
+    // =====================
+    {
+        id: 'athena_knight',
+        name: 'Chevalier d\'Athéna',
+        element: 'light',
+        weakness: 'darkness',
+        maxHealth: 16,
+        imageUrl: '/cards/gods/card_athena_knight.png',
+        flavorText: '"Pour la gloire d\'Athéna, nous ne fléchirons jamais!"',
+        hidden: true,  // Exclusif mode Histoire
+        category: 'servant',
+        affiliatedTo: 'athena',
+    },
 ];
 
 // Helper pour obtenir un dieu par son ID

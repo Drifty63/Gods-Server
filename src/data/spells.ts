@@ -2341,6 +2341,174 @@ export const ALL_SPELLS: SpellCard[] = [
         imageUrl: '/cards/spells/spell_spider_injection.png',
         description: '4🩸 +2💀 → ⚔️',
     },
+
+    // =====================================================
+    // SORTS D'ULYSSE (Eau 💧) - Combat 4 Chapitre 2
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'ulysses_generator_1',
+        name: 'Vague Déferlante',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_wave_strike.png',
+        description: '1🩸 → ALL⚔️',
+    },
+    {
+        id: 'ulysses_generator_2',
+        name: 'Flèche Précise',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_arrow_shot.png',
+        description: '3🩸 → ⚔️',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'ulysses_utility_1',
+        name: 'Ruse d\'Ulysse',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'status', status: 'untargetable', value: 1, statusDuration: 2, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_cunning.png',
+        description: '+🚫2⏳🔄',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'ulysses_skill_1',
+        name: 'Coup Étourdissant',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_stunning_blow.png',
+        description: '3🩸 +💫1⏳ → ⚔️',
+    },
+    {
+        id: 'ulysses_skill_2',
+        name: 'Raz-de-Marée',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_tidal_wave.png',
+        description: '2🩸 → ALL⚔️',
+    },
+
+    // =====================================================
+    // SORTS DU CHEVALIER D'ATHÉNA (Lumière ☀️) - Combat 4 Chapitre 2
+    // 2 générateurs + 2 compétences + 1 utilitaire
+    // =====================================================
+
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'athena_knight_generator_1',
+        name: 'Balayage Lumineux',
+        element: 'light',
+        godId: 'athena_knight',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' }
+        ],
+        imageUrl: '/cards/spells/spell_knight_light_sweep.png',
+        description: '1🩸 → ALL⚔️',
+    },
+    {
+        id: 'athena_knight_generator_2',
+        name: 'Frappe de Lance',
+        element: 'light',
+        godId: 'athena_knight',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 1,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_knight_spear_thrust.png',
+        description: '3🩸 → ⚔️',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'athena_knight_utility_1',
+        name: 'Mur de Boucliers',
+        element: 'light',
+        godId: 'athena_knight',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'shield', value: 3, target: 'self' },
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_knight_spear_thrust.png',
+        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'athena_knight_skill_1',
+        name: 'Double Estocade',
+        element: 'light',
+        godId: 'athena_knight',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' },
+            { type: 'damage', value: 1, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_knight_light_sweep.png',
+        description: '1🩸 +💫1⏳ → ⚔️⚔️',
+    },
+    {
+        id: 'athena_knight_skill_2',
+        name: 'Ralliement Divin',
+        element: 'light',
+        godId: 'athena_knight',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 1, target: 'all_enemies' },
+            { type: 'shield', value: 1, target: 'all_allies' }
+        ],
+        imageUrl: '/cards/spells/spell_knight_spear_thrust.png',
+        description: '1🩸 → ALL⚔️ | +1🛡️ → ALL👥',
+    },
 ];
 
 // Helper pour obtenir les sorts d'un dieu

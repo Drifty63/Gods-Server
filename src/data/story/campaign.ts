@@ -46,6 +46,14 @@ import {
     CHAPTER2_BATTLE3_ARACHNE_AMBUSH,
     CHAPTER2_BATTLE3_WIN,
     CHAPTER2_BATTLE3_LOSE,
+    // Chapitre 2 - Combat 4 : Athènes - Le Temple d'Athéna
+    CHAPTER2_BATTLE4_NARRATIVE,
+    CHAPTER2_BATTLE4_ARRIVAL,
+    CHAPTER2_BATTLE4_INTERCEPT,
+    CHAPTER2_BATTLE4_TEMPLE,
+    CHAPTER2_BATTLE4_CONFRONTATION,
+    CHAPTER2_BATTLE4_WIN,
+    CHAPTER2_BATTLE4_LOSE,
     // Chapitre 3 (dialogues gardés mais combats supprimés)
     CHAPTER3_INTRO,
     CHAPTER3_EPILOGUE
@@ -629,7 +637,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE3_WIN,
         backgroundImage: '/assets/story/ch2_arachne_victory.png',
-        nextEventId: undefined  // Fin du chapitre 2 pour l'instant
+        nextEventId: 'ch2_battle4_narrative'  // Continue vers combat 4
     },
     // Défaite
     {
@@ -641,11 +649,94 @@ const chapter2Battle3Events: StoryEvent[] = [
     }
 ];
 
+// ===========================================
+// CHAPITRE 2 - COMBAT 4 : ATHÈNES - LE TEMPLE D'ATHÉNA
+// Zeus + Artémis vs Athéna + Ulysse + Chevalier d'Athéna
+// ===========================================
+const chapter2Battle4Events: StoryEvent[] = [
+    // Scène 1 : Narration - Le voyage vers Athènes
+    {
+        id: 'ch2_battle4_narrative',
+        type: 'cutscene',
+        dialogues: CHAPTER2_BATTLE4_NARRATIVE,
+        backgroundImage: '/story/chapter2/combat4_athens_arrival.png',
+        nextEventId: 'ch2_battle4_arrival'
+    },
+    // Scène 2 : Arrivée à Athènes
+    {
+        id: 'ch2_battle4_arrival',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE4_ARRIVAL,
+        backgroundImage: '/story/chapter2/combat4_athens_arrival.png',
+        nextEventId: 'ch2_battle4_intercept'
+    },
+    // Scène 3 : Les chevaliers interceptent les dieux
+    {
+        id: 'ch2_battle4_intercept',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE4_INTERCEPT,
+        backgroundImage: '/story/chapter2/combat4_knights_intercept.png',
+        nextEventId: 'ch2_battle4_temple'
+    },
+    // Scène 4 : Le Temple d'Athéna - Rencontre avec Athéna et Ulysse
+    {
+        id: 'ch2_battle4_temple',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE4_TEMPLE,
+        backgroundImage: '/story/chapter2/combat4_temple_meeting.png',
+        nextEventId: 'ch2_battle4_confrontation'
+    },
+    // Scène 5 : Confrontation Zeus vs Athéna
+    {
+        id: 'ch2_battle4_confrontation',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE4_CONFRONTATION,
+        backgroundImage: '/story/chapter2/combat4_confrontation.png',
+        nextEventId: 'ch2_battle4_fight'
+    },
+    // Combat : Zeus + Artémis vs Athéna + Ulysse + Chevalier d'Athéna
+    {
+        id: 'ch2_battle4_fight',
+        type: 'battle',
+        dialogues: [],
+        backgroundImage: '/story/chapter2/combat4_confrontation.png',
+        battle: {
+            id: 'battle_athens_temple',
+            name: "Le Défi d'Athéna",
+            description: "Zeus et Artémis affrontent Athéna, Ulysse et un Chevalier pour prouver la valeur des mortels !",
+            playerTeam: ['zeus', 'artemis'],
+            enemyTeam: ['athena', 'ulysses', 'athena_knight'],
+            deckMultiplier: 2,           // x2 pour le joueur (20 cartes total)
+            enemyDeckMultiplier: 1,      // x1 pour l'IA (15 cartes total)
+            continueOnDefeat: false
+        },
+        nextEventOnWin: 'ch2_battle4_win',
+        nextEventOnLose: 'ch2_battle4_lose'
+    },
+    // Victoire - Fin du Chapitre 2
+    {
+        id: 'ch2_battle4_win',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE4_WIN,
+        backgroundImage: '/story/chapter2/combat4_victory.png',
+        nextEventId: undefined  // Fin du chapitre 2
+    },
+    // Défaite
+    {
+        id: 'ch2_battle4_lose',
+        type: 'dialogue',
+        dialogues: CHAPTER2_BATTLE4_LOSE,
+        backgroundImage: '/story/chapter2/combat4_defeat.png',
+        nextEventId: undefined  // Doit réessayer
+    }
+];
+
 // Tous les événements du chapitre 2
 const chapter2Events: StoryEvent[] = [
     ...chapter2Battle1Events,
     ...chapter2Battle2Events,
-    ...chapter2Battle3Events
+    ...chapter2Battle3Events,
+    ...chapter2Battle4Events
 ];
 
 // Configuration des combats du chapitre 2
@@ -673,6 +764,14 @@ export const CHAPTER_2_BATTLES = [
         firstEventId: 'ch2_battle3_campfire',
         unlocked: false,              // Débloqué après combat 2
         requiresBattleId: 'battle2'
+    },
+    {
+        id: 'battle4',
+        name: "Le Temple d'Athéna",
+        description: "À Athènes, Zeus doit prouver la valeur des mortels face à Athéna et Ulysse",
+        firstEventId: 'ch2_battle4_narrative',
+        unlocked: false,              // Débloqué après combat 3
+        requiresBattleId: 'battle3'
     }
 ];
 

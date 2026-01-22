@@ -3371,3 +3371,733 @@ export const CHAPTER2_BATTLE3_LOSE: DialogueLine[] = [
         emotion: 'neutral'
     }
 ];
+
+// ===========================================
+// COMBAT 4 - ATHÈNES : LE TEMPLE D'ATHÉNA
+// Zeus et Artémis vs Athéna, Ulysse et Chevalier d'Athéna
+// ===========================================
+
+// Scène 1 : Narration - Le voyage vers Athènes
+export const CHAPTER2_BATTLE4_NARRATIVE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le Bois de Colone disparaît derrière eux, encore fumant des feux de la bataille contre Arachné.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les sept dieux marchent en silence, leurs pas soulevant la poussière du chemin menant à Athènes.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Devant eux, la cité d'Athéna se dévoile peu à peu. L'Acropole brille sous le soleil couchant.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le Parthénon, joyau de la civilisation grecque, domine la ville de toute sa majesté.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "C'est ici que réside Athéna, déesse de la sagesse et de la guerre stratégique. Leur seul espoir.",
+        emotion: 'neutral'
+    }
+];
+
+// Scène 2 : Arrivée à Athènes - Discussion des dieux
+export const CHAPTER2_BATTLE4_ARRIVAL: DialogueLine[] = [
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*observe la cité* Nous y voilà enfin. Athènes... la cité de ma fille.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Comment allons-nous trouver Athéna ? Elle pourrait être n'importe où.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Athéna est proche des mortels. Elle passe beaucoup de temps parmi eux.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Nous pourrions demander au roi Thésée. Il connaît certainement sa localisation.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*regarde autour* Thésée... le héros qui a vaincu le Minotaure ? Impressionnant.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "Le palais royal est sur l'Acropole. Commençons par là.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*prudemment* Restons discrets. Hadès a sûrement des espions partout.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Hestia a raison. Entrons dans la cité et cherchons des informations.",
+        emotion: 'determined'
+    }
+];
+
+// Scène 3 : Les chevaliers d'Athéna interceptent les dieux
+export const CHAPTER2_BATTLE4_INTERCEPT: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les dieux se mêlent à la foule athénienne, cherchant des informations sur Athéna.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Mais à peine ont-ils fait quelques pas qu'une troupe de guerriers en armure dorée leur barre le chemin.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena_knight',
+        speakerName: 'Capitaine des Chevaliers',
+        text: "*lève sa lance* Halte ! Vous êtes les dieux de l'Olympe, n'est-ce pas ?",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*sur ses gardes* Qui demande ?",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena_knight',
+        speakerName: 'Capitaine des Chevaliers',
+        text: "*s'incline* Je suis le Capitaine des Chevaliers d'Athéna. Notre maîtresse vous attend.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*surprise* Elle... nous attend ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'athena_knight',
+        speakerName: 'Capitaine des Chevaliers',
+        text: "Dame Athéna sait tout ce qui se passe dans sa cité. Elle vous attend dans son temple.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena_knight',
+        speakerName: 'Capitaine des Chevaliers',
+        text: "Veuillez nous suivre, s'il vous plaît. C'est un honneur de vous escorter.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*échange un regard avec les autres* ... Très bien. Conduisez-nous à ma fille.",
+        emotion: 'neutral'
+    }
+];
+
+// Scène 4 : Le Temple d'Athéna - Rencontre avec Athéna et Ulysse
+export const CHAPTER2_BATTLE4_TEMPLE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les portes du Temple d'Athéna s'ouvrent, révélant une salle majestueuse baignée de lumière divine.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Sur un trône ornementé, Athéna est assise, son hibou sur l'épaule. À ses côtés, un homme en armure de bronze : Ulysse.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*se lève* Père. Artémis, Apollon, et vous tous... Bienvenue à Athènes.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Athéna, ma fille. Nous avons besoin de—",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*lève la main* Je sais pourquoi vous êtes là, père. La chute de l'Olympe, Hadès sur le trône, Arès à ses côtés...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Je sais aussi que vous avez affronté le Minotaure, puis Méduse, et récemment Arachné.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*impressionné* Tu sais tout cela ? Comment ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*petit sourire* Je suis la déesse de la sagesse, Apollon. J'ai mes propres sources d'information.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Alors tu sais que nous devons trouver Poséidon et remonter à l'Olympe. Nous avons besoin de ton aide.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*s'avance* Tout est déjà prévu, père. Un bateau vous attend au port pour demain.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Le plan est simple : trouver Poséidon, puis atteindre les Enfers pour passer à l'Olympe par un portail.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Passer par les Enfers ? N'est-ce pas... dangereux ?",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "C'est la seule option. Le Mont Olympe est trop bien gardé pour une approche directe.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Et le domaine de Poséidon vers l'Olympe serait trop périlleux, surtout s'il n'est pas encore de notre côté.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*désigne Ulysse* Et voici notre atout majeur : Ulysse, le roi d'Ithaque.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*perplexe* Un mortel ? Comment un mortel peut-il nous aider contre des dieux ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*s'avance* Permettez-moi de vous expliquer.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "Athéna et Poséidon... leurs relations sont complexes. Conflictuelles, même.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "Mais moi, j'ai une... histoire personnelle avec le dieu des mers.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "Pendant dix ans, il a tout fait pour m'empêcher de rentrer chez moi à Ithaque. Tempêtes, monstres, naufrages...",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "Mais Athéna m'a toujours protégé. Elle a plaidé ma cause auprès de Zeus lui-même.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "Je sais comment attirer Poséidon. Comment provoquer sa colère. Les Cyclopes, par exemple...",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*intriguée* Polyphème était son fils, n'est-ce pas ? Celui que tu as aveuglé ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*hoche la tête* Exactement. Je connais ses faiblesses, ses fiertés, ses colères.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "Et pour les Enfers... j'y suis déjà allé. Au pays des Cimmériens, aux portes du monde des morts.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Mais ce chemin serait trop long. Nous passerons par le Cap Ténare, au Péloponnèse.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "Le passage classique vers les Enfers. Thésée l'a emprunté autrefois...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "Thésée ? N'a-t-il pas été capturé par Hadès ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*acquiesce* Oui, mais Héraclès l'a libéré. Thésée m'a donné des conseils précieux sur ce passage.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*réfléchit* Orphée aussi est passé par le Cap Ténare. Je m'en souviens maintenant.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Vous comprenez maintenant pourquoi Ulysse est indispensable. Sa ruse, ses connaissances, son expérience...",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Avec Poséidon de notre côté, nous pourrons naviguer sans danger et atteindre le Cap Ténare rapidement.",
+        emotion: 'neutral'
+    }
+];
+
+// Scène 5 : Confrontation Zeus vs Athéna
+export const CHAPTER2_BATTLE4_CONFRONTATION: DialogueLine[] = [
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*coup de tonnerre* NON !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Un éclair illumine le temple. L'atmosphère devient soudainement électrique.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Ces affaires sont celles des DIEUX, Athéna ! Pas des mortels !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Sur ce point, je partage l'avis de Poséidon et même de... *hésite* ...Hadès et Arès.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*se dresse face à son père* Père, c'est de l'orgueil mal placé.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Les mortels ont prouvé leur valeur maintes fois. Héraclès, Persée, Thésée, Achille...",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Des demi-dieux ! Du sang divin coulait dans leurs veines !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Ulysse n'a AUCUN sang divin. Pourtant, il a survécu à tout ce que les dieux lui ont envoyé !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*prend sa lance et son bouclier* Je te défie, père. En combat.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*inquiète* Athéna, non ! Nous ne pouvons pas nous battre entre nous !",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Pas un combat à mort, tante Hestia. Un défi pour prouver la valeur d'Ulysse.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Moi, Ulysse, et mon meilleur chevalier... contre toi et un allié de ton choix.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*évalue la situation* ...Tu es sérieuse ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Si tu gagnes, nous ferons comme tu le souhaites. Si nous gagnons, tu acceptes mon plan.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*se tourne vers les autres* Qu'en pensez-vous ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "Je suis proche des mortels à travers la musique et les arts. Je suis d'accord avec Athéna.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*hausse les épaules* Je vis parmi les mortels. Ils m'ont toujours bien traité. Je suis avec Athéna.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "Je protège les mortels depuis toujours. Je fais confiance au jugement d'Athéna.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*joue avec une mèche de cheveux* Moi ? Je trouve ce conflit... divertissant. Je reste avec toi, Zeus.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*soupire* J'aime les mortels, mais je suis neutre dans ce conflit. Je n'aime pas la violence.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*regarde son père puis sa sœur* Je reste fidèle à père. Mais si Athéna a raison...",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*ajuste son arc* ...je veux le voir de mes propres yeux. Je combattrai à ses côtés.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*sourire fier* Très bien, Artémis. Toi et moi, contre ma fille et son mortel.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*frappe sa lance au sol* Qu'il en soit ainsi ! Ulysse, Capitaine, à mes côtés !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*dégaine son arc* Pour l'honneur des mortels !",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le temple d'Athéna vibre d'énergie divine. Père contre fille. L'orgueil contre la sagesse.",
+        emotion: 'neutral'
+    }
+];
+
+// Victoire du Combat 4
+export const CHAPTER2_BATTLE4_WIN: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le dernier éclair de Zeus s'éteint. Le silence retombe sur le temple d'Athéna.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*essoufflé mais souriant* Impressionnant... Vraiment impressionnant.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*abaisse son arc* Athéna... tes guerriers... ils sont redoutables.",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*s'approche d'Ulysse* Toi, mortel. Comment t'appelles-tu déjà ?",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*s'incline* Ulysse, fils de Laërte, roi d'Ithaque.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*pose une main sur son épaule* Tu as combattu avec honneur et intelligence. Je comprends maintenant pourquoi Athéna te protège.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*sourire victorieux* Alors, père ? Acceptes-tu mon plan ?",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*soupire* J'ai perdu... c'est indéniable. Et je suis un dieu de parole.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "Ulysse nous accompagnera. Ton plan sera suivi à la lettre.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*applaudit* Voilà qui est sage ! L'union fait la force.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*lève une coupe imaginaire* À la réconciliation ! Et au voyage à venir !",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*soulagée* Nous sommes plus forts unis. N'oublions jamais cela.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*au groupe* Le bateau sera prêt à l'aube. Reposez-vous cette nuit. Le voyage sera long.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "Direction : l'île des Cyclopes d'abord. Puis le domaine de Poséidon.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*sourit* Poséidon ne sait pas ce qui l'attend.",
+        emotion: 'happy'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*regarde l'horizon par une fenêtre* Hadès... Arès... Profitez de vos derniers jours de règne.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La nuit tombe sur Athènes. Demain, les dieux prendront la mer. Leur quête pour reconquérir l'Olympe ne fait que commencer.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Fin du Chapitre 2 : La Fuite vers Athènes",
+        emotion: 'neutral'
+    }
+];
+
+// Défaite du Combat 4
+export const CHAPTER2_BATTLE4_LOSE: DialogueLine[] = [
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le tonnerre de Zeus résonne une dernière fois... puis le silence. La foudre et les flèches d'Artémis s'éteignent.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*debout, victorieuse* C'est... terminé ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*à genoux, épuisé* Je... je n'ai plus de force...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*s'effondre près de son père* Nous avons... perdu...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*range son arc* Ce n'était pas censé se passer ainsi...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*s'agenouille près de Zeus* Père... tu es blessé ?",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'apollon',
+        speakerName: 'Apollon',
+        text: "*accourt* Zeus ! Artémis ! Que s'est-il passé ?",
+        emotion: 'surprised'
+    },
+    {
+        speakerId: 'demeter',
+        speakerName: 'Déméter',
+        text: "*regarde Zeus avec inquiétude* Si même Zeus ne peut vaincre sa propre fille...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'dionysos',
+        speakerName: 'Dionysos',
+        text: "*secoue la tête* ...comment pourra-t-il reconquérir l'Olympe contre Hadès ?",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*croise les bras* Je savais que cette quête était vouée à l'échec.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'hestia',
+        speakerName: 'Hestia',
+        text: "*les larmes aux yeux* Notre confiance en Zeus... est-elle brisée à jamais ?",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*aide Zeus à se relever* Père, ce n'était qu'un combat d'entraînement. Reprends tes forces.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*refuse son aide* Non... j'ai besoin de réfléchir. Seul.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'ulysses',
+        speakerName: 'Ulysse',
+        text: "*à Athéna* Ce n'était peut-être pas une bonne idée...",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*regarde son père s'éloigner* Qu'ai-je fait ? Voulais-je trop prouver ?",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La défaite de Zeus face à sa propre fille a ébranlé la confiance du groupe.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Les dieux quittent le temple en silence, le doute planant sur leur quête.",
+        emotion: 'neutral'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Comment reconquérir l'Olympe quand le roi des dieux doute de lui-même ?",
+        emotion: 'neutral'
+    }
+];
+
