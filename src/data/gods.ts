@@ -351,7 +351,7 @@ export const ALL_GODS: GodCard[] = [
         duelCost: 3,
     },
 
-    // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Exclusif Histoire
+    // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Duel + Histoire
     {
         id: 'giant_spider_1',
         name: 'Araignée Géante',
@@ -360,9 +360,9 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 12,
         imageUrl: '/cards/gods/giant_spider_1.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
-        hidden: true,  // Exclusif mode Histoire
-        category: 'creature',
+        category: 'servant',
         affiliatedTo: 'arachne',
+        duelCost: 2,
     },
 
     // ARAIGNÉE GÉANTE 2 (Ténèbres 💀) - Exclusif Histoire
@@ -394,7 +394,7 @@ export const ALL_GODS: GodCard[] = [
     },
 
     // =====================
-    // ULYSSE (Créature - Eau 💧) - Combat 4 Chapitre 2
+    // ULYSSE (Créature - Eau 💧) - Duel + Histoire
     // =====================
     {
         id: 'ulysses',
@@ -404,13 +404,13 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 20,
         imageUrl: '/cards/gods/card_ulysses.png',
         flavorText: '"Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies."',
-        hidden: true,  // Exclusif mode Histoire
         category: 'creature',
         affiliatedTo: 'athena',
+        duelCost: 4,
     },
 
     // =====================
-    // CHEVALIER D'ATHÉNA (Serviteur - Lumière ☀️) - Combat 4 Chapitre 2
+    // CHEVALIER D'ATHÉNA (Serviteur - Lumière ☀️) - Duel + Histoire
     // =====================
     {
         id: 'athena_knight',
@@ -420,9 +420,9 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 16,
         imageUrl: '/cards/gods/card_athena_knight.png',
         flavorText: '"Pour la gloire d\'Athéna, nous ne fléchirons jamais!"',
-        hidden: true,  // Exclusif mode Histoire
         category: 'servant',
         affiliatedTo: 'athena',
+        duelCost: 3,
     },
 ];
 
