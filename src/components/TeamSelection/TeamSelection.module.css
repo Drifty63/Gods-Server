@@ -8,12 +8,13 @@
         /* Overlay */
         linear-gradient(180deg,
             rgba(10, 10, 26, 0.9) 0%,
-            rgba(26, 26, 58, 0.95) 50%,
-            rgba(10, 10, 26, 0.95) 100%),
-        /* Rayons divins */
-        radial-gradient(ellipse at 50% -20%,
-            rgba(212, 175, 55, 0.15) 0%,
-            transparent 60%);
+            rgba(26, 26, 58, 0.85) 50%,
+            rgba(10, 10, 26, 0.9) 100%),
+        /* Image de fond */
+        url('/assets/team_selection_background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     display: flex;
     flex-direction: column;
     align-items: center;
