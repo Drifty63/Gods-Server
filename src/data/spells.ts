@@ -1760,10 +1760,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'shield', value: 3, target: 'self' },
-            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/soldier_shield_wall.png',
-        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+        description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
     // =====================================================
@@ -1843,10 +1843,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'shield', value: 3, target: 'self' },
-            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/soldier_shield_wall.png',
-        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+        description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
     // =====================================================
@@ -1926,10 +1926,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'shield', value: 3, target: 'self' },
-            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/soldier_shield_wall.png',
-        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+        description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
     // =====================================================
@@ -1999,10 +1999,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'damage', value: 2, target: 'all_enemies' },
-            { type: 'shield', value: 3, target: 'self' }
+            { type: 'shield', value: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_dragon_tempete.png',
-        description: '2🩸 → 👊 | +3🛡️🔄',
+        description: '2🩸 → 👊 | +2🛡️🔄',
     },
 
     // --- UTILITAIRE ---
@@ -2404,10 +2404,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' },
-            { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
+            { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'same' }
         ],
         imageUrl: '/cards/spells/spell_ulysses_stunning_blow.png',
-        description: '3🩸 +💫1⏳ → ⚔️',
+        description: '3🩸 +💫2⏳ → ⚔️',
     },
     {
         id: 'ulysses_skill_2',
@@ -2418,10 +2418,11 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 3,
         energyGain: 0,
         effects: [
-            { type: 'damage', value: 2, target: 'all_enemies' }
+            { type: 'damage', value: 2, target: 'all_enemies' },
+            { type: 'status', status: 'untargetable', value: 1, statusDuration: 1, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_ulysses_tidal_wave.png',
-        description: '2🩸 → ALL⚔️',
+        description: '2🩸 → ALL⚔️ | +🚫1⏳🔄',
     },
 
     // =====================================================
@@ -2470,10 +2471,10 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'shield', value: 3, target: 'self' },
-            { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
+            { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_knight_spear_thrust.png',
-        description: '+3🛡️🔄 | +🗡️1⏳🔄',
+        imageUrl: '/cards/spells/spell_knight_shield_wall.png',
+        description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
     // --- COMPÉTENCES ---

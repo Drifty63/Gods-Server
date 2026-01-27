@@ -349,6 +349,7 @@ export const ALL_GODS: GodCard[] = [
         hidden: false,  // Disponible en mode Duel
         category: 'creature',
         duelCost: 3,
+        affiliatedTo: 'athena',
     },
 
     // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Duel + Histoire
@@ -357,7 +358,7 @@ export const ALL_GODS: GodCard[] = [
         name: 'Araignée Géante',
         element: 'darkness',
         weakness: 'light',
-        maxHealth: 12,
+        maxHealth: 14,
         imageUrl: '/cards/gods/giant_spider_1.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         category: 'servant',
@@ -405,8 +406,8 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/card_ulysses.png',
         flavorText: '"Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies."',
         category: 'creature',
-        affiliatedTo: 'athena',
-        duelCost: 4,
+        affiliatedTo: 'hestia',
+        duelCost: 3,
     },
 
     // =====================
@@ -422,7 +423,7 @@ export const ALL_GODS: GodCard[] = [
         flavorText: '"Pour la gloire d\'Athéna, nous ne fléchirons jamais!"',
         category: 'servant',
         affiliatedTo: 'athena',
-        duelCost: 3,
+        duelCost: 2,
     },
 ];
 
