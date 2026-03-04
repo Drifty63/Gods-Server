@@ -26,7 +26,9 @@ import {
     CHAPTER2_BATTLE2_WIN,
     CHAPTER2_BATTLE2_LOSE,
     CHAPTER2_BATTLE3_WIN,
-    CHAPTER2_BATTLE3_LOSE
+    CHAPTER2_BATTLE3_LOSE,
+    CHAPTER2_BATTLE4_WIN,
+    CHAPTER2_BATTLE4_LOSE
 } from '@/data/story/dialogues';
 import styles from './page.module.css';
 
@@ -327,7 +329,10 @@ function StoryBattleContent() {
             // Déterminer quels dialogues utiliser selon le combat
             let allDialogues;
 
-            if (battleConfig?.id === 'battle_arachne') {
+            if (battleConfig?.id === 'battle_athens_temple') {
+                // Chapitre 2 Combat 4 : Temple d'Athéna
+                allDialogues = won ? CHAPTER2_BATTLE4_WIN : CHAPTER2_BATTLE4_LOSE;
+            } else if (battleConfig?.id === 'battle_arachne') {
                 // Chapitre 2 Combat 3 : Arachné
                 allDialogues = won ? CHAPTER2_BATTLE3_WIN : CHAPTER2_BATTLE3_LOSE;
             } else if (battleConfig?.id === 'battle_dragon_thebes') {
@@ -675,7 +680,12 @@ function StoryBattleContent() {
 
         // Utiliser l'image de fond appropriée selon le combat
         let backgroundImage: string;
-        if (battleConfig?.id === 'battle_arachne') {
+        if (battleConfig?.id === 'battle_athens_temple') {
+            // Chapitre 2 Combat 4 : Temple d'Athéna
+            backgroundImage = playerWon
+                ? '/story/chapter2/combat4_victory.png'
+                : '/story/chapter2/combat4_defeat.png';
+        } else if (battleConfig?.id === 'battle_arachne') {
             // Chapitre 2 Combat 3 : Arachné
             backgroundImage = playerWon
                 ? '/assets/story/ch2_arachne_victory.png'
@@ -794,7 +804,12 @@ function StoryBattleContent() {
 
     // Fonction pour obtenir l'image de fond appropriée selon le combat
     const getResultBackgroundImage = (isVictory: boolean): string => {
-        if (battleConfig?.id === 'battle_arachne') {
+        if (battleConfig?.id === 'battle_athens_temple') {
+            // Chapitre 2 Combat 4 : Temple d'Athéna
+            return isVictory
+                ? '/story/chapter2/combat4_victory.png'
+                : '/story/chapter2/combat4_defeat.png';
+        } else if (battleConfig?.id === 'battle_arachne') {
             // Chapitre 2 Combat 3 : Arachné
             return isVictory
                 ? '/assets/story/ch2_arachne_victory.png'

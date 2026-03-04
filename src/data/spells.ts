@@ -2510,6 +2510,86 @@ export const ALL_SPELLS: SpellCard[] = [
         imageUrl: '/cards/spells/spell_knight_spear_thrust.png',
         description: '1🩸 → ALL⚔️ | +1🛡️ → ALL👥',
     },
+
+    // =====================================================
+    // SORTS D'ULYSSE (Eau 💧)
+    // =====================================================
+    // --- GÉNÉRATEURS ---
+    {
+        id: 'ulysses_generator_1',
+        name: 'Ruse du Tacticien',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'generator',
+        energyCost: 0,
+        energyGain: 2,
+        effects: [
+            { type: 'damage', value: 2, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_ruse.png',
+        description: '+2⚡ | 2🩸 → ⚔️',
+    },
+    {
+        id: 'ulysses_generator_2',
+        name: 'Cheval de Bois',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'generator',
+        energyCost: 1,
+        energyGain: 4,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_cheval.png',
+        description: '+4⚡ | 3🩸 → ⚔️',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'ulysses_skill_1',
+        name: 'Tir à l\'Arc Précis',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'competence',
+        energyCost: 2,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 5, target: 'enemy_god' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_arc.png',
+        description: '5🩸 → ⚔️',
+    },
+    {
+        id: 'ulysses_skill_2',
+        name: 'Dernier Survivant',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'all_enemies' },
+            { type: 'shield', value: 2, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_survivant.png',
+        description: '2🩸 → ALL⚔️ | +2🛡️🔄',
+    },
+
+    // --- UTILITAIRE ---
+    {
+        id: 'ulysses_utility_1',
+        name: 'Retour à Ithaque',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'utility',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'heal', value: 4, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_retour.png',
+        description: '+4💚🔄',
+    },
 ];
 
 // Helper pour obtenir les sorts d'un dieu

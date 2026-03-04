@@ -43,6 +43,7 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         selectCard,
         startTargetSelection,
         addTargetGod,
+        toggleTargetGod,
         setLightningAction,
         setSelectedElement,
         isSelectingElement,
@@ -1198,8 +1199,8 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
         const targetGod = godsList.find(g => g.card.id === godId);
         if (!targetGod) return;
 
-        // Ajouter cette cible à la liste
-        addTargetGod(targetGod);
+        // Ajouter ou retirer cette cible à la liste
+        toggleTargetGod(targetGod);
     };
 
     const handleConfirmPlay = () => {
@@ -1214,23 +1215,9 @@ export default function GameBoard({ onAction }: GameBoardProps = {}) {
     const handleSingleTargetSelect = (uniqueGodId: string) => {
         if (!selectedCard || !isSelectingTarget) return;
 
-        // Parser l'ID unique pour obtenir le vrai godId
-        const { godId } = parseUniqueGodId(uniqueGodId);
-
-        // Pour les sorts copiés (Perséphone ulti), toujours passer par handlePlayCard
-        // qui gère correctement le contexte cast_copy via pendingEnemyCardEffect
-        const isCopiedSpell = pendingEnemyCardEffect?.startsWith('cast_copy:');
-
-        if (requiredTargets === 1 && !needsLightningChoice(selectedCard) && !needsElementChoiceLocal(selectedCard)) {
-            // Comportement classique : jouer immédiatement (cartes sans choix foudre ni élément)
-            handlePlayCard(selectedCard.id, godId);
-        } else if (isCopiedSpell && requiredTargets === 1) {
-            // Sort copié avec une seule cible : jouer directement avec la cible
-            handlePlayCard(selectedCard.id, godId);
-        } else {
-            // Ciblage multiple OU carte avec choix foudre/élément : ajouter la cible et attendre
-            handleTargetSelect(uniqueGodId);
-        }
+        // On ne force plus la validation automatique des cibles (demande utilisateur)
+        // L'utilisateur doit vérifier le modal pour valider.
+        handleTargetSelect(uniqueGodId);
     };
 
     const handleDiscard = (cardId: string) => {

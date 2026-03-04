@@ -114,6 +114,16 @@ function createDefaultProfile(uid: string, email: string, username: string): Omi
     };
 }
 
+// Obtenir le niveau à partir de l'XP
+export function getLevelFromXP(xp: number): number {
+    // Simple progression:
+    // Niv 1: 0-99 XP
+    // Niv 2: 100-399 XP
+    // Niv 3: 400-899 XP
+    if (xp < 0) return 1;
+    return Math.floor(Math.sqrt(xp / 100)) + 1;
+}
+
 // =====================================
 // VÉRIFICATIONS
 // =====================================
@@ -457,12 +467,15 @@ export async function recordVictory(uid: string, updateStats: boolean = true): P
         const newStreak = profile.stats.currentStreak + 1;
         const bestStreak = Math.max(newStreak, profile.stats.bestStreak);
 
+        const newXp = profile.xp + 100;
+
         await updateDoc(doc(db, 'users', uid), {
             'stats.victories': profile.stats.victories + 1,
             'stats.totalGames': profile.stats.totalGames + 1,
             'stats.currentStreak': newStreak,
             'stats.bestStreak': bestStreak,
-            xp: profile.xp + 100, // +100 XP par victoire
+            xp: newXp, // +100 XP par victoire
+            level: getLevelFromXP(newXp)
         });
     }
 
@@ -479,11 +492,14 @@ export async function recordDefeat(uid: string, updateStats: boolean = true): Pr
 
     // Mettre à jour les stats seulement en mode classé
     if (updateStats) {
+        const newXp = profile.xp + 25;
+
         await updateDoc(doc(db, 'users', uid), {
             'stats.defeats': profile.stats.defeats + 1,
             'stats.totalGames': profile.stats.totalGames + 1,
             'stats.currentStreak': 0,
-            xp: profile.xp + 25, // +25 XP par défaite
+            xp: newXp, // +25 XP par défaite
+            level: getLevelFromXP(newXp)
         });
     }
 
