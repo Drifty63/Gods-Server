@@ -2513,82 +2513,85 @@ export const ALL_SPELLS: SpellCard[] = [
 
     // =====================================================
     // SORTS D'ULYSSE (Eau 💧)
+    // 2 générateurs + 2 compétences + 1 utilitaire
     // =====================================================
+
     // --- GÉNÉRATEURS ---
     {
         id: 'ulysses_generator_1',
-        name: 'Ruse du Tacticien',
+        name: 'Vague Déferlante',
         element: 'water',
         godId: 'ulysses',
         type: 'generator',
         energyCost: 0,
-        energyGain: 2,
+        energyGain: 1,
         effects: [
-            { type: 'damage', value: 2, target: 'enemy_god' }
+            { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_ruse.png',
-        description: '+2⚡ | 2🩸 → ⚔️',
+        imageUrl: '/cards/spells/spell_ulysses_wave_strike.png',
+        description: '1🩸 → ALL⚔️',
     },
     {
         id: 'ulysses_generator_2',
-        name: 'Cheval de Bois',
+        name: 'Flèche Précise',
         element: 'water',
         godId: 'ulysses',
         type: 'generator',
-        energyCost: 1,
-        energyGain: 4,
+        energyCost: 0,
+        energyGain: 1,
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_cheval.png',
-        description: '+4⚡ | 3🩸 → ⚔️',
-    },
-
-    // --- COMPÉTENCES ---
-    {
-        id: 'ulysses_skill_1',
-        name: 'Tir à l\'Arc Précis',
-        element: 'water',
-        godId: 'ulysses',
-        type: 'competence',
-        energyCost: 2,
-        energyGain: 0,
-        effects: [
-            { type: 'damage', value: 5, target: 'enemy_god' }
-        ],
-        imageUrl: '/cards/spells/spell_ulysses_arc.png',
-        description: '5🩸 → ⚔️',
-    },
-    {
-        id: 'ulysses_skill_2',
-        name: 'Dernier Survivant',
-        element: 'water',
-        godId: 'ulysses',
-        type: 'competence',
-        energyCost: 1,
-        energyGain: 0,
-        effects: [
-            { type: 'damage', value: 2, target: 'all_enemies' },
-            { type: 'shield', value: 2, target: 'self' }
-        ],
-        imageUrl: '/cards/spells/spell_ulysses_survivant.png',
-        description: '2🩸 → ALL⚔️ | +2🛡️🔄',
+        imageUrl: '/cards/spells/spell_ulysses_arrow_shot.png',
+        description: '3🩸 → ⚔️',
     },
 
     // --- UTILITAIRE ---
     {
         id: 'ulysses_utility_1',
-        name: 'Retour à Ithaque',
+        name: 'Ruse d\'Ulysse',
         element: 'water',
         godId: 'ulysses',
         type: 'utility',
         energyCost: 1,
         energyGain: 0,
         effects: [
-            { type: 'heal', value: 4, target: 'self' }
+            { type: 'status', status: 'untargetable', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_retour.png',
-        description: '+4💚🔄',
+        imageUrl: '/cards/spells/spell_ulysses_cunning.png',
+        description: '+🚫2⏳🔄',
+    },
+
+    // --- COMPÉTENCES ---
+    {
+        id: 'ulysses_skill_1',
+        name: 'Coup Étourdissant',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'competence',
+        energyCost: 1,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'same' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_stunning_blow.png',
+        description: '3🩸 +💫2⏳ → ⚔️',
+    },
+    {
+        id: 'ulysses_skill_2',
+        name: 'Raz-de-Marée',
+        element: 'water',
+        godId: 'ulysses',
+        type: 'competence',
+        energyCost: 3,
+        energyGain: 0,
+        effects: [
+            { type: 'damage', value: 2, target: 'all_enemies' },
+            { type: 'status', status: 'untargetable', value: 1, statusDuration: 1, target: 'self' }
+        ],
+        imageUrl: '/cards/spells/spell_ulysses_tidal_wave.png',
+        description: '2🩸 → ALL⚔️ | +🚫1⏳🔄',
     },
 ];
 
