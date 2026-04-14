@@ -232,7 +232,7 @@ export default function MultiplayerGamePage() {
             <GameBoard onAction={(action) => {
                 // Envoyer l'action au serveur pour synchronisation
                 sendAction({
-                    type: action.type,
+                    type: action.type as any,
                     payload: action.payload as Record<string, unknown>
                 });
 

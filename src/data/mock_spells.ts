@@ -16,7 +16,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 3 }],
                 imageUrl: '/cards/spells/poseidon/trident.png',
-                description: "Inflige 3 dégâts à une cible."
+                description: "Inflige 3 dégâts à un dieu adverse."
             },
             {
                 id: 'poseidon_s2',
@@ -82,7 +82,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 3 }],
                 imageUrl: '/cards/spells/zeus/zeus_bolt.png',
-                description: "Inflige 3 dégâts à une cible."
+                description: "Inflige 3 dégâts à un dieu adverse."
             },
             {
                 id: 'zeus_s2',
@@ -160,7 +160,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 1, target: 'all_enemies' }],
                 imageUrl: '/cards/spells/nyx/void_zone.png',
-                description: "Inflige 1 dégâts à toutes les cibles."
+                description: "Inflige 1 dégât à tous les dieux adverses."
             },
             {
                 id: 'nyx_s3',
@@ -214,7 +214,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 3 }],
                 imageUrl: '/cards/spells/hestia/inner_flames.png',
-                description: "Inflige 3 dégâts à une cible."
+                description: "Inflige 3 dégâts à un dieu adverse."
             },
             {
                 id: 'hestia_s2',
@@ -280,7 +280,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 3 }],
                 imageUrl: '/cards/spells/athena/sharp_talons.png',
-                description: "Inflige 3 dégâts à une cible."
+                description: "Inflige 3 dégâts à un dieu adverse."
             },
             {
                 id: 'athena_s2',
@@ -346,7 +346,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [],
                 imageUrl: '/cards/spells/demeter/harvest.png',
-                description: "Inflige 3 dégâts à une cible."
+                description: "Inflige 3 dégâts à un dieu adverse."
             },
             {
                 id: 'demeter_s2',
@@ -412,7 +412,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 3 }],
                 imageUrl: '/cards/spells/dionysos/hangover.png',
-                description: "Inflige 3 dégâts à une cible."
+                description: "Inflige 3 dégâts à un dieu adverse."
             },
             {
                 id: 'dionysos_s2',
@@ -490,7 +490,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 1, target: 'all_enemies' }],
                 imageUrl: '/cards/spells/hades/scorched_earth.png',
-                description: "Inflige 1 dégâts à toutes les cibles."
+                description: "Inflige 1 dégât à tous les dieux adverses."
             },
             {
                 id: 'hades_s3',
@@ -556,7 +556,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 1, target: 'all_enemies' }],
                 imageUrl: '/cards/spells/apollon/cacophony.png',
-                description: "Inflige 1 dégâts à toutes les cibles."
+                description: "Inflige 1 dégât à tous les dieux adverses."
             },
             {
                 id: 'apollon_s3',
@@ -622,7 +622,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 1, target: 'all_enemies' }],
                 imageUrl: '/cards/spells/ares/break_ranks.png',
-                description: "Inflige 1 dégâts à toutes les cibles."
+                description: "Inflige 1 dégât à tous les dieux adverses."
             },
             {
                 id: 'ares_s3',
@@ -688,7 +688,7 @@ export function getSpellsForGod(god: GodCard): SpellCard[] {
                 energyGain: 0,
                 effects: [{ type: 'damage', value: 1, target: 'all_enemies' }],
                 imageUrl: '/cards/spells/artemis/multiple_arrows.png',
-                description: "Inflige 1 dégâts à toutes les cibles."
+                description: "Inflige 1 dégât à tous les dieux adverses."
             },
             {
                 id: 'artemis_s3',

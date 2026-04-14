@@ -272,7 +272,7 @@ export default function OnlineGamePage() {
 
             <GameBoard onAction={(action) => {
                 sendAction({
-                    type: action.type,
+                    type: action.type as any,
                     payload: action.payload as Record<string, unknown>
                 });
 

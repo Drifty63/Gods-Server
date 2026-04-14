@@ -78,128 +78,105 @@ function HomeContent() {
 
   return (
     <main className={styles.main}>
-      {/* Titre centré sur la page */}
-      <div className={styles.logoContainer}>
-        <h1 className={styles.title}>
-          <span className={styles.titleLetter}>G</span>
-          <span className={styles.titleLetter}>O</span>
-          <span className={styles.titleLetter}>D</span>
-          <span className={styles.titleLetter}>S</span>
-        </h1>
-        <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
-      </div>
+      {/* BACKGROUND EFFECTS */}
+      <div className={styles.bgParticles} />
 
-      {/* Header avec boutons */}
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          {/* Espace vide pour équilibrer */}
-        </div>
-
-        <div className={styles.headerRight}>
-          <button
-            className={styles.headerButton}
-            onClick={handleQuestsClick}
-            title="Quêtes"
-          >
-            📜
-          </button>
-          <button
-            className={styles.headerButton}
-            onClick={handleRewardsClick}
-            title="Récompenses"
-          >
-            🎁
-          </button>
-          <button
-            className={styles.headerButton}
-            onClick={handleOptionsClick}
-            title="Options"
-          >
-            ⚙️
-          </button>
-        </div>
-      </header>
-
-      {/* Affichage de l'Ambroisie */}
-      <div className={styles.currencyDisplay}>
-        <Image
-          src="/icons/ambroisie.png"
-          alt="Ambroisie"
-          width={24}
-          height={24}
-          className={styles.currencyIcon}
-        />
-        <span className={styles.currencyAmount}>{userAmbroisie.toLocaleString()}</span>
-      </div>
-
-      {/* Contenu principal */}
+      {/* Contenu principal divisé en deux colonnes pour le format Paysage */}
       <div className={styles.content}>
-        {/* Carte du dieu au centre avec carrousel */}
-        <section className={styles.godCardSection}>
-          <button className={styles.carouselArrow} onClick={prevGod} aria-label="Dieu précédent">
-            ‹
-          </button>
+        
+        {/* COLONNE GAUCHE (Titre + Actualités) */}
+        <div className={styles.leftColumn}>
+          {/* Titre aligné à gauche */}
+          <div className={styles.logoContainer}>
+            <h1 className={styles.title}>
+              <span className={styles.titleLetter}>G</span>
+              <span className={styles.titleLetter}>O</span>
+              <span className={styles.titleLetter}>D</span>
+              <span className={styles.titleLetter}>S</span>
+            </h1>
+            <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
+          </div>
 
-          <div className={`${styles.godCardWrapper} ${isTransitioning ? styles.transitioning : ''}`}>
-            <div className={styles.godCard}>
-              <div className={styles.godCardInner}>
-                <Image
-                  src={currentGod.carouselImage || currentGod.imageUrl}
-                  alt={currentGod.name}
-                  fill
-                  className={styles.godCardImage}
-                  priority
-                />
+          {/* Section Actualités */}
+          <section className={styles.newsSection}>
+            <div className={styles.newsSectionHeader}>
+              <span className={styles.newsIcon}>📜</span>
+              <h2>Actualité :</h2>
+            </div>
+            <div className={styles.newsContent}>
+              <p className={styles.newsItem}>
+                <span className={styles.newsBullet}>-</span>
+                Patch 0.24 : Correctif des bugs sur le mode en ligne.
+              </p>
+              <p className={styles.newsItem}>
+                <span className={styles.newsBullet}>-</span>
+                Présentation de l'extension <Link href="/news/death-glory" className={styles.newsLink}>Death & Glory</Link>.
+              </p>
+              <p className={styles.newsItem}>
+                <span className={styles.newsBullet}>-</span>
+                Patch 0.23 : Sortie de l'histoire de ZEUS
+              </p>
+            </div>
+          </section>
+        </div>
+
+        {/* COLONNE DROITE (Carrousel) */}
+        <div className={styles.rightColumn}>
+          <section className={styles.godCardSection}>
+            <button className={styles.carouselArrow} onClick={prevGod} aria-label="Dieu précédent">
+              ‹
+            </button>
+
+            <div className={`${styles.godCardWrapper} ${isTransitioning ? styles.transitioning : ''}`}>
+              <div className={styles.godCard}>
+                <div className={styles.godCardInner}>
+                  <Image
+                    src={currentGod.carouselImage || currentGod.imageUrl}
+                    alt={currentGod.name}
+                    fill
+                    className={styles.godCardImage}
+                    priority
+                  />
+                </div>
+              </div>
+              <div className={styles.godCardIndicators}>
+                {visibleGods.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`${styles.indicator} ${index === currentGodIndex ? styles.activeIndicator : ''}`}
+                    onClick={() => {
+                      setIsTransitioning(true);
+                      setTimeout(() => {
+                        setCurrentGodIndex(index);
+                        setIsTransitioning(false);
+                      }, 300);
+                    }}
+                    aria-label={`Voir ${visibleGods[index].name}`}
+                  />
+                ))}
               </div>
             </div>
-            <div className={styles.godCardIndicators}>
-              {visibleGods.map((_, index) => (
-                <button
-                  key={index}
-                  className={`${styles.indicator} ${index === currentGodIndex ? styles.activeIndicator : ''}`}
-                  onClick={() => {
-                    setIsTransitioning(true);
-                    setTimeout(() => {
-                      setCurrentGodIndex(index);
-                      setIsTransitioning(false);
-                    }, 300);
-                  }}
-                  aria-label={`Voir ${visibleGods[index].name}`}
-                />
-              ))}
-            </div>
-          </div>
 
-          <button className={styles.carouselArrow} onClick={nextGod} aria-label="Dieu suivant">
-            ›
-          </button>
-        </section>
-
-        {/* Section Actualités */}
-        <section className={styles.newsSection}>
-          <div className={styles.newsSectionHeader}>
-            <span className={styles.newsIcon}>📜</span>
-            <h2>Actualité :</h2>
-          </div>
-          <div className={styles.newsContent}>
-            <p className={styles.newsItem}>
-              <span className={styles.newsBullet}>-</span>
-              Patch 0.24 : Correctif des bugs sur le mode en ligne.
-            </p>
-            <p className={styles.newsItem}>
-              <span className={styles.newsBullet}>-</span>
-              Présentation de l'extension <Link href="/news/death-glory" className={styles.newsLink}>Death & Glory</Link>.
-            </p>
-            <p className={styles.newsItem}>
-              <span className={styles.newsBullet}>-</span>
-              Patch 0.23 : Sortie de l'histoire de ZEUS
-            </p>
-          </div>
-        </section>
+            <button className={styles.carouselArrow} onClick={nextGod} aria-label="Dieu suivant">
+              ›
+            </button>
+          </section>
+        </div>
       </div>
 
       {/* Barre de navigation en bas */}
       <nav className={styles.bottomNav}>
+        <div className={styles.currencyDisplay}>
+          <Image
+            src="/icons/ambroisie.png"
+            alt="Ambroisie"
+            width={24}
+            height={24}
+            className={styles.currencyIcon}
+          />
+          <span className={styles.currencyAmount}>{userAmbroisie.toLocaleString()}</span>
+        </div>
+
         <Link href="/shop" className={styles.navItem}>
           <Image src="/shop_icon.png" alt="Boutique" width={32} height={32} className={styles.navIconImage} />
           <span className={styles.navLabel}>Boutique</span>
@@ -210,29 +187,31 @@ function HomeContent() {
           <span className={styles.navLabel}>Deck</span>
         </Link>
 
-        {/* Bouton central JOUER */}
-        <Link href="/play" className={styles.playButton}>
-          <span className={styles.playIcon}>⚔️</span>
-          <span className={styles.playLabel}>Jouer</span>
-        </Link>
-
         <Link href="/social" className={styles.navItem}>
           <span className={styles.navIcon}>💬</span>
           <span className={styles.navLabel}>Social</span>
         </Link>
+        
+        {/* Options / Settings in Nav now */}
+        <button className={styles.navItem} onClick={handleOptionsClick}>
+            <span className={styles.navIcon}>⚙️</span>
+            <span className={styles.navLabel}>Options</span>
+        </button>
 
         <Link href="/profile" className={styles.navItem}>
           <span className={styles.navIcon}>👤</span>
           <span className={styles.navLabel}>Profil</span>
         </Link>
+
+        {/* Bouton central JOUER décalé en bas */}
+        <Link href="/play" className={styles.playButton}>
+          <span className={styles.playIcon}>⚔️</span>
+          <span className={styles.playLabel}>Jouer</span>
+        </Link>
       </nav>
 
-
-
-
-
       {/* Footer discret */}
-      <footer className={styles.footer}>
+      <footer className={styles.footer} style={{ position: 'fixed', bottom: '5px', right: '10px', fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', zIndex: 10 }}>
         <p>2025 GODS SERIE 1 • Aseo, Drift & Zedycuss</p>
       </footer>
     </main>

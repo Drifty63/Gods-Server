@@ -963,7 +963,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                             freshPlayer?.hasPlayedCard) {
                             get().endTurn();
                         }
-                    }, 4500);
+                    }, 1500);
                 }
             }
         }
@@ -1219,8 +1219,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     if (remainingDamage > 0) {
                         target.currentHealth -= remainingDamage;
                         if (target.currentHealth <= 0) {
-                            target.isDead = true;
-                            target.currentHealth = 0;
+                            // Utiliser killGod pour gérer proprement la mort (retrait cartes, victoire)
+                            engine.killGod(opponent.id, target.card.id);
                         }
                     }
                 }
@@ -1295,8 +1295,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     if (remainingDamage > 0) {
                         target.currentHealth -= remainingDamage;
                         if (target.currentHealth <= 0) {
-                            target.isDead = true;
-                            target.currentHealth = 0;
+                            // Utiliser killGod pour gérer proprement la mort (retrait cartes, victoire)
+                            engine.killGod(opponent.id, target.card.id);
                         }
                     }
                 }
@@ -1641,7 +1641,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         if (remainingDamage > 0) {
                             target.currentHealth = Math.max(0, target.currentHealth - remainingDamage);
                             if (target.currentHealth === 0) {
-                                target.isDead = true;
+                                // Utiliser killGod pour gérer proprement la mort
+                                engine.killGod(opponent.id, target.card.id);
                             }
                         }
                     }

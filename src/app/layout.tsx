@@ -4,6 +4,7 @@ import "./globals.css";
 
 import GlobalUI from "@/components/GlobalUI/GlobalUI";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ClientOrientationLock from "@/components/ClientOrientationLock";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,15 +23,13 @@ const cinzelDecorative = Cinzel_Decorative({
   weight: ['400', '700', '900'],
 });
 
-// Configuration du viewport pour permettre la rotation d'écran sur mobile
+// Configuration du viewport 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
-  // Pas de "user-scalable=no" pour permettre le zoom
-  // Pas de restriction d'orientation pour permettre portrait ET paysage
 };
 
 export const metadata: Metadata = {
@@ -65,6 +64,7 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.variable} ${cinzel.variable} ${cinzelDecorative.variable}`}>
+        <ClientOrientationLock />
         <AuthProvider>
           <GlobalUI />
           {children}

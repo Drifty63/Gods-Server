@@ -1,37 +1,15 @@
 /**
  * ============================================
- * GODS - MOTEUR DE JEU PRINCIPAL
+ * GODS - MOTEUR DE JEU v2.0 (REFONTE COMPLÈTE)
  * ============================================
- * 
- * Ce fichier contient le cœur de la logique de jeu GODS.
- * Il gère toutes les actions de jeu, les effets de cartes,
- * les conditions de victoire et la progression de partie.
- * 
- * ARCHITECTURE:
- * - GameEngine : Classe principale qui maintient l'état du jeu
- * - executeAction() : Point d'entrée pour toutes les actions
- * - applyEffect() : Application des effets de base (damage, heal, etc.)
- * - applyCustomEffect() : Effets spéciaux des dieux (1000+ lignes)
- * 
- * FLUX D'UN TOUR:
- * 1. drawToHandLimit() - Pioche jusqu'à 5 cartes
- * 2. playCard() ou discardForEnergy() - Action du joueur
- * 3. endTurn() - Fin de tour, effets de statut, passage au joueur suivant
- * 
- * SYSTÈMES GÉRÉS:
- * - Éléments et faiblesses (ElementSystem.ts)
- * - Effets de statut (poison, shield, stun, etc.)
- * - Zombies (Perséphone)
- * - Fatigue (recyclage du deck)
- * - Limite de tours (parties online)
- * - Anti-AFK (parties online)
- * 
- * @see ElementSystem.ts - Calcul des dégâts et faiblesses
- * @see AIPlayer.ts - IA pour le mode solo
- * @see gameStore.ts - Store Zustand qui utilise ce moteur
- * 
- * @version 1.0
- * @author GODS Team
+ *
+ * Architecture modulaire :
+ * - DamageSystem.ts  → Dégâts, boucliers, mort
+ * - StatusSystem.ts  → Effets de statut (poison, regen, stun...)
+ * - EffectResolver   → Registre d'effets custom (pattern Map)
+ * - GameEngine.ts    → Orchestration propre
+ *
+ * Plus de switch/case de 1500 lignes. Plus de code dupliqué.
  */
 
 import {
@@ -43,55 +21,448 @@ import {
     StatusEffect,
     GodCard
 } from '@/types/cards';
-import { calculateDamage, calculateDamageWithDualWeakness, getWeakness } from './ElementSystem';
+import type { Element } from '@/types/cards';
+import { calculateDamageWithDualWeakness } from './ElementSystem';
+import { dealDamage, healGod, handleGodDeath, addShield } from './DamageSystem';
+import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects } from './StatusSystem';
 
-// Fonction utilitaire pour générer un UUID compatible HTTP (non sécurisé)
+// ─────────────────────────────────────────────
+// Constantes
+// ─────────────────────────────────────────────
+
+const MAX_ENERGY = 10;
+const HAND_LIMIT = 5;
+
+// ─────────────────────────────────────────────
+// UUID
+// ─────────────────────────────────────────────
+
 const generateUUID = () => {
-    // Vérifier si nous sommes dans un environnement navigateur sécurisé
     if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
         return window.crypto.randomUUID();
     }
-    // Fallback pour les environnements non sécurisés (HTTP) ou sans crypto
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 };
 
-/**
- * Classe principale du moteur de jeu
- */
+// ─────────────────────────────────────────────
+// Types pour le registre d'effets
+// ─────────────────────────────────────────────
+
+export interface EffectContext {
+    engine: GameEngine;
+    player: PlayerState;
+    opponent: PlayerState;
+    castingGod: GodState | undefined;
+    card: SpellCard;
+    targets: GodState[];
+    targetGodId?: string;
+    selectedElement?: Element;
+    lightningAction?: 'apply' | 'remove';
+}
+
+type CustomEffectHandler = (ctx: EffectContext) => void;
+
+// ─────────────────────────────────────────────
+// Registre d'effets custom
+// ─────────────────────────────────────────────
+
+const customEffects = new Map<string, CustomEffectHandler>();
+
+function registerEffect(id: string, handler: CustomEffectHandler) {
+    customEffects.set(id, handler);
+}
+
+// === DEMETER ===
+registerEffect('revive_god', (ctx) => {
+    if (!ctx.targetGodId) return;
+    const god = ctx.player.gods.find(g => g.card.id === ctx.targetGodId && g.isDead);
+    if (!god) return;
+
+    god.isDead = false;
+    god.currentHealth = 8;
+    god.statusEffects = [];
+    god.temporaryWeakness = undefined;
+
+    // Récupérer les cartes du dieu depuis removedCards
+    const cardsToReturn: SpellCard[] = [];
+    ctx.player.removedCards = ctx.player.removedCards.filter(card => {
+        if (card.godId === god.card.id) {
+            cardsToReturn.push(card);
+            return false;
+        }
+        return true;
+    });
+    ctx.player.deck.push(...cardsToReturn);
+    shuffleArray(ctx.player.deck);
+});
+
+registerEffect('distribute_heal_5', (ctx) => {
+    // Pour l'IA : distribution automatique.
+    // Pour le joueur humain : le store gère via modal.
+    if (ctx.player.id !== 'player1') {
+        const alive = ctx.player.gods.filter(g => !g.isDead);
+        if (alive.length === 0) return;
+        const healPer = Math.floor(5 / alive.length);
+        const remainder = 5 % alive.length;
+        alive.forEach((ally, i) => {
+            const amount = healPer + (i < remainder ? 1 : 0);
+            ally.currentHealth = Math.min(ally.currentHealth + amount, ally.card.maxHealth);
+        });
+    }
+});
+
+// === SÉLÉNÉ ===
+registerEffect('resurrect_two', (ctx) => {
+    const deadGods = ctx.player.gods.filter(g => g.isDead).slice(0, 2);
+    for (const god of deadGods) {
+        god.isDead = false;
+        god.currentHealth = 3;
+        god.statusEffects = [];
+        god.temporaryWeakness = undefined;
+        god.isZombie = false;
+        god.zombieCard = undefined;
+        god.zombieOwnerId = undefined;
+
+        const cardsToReturn: SpellCard[] = [];
+        ctx.player.removedCards = ctx.player.removedCards.filter(card => {
+            if (card.godId === god.card.id) {
+                cardsToReturn.push(card);
+                return false;
+            }
+            return true;
+        });
+        ctx.player.deck.push(...cardsToReturn);
+    }
+    shuffleArray(ctx.player.deck);
+});
+
+// === DIONYSOS ===
+registerEffect('heal_by_poison', (ctx) => {
+    let totalPoison = 0;
+    for (const god of ctx.opponent.gods) {
+        if (!god.isDead) totalPoison += getStatusStacks(god, 'poison');
+    }
+    if (totalPoison > 0 && ctx.targets.length > 0) {
+        healGod(ctx.targets[0], totalPoison);
+    }
+});
+
+// === HADÈS ===
+registerEffect('heal_if_kill_8', (ctx) => {
+    if (!ctx.targetGodId || !ctx.castingGod) return;
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId);
+    if (target?.isDead) {
+        healGod(ctx.castingGod, 8);
+    }
+});
+
+registerEffect('lifesteal_damage', (ctx) => {
+    if (!ctx.castingGod || !ctx.targetGodId) return;
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId);
+    if (!target) return;
+
+    const hasImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
+    const { damage } = hasImmunity
+        ? { damage: 3 }
+        : calculateDamageWithDualWeakness(3, ctx.card.element, target.card.weakness, target.temporaryWeakness);
+    healGod(ctx.castingGod, damage);
+});
+
+// === APOLLON ===
+registerEffect('remove_energy_1', (ctx) => {
+    ctx.opponent.energy = Math.max(0, ctx.opponent.energy - 1);
+});
+
+registerEffect('remove_energy_2', (ctx) => {
+    ctx.opponent.energy = Math.max(0, ctx.opponent.energy - 2);
+});
+
+// === ARÈS ===
+registerEffect('damage_equal_lost_health', (ctx) => {
+    if (!ctx.castingGod || !ctx.targetGodId) return;
+    const lostHealth = ctx.castingGod.card.maxHealth - ctx.castingGod.currentHealth;
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId && !g.isDead);
+    if (!target || lostHealth <= 0) return;
+    dealDamage(target, lostHealth, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+});
+
+// === ARTÉMIS ===
+registerEffect('apply_weakness', (ctx) => {
+    const element = ctx.selectedElement || ctx.card.element;
+    for (const target of ctx.targets) {
+        target.temporaryWeakness = element;
+    }
+});
+
+// === APHRODITE ===
+registerEffect('cleanse', (ctx) => {
+    for (const target of ctx.targets) {
+        target.statusEffects = target.statusEffects.filter(s => s.type === 'shield');
+        target.temporaryWeakness = undefined;
+    }
+});
+
+registerEffect('cleanse_all_allies', (ctx) => {
+    for (const god of ctx.player.gods) {
+        if (!god.isDead) {
+            god.statusEffects = god.statusEffects.filter(s => s.type === 'shield');
+            god.temporaryWeakness = undefined;
+        }
+    }
+});
+
+// === ZEUS ===
+function handleLightningToggle(targets: GodState[], ctx: EffectContext) {
+    for (const target of targets) {
+        const stacks = getStatusStacks(target, 'lightning');
+        const action = ctx.lightningAction !== undefined
+            ? ctx.lightningAction
+            : (stacks > 0 ? 'remove' : 'apply');
+
+        if (action === 'remove' && stacks > 0) {
+            const bonusDamage = stacks * 2;
+            removeStatus(target, 'lightning');
+            dealDamage(target, bonusDamage, findOwner(target, ctx), ctx.engine.getState(), { element: 'lightning' as Element });
+        } else if (action === 'apply') {
+            addStatus(target, 'lightning', 1);
+        }
+    }
+}
+
+registerEffect('lightning_toggle', (ctx) => handleLightningToggle(ctx.targets, ctx));
+registerEffect('lightning_toggle_multi', (ctx) => handleLightningToggle(ctx.targets, ctx));
+
+registerEffect('lightning_toggle_all', (ctx) => {
+    const enemies = ctx.opponent.gods.filter(g => !g.isDead);
+    handleLightningToggle(enemies, ctx);
+});
+
+// === POSÉIDON ===
+registerEffect('conductive_lightning', (ctx) => {
+    for (const target of ctx.targets) {
+        dealDamage(target, 1, findOwner(target, ctx), ctx.engine.getState(), { element: ctx.card.element });
+        addStatus(target, 'lightning', 1);
+    }
+});
+
+registerEffect('tsunami_damage', (ctx) => {
+    if (!ctx.targetGodId) return;
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId && !g.isDead);
+    if (!target) return;
+
+    const recentDiscard = ctx.opponent.discard.slice(-5);
+    const cardsFromTarget = recentDiscard.filter(c => c.godId === ctx.targetGodId);
+    const baseDamage = cardsFromTarget.length * 3;
+    if (baseDamage > 0) {
+        dealDamage(target, baseDamage, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+    }
+});
+
+registerEffect('prison_mill', (ctx) => {
+    const livingEnemies = ctx.opponent.gods.filter(g => !g.isDead).length;
+    for (let i = 0; i < livingEnemies; i++) {
+        if (ctx.opponent.deck.length > 0) {
+            const card = ctx.opponent.deck.shift()!;
+            cleanBlindCard(card);
+            ctx.opponent.discard.push(card);
+        }
+    }
+});
+
+// === NYX ===
+registerEffect('shuffle_hand_draw_blind', (_ctx) => {
+    // Géré par le store via CardSelectionModal
+});
+
+registerEffect('shuffle_hand_draw_blind_2', (_ctx) => {
+    // Géré par le store via CardSelectionModal
+});
+
+registerEffect('shuffle_all_hand_draw_blind', (ctx) => {
+    while (ctx.opponent.hand.length > 0) {
+        const card = ctx.opponent.hand.pop()!;
+        card.isHiddenFromOwner = false;
+        ctx.opponent.deck.push(card);
+    }
+    shuffleArray(ctx.opponent.deck);
+
+    const count = Math.min(5, ctx.opponent.deck.length);
+    for (let i = 0; i < count; i++) {
+        if (ctx.opponent.deck.length > 0) {
+            const drawn = ctx.opponent.deck.shift()!;
+            drawn.isHiddenFromOwner = true;
+            drawn.revealedToPlayerId = ctx.player.id;
+            ctx.opponent.hand.push(drawn);
+        }
+    }
+});
+
+// === ATHÉNA ===
+registerEffect('remove_weakness_1_turn', (ctx) => {
+    for (const target of ctx.targets) {
+        if (ctx.player.gods.includes(target) && !target.isDead) {
+            addStatus(target, 'weakness_immunity', 1, 1);
+        }
+    }
+});
+
+registerEffect('remove_all_weakness_3_turns', (ctx) => {
+    for (const god of ctx.player.gods) {
+        if (!god.isDead) addStatus(god, 'weakness_immunity', 1, 3);
+    }
+});
+
+// === HESTIA ===
+registerEffect('heal_by_energy', (ctx) => {
+    for (const target of ctx.targets) {
+        if (ctx.player.gods.includes(target) && !target.isDead) {
+            healGod(target, ctx.player.energy);
+        }
+    }
+});
+
+registerEffect('recycle_from_discard', (_ctx) => { /* store-managed */ });
+registerEffect('put_cards_bottom', (_ctx) => { /* store-managed */ });
+
+// === THANATOS ===
+function damageWithDeadCount(ctx: EffectContext, baseDmg: number, multiplier: number, countSource: 'allies' | 'enemies') {
+    const source = countSource === 'allies' ? ctx.player : ctx.opponent;
+    const deadCount = source.gods.filter(g => g.isDead).length;
+    const totalDmg = baseDmg + (multiplier * deadCount);
+    if (totalDmg <= 0 || !ctx.targetGodId) return;
+
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId && !g.isDead);
+    if (target) dealDamage(target, totalDmg, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+}
+
+function aoeDamageWithDeadCount(ctx: EffectContext, baseDmg: number, multiplier: number, countSource: 'allies' | 'enemies') {
+    const source = countSource === 'allies' ? ctx.player : ctx.opponent;
+    const deadCount = source.gods.filter(g => g.isDead).length;
+    const totalDmg = baseDmg + (multiplier * deadCount);
+
+    for (const enemy of ctx.opponent.gods.filter(g => !g.isDead)) {
+        dealDamage(enemy, totalDmg, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+    }
+}
+
+registerEffect('damage_plus_dead_allies', (ctx) => damageWithDeadCount(ctx, 2, 1, 'allies'));
+registerEffect('damage_plus_2x_dead_allies', (ctx) => damageWithDeadCount(ctx, 2, 2, 'allies'));
+registerEffect('aoe_damage_plus_dead_allies', (ctx) => aoeDamageWithDeadCount(ctx, 1, 1, 'allies'));
+registerEffect('damage_5x_dead_allies', (ctx) => {
+    const deadCount = ctx.player.gods.filter(g => g.isDead).length;
+    const totalDmg = 5 * deadCount;
+    if (totalDmg <= 0 || !ctx.targetGodId) return;
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId && !g.isDead);
+    if (target) dealDamage(target, totalDmg, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+});
+
+// === NIKÉ ===
+registerEffect('damage_plus_dead_enemies', (ctx) => damageWithDeadCount(ctx, 1, 1, 'enemies'));
+registerEffect('damage_plus_2x_dead_enemies', (ctx) => damageWithDeadCount(ctx, 2, 2, 'enemies'));
+registerEffect('aoe_damage_plus_dead_enemies', (ctx) => aoeDamageWithDeadCount(ctx, 1, 1, 'enemies'));
+registerEffect('aoe_damage_plus_2x_dead_enemies', (ctx) => aoeDamageWithDeadCount(ctx, 2, 2, 'enemies'));
+
+// === HÉPHAÏSTOS ===
+registerEffect('gain_current_shield', (ctx) => {
+    if (!ctx.castingGod || !ctx.targetGodId) return;
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId);
+    if (!target) return;
+    const { damage: realDmg } = calculateDamageWithDualWeakness(2, ctx.card.element, target.card.weakness, target.temporaryWeakness);
+    addShield(ctx.castingGod, realDmg);
+});
+
+registerEffect('damage_plus_shield', (ctx) => {
+    if (!ctx.castingGod || !ctx.targetGodId) return;
+    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId && !g.isDead);
+    if (!target) return;
+    const shieldStacks = ctx.castingGod.statusEffects.find(s => s.type === 'shield')?.stacks || 0;
+    const totalDmg = 3 + shieldStacks;
+    dealDamage(target, totalDmg, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+});
+
+// === CHIONÉ ===
+registerEffect('splash_damage', (ctx) => {
+    if (!ctx.targetGodId) return;
+    const idx = ctx.opponent.gods.findIndex(g => g.card.id === ctx.targetGodId);
+    if (idx === -1) return;
+
+    const neighbors: GodState[] = [];
+    if (idx > 0) neighbors.push(ctx.opponent.gods[idx - 1]);
+    if (idx < ctx.opponent.gods.length - 1) neighbors.push(ctx.opponent.gods[idx + 1]);
+
+    for (const neighbor of neighbors) {
+        if (!neighbor.isDead) {
+            dealDamage(neighbor, 2, ctx.opponent, ctx.engine.getState());
+        }
+    }
+});
+
+// === HERMÈS ===
+registerEffect('replay_action', (ctx) => {
+    ctx.player.hasPlayedCard = false;
+});
+
+// === Store-managed effects (no-op in engine) ===
+for (const id of [
+    'retrieve_discard', 'copy_discard_spell', 'free_recycle',
+    'optional_mill_boost', 'choose_discard_enemy', 'temp_resurrect',
+    'shuffle_god_cards'
+]) {
+    registerEffect(id, (_ctx) => { /* géré par le store via modal */ });
+}
+
+// === VISION DU TARTARE ===
+registerEffect('vision_tartare', (_ctx) => { /* géré par le store modal Oui/Non */ });
+
+// ─────────────────────────────────────────────
+// Utilitaires module
+// ─────────────────────────────────────────────
+
+function shuffleArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function cleanBlindCard(card: SpellCard): void {
+    delete card.isHiddenFromOwner;
+    delete card.revealedToPlayerId;
+}
+
+function findOwner(god: GodState, ctx: EffectContext): PlayerState {
+    return ctx.player.gods.includes(god) ? ctx.player : ctx.opponent;
+}
+
+// ═══════════════════════════════════════════════
+// GameEngine - Classe principale
+// ═══════════════════════════════════════════════
+
 export class GameEngine {
     private state: GameState;
 
     constructor(initialState: GameState) {
-        this.state = JSON.parse(JSON.stringify(initialState)); // Deep clone
+        this.state = JSON.parse(JSON.stringify(initialState));
     }
 
-    /**
-     * Obtient l'état actuel du jeu
-     */
-    getState(): GameState {
-        return this.state;
-    }
+    // ─── Accesseurs ─────────────────────────
 
-    /**
-     * Obtient le joueur actuel
-     */
+    getState(): GameState { return this.state; }
+
     getCurrentPlayer(): PlayerState {
         return this.state.players.find(p => p.id === this.state.currentPlayerId)!;
     }
 
-    /**
-     * Obtient le joueur adverse
-     */
     getOpponent(): PlayerState {
         return this.state.players.find(p => p.id !== this.state.currentPlayerId)!;
     }
 
-    /**
-     * Exécute une action de jeu
-     */
+    // ─── Point d'entrée des actions ─────────
+
     executeAction(action: GameAction): { success: boolean; message: string } {
         switch (action.type) {
             case 'play_card':
@@ -109,211 +480,128 @@ export class GameEngine {
         }
     }
 
-    /**
-     * Joue une carte depuis la main
-     */
+    // ─── Jouer une carte ───────────────────
+
     private playCard(action: GameAction): { success: boolean; message: string } {
         const player = this.getCurrentPlayer();
         const cardIndex = player.hand.findIndex(c => c.id === action.cardId);
 
-        if (cardIndex === -1) {
-            return { success: false, message: 'Carte non trouvée dans la main' };
-        }
-
-        // Vérifier si le joueur a déjà joué une carte ce tour
-        if (player.hasPlayedCard) {
-            return { success: false, message: 'Vous avez déjà joué une carte ce tour' };
-        }
+        if (cardIndex === -1) return { success: false, message: 'Carte non trouvée dans la main' };
+        if (player.hasPlayedCard) return { success: false, message: 'Vous avez déjà joué une carte ce tour' };
 
         const card = player.hand[cardIndex];
+        if (player.energy < card.energyCost) return { success: false, message: 'Pas assez d\'énergie' };
 
-        // Vérifier le coût en énergie
-        if (player.energy < card.energyCost) {
-            return { success: false, message: 'Pas assez d\'énergie' };
-        }
-
-        // Trouver le dieu qui lance le sort
         const castingGod = player.gods.find(g => g.card.id === card.godId && !g.isDead);
-        if (!castingGod) {
-            return { success: false, message: 'Le dieu de cette carte est mort' };
-        }
+        if (!castingGod) return { success: false, message: 'Le dieu de cette carte est mort' };
 
-        // Appliquer les dégâts de poison avant le sort
-        // Le poison est permanent et inflige des dégâts à chaque sort lancé par le dieu
-        const poisonStacks = this.getStatusStacks(castingGod, 'poison');
-        if (poisonStacks > 0) {
-            castingGod.currentHealth -= poisonStacks;
-            if (castingGod.currentHealth <= 0) {
-                this.handleGodDeath(player, castingGod);
+        // Payer et gagner l'énergie (plafonnée)
+        player.energy = Math.min(player.energy - card.energyCost + card.energyGain, MAX_ENERGY);
 
-                // Le tour se termine immédiatement
-                this.endTurn();
-
-                return { success: true, message: `${castingGod.card.name} est mort du poison ! Le tour passe à l'adversaire.` };
-            }
-        }
-
-        // Payer le coût
-        player.energy -= card.energyCost;
-
-        // Gagner l'énergie de la carte
-        player.energy += card.energyGain;
-
-        // Préparer les cibles multiples
+        // Préparer les cibles
         const targetIds = action.targetGodIds || (action.targetGodId ? [action.targetGodId] : []);
         let targetIndex = 0;
-        let lastUsedTargetId: string | undefined = undefined;
+        let lastUsedTargetId: string | undefined;
 
-        // Marquer que le joueur a joué une carte ce tour (avant les effets pour permettre le reset via replay_action)
         player.hasPlayedCard = true;
 
         // Appliquer les effets
         for (const effect of card.effects) {
-            // Pour target 'same', utiliser la dernière cible OU ignorer si pas de cible valide
             if (effect.target === 'same') {
                 if (lastUsedTargetId) {
                     this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
                 }
-                // Si lastUsedTargetId est undefined, on ignore l'effet 'same' (pas de cible précédente valide)
                 continue;
             }
 
-            // Pour les effets qui ciblent enemy_god ou ally_god, utiliser une cible de la liste
-            const needsSingleTarget = effect.target === 'enemy_god' || effect.target === 'ally_god' || effect.target === 'any_god' || effect.target === 'dead_ally_god';
+            const needsSingleTarget = ['enemy_god', 'ally_god', 'any_god', 'dead_ally_god'].includes(effect.target || '');
 
             if (needsSingleTarget && targetIds.length > 0) {
-                // CORRECTION: Si on a épuisé toutes les cibles disponibles, ne pas appliquer les effets restants
-                // Cela empêche une seule cible de recevoir 2x les dégâts sur un sort multi-cible
                 if (targetIndex >= targetIds.length) {
-                    // Plus de cibles disponibles, ignorer cet effet
-                    // IMPORTANT: Réinitialiser lastUsedTargetId pour que les effets 'same' suivants soient aussi ignorés
                     lastUsedTargetId = undefined;
                     continue;
                 }
-
-                // Utiliser la prochaine cible disponible dans la liste
                 const currentTarget = targetIds[targetIndex];
                 this.applyEffect(effect, card, currentTarget, action.selectedElement, action.lightningAction, [currentTarget]);
                 lastUsedTargetId = currentTarget;
                 targetIndex++;
             } else if (!effect.target && effect.type === 'custom') {
-                // Effet custom sans target explicite : passer TOUTES les cibles
-                // Cela permet à lightning_toggle_multi de toucher toutes les cibles sélectionnées
                 this.applyEffect(effect, card, action.targetGodId, action.selectedElement, action.lightningAction, targetIds.length > 0 ? targetIds : undefined);
             } else if (!effect.target && lastUsedTargetId) {
-                // Autre effet sans target explicite : appliquer à la dernière cible utilisée
                 this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
             } else {
-                // Effet sans ciblage spécifique ou ciblage de groupe (all_enemies, all_allies, self)
                 this.applyEffect(effect, card, action.targetGodId, action.selectedElement, action.lightningAction, action.targetGodIds);
             }
         }
 
-        // Déplacer la carte vers la défausse (nettoyer les propriétés "blind" d'abord)
+        // Défausser la carte
         player.hand.splice(cardIndex, 1);
-        this.cleanBlindCard(card);
+        cleanBlindCard(card);
         player.discard.push(card);
-
 
         return { success: true, message: `${card.name} joué avec succès` };
     }
 
-    /**
-     * Défausse une carte (plusieurs possibles par tour, mais +1 énergie max)
-     * Exclusif avec jouer une carte : si on défausse, on ne peut plus jouer
-     */
+    // ─── Défausser pour énergie ────────────
+
     private discardForEnergy(action: GameAction): { success: boolean; message: string } {
         const player = this.getCurrentPlayer();
-
-        // Vérifier si le joueur a déjà joué une carte ce tour
-        if (player.hasPlayedCard) {
-            return { success: false, message: 'Vous avez déjà joué une carte ce tour. Défausse impossible.' };
-        }
+        if (player.hasPlayedCard) return { success: false, message: 'Vous avez déjà joué une carte ce tour. Défausse impossible.' };
 
         const cardIndex = player.hand.findIndex(c => c.id === action.cardId);
-
-        if (cardIndex === -1) {
-            return { success: false, message: 'Carte non trouvée dans la main' };
-        }
+        if (cardIndex === -1) return { success: false, message: 'Carte non trouvée dans la main' };
 
         const card = player.hand[cardIndex];
-
-        // Retirer de la main et ajouter à la défausse (nettoyer les propriétés "blind")
         player.hand.splice(cardIndex, 1);
-        this.cleanBlindCard(card);
+        cleanBlindCard(card);
         player.discard.push(card);
 
-        // Gagner 1 énergie SEULEMENT si c'est la première défausse du tour
         if (!player.hasDiscardedForEnergy) {
-            player.energy += 1;
+            player.energy = Math.min(player.energy + 1, MAX_ENERGY);
             player.hasDiscardedForEnergy = true;
             return { success: true, message: `${card.name} défaussé, +1 énergie` };
-        } else {
-            return { success: true, message: `${card.name} défaussé (énergie déjà gagnée ce tour)` };
         }
+        return { success: true, message: `${card.name} défaussé (énergie déjà gagnée ce tour)` };
     }
 
+    // ─── Attaque zombie ──────────────────
 
-
-    /**
-     * Effectue une attaque de zombie (1 dégât ténèbres + gestion faiblesse/bouclier)
-     */
     private zombieAttack(action: GameAction): { success: boolean; message: string } {
         const opponent = this.getOpponent();
-        const targetGodId = action.targetGodId;
+        if (!action.targetGodId) return { success: false, message: 'Aucune cible spécifiée pour l\'attaque zombie' };
 
-        if (!targetGodId) {
-            return { success: false, message: 'Aucune cible spécifiée pour l\'attaque zombie' };
-        }
+        const target = opponent.gods.find(g => g.card.id === action.targetGodId && !g.isDead);
+        if (!target) return { success: false, message: 'Cible invalide ou déjà morte' };
 
-        const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-        if (!target) {
-            return { success: false, message: 'Cible invalide ou déjà morte' };
-        }
-
-        // Dégâts : 1 par zombie allié vivant (Ténèbres)
         const player = this.getCurrentPlayer();
         const zombieCount = player.gods.filter(g => g.isZombie && !g.isDead).length;
         const damage = Math.max(1, zombieCount);
-        const element = 'darkness';
 
-        const { damage: finalDamage } = calculateDamageWithDualWeakness(
-            damage, element, target.card.weakness, target.temporaryWeakness
-        );
-
-        this.applyDamageWithShield(target, finalDamage, opponent);
+        dealDamage(target, damage, opponent, this.state, { element: 'darkness' as Element });
 
         return { success: true, message: 'Attaque zombie effectuée' };
     }
 
-    /**
-     * Lance un sort copié de la défausse (Perséphone - Utlity)
-     * Note: La carte originale "Pouvoirs des Âmes" a DÉJÀ été jouée par le store
-     * avant d'ouvrir le modal de sélection. On ne la cherche plus dans la main.
-     */
+    // ─── Sort copié ─────────────────────
+
     private castCopiedSpell(action: GameAction): { success: boolean; message: string } {
         const player = this.getCurrentPlayer();
-
-        // 1. Vérifier la carte à copier dans la défausse
         const copiedCard = player.discard.find(c => c.id === action.copiedCardId);
         if (!copiedCard) return { success: false, message: "Carte à copier non trouvée" };
 
-        // 2. Préparer et jouer la copie (pas besoin de payer l'énergie, déjà fait)
         const clonedCard = JSON.parse(JSON.stringify(copiedCard));
         clonedCard.id = `copy_${Date.now()}_${clonedCard.id}`;
-        clonedCard.element = 'darkness'; // Transformé en Ténèbres
+        clonedCard.element = 'darkness';
         clonedCard.energyCost = 0;
 
         player.hand.push(clonedCard);
-
-        // Hack pour autoriser le jeu immédiat (la carte originale a été jouée, donc hasPlayedCard est true)
         player.hasPlayedCard = false;
 
         const playAction: GameAction = {
             type: 'play_card',
             playerId: action.playerId,
             cardId: clonedCard.id,
-            targetGodId: action.targetGodId, // Cible choisie pour la COPIE
+            targetGodId: action.targetGodId,
             targetGodIds: action.targetGodIds,
             selectedElement: action.selectedElement,
             lightningAction: action.lightningAction
@@ -323,7 +611,6 @@ export class GameEngine {
 
         if (!result.success) {
             player.hasPlayedCard = true;
-            // Nettoyage si échec
             const copyIndex = player.hand.findIndex(c => c.id === clonedCard.id);
             if (copyIndex !== -1) player.hand.splice(copyIndex, 1);
             return result;
@@ -332,499 +619,181 @@ export class GameEngine {
         return { success: true, message: `Sort copié lancé: ${result.message}` };
     }
 
-    /**
-     * Termine le tour actuel
-     */
-    private endTurn(): { success: boolean; message: string } {
-        // Récupérer le joueur qui finit son tour (avant de changer)
+    // ─── Fin de tour ─────────────────────
+
+    endTurn(): { success: boolean; message: string } {
+        if (this.state.status !== 'playing') return { success: false, message: 'La partie est terminée' };
+
         const previousPlayer = this.getCurrentPlayer();
 
-        // === SYSTÈME ANTI-AFK (Mode Online uniquement) ===
-        // Si le joueur n'a pas joué de carte ce tour, incrémenter son compteur AFK
-        // Si le joueur n'a pas joué pendant 5 tours consécutifs, il est disqualifié
-        if (this.state.isOnlineGame) {
-            if (!previousPlayer.hasPlayedCard) {
-                previousPlayer.afkTurns = (previousPlayer.afkTurns || 0) + 1;
-                console.log(`⚠️ ${previousPlayer.name} AFK: ${previousPlayer.afkTurns}/5 tours sans jouer`);
+        // Tick des effets de statut (regen, poison, durées)
+        tickStatusEffects(previousPlayer, this.state);
 
-                // Disqualification après 5 tours AFK
-                if (previousPlayer.afkTurns >= 5) {
-                    console.log(`🚫 ${previousPlayer.name} DISQUALIFIÉ pour AFK!`);
-                    this.state.status = 'finished';
-                    this.state.winnerId = this.state.players.find(p => p.id !== previousPlayer.id)?.id;
-                    this.state.winReason = 'surrender'; // On utilise surrender car c'est un abandon implicite
-                    return { success: true, message: `${previousPlayer.name} disqualifié pour inactivité!` };
-                }
-            } else {
-                // Le joueur a joué une carte, reset son compteur AFK
-                previousPlayer.afkTurns = 0;
-            }
+        // Vérifier si la partie est terminée après les effets
+        if (this.state.status !== 'playing') {
+            return { success: true, message: 'La partie est terminée' };
         }
 
         // Passer au joueur suivant
-        const currentIndex = this.state.players.findIndex(p => p.id === this.state.currentPlayerId);
-        const nextIndex = (currentIndex + 1) % 2;
-
-        const nextPlayer = this.state.players[nextIndex];
+        const nextPlayer = this.getOpponent();
         this.state.currentPlayerId = nextPlayer.id;
 
-        // Réinitialiser les flags de tour pour le nouveau joueur
+        // Incrémenter le compteur de tours
+        if (nextPlayer.id === this.state.players[0].id) {
+            this.state.turnNumber++;
+
+            // Vérifier limite de tours (online)
+            if (this.state.maxTurns && this.state.turnNumber > this.state.maxTurns) {
+                this.state.status = 'finished';
+                this.resolveByHealthTotal();
+                return { success: true, message: 'Limite de tours atteinte' };
+            }
+        }
+
+        // Réinitialiser les flags du nouveau joueur
         nextPlayer.hasPlayedCard = false;
         nextPlayer.hasDiscardedForEnergy = false;
 
-        // Incrémenter le numéro de tour
-        if (nextIndex === 0) {
-            this.state.turnNumber++;
+        // Gagner 1 énergie de base (plafonnée)
+        nextPlayer.energy = Math.min(nextPlayer.energy + 1, MAX_ENERGY);
 
-            // Vérifier la limite de tours (pour les parties online)
-            if (this.state.maxTurns && this.state.turnNumber > this.state.maxTurns) {
-                this.endGameByTurnLimit();
-                return { success: true, message: 'Limite de tours atteinte!' };
-            }
-        }
+        // Piocher jusqu'à la limite
+        this.drawToHandLimit(nextPlayer);
 
-        // Piocher pour le nouveau joueur actuel
-        this.drawToHandLimit(this.getCurrentPlayer());
-
-        // Réduire la durée des effets temporaires du joueur qui VIENT DE FINIR son tour
-        // Logique : un stun appliqué par l'ennemi reste actif pendant tout le tour du joueur affecté
-        // puis est décrémenté quand ce joueur termine son tour
-        this.tickStatusEffects(previousPlayer);
-
-        return { success: true, message: 'Tour terminé' };
+        return { success: true, message: `Tour de ${nextPlayer.name}` };
     }
 
-    /**
-     * Termine la partie à cause de la limite de tours
-     * Le gagnant est déterminé par:
-     * 1. Nombre de dieux vivants
-     * 2. Si égalité: PV cumulés des dieux vivants
-     * 3. Si toujours égalité: Match nul
-     */
-    private endGameByTurnLimit(): void {
-        const player1 = this.state.players[0];
-        const player2 = this.state.players[1];
+    // ─── Pioche ──────────────────────────
 
-        // Compter les dieux vivants
-        const player1AliveGods = player1.gods.filter(g => !g.isDead);
-        const player2AliveGods = player2.gods.filter(g => !g.isDead);
+    drawToHandLimit(player: PlayerState): void {
+        while (player.hand.length < HAND_LIMIT) {
+            if (player.deck.length === 0) {
+                // Recycler la défausse
+                if (player.discard.length === 0) break; // Plus de cartes du tout
 
-        const player1AliveCount = player1AliveGods.length;
-        const player2AliveCount = player2AliveGods.length;
+                player.fatigueCounter++;
+                const fatigueDamage = player.fatigueCounter;
 
-        console.log(`⏱️ Limite de ${this.state.maxTurns} tours atteinte!`);
-        console.log(`   Joueur 1: ${player1AliveCount} dieux vivants`);
-        console.log(`   Joueur 2: ${player2AliveCount} dieux vivants`);
+                // Recycler les cartes de dieux encore vivants
+                const aliveGodIds = new Set(player.gods.filter(g => !g.isDead).map(g => g.card.id));
+                const recyclableCards = player.discard.filter(c => aliveGodIds.has(c.godId));
 
-        this.state.status = 'finished';
+                if (recyclableCards.length === 0) break;
 
-        if (player1AliveCount !== player2AliveCount) {
-            // Le joueur avec le plus de dieux vivants gagne
-            this.state.winnerId = player1AliveCount > player2AliveCount ? player1.id : player2.id;
-            this.state.winReason = 'turn_limit';
-            console.log(`🏆 Gagnant par nombre de dieux: ${this.state.winnerId}`);
-        } else {
-            // Égalité de dieux vivants: compter les PV cumulés
-            const player1TotalHP = player1AliveGods.reduce((sum, g) => sum + g.currentHealth, 0);
-            const player2TotalHP = player2AliveGods.reduce((sum, g) => sum + g.currentHealth, 0);
+                // Retirer les cartes recyclables de la défausse et les remettre dans le deck
+                player.discard = player.discard.filter(c => !aliveGodIds.has(c.godId));
+                player.deck.push(...recyclableCards);
+                shuffleArray(player.deck);
 
-            console.log(`   Joueur 1: ${player1TotalHP} PV cumulés`);
-            console.log(`   Joueur 2: ${player2TotalHP} PV cumulés`);
+                // Appliquer les dégâts de fatigue à tous les dieux vivants
+                for (const god of player.gods) {
+                    if (!god.isDead) {
+                        god.currentHealth -= fatigueDamage;
+                        if (god.currentHealth <= 0) {
+                            handleGodDeath(player, god, this.state);
+                        }
+                    }
+                }
 
-            if (player1TotalHP !== player2TotalHP) {
-                this.state.winnerId = player1TotalHP > player2TotalHP ? player1.id : player2.id;
-                this.state.winReason = 'turn_limit';
-                console.log(`🏆 Gagnant par PV cumulés: ${this.state.winnerId}`);
+                if (this.state.status !== 'playing') return;
+            }
+
+            if (player.deck.length > 0) {
+                const card = player.deck.shift()!;
+                player.hand.push(card);
             } else {
-                // Égalité parfaite: MATCH NUL
-                this.state.winnerId = undefined;
-                this.state.winReason = 'draw';
-                console.log(`🤝 Égalité parfaite - MATCH NUL!`);
+                break;
             }
         }
     }
 
-    /**
-     * Pioche des cartes jusqu'à avoir 5 cartes en main (ou le max possible)
-     */
-    private drawToHandLimit(player: PlayerState): void {
-        const handLimit = 5;
-        const livingGodIds = player.gods.filter(g => !g.isDead).map(g => g.card.id);
+    // ─── Application des effets ─────────
 
-        while (player.hand.length < handLimit) {
-            // Trouver une carte valide (d'un dieu vivant) dans le deck
-            let validCardIndex = player.deck.findIndex(c => livingGodIds.includes(c.godId));
-
-            // Si pas de carte valide dans le deck, essayer de recycler
-            if (validCardIndex === -1) {
-                if (player.discard.length > 0) {
-                    // Recycler la défausse (applique fatigue)
-                    this.recycleDeck(player);
-                    // Réessayer de trouver une carte valide après recyclage
-                    validCardIndex = player.deck.findIndex(c => livingGodIds.includes(c.godId));
-                }
-
-                // Toujours pas de carte valide après recyclage
-                if (validCardIndex === -1) {
-                    break;
-                }
-            }
-
-            const card = player.deck.splice(validCardIndex, 1)[0];
-            player.hand.push(card);
-        }
-    }
-
-    /**
-     * Recycle la défausse en nouveau deck (fatigue)
-     */
-    private recycleDeck(player: PlayerState): void {
-        if (player.discard.length === 0) return;
-
-        // Incrémenter le compteur de fatigue
-        player.fatigueCounter++;
-
-        // Infliger des dégâts de fatigue à tous les dieux vivants
-        for (const god of player.gods) {
-            if (!god.isDead) {
-                let damageToInflict = player.fatigueCounter;
-
-                // Vérifier s'il y a un bouclier actif
-                const shieldIndex = god.statusEffects.findIndex(s => s.type === 'shield');
-                if (shieldIndex !== -1) {
-                    const shield = god.statusEffects[shieldIndex];
-                    if (shield.stacks >= damageToInflict) {
-                        shield.stacks -= damageToInflict;
-                        damageToInflict = 0;
-                    } else {
-                        damageToInflict -= shield.stacks;
-                        shield.stacks = 0;
-                        // Retirer le statut si bouclier épuisé
-                        god.statusEffects.splice(shieldIndex, 1);
-                    }
-                }
-
-                // Appliquer les dégâts restants à la santé
-                if (damageToInflict > 0) {
-                    god.currentHealth -= damageToInflict;
-                    if (god.currentHealth <= 0) {
-                        this.handleGodDeath(player, god);
-                    }
-                }
-            }
-        }
-
-        // Mélanger la défausse et en faire le nouveau deck
-        player.deck = this.shuffleArray([...player.discard]);
-        player.discard = [];
-    }
-
-    /**
-     * Gère la mort d'un dieu
-     */
-    private handleGodDeath(player: PlayerState, god: GodState): void {
-        god.isDead = true;
-        god.currentHealth = 0;
-
-        // Si c'était un zombie, gérer spécialement
-        if (god.isZombie) {
-            // La carte zombie va à la défausse
-            if (god.zombieCard) {
-                this.cleanBlindCard(god.zombieCard);
-                player.discard.push(god.zombieCard);
-            }
-            // Réinitialiser les propriétés zombie pour permettre re-zombification
-            god.isZombie = false;
-            god.zombieCard = undefined;
-            god.zombieOwnerId = undefined;
-            // Le dieu reste mort mais peut être zombifié à nouveau
-            return;
-        }
-
-        // Retirer toutes les cartes de ce dieu et les stocker dans removedCards
-        const godId = god.card.id;
-
-        // Depuis la main
-        const handCards = player.hand.filter(c => c.godId === godId);
-        player.hand = player.hand.filter(c => c.godId !== godId);
-
-        // Depuis le deck
-        const deckCards = player.deck.filter(c => c.godId === godId);
-        player.deck = player.deck.filter(c => c.godId !== godId);
-
-        // Depuis la défausse
-        const discardCards = player.discard.filter(c => c.godId === godId);
-        player.discard = player.discard.filter(c => c.godId !== godId);
-
-        // Stocker toutes les cartes retirées
-        player.removedCards.push(...handCards, ...deckCards, ...discardCards);
-
-        // Vérifier si le joueur a perdu (tous les dieux morts)
-        // IMPORTANT: Ne pas écraser le gagnant si la partie est déjà terminée
-        // Cela permet aux sorts comme ceux d'Arès d'infliger les dégâts d'abord
-        // puis de recevoir les dégâts ensuite. Si l'ennemi meurt en premier,
-        // le joueur actuel a gagné même s'il meurt ensuite du contrecoup.
-        if (this.state.status !== 'finished') {
-            const allDead = player.gods.every(g => g.isDead);
-
-            // Debug: afficher l'état des dieux
-            console.log(`🔍 handleGodDeath - Joueur ${player.id}:`);
-            player.gods.forEach(g => {
-                console.log(`   - ${g.card.name}: isDead=${g.isDead}, HP=${g.currentHealth}`);
-            });
-            console.log(`   => Tous morts? ${allDead}`);
-
-            if (allDead) {
-                this.state.status = 'finished';
-                // Le gagnant est l'AUTRE joueur (celui dont les dieux ne sont pas tous morts)
-                // CORRECTION: On ne peut pas utiliser getOpponent() car ça retourne l'opposant
-                // du joueur dont c'est le tour, pas l'opposant du joueur qui vient de perdre!
-                this.state.winnerId = this.state.players.find(p => p.id !== player.id)?.id;
-                console.log(`🏆 Partie terminée! Gagnant: ${this.state.winnerId}`);
-            }
-        }
-    }
-
-
-    /**
-     * Applique un effet de sort
-     */
     private applyEffect(
         effect: SpellCard['effects'][0],
         card: SpellCard,
         targetGodId?: string,
-        selectedElement?: import('@/types/cards').Element,
+        selectedElement?: Element,
         lightningAction?: 'apply' | 'remove',
         targetGodIds?: string[]
     ): void {
         const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
-
-        const getTargetGods = (): GodState[] => {
-            // Si une cible spécifique est définie dans l'effet
-            if (effect.target) {
-                switch (effect.target) {
-                    case 'enemy_god':
-                        if (targetGodId) {
-                            const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                            return target ? [target] : [];
-                        }
-                        return [];
-                    case 'all_enemies':
-                        return opponent.gods.filter(g => !g.isDead);
-                    case 'ally_god':
-                        if (targetGodId) {
-                            const target = player.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                            return target ? [target] : [];
-                        }
-                        return [];
-                    case 'all_allies':
-                        return player.gods.filter(g => !g.isDead);
-                    case 'self':
-                        const caster = player.gods.find(g => g.card.id === card.godId && !g.isDead);
-                        return caster ? [caster] : [];
-                    case 'all_gods':
-                        return [...player.gods, ...opponent.gods].filter(g => !g.isDead);
-                    case 'dead_ally_god':
-                        if (targetGodId) {
-                            const deadTarget = player.gods.find(g => g.card.id === targetGodId && g.isDead);
-                            return deadTarget ? [deadTarget] : [];
-                        }
-                        return [];
-                    case 'any_god':
-                        // Pour any_god, chercher d'abord chez le JOUEUR (alliés) pour les heals
-                        // puis chez l'adversaire si pas trouvé
-                        // Cela évite le bug en match miroir où on soignerait l'ennemi
-                        if (targetGodId) {
-                            const allyTarget = player.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                            if (allyTarget) return [allyTarget];
-                            const enemyTarget = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                            if (enemyTarget) return [enemyTarget];
-                        }
-                        return [];
-                    case 'same':
-                        // Le cas 'same' est géré en amont dans executeAction
-                        // Si on arrive ici, utiliser la cible fournie
-                        if (targetGodId) {
-                            const sameTarget = [...opponent.gods, ...player.gods].find(g => g.card.id === targetGodId && !g.isDead);
-                            return sameTarget ? [sameTarget] : [];
-                        }
-                        return [];
-                }
-            }
-
-            // Si pas de cible définie dans l'effet (ex: custom effect toggle), utiliser les cibles fournies
-            // IMPORTANT: Pour éviter les bugs quand les deux joueurs ont le même dieu,
-            // on cherche d'abord chez l'adversaire (cas le plus courant pour les sorts offensifs)
-            if (targetGodIds && targetGodIds.length > 0) {
-                // Priorité: chercher d'abord chez l'adversaire
-                const opponentTargets = opponent.gods.filter(g => targetGodIds.includes(g.card.id) && !g.isDead);
-                const playerTargets = player.gods.filter(g => targetGodIds.includes(g.card.id) && !g.isDead);
-
-                // Retourner les cibles ennemies correspondantes en priorité
-                // Si on en trouve le bon nombre, on les retourne
-                // Sinon on retourne tout ce qu'on a trouvé
-                if (opponentTargets.length >= targetGodIds.length) {
-                    return opponentTargets.slice(0, targetGodIds.length);
-                }
-                if (opponentTargets.length > 0 && playerTargets.length === 0) {
-                    return opponentTargets;
-                }
-                if (playerTargets.length > 0 && opponentTargets.length === 0) {
-                    return playerTargets;
-                }
-                // Cas mixte: prendre d'abord les ennemis puis compléter avec les alliés si nécessaire
-                return [...opponentTargets, ...playerTargets].slice(0, targetGodIds.length);
-            }
-
-            if (targetGodId) {
-                // Priorité: chercher d'abord chez l'adversaire
-                const opponentTarget = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                if (opponentTarget) return [opponentTarget];
-
-                const playerTarget = player.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                if (playerTarget) return [playerTarget];
-
-                return [];
-            }
-
-            return [];
-        };
-
-        const targets = getTargetGods();
+        const targets = this.resolveTargets(effect.target, player, opponent, targetGodId, targetGodIds);
 
         switch (effect.type) {
             case 'damage':
                 for (const target of targets) {
-                    // Vérifier si la cible a l'immunité aux faiblesses
-                    const hasWeaknessImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
-                    // Calculer les dégâts en prenant en compte les DEUX faiblesses (innée ET temporaire)
-                    // Si immunité, passer undefined pour les deux
-                    const { damage, isWeakness } = hasWeaknessImmunity
-                        ? { damage: effect.value || 0, isWeakness: false }
-                        : calculateDamageWithDualWeakness(
-                            effect.value || 0,
-                            card.element,
-                            target.card.weakness,
-                            target.temporaryWeakness
-                        );
-
-                    let damageToInflict = damage;
-
-                    // Vérifier s'il y a un bouclier actif
-                    const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                    if (shieldIndex !== -1) {
-                        const shield = target.statusEffects[shieldIndex];
-                        if (shield.stacks >= damageToInflict) {
-                            shield.stacks -= damageToInflict;
-                            damageToInflict = 0;
-                        } else {
-                            damageToInflict -= shield.stacks;
-                            shield.stacks = 0;
-                            // Retirer le statut si bouclier épuisé
-                            target.statusEffects.splice(shieldIndex, 1);
-                        }
-                    }
-
-                    target.currentHealth -= damageToInflict;
-
-                    if (target.currentHealth <= 0) {
-                        // Trouver le propriétaire du dieu
-                        const owner = player.gods.includes(target) ? player : opponent;
-                        this.handleGodDeath(owner, target);
-                    }
+                    dealDamage(target, effect.value || 0,
+                        player.gods.includes(target) ? player : opponent,
+                        this.state,
+                        { element: card.element }
+                    );
                 }
                 break;
 
             case 'heal':
                 for (const target of targets) {
-                    const healAmount = effect.value || 0;
-
-                    // Le soin fait les deux en même temps :
-                    // - Soigne de la valeur du soin
-                    // - ET retire du poison de la même valeur
-
-                    // 1. Retirer le poison (min entre heal et stacks de poison)
-                    const poisonIndex = target.statusEffects.findIndex(s => s.type === 'poison');
-                    if (poisonIndex !== -1) {
-                        const poisonToRemove = Math.min(healAmount, target.statusEffects[poisonIndex].stacks);
-                        target.statusEffects[poisonIndex].stacks -= poisonToRemove;
-                        if (target.statusEffects[poisonIndex].stacks <= 0) {
-                            target.statusEffects.splice(poisonIndex, 1);
-                        }
-                    }
-
-                    // 2. Soigner (indépendamment du poison), limité au max HP
-                    target.currentHealth = Math.min(
-                        target.currentHealth + healAmount,
-                        target.card.maxHealth
-                    );
+                    healGod(target, effect.value || 0);
                 }
                 break;
 
             case 'shield':
                 for (const target of targets) {
-                    // Ajouter uniquement le statut bouclier (pas de PV)
-                    this.addStatus(target, 'shield', effect.value || 0);
+                    addShield(target, effect.value || 0);
                 }
                 break;
 
-            case 'discard':
-                // Défaussement aléatoire de cartes de la main
-                // Utiliser le target de l'effet pour déterminer qui défausse
-                let discardPlayer: typeof player;
+            case 'discard': {
+                let discardPlayer: PlayerState;
                 if (effect.target === 'enemy_god' || effect.target === 'all_enemies') {
                     discardPlayer = opponent;
                 } else if (effect.target === 'ally_god' || effect.target === 'all_allies' || effect.target === 'self') {
                     discardPlayer = player;
                 } else {
-                    // Fallback à l'ancienne logique si pas de target défini
                     discardPlayer = targets.some(t => player.gods.includes(t)) ? player : opponent;
                 }
-                const discardCount = effect.value || 1;
-
-                for (let i = 0; i < discardCount; i++) {
+                const count = effect.value || 1;
+                for (let i = 0; i < count; i++) {
                     if (discardPlayer.hand.length > 0) {
-                        // Choisir une carte aléatoire à défausser
-                        const randomIndex = Math.floor(Math.random() * discardPlayer.hand.length);
-                        const cardToDiscard = discardPlayer.hand[randomIndex];
-                        discardPlayer.hand.splice(randomIndex, 1);
-                        this.cleanBlindCard(cardToDiscard);
-                        discardPlayer.discard.push(cardToDiscard);
+                        const rndIdx = Math.floor(Math.random() * discardPlayer.hand.length);
+                        const c = discardPlayer.hand[rndIdx];
+                        discardPlayer.hand.splice(rndIdx, 1);
+                        cleanBlindCard(c);
+                        discardPlayer.discard.push(c);
                     }
                 }
                 break;
+            }
 
             case 'energy':
-                player.energy += effect.value || 0;
+                player.energy = Math.min(player.energy + (effect.value || 0), MAX_ENERGY);
                 break;
 
             case 'draw':
                 for (let i = 0; i < (effect.value || 1); i++) {
                     if (player.deck.length > 0) {
-                        const card = player.deck.shift()!;
-                        player.hand.push(card);
+                        player.hand.push(player.deck.shift()!);
                     }
                 }
                 break;
 
-            case 'mill':
-                // Fait défausser des cartes du deck
-                // Si target === 'self', cible son propre deck, sinon l'adversaire
+            case 'mill': {
                 const millTarget = effect.target === 'self' ? player : opponent;
                 for (let i = 0; i < (effect.value || 1); i++) {
                     if (millTarget.deck.length > 0) {
-                        const cardToMill = millTarget.deck.shift()!;
-                        this.cleanBlindCard(cardToMill);
-                        millTarget.discard.push(cardToMill);
+                        const c = millTarget.deck.shift()!;
+                        cleanBlindCard(c);
+                        millTarget.discard.push(c);
                     }
                 }
                 break;
+            }
 
             case 'status':
                 for (const target of targets) {
                     if (effect.status) {
-                        this.addStatus(target, effect.status, effect.value || 1, effect.statusDuration);
+                        addStatus(target, effect.status as any, effect.value || 1, effect.statusDuration);
                     }
                 }
                 break;
@@ -832,1215 +801,165 @@ export class GameEngine {
             case 'remove_status':
                 for (const target of targets) {
                     if (effect.status) {
-                        this.removeStatus(target, effect.status);
+                        removeStatus(target, effect.status as any);
                     }
                 }
                 break;
 
-            case 'custom':
-                this.applyCustomEffect(effect.customEffectId || '', card, player, opponent, targets, targetGodId, selectedElement, lightningAction);
+            case 'custom': {
+                const effectId = effect.customEffectId || '';
+                const handler = customEffects.get(effectId);
+                if (handler) {
+                    const castingGod = player.gods.find(g => g.card.id === card.godId && !g.isDead);
+                    handler({
+                        engine: this,
+                        player,
+                        opponent,
+                        castingGod,
+                        card,
+                        targets,
+                        targetGodId,
+                        selectedElement,
+                        lightningAction
+                    });
+                } else {
+                    console.warn(`Effet custom non implémenté: ${effectId}`);
+                }
                 break;
+            }
         }
     }
 
-    /**
-     * Applique un effet personnalisé
-     */
-    private applyCustomEffect(
-        effectId: string,
-        card: SpellCard,
+    // ─── Résolution des cibles ──────────
+
+    private resolveTargets(
+        targetType: string | undefined,
         player: PlayerState,
         opponent: PlayerState,
-        targets: GodState[],
         targetGodId?: string,
-        selectedElement?: import('@/types/cards').Element,
-        lightningAction?: 'apply' | 'remove'
-    ): void {
-        const castingGod = player.gods.find(g => g.card.id === card.godId && !g.isDead);
-
-        switch (effectId) {
-            // ========================================
-            // DEMETER - Résurrection
-            // ========================================
-            case 'revive_god':
-                // Ressuscite le dieu mort ciblé avec 8 PV
-                if (targetGodId) {
-                    const godToRevive = player.gods.find(g => g.card.id === targetGodId && g.isDead);
-                    if (godToRevive) {
-                        godToRevive.isDead = false;
-                        godToRevive.currentHealth = 8;
-                        godToRevive.statusEffects = [];
-                        godToRevive.temporaryWeakness = undefined;
-
-                        // Récupérer les sorts du dieu depuis removedCards et les remettre dans le deck
-                        const godId = godToRevive.card.id;
-                        const cardsToReturn: SpellCard[] = [];
-
-                        // Trouver les cartes du dieu dans removedCards
-                        player.removedCards = player.removedCards.filter(card => {
-                            if (card.godId === godId) {
-                                cardsToReturn.push(card);
-                                return false; // Retirer de removedCards
-                            }
-                            return true;
-                        });
-
-                        // Ajouter les cartes au deck
-                        player.deck.push(...cardsToReturn);
-
-                        // Mélanger le deck (Fisher-Yates)
-                        for (let i = player.deck.length - 1; i > 0; i--) {
-                            const j = Math.floor(Math.random() * (i + 1));
-                            [player.deck[i], player.deck[j]] = [player.deck[j], player.deck[i]];
-                        }
-                    }
-                }
-                break;
-
-            // ========================================
-            // SÉLÉNÉ - Résurrection de 2 alliés
-            // ========================================
-            case 'resurrect_two': {
-                // Ressuscite les 2 premiers dieux morts avec 3 PV chacun
-                const deadGods = player.gods.filter(g => g.isDead);
-                const godsToResurrect = deadGods.slice(0, 2);
-
-                for (const godToRevive of godsToResurrect) {
-                    godToRevive.isDead = false;
-                    godToRevive.currentHealth = 3;
-                    godToRevive.statusEffects = [];
-                    godToRevive.temporaryWeakness = undefined;
-                    // Réinitialiser les propriétés zombie si c'était un zombie
-                    godToRevive.isZombie = false;
-                    godToRevive.zombieCard = undefined;
-                    godToRevive.zombieOwnerId = undefined;
-
-                    // Récupérer les sorts du dieu depuis removedCards et les remettre dans le deck
-                    const godId = godToRevive.card.id;
-                    const cardsToReturn: SpellCard[] = [];
-
-                    // Trouver les cartes du dieu dans removedCards
-                    player.removedCards = player.removedCards.filter(card => {
-                        if (card.godId === godId) {
-                            cardsToReturn.push(card);
-                            return false; // Retirer de removedCards
-                        }
-                        return true;
-                    });
-
-                    // Ajouter les cartes au deck
-                    player.deck.push(...cardsToReturn);
-                }
-
-                // Mélanger le deck une fois à la fin (Fisher-Yates)
-                for (let i = player.deck.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [player.deck[i], player.deck[j]] = [player.deck[j], player.deck[i]];
-                }
-                break;
-            }
-
-            // ========================================
-            // DIONYSOS - Soin par poison
-            // ========================================
-            case 'heal_by_poison':
-                // Soigne un personnage du nombre total de poisons sur les ennemis
-                let totalPoisonStacks = 0;
-                for (const god of opponent.gods) {
-                    if (!god.isDead) {
-                        totalPoisonStacks += this.getStatusStacks(god, 'poison');
-                    }
-                }
-                if (totalPoisonStacks > 0 && targets.length > 0) {
-                    const healTarget = targets[0];
-
-                    // 1. Retirer le poison du dieu soigné (min entre heal et stacks de poison)
-                    const poisonIndex = healTarget.statusEffects.findIndex(s => s.type === 'poison');
-                    if (poisonIndex !== -1) {
-                        const poisonToRemove = Math.min(totalPoisonStacks, healTarget.statusEffects[poisonIndex].stacks);
-                        healTarget.statusEffects[poisonIndex].stacks -= poisonToRemove;
-                        if (healTarget.statusEffects[poisonIndex].stacks <= 0) {
-                            healTarget.statusEffects.splice(poisonIndex, 1);
-                        }
-                    }
-
-                    // 2. Soigner
-                    healTarget.currentHealth = Math.min(
-                        healTarget.currentHealth + totalPoisonStacks,
-                        healTarget.card.maxHealth
-                    );
-                }
-                break;
-
-            // ========================================
-            // HADÈS - Soin si kill
-            // ========================================
-            case 'heal_if_kill_8':
-                // Vérifie si la cible est morte après les dégâts de la carte
-                if (targetGodId) {
-                    const target = opponent.gods.find(g => g.card.id === targetGodId);
-                    if (target && target.isDead && castingGod) {
-                        castingGod.currentHealth = Math.min(
-                            castingGod.currentHealth + 8,
-                            castingGod.card.maxHealth
-                        );
-                    }
-                }
-                break;
-
-            // ========================================
-            // HADÈS - Vol de vie
-            // ========================================
-            case 'lifesteal_damage':
-                // Soigne du nombre de dégâts réellement infligés (avec bonus faiblesse)
-                // Utilise la dernière cible utilisée (targetGodId) et recalcule les dégâts
-                if (castingGod && targetGodId) {
-                    const target = opponent.gods.find(g => g.card.id === targetGodId);
-                    if (target) {
-                        // Vérifier si le dieu a l'immunité aux faiblesses
-                        const hasWeaknessImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
-                        // Calculer les dégâts réels avec les deux faiblesses
-                        const { damage } = hasWeaknessImmunity
-                            ? { damage: 3 }
-                            : calculateDamageWithDualWeakness(3, card.element, target.card.weakness, target.temporaryWeakness);
-
-                        // 1. Retirer le poison (min entre heal et stacks de poison)
-                        const poisonIndex = castingGod.statusEffects.findIndex(s => s.type === 'poison');
-                        if (poisonIndex !== -1) {
-                            const poisonToRemove = Math.min(damage, castingGod.statusEffects[poisonIndex].stacks);
-                            castingGod.statusEffects[poisonIndex].stacks -= poisonToRemove;
-                            if (castingGod.statusEffects[poisonIndex].stacks <= 0) {
-                                castingGod.statusEffects.splice(poisonIndex, 1);
-                            }
-                        }
-
-                        // 2. Soigner (limité au max HP)
-                        castingGod.currentHealth = Math.min(
-                            castingGod.currentHealth + damage,
-                            castingGod.card.maxHealth
-                        );
-                    }
-                }
-                break;
-
-            // ========================================
-            // APOLLON - Drain d'énergie
-            // ========================================
-            case 'remove_energy_1':
-                opponent.energy = Math.max(0, opponent.energy - 1);
-                break;
-
-            case 'remove_energy_2':
-                opponent.energy = Math.max(0, opponent.energy - 2);
-                break;
-
-            // ========================================
-            // ARÈS - Dégâts égaux aux PV perdus
-            // ========================================
-            case 'damage_equal_lost_health':
-                if (castingGod && targetGodId) {
-                    const lostHealth = castingGod.card.maxHealth - castingGod.currentHealth;
-                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (target && lostHealth > 0) {
-                        // Appliquer le bonus de faiblesse avec les deux faiblesses
-                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                            lostHealth, card.element, target.card.weakness, target.temporaryWeakness
-                        );
-
-                        // Gestion du bouclier
-                        let damageToInflict = finalDamage;
-                        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                        if (shieldIndex !== -1) {
-                            const shield = target.statusEffects[shieldIndex];
-                            if (shield.stacks >= damageToInflict) {
-                                shield.stacks -= damageToInflict;
-                                damageToInflict = 0;
-                            } else {
-                                damageToInflict -= shield.stacks;
-                                shield.stacks = 0;
-                                target.statusEffects.splice(shieldIndex, 1);
-                            }
-                        }
-
-                        target.currentHealth -= damageToInflict;
-                        if (target.currentHealth <= 0) {
-                            this.handleGodDeath(opponent, target);
-                        }
-                    }
-                }
-                break;
-
-            // ========================================
-            // ARTÉMIS - Appliquer faiblesse
-            // ========================================
-            case 'apply_weakness':
-                // Applique une faiblesse temporaire à la cible
-                // L'élément est passé via selectedElement dans l'action
-                if (selectedElement) {
-                    for (const target of targets) {
-                        target.temporaryWeakness = selectedElement;
-                    }
-                } else {
-                    // Si aucun élément sélectionné, applique la faiblesse de l'attaquant par défaut
-                    for (const target of targets) {
-                        target.temporaryWeakness = card.element;
-                    }
-                }
-                break;
-
-            // ========================================
-            // APHRODITE - Nettoyage des effets négatifs
-            // ========================================
-            case 'cleanse':
-                // Enlève tous les effets négatifs d'une cible
-                for (const target of targets) {
-                    target.statusEffects = target.statusEffects.filter(
-                        s => s.type === 'shield' // Garde uniquement le bouclier (effet positif)
-                    );
-                    target.temporaryWeakness = undefined; // Retire aussi la faiblesse temporaire
-                }
-                break;
-
-            case 'cleanse_all_allies':
-                // Enlève tous les effets négatifs de tous les alliés
-                for (const god of player.gods) {
-                    if (!god.isDead) {
-                        god.statusEffects = god.statusEffects.filter(
-                            s => s.type === 'shield'
-                        );
-                        god.temporaryWeakness = undefined;
-                    }
-                }
-                break;
-
-            // ========================================
-            // ZEUS - Effets de foudre (toggle)
-            // ========================================
-            case 'lightning_toggle':
-            case 'lightning_toggle_multi':
-                // Applique ou enlève ⚡ de cibles selon le choix du joueur. +2 dégâts par ⚡ enlevée
-                for (const target of targets) {
-                    const lightningStacks = this.getStatusStacks(target, 'lightning');
-                    // Respecter le choix de l'utilisateur s'il est défini
-                    const action = lightningAction !== undefined
-                        ? lightningAction
-                        : (lightningStacks > 0 ? 'remove' : 'apply');
-
-                    if (action === 'remove' && lightningStacks > 0) {
-                        // Calcul des dégâts bonus avec prise en compte des deux faiblesses
-                        const { damage: bonusDamage } = calculateDamageWithDualWeakness(
-                            lightningStacks * 2,
-                            'lightning',
-                            target.card.weakness,
-                            target.temporaryWeakness
-                        );
-
-                        // Gestion bouclier et dégâts
-                        let damageToInflict = bonusDamage;
-                        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                        if (shieldIndex !== -1) {
-                            const shield = target.statusEffects[shieldIndex];
-                            if (shield.stacks >= damageToInflict) {
-                                shield.stacks -= damageToInflict;
-                                damageToInflict = 0;
-                            } else {
-                                damageToInflict -= shield.stacks;
-                                shield.stacks = 0;
-                                target.statusEffects.splice(shieldIndex, 1);
-                            }
-                        }
-
-                        target.currentHealth -= damageToInflict;
-                        this.removeStatus(target, 'lightning');
-
-                        if (target.currentHealth <= 0) {
-                            const owner = player.gods.includes(target) ? player : opponent;
-                            this.handleGodDeath(owner, target);
-                        }
-                    } else if (action === 'apply') {
-                        this.addStatus(target, 'lightning', 1);
-                    }
-                    // Si action === 'remove' mais pas de marques, ne rien faire
-                }
-                break;
-
-            case 'lightning_toggle_all':
-                for (const god of opponent.gods) {
-                    if (!god.isDead) {
-                        const lightningStacks = this.getStatusStacks(god, 'lightning');
-                        // Respecter le choix de l'utilisateur s'il est défini
-                        // Fallback auto seulement si aucune action choisie
-                        const action = lightningAction !== undefined
-                            ? lightningAction
-                            : (lightningStacks > 0 ? 'remove' : 'apply');
-
-                        if (action === 'remove' && lightningStacks > 0) {
-                            const { damage: bonusDamage } = calculateDamageWithDualWeakness(
-                                lightningStacks * 2,
-                                'lightning',
-                                god.card.weakness,
-                                god.temporaryWeakness
-                            );
-
-                            let damageToInflict = bonusDamage;
-                            const shieldIndex = god.statusEffects.findIndex(s => s.type === 'shield');
-                            if (shieldIndex !== -1) {
-                                const shield = god.statusEffects[shieldIndex];
-                                if (shield.stacks >= damageToInflict) {
-                                    shield.stacks -= damageToInflict;
-                                    damageToInflict = 0;
-                                } else {
-                                    damageToInflict -= shield.stacks;
-                                    shield.stacks = 0;
-                                    god.statusEffects.splice(shieldIndex, 1);
-                                }
-                            }
-
-                            god.currentHealth -= damageToInflict;
-                            this.removeStatus(god, 'lightning');
-
-                            if (god.currentHealth <= 0) {
-                                this.handleGodDeath(opponent, god);
-                            }
-                        } else if (action === 'apply') {
-                            this.addStatus(god, 'lightning', 1);
-                        }
-                        // Si action === 'remove' mais pas de marques, ne rien faire
-                    }
-                }
-                break;
-
-
-
-            // ========================================
-            // POSEIDON - Effets spéciaux
-            // ========================================
-            case 'conductive_lightning':
-                // Inflige 1 dégât et applique 1 marque de foudre à chaque cible
-                for (const target of targets) {
-                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                        1,
-                        card.element,
-                        target.card.weakness,
-                        target.temporaryWeakness
-                    );
-
-                    let damageToInflict = finalDamage;
-                    const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                    if (shieldIndex !== -1) {
-                        const shield = target.statusEffects[shieldIndex];
-                        if (shield.stacks >= damageToInflict) {
-                            shield.stacks -= damageToInflict;
-                            damageToInflict = 0;
-                        } else {
-                            damageToInflict -= shield.stacks;
-                            shield.stacks = 0;
-                            target.statusEffects.splice(shieldIndex, 1);
-                        }
-                    }
-
-                    target.currentHealth -= damageToInflict;
-                    this.addStatus(target, 'lightning', 1);
-
-                    if (target.currentHealth <= 0) {
-                        const owner = player.gods.includes(target) ? player : opponent;
-                        this.handleGodDeath(owner, target);
-                    }
-                }
-                break;
-
-            case 'tsunami_damage':
-                // Inflige 3 dégâts par carte du dieu ciblé qui a été meulée récemment
-                // Le mill a déjà été appliqué, on compte les 5 dernières cartes meulées
-                if (targetGodId) {
-                    const targetGod = opponent.gods.find(g => g.card.id === targetGodId);
-                    if (targetGod && !targetGod.isDead) {
-                        // Compter les cartes récemment meulées (5 dernières) appartenant à ce dieu
-                        const recentDiscard = opponent.discard.slice(-5);
-                        const cardsFromTargetGod = recentDiscard.filter(c => c.godId === targetGodId);
-                        const baseDamage = cardsFromTargetGod.length * 3;
-
-                        if (baseDamage > 0) {
-                            // Appliquer le bonus de faiblesse
-                            const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                                baseDamage, card.element, targetGod.card.weakness, targetGod.temporaryWeakness
-                            );
-
-                            // Gestion du bouclier
-                            let damageToInflict = finalDamage;
-                            const shieldIndex = targetGod.statusEffects.findIndex(s => s.type === 'shield');
-                            if (shieldIndex !== -1) {
-                                const shield = targetGod.statusEffects[shieldIndex];
-                                if (shield.stacks >= damageToInflict) {
-                                    shield.stacks -= damageToInflict;
-                                    damageToInflict = 0;
-                                } else {
-                                    damageToInflict -= shield.stacks;
-                                    shield.stacks = 0;
-                                    targetGod.statusEffects.splice(shieldIndex, 1);
-                                }
-                            }
-
-                            targetGod.currentHealth -= damageToInflict;
-                            if (targetGod.currentHealth <= 0) {
-                                this.handleGodDeath(opponent, targetGod);
-                            }
-                        }
-                    }
-                }
-                break;
-
-            case 'prison_mill':
-                // Meule du nombre d'ennemis touchés (vivants)
-                const livingEnemies = opponent.gods.filter(g => !g.isDead).length;
-                for (let i = 0; i < livingEnemies; i++) {
-                    if (opponent.deck.length > 0) {
-                        const card = opponent.deck.shift()!;
-                        this.cleanBlindCard(card);
-                        opponent.discard.push(card);
-                    }
-                }
-                break;
-
-            case 'damage_equal_lost_health':
-                if (castingGod) {
-                    const lostHealth = castingGod.card.maxHealth - castingGod.currentHealth;
-                    if (lostHealth > 0) {
-                        for (const target of targets) {
-                            const { damage } = calculateDamageWithDualWeakness(
-                                lostHealth, card.element, target.card.weakness, target.temporaryWeakness
-                            );
-
-                            let damageToInflict = damage;
-                            const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                            if (shieldIndex !== -1) {
-                                const shield = target.statusEffects[shieldIndex];
-                                if (shield.stacks >= damageToInflict) {
-                                    shield.stacks -= damageToInflict;
-                                    damageToInflict = 0;
-                                } else {
-                                    damageToInflict -= shield.stacks;
-                                    shield.stacks = 0;
-                                    target.statusEffects.splice(shieldIndex, 1);
-                                }
-                            }
-
-                            target.currentHealth -= damageToInflict;
-                            if (target.currentHealth <= 0) {
-                                const owner = player.gods.includes(target) ? player : opponent;
-                                this.handleGodDeath(owner, target);
-                            }
-                        }
-                    }
-                }
-                break;
-
-            // ========================================
-            // NYX - Effets de manipulation de main
-            // ========================================
-            case 'shuffle_hand_draw_blind':
-            case 'shuffle_hand_draw_blind_2':
-                // Effet entièrement géré par le store via CardSelectionModal
-                // Le joueur (Nyx) choisit les cartes adverses à mélanger
-                // puis confirmEnemyCardSelection applique l'effet complet
-                break;
-
-            // ========================================
-            // HESTIA - Effets de recyclage
-            // Ces effets sont gérés par le store après sélection des cartes par le joueur
-            // ========================================
-            case 'recycle_from_discard':
-                // Géré par le store via CardSelectionModal
-                // Ne rien faire ici - le store appellera confirmCardSelection
-                break;
-
-            case 'put_cards_bottom':
-                // Géré par le store via CardSelectionModal
-                // Ne rien faire ici - le store appellera confirmCardSelection
-                break;
-
-            // ========================================
-            // ATHÉNA - Effets de protection contre faiblesse
-            // ========================================
-            case 'remove_weakness_1_turn':
-                // Retire la faiblesse d'un allié pendant 1 tour adverse
-                for (const target of targets) {
-                    if (player.gods.includes(target) && !target.isDead) {
-                        this.addStatus(target, 'weakness_immunity', 1, 1);
-                    }
-                }
-                break;
-
-            case 'remove_all_weakness_3_turns':
-                // Tous les alliés perdent leur faiblesse pendant 3 tours adverses
-                for (const god of player.gods) {
-                    if (!god.isDead) {
-                        this.addStatus(god, 'weakness_immunity', 1, 3);
-                    }
-                }
-                break;
-
-            // ========================================
-            // HESTIA - Soins basés sur l'énergie
-            // ========================================
-            case 'heal_by_energy':
-                // Soigne un allié de la valeur totale de l'énergie
-                for (const target of targets) {
-                    if (player.gods.includes(target) && !target.isDead) {
-                        const healAmount = player.energy;
-                        // Retirer le poison d'abord
-                        const poisonIndex = target.statusEffects.findIndex(s => s.type === 'poison');
-                        if (poisonIndex !== -1) {
-                            const poisonToRemove = Math.min(healAmount, target.statusEffects[poisonIndex].stacks);
-                            target.statusEffects[poisonIndex].stacks -= poisonToRemove;
-
-                            if (target.statusEffects[poisonIndex].stacks <= 0) {
-                                target.statusEffects.splice(poisonIndex, 1);
-                            }
-                        }
-
-                        // Soigner de la valeur totale (indépendamment du poison retiré)
-                        target.currentHealth = Math.min(target.currentHealth + healAmount, target.card.maxHealth);
-                    }
-                }
-                break;
-
-            // ========================================
-            // NYX - Mélange main adverse et pioche à l'envers
-            // ========================================
-            case 'shuffle_hand_draw_blind':
-                // Mélange 1 carte aléatoire de la main adverse dans son deck, pioche 1 à l'envers
-                if (opponent.hand.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * opponent.hand.length);
-                    const cardToShuffle = opponent.hand.splice(randomIndex, 1)[0];
-                    // Retirer le flag hidden s'il existait
-                    cardToShuffle.isHiddenFromOwner = false;
-                    opponent.deck.push(cardToShuffle);
-                    this.shuffleArray(opponent.deck);
-
-                    // Piocher 1 carte à l'envers
-                    if (opponent.deck.length > 0) {
-                        const drawnCard = opponent.deck.shift()!;
-                        drawnCard.isHiddenFromOwner = true;
-                        drawnCard.revealedToPlayerId = player.id; // Le joueur qui a lancé Nyx peut voir cette carte
-                        opponent.hand.push(drawnCard);
-                    }
-                }
-                break;
-
-            case 'shuffle_hand_draw_blind_2':
-                // Cet effet est géré par le store via le modal de sélection de cartes adverses
-                // Le joueur choisit les cartes, et confirmEnemyCardSelection applique l'effet
-                break;
-
-            case 'shuffle_all_hand_draw_blind':
-                // Mélange TOUTE la main adverse dans son deck, pioche 5 à l'envers
-                const handSize = opponent.hand.length;
-                while (opponent.hand.length > 0) {
-                    const card = opponent.hand.pop()!;
-                    card.isHiddenFromOwner = false;
-                    opponent.deck.push(card);
-                }
-                this.shuffleArray(opponent.deck);
-
-                // Piocher 5 cartes à l'envers (ou moins si deck insuffisant)
-                const cardsToDraw = Math.min(5, opponent.deck.length);
-                for (let i = 0; i < cardsToDraw; i++) {
-                    if (opponent.deck.length > 0) {
-                        const drawnCard = opponent.deck.shift()!;
-                        drawnCard.isHiddenFromOwner = true;
-                        drawnCard.revealedToPlayerId = player.id; // Le joueur qui a lancé Nyx peut voir cette carte
-                        opponent.hand.push(drawnCard);
-                    }
-                }
-                break;
-
-
-            // ========================================
-            // POSÉIDON - Prison Aquatique (meule du nombre d'ennemis touchés)
-            // ========================================
-            case 'prison_mill':
-                // Compte les ennemis vivants (qui ont été touchés par les dégâts all_enemies)
-                const enemyCount = opponent.gods.filter(g => !g.isDead).length;
-                // Meule ce nombre de cartes
-                for (let i = 0; i < enemyCount; i++) {
-                    if (opponent.deck.length > 0) {
-                        const milledCard = opponent.deck.shift()!;
-                        this.cleanBlindCard(milledCard);
-                        opponent.discard.push(milledCard);
-                    }
-                }
-                break;
-
-            // ========================================
-            // DEMETER - Distribution de soins
-            // ========================================
-            case 'distribute_heal_5':
-                // Pour le joueur humain (player1), le modal gère la distribution
-                // dans confirmHealDistribution du gameStore.
-                // Pour l'IA (player2), on distribue automatiquement et équitablement.
-                if (player.id !== 'player1') {
-                    // Mode IA : distribution automatique
-                    const aliveAllies = player.gods.filter(g => !g.isDead);
-                    if (aliveAllies.length > 0) {
-                        const healPerAlly = Math.floor(5 / aliveAllies.length);
-                        const remainder = 5 % aliveAllies.length;
-
-                        aliveAllies.forEach((ally, index) => {
-                            // Les premiers alliés reçoivent 1 soin de plus pour distribuer le reste
-                            const healAmount = healPerAlly + (index < remainder ? 1 : 0);
-                            ally.currentHealth = Math.min(
-                                ally.currentHealth + healAmount,
-                                ally.card.maxHealth
-                            );
-                        });
-                    }
-                }
-                // Pour player1, ne rien faire - le modal gère
-                break;
-
-            // ========================================
-            // ARTÉMIS - Appliquer une faiblesse
-            // ========================================
-            case 'apply_weakness':
-                // Applique une faiblesse temporaire de l'élément choisi à la cible
-                // Duration 2 : survit à la fin du tour actuel de P2 (si appliqué sur P2) et au tour de P1
-                if (targetGodId && selectedElement) {
-                    const target = opponent.gods.find(g => g.card.id === targetGodId);
-                    if (target && !target.isDead) {
-                        this.addStatus(target, 'weakness', 1, 2);
-                        // Hack : utiliser temporaryWeakness pour stocker l'élément de la faiblesse
-                        // Idéalement on devrait pouvoir stocker des métadonnées sur le statut
-                        target.temporaryWeakness = selectedElement;
-                    }
-                }
-                break;
-
-            // ========================================
-            // HERMÈS - Rejouer une action
-            // ========================================
-            case 'replay_action':
-                // Permet de jouer une autre carte ce tour
-                // On remet hasPlayedCard à false pour permettre de rejouer
-                player.hasPlayedCard = false;
-                break;
-
-            // ========================================
-            // THANATOS - Coup Mortel (2 + 1 par mort)
-            // ========================================
-            case 'damage_plus_dead_allies': {
-                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
-                const totalDamage = 2 + deadAlliesCount;
-
-                if (totalDamage > 0 && targetGodId) {
-                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (target) {
-                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
-                        );
-                        this.applyDamageWithShield(target, finalDamage, opponent);
-                    }
-                }
-                break;
-            }
-
-            // ========================================
-            // THANATOS - Décharge Mortelle (2 + 2 par mort)
-            // ========================================
-            case 'damage_plus_2x_dead_allies': {
-                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
-                const totalDamage = 2 + (2 * deadAlliesCount);
-
-                if (totalDamage > 0 && targetGodId) {
-                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (target) {
-                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
-                        );
-                        this.applyDamageWithShield(target, finalDamage, opponent);
-                    }
-                }
-                break;
-            }
-
-            // ========================================
-            // THANATOS - Happement Mortuaire (AOE 1 + 1 par mort)
-            // ========================================
-            case 'aoe_damage_plus_dead_allies': {
-                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
-                const totalDamage = 1 + deadAlliesCount;
-
-                const enemies = opponent.gods.filter(g => !g.isDead);
-                for (const enemy of enemies) {
-                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                        totalDamage, card.element, enemy.card.weakness, enemy.temporaryWeakness
-                    );
-                    this.applyDamageWithShield(enemy, finalDamage, opponent);
-                }
-                break;
-            }
-
-            // ========================================
-            // THANATOS - Dégâts 5× alliés morts
-            // ========================================
-            case 'damage_5x_dead_allies':
-                // Inflige 5 × nombre d'alliés morts à une cible
-                const deadAlliesCount = player.gods.filter(g => g.isDead).length;
-                const totalDamage5x = 5 * deadAlliesCount;
-
-                if (totalDamage5x > 0 && targetGodId) {
-                    const target5x = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (target5x) {
-                        // Calculer avec faiblesse
-                        const { damage: finalDamage5x } = calculateDamageWithDualWeakness(
-                            totalDamage5x, card.element, target5x.card.weakness, target5x.temporaryWeakness
-                        );
-
-                        // Gestion du bouclier
-                        let damageToInflict5x = finalDamage5x;
-                        const shieldIndex5x = target5x.statusEffects.findIndex(s => s.type === 'shield');
-                        if (shieldIndex5x !== -1) {
-                            const shield = target5x.statusEffects[shieldIndex5x];
-                            if (shield.stacks >= damageToInflict5x) {
-                                shield.stacks -= damageToInflict5x;
-                                damageToInflict5x = 0;
-                            } else {
-                                damageToInflict5x -= shield.stacks;
-                                shield.stacks = 0;
-                                target5x.statusEffects.splice(shieldIndex5x, 1);
-                            }
-                        }
-
-                        target5x.currentHealth -= damageToInflict5x;
-                        if (target5x.currentHealth <= 0) {
-                            this.handleGodDeath(opponent, target5x);
-                        }
-                    }
-                }
-                break;
-
-            // ========================================
-            // NIKÉ - Succès Flamboyant (1 + 1 par ennemi mort)
-            // ========================================
-            case 'damage_plus_dead_enemies': {
-                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
-                const totalDamage = 1 + deadEnemiesCount;
-
-                if (totalDamage > 0 && targetGodId) {
-                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (target) {
-                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
-                        );
-                        this.applyDamageWithShield(target, finalDamage, opponent);
-                    }
-                }
-                break;
-            }
-
-            // ========================================
-            // NIKÉ - Coup Triomphant (2 + 2 par ennemi mort)
-            // ========================================
-            case 'damage_plus_2x_dead_enemies': {
-                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
-                const totalDamage = 2 + (2 * deadEnemiesCount);
-
-                if (totalDamage > 0 && targetGodId) {
-                    const target = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (target) {
-                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                            totalDamage, card.element, target.card.weakness, target.temporaryWeakness
-                        );
-                        this.applyDamageWithShield(target, finalDamage, opponent);
-                    }
-                }
-                break;
-            }
-
-            // ========================================
-            // NIKÉ - Consécration (AOE 1 + 1 par ennemi mort)
-            // ========================================
-            case 'aoe_damage_plus_dead_enemies': {
-                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
-                const totalDamage = 1 + deadEnemiesCount;
-
-                const enemies = opponent.gods.filter(g => !g.isDead);
-                for (const enemy of enemies) {
-                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                        totalDamage, card.element, enemy.card.weakness, enemy.temporaryWeakness
-                    );
-                    this.applyDamageWithShield(enemy, finalDamage, opponent);
-                }
-                break;
-            }
-
-            // ========================================
-            // NIKÉ - Apothéose (AOE 2 + 2 par ennemi mort)
-            // ========================================
-            case 'aoe_damage_plus_2x_dead_enemies': {
-                const deadEnemiesCount = opponent.gods.filter(g => g.isDead).length;
-                const totalDamage = 2 + (2 * deadEnemiesCount);
-
-                const enemies = opponent.gods.filter(g => !g.isDead);
-                for (const enemy of enemies) {
-                    const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                        totalDamage, card.element, enemy.card.weakness, enemy.temporaryWeakness
-                    );
-                    this.applyDamageWithShield(enemy, finalDamage, opponent);
-                }
-                break;
-            }
-
-            // ========================================
-            // HÉPHAÏSTOS - Bouclier = dégâts infligés
-            // ========================================
-            case 'gain_current_shield':
-                // Gagne en bouclier le nombre de dégâts infligés (avec bonus faiblesse)
-                if (castingGod && targetGodId) {
-                    const targetForShield = opponent.gods.find(g => g.card.id === targetGodId);
-                    if (targetForShield) {
-                        // Calculer les dégâts réels (2 de base pour Absorption d'Armure)
-                        const baseDamage = 2;
-                        const { damage: realDamage } = calculateDamageWithDualWeakness(
-                            baseDamage, card.element, targetForShield.card.weakness, targetForShield.temporaryWeakness
-                        );
-                        // Ajouter le bouclier au lanceur
-                        this.addStatus(castingGod, 'shield', realDamage);
-                    }
-                }
-                break;
-
-            // ========================================
-            // HÉPHAÏSTOS - Dégâts = 3 + boucliers actuels
-            // ========================================
-            case 'damage_plus_shield':
-                // Inflige 3 + nombre de boucliers du lanceur
-                if (castingGod && targetGodId) {
-                    const targetDestruction = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
-                    if (targetDestruction) {
-                        // Calculer les boucliers actuels du lanceur
-                        const shieldEffect = castingGod.statusEffects.find(s => s.type === 'shield');
-                        const currentShields = shieldEffect?.stacks || 0;
-                        const totalDamageBase = 3 + currentShields;
-
-                        // Calculer avec faiblesse
-                        const { damage: finalDamage } = calculateDamageWithDualWeakness(
-                            totalDamageBase, card.element, targetDestruction.card.weakness, targetDestruction.temporaryWeakness
-                        );
-
-                        // Gestion du bouclier de la cible
-                        let damageToInflict = finalDamage;
-                        const targetShieldIndex = targetDestruction.statusEffects.findIndex(s => s.type === 'shield');
-                        if (targetShieldIndex !== -1) {
-                            const shield = targetDestruction.statusEffects[targetShieldIndex];
-                            if (shield.stacks >= damageToInflict) {
-                                shield.stacks -= damageToInflict;
-                                damageToInflict = 0;
-                            } else {
-                                damageToInflict -= shield.stacks;
-                                shield.stacks = 0;
-                                targetDestruction.statusEffects.splice(targetShieldIndex, 1);
-                            }
-                        }
-
-                        targetDestruction.currentHealth -= damageToInflict;
-                        if (targetDestruction.currentHealth <= 0) {
-                            this.handleGodDeath(opponent, targetDestruction);
-                        }
-                    }
-                }
-                break;
-
-            // ========================================
-            // PERSÉPHONE - Récupérer une carte de la défausse
-            // ========================================
-            case 'retrieve_discard':
-                // Cet effet est géré par le modal de sélection dans le GameStore
-                // Le GameBoard détecte cet effet et ouvre le modal
-                // Rien à faire ici, le store s'en occupe
-                break;
-
-            // ========================================
-            // CHIONÉ - Dégâts de zone (splash)
-            // ========================================
-            case 'splash_damage':
-                if (targetGodId) {
-                    const targetIndex = opponent.gods.findIndex(g => g.card.id === targetGodId);
-                    if (targetIndex !== -1) {
-                        // Identifier les voisins (gauche et droite)
-                        const neighbors: GodState[] = [];
-
-                        // Voisin de gauche
-                        if (targetIndex > 0) {
-                            neighbors.push(opponent.gods[targetIndex - 1]);
-                        }
-                        // Voisin de droite
-                        if (targetIndex < opponent.gods.length - 1) {
-                            neighbors.push(opponent.gods[targetIndex + 1]);
-                        }
-
-                        // Appliquer les dégâts aux voisins
-                        for (const neighbor of neighbors) {
-                            if (!neighbor.isDead) {
-                                this.applyDamageWithShield(neighbor, 2, opponent);
-                                // Vérifier la mort
-                                if (neighbor.currentHealth <= 0) {
-                                    this.handleGodDeath(opponent, neighbor);
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-
-            // ========================================
-            // PERSÉPHONE - Copier un sort de la défausse
-            // ========================================
-            case 'copy_discard_spell':
-                // Cet effet est géré par le modal de sélection dans le GameStore
-                // Le GameBoard détecte cet effet et ouvre le modal
-                // Rien à faire ici, le store s'en occupe
-                break;
-
-            // ========================================
-            // ZÉPHYR - Recyclage sans fatigue
-            // ========================================
-            case 'free_recycle':
-                // Cet effet est géré par le modal de sélection de joueur dans le GameStore
-                // Le GameBoard détecte cet effet et ouvre le modal de choix
-                // Rien à faire ici, le store s'en occupe
-                break;
-
-            // ========================================
-            // PERSÉPHONE - Défausse optionnelle pour bonus
-            // ========================================
-            case 'optional_mill_boost':
-                // Cet effet est géré par le modal de confirmation dans le GameStore
-                // Le GameBoard détecte cet effet et ouvre le modal Oui/Non
-                // Rien à faire ici, le store s'en occupe
-                break;
-
-            // ========================================
-            // ZÉPHYR - Choisir une carte adverse à défausser
-            // ========================================
-            case 'choose_discard_enemy':
-                // Cet effet est géré par le modal de sélection de cartes adverses dans le GameStore
-                // Le GameBoard détecte cet effet et ouvre le modal
-                // Rien à faire ici, le store s'en occupe
-                break;
-
-            // ========================================
-            // PERSÉPHONE - Resurrection temporaire (zombie)
-            // ========================================
-            case 'temp_resurrect':
-                // Cet effet est géré par le modal de sélection de dieu mort dans le GameStore
-                // Le GameBoard détecte cet effet et ouvre le modal
-                // Rien à faire ici, le store s'en occupe
-                break;
-
-            // ========================================
-            // HERMÈS - Rejouer une action
-            // ========================================
-            case 'replay_action':
-                // Remet hasPlayedCard à false pour permettre au joueur de jouer une autre carte
-                player.hasPlayedCard = false;
-                break;
-
-            // ========================================
-            // ZÉPHYR - Vent de Face (shuffle_god_cards)
-            // ========================================
-            case 'shuffle_god_cards':
-                // Cet effet est géré par le store via le modal de sélection de dieu
-                // Le joueur choisit un dieu, et confirmGodSelection applique l'effet
-                break;
-
-            default:
-                console.warn(`Effet custom non implémenté: ${effectId}`);
-                break;
-        }
-    }
-
-    /**
-     * Ajoute un effet de statut à un dieu
-     */
-    private addStatus(god: GodState, status: StatusEffect, stacks: number, duration?: number): void {
-        // La régénération (soin) retire le poison
-        if (status === 'regen') {
-            const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
-            if (poisonIndex !== -1) {
-                god.statusEffects.splice(poisonIndex, 1);
-            }
-        }
-
-        const existing = god.statusEffects.find(s => s.type === status);
-        if (existing) {
-            existing.stacks += stacks;
-            if (duration) existing.duration = duration;
-        } else {
-            god.statusEffects.push({ type: status, stacks, duration });
-        }
-    }
-
-    /**
-     * Retire un effet de statut
-     */
-    private removeStatus(god: GodState, status: StatusEffect): void {
-        god.statusEffects = god.statusEffects.filter(s => s.type !== status);
-    }
-
-    /**
-     * Nettoie les propriétés "blind" d'une carte (utilisé quand elle va à la défausse)
-     * Cela garantit que les cartes repioché après mélange de la défausse ne sont pas cachées
-     */
-    private cleanBlindCard(card: SpellCard): void {
-        delete card.isHiddenFromOwner;
-        delete card.revealedToPlayerId;
-    }
-
-    /**
-     * Obtient le nombre de stacks d'un statut
-     */
-    private getStatusStacks(god: GodState, status: StatusEffect): number {
-        return god.statusEffects
-            .filter(s => s.type === status)
-            .reduce((sum, effect) => sum + effect.stacks, 0);
-    }
-
-    /**
-     * Réduit la durée des effets temporaires pour le joueur qui vient de finir son tour
-     * On ne tick que les effets affectant les dieux de ce joueur.
-     * Cela assure une symétrie : un effet dure X "fins de tours" du joueur affecté.
-     */
-    private tickStatusEffects(playerWhoJustFinished: PlayerState): void {
-        for (const god of playerWhoJustFinished.gods) {
-            // Appliquer les effets périodiques avant de réduire la durée
-
-            // 1. Régénération (regen)
-            const regenEffect = god.statusEffects.find(s => s.type === 'regen');
-            if (regenEffect) {
-                // Soigner du montant de stacks (value)
-                const healAmount = regenEffect.stacks;
-                if (god.currentHealth < god.card.maxHealth && !god.isDead) {
-                    god.currentHealth = Math.min(god.currentHealth + healAmount, god.card.maxHealth);
-                }
-            }
-
-            // Gestion de la durée des effets
-            god.statusEffects = god.statusEffects.filter(effect => {
-                if (effect.duration !== undefined) {
-                    effect.duration--;
-                    return effect.duration > 0;
-                }
-                return true;
-            });
-            // NOTE: temporaryWeakness est permanente jusqu'à un cleanse
-            // Elle n'est plus liée au statut 'weakness' dans statusEffects
-        }
-    }
-
-    /**
-     * Vérifie si un dieu peut attaquer (pas gelé/étourdi)
-     */
-    canGodAct(god: GodState): boolean {
-        const isStunned = god.statusEffects.some(
-            s => s.type === 'stun'
-        );
-        return !god.isDead && !isStunned;
-    }
-
-    /**
-     * Obtient les cibles valides pour une attaque
-     * Pour les sorts mono-cible avec provocation : seul le provocateur est ciblable
-     * Pour les sorts multi-cibles avec provocation : tous les dieux sont ciblables
-     * (mais getRequiredTargets() retournera le provocateur qui doit être inclus)
-     */
-    getValidTargets(targetType: SpellCard['effects'][0]['target'], isMultiTarget: boolean = false): GodState[] {
-        const player = this.getCurrentPlayer();
-        const opponent = this.getOpponent();
-
-        // Vérifier la provocation
-        const provokers = opponent.gods.filter(
-            g => !g.isDead && g.statusEffects.some(s => s.type === 'provocation')
-        );
-
-        // Pour les sorts mono-cible avec provocation : seul le provocateur
-        // Pour les sorts multi-cibles avec provocation : tous les dieux (le provocateur sera forcé)
-        if (provokers.length > 0 && targetType === 'enemy_god' && !isMultiTarget) {
-            return provokers; // Doit cibler un provocateur
-        }
-
+        targetGodIds?: string[]
+    ): GodState[] {
         switch (targetType) {
             case 'enemy_god':
-                return opponent.gods.filter(g => !g.isDead);
+                if (targetGodId) {
+                    const t = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    return t ? [t] : [];
+                }
+                return [];
+
             case 'ally_god':
-                return player.gods.filter(g => !g.isDead);
-            case 'dead_ally_god':
-                return player.gods.filter(g => g.isDead);
+                if (targetGodId) {
+                    const t = player.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    return t ? [t] : [];
+                }
+                return [];
+
             case 'any_god':
-                return [...player.gods, ...opponent.gods].filter(g => !g.isDead);
+                if (targetGodId) {
+                    const t = [...player.gods, ...opponent.gods].find(g => g.card.id === targetGodId && !g.isDead);
+                    return t ? [t] : [];
+                }
+                return [];
+
+            case 'dead_ally_god':
+                if (targetGodId) {
+                    const t = player.gods.find(g => g.card.id === targetGodId && g.isDead);
+                    return t ? [t] : [];
+                }
+                return [];
+
+            case 'all_enemies':
+                return opponent.gods.filter(g => !g.isDead);
+
+            case 'all_allies':
+                return player.gods.filter(g => !g.isDead);
+
+            case 'self':
+                if (targetGodId) {
+                    const self = player.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    return self ? [self] : [];
+                }
+                return [];
+
             default:
+                if (targetGodIds && targetGodIds.length > 0) {
+                    return [...player.gods, ...opponent.gods].filter(g => targetGodIds.includes(g.card.id) && !g.isDead);
+                }
+                if (targetGodId) {
+                    const all = [...player.gods, ...opponent.gods];
+                    const t = all.find(g => g.card.id === targetGodId && !g.isDead);
+                    return t ? [t] : [];
+                }
                 return [];
         }
     }
 
+    // ─── API publiques ──────────────────
 
+    canGodAct(god: GodState): boolean {
+        return canGodAct(god);
+    }
 
-    /**
-     * Obtient les cibles qui DOIVENT être incluses (provocateurs pour enemy_god)
-     */
-    getRequiredTargets(targetType: SpellCard['effects'][0]['target']): GodState[] {
+    killGod(playerId: string, godId: string): void {
+        const player = this.state.players.find(p => p.id === playerId);
+        if (!player) return;
+        const god = player.gods.find(g => g.card.id === godId);
+        if (!god) return;
+        handleGodDeath(player, god, this.state);
+    }
+
+    getValidTargets(targetType: SpellCard['effects'][0]['target'], isMultiTarget: boolean = false): GodState[] {
+        const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
 
+        const provokers = opponent.gods.filter(
+            g => !g.isDead && g.statusEffects.some(s => s.type === 'provocation')
+        );
+
+        if (provokers.length > 0 && targetType === 'enemy_god' && !isMultiTarget) {
+            return provokers;
+        }
+
+        switch (targetType) {
+            case 'enemy_god': return opponent.gods.filter(g => !g.isDead);
+            case 'ally_god': return player.gods.filter(g => !g.isDead);
+            case 'dead_ally_god': return player.gods.filter(g => g.isDead);
+            case 'any_god': return [...player.gods, ...opponent.gods].filter(g => !g.isDead);
+            default: return [];
+        }
+    }
+
+    getRequiredTargets(targetType: SpellCard['effects'][0]['target']): GodState[] {
+        const opponent = this.getOpponent();
         if (targetType === 'enemy_god') {
-            // Les provocateurs doivent être inclus dans les cibles
             return opponent.gods.filter(
                 g => !g.isDead && g.statusEffects.some(s => s.type === 'provocation')
             );
         }
-
         return [];
     }
 
-    /**
-     * Mélange un tableau (Fisher-Yates)
-     */
-    private shuffleArray<T>(array: T[]): T[] {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
+    // ─── Résolution par PV (online) ────
+
+    private resolveByHealthTotal(): void {
+        const p1 = this.state.players[0];
+        const p2 = this.state.players[1];
+        const p1Health = p1.gods.reduce((sum, g) => sum + (g.isDead ? 0 : g.currentHealth), 0);
+        const p2Health = p2.gods.reduce((sum, g) => sum + (g.isDead ? 0 : g.currentHealth), 0);
+
+        if (p1Health > p2Health) this.state.winnerId = p1.id;
+        else if (p2Health > p1Health) this.state.winnerId = p2.id;
+        else this.state.winnerId = undefined; // Égalité
     }
 
-    /**
-     * Applique des dégâts à une cible en gérant le bouclier
-     */
-    private applyDamageWithShield(target: GodState, damage: number, owner: PlayerState): void {
-        let damageToInflict = damage;
-        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-
-        if (shieldIndex !== -1) {
-            const shield = target.statusEffects[shieldIndex];
-            if (shield.stacks >= damageToInflict) {
-                shield.stacks -= damageToInflict;
-                damageToInflict = 0;
-            } else {
-                damageToInflict -= shield.stacks;
-                shield.stacks = 0;
-                target.statusEffects.splice(shieldIndex, 1);
-            }
-        }
-
-        target.currentHealth -= damageToInflict;
-        if (target.currentHealth <= 0) {
-            this.handleGodDeath(owner, target);
-        }
+    // ─── Gestion de la mort (privée) ───
+    // Gardée pour compatibilité interne, délègue au DamageSystem
+    private handleGodDeath(owner: PlayerState, god: GodState): void {
+        handleGodDeath(owner, god, this.state);
     }
 
-    /**
-     * Crée un état de jeu initial
-     */
+    // ─── Création d'état initial ────────
+
     static createInitialState(
         player1Id: string,
         player1Name: string,
@@ -2051,17 +970,10 @@ export class GameEngine {
         player2Gods: GodCard[],
         player2Deck: SpellCard[],
         firstPlayerId: string,
-        options?: {
-            isOnlineGame?: boolean;
-            maxTurns?: number;
-        }
+        options?: { isOnlineGame?: boolean; maxTurns?: number }
     ): GameState {
         const createPlayerState = (
-            id: string,
-            name: string,
-            gods: GodCard[],
-            deck: SpellCard[],
-            isFirst: boolean
+            id: string, name: string, gods: GodCard[], deck: SpellCard[], isFirst: boolean
         ): PlayerState => ({
             id,
             name,
@@ -2072,18 +984,16 @@ export class GameEngine {
                 isDead: false,
             })),
             hand: [],
-            deck: GameEngine.prototype.shuffleArray(deck),
+            deck: shuffleArray([...deck]),
             discard: [],
             removedCards: [],
-            energy: isFirst ? 0 : 1, // Premier joueur: 0, Second: 1
+            energy: isFirst ? 0 : 1,
             fatigueCounter: 0,
             hasPlayedCard: false,
             hasDiscardedForEnergy: false,
         });
 
         const isPlayer1First = firstPlayerId === player1Id;
-
-        // Pour les parties online: limite de 50 tours par défaut
         const isOnline = options?.isOnlineGame ?? false;
         const maxTurns = options?.maxTurns ?? (isOnline ? 50 : undefined);
 
@@ -2102,7 +1012,6 @@ export class GameEngine {
             updatedAt: new Date(),
         };
 
-        // Piocher 5 cartes pour chaque joueur
         const engine = new GameEngine(state);
         engine.drawToHandLimit(engine.state.players[0]);
         engine.drawToHandLimit(engine.state.players[1]);
