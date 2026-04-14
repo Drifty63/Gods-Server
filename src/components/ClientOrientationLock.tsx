@@ -5,9 +5,12 @@ import React, { useEffect } from 'react';
 export default function ClientOrientationLock() {
     useEffect(() => {
         const lockOrientation = async () => {
-            if (typeof window !== 'undefined' && window.screen && window.screen.orientation && window.screen.orientation.lock) {
+            if (typeof window !== 'undefined' && window.screen && window.screen.orientation) {
                 try {
-                    await window.screen.orientation.lock('landscape');
+                    const orientation = window.screen.orientation as any;
+                    if (orientation.lock) {
+                        await orientation.lock('landscape');
+                    }
                 } catch (error) {
                     console.log("Could not lock orientation programatically.");
                 }
@@ -16,8 +19,13 @@ export default function ClientOrientationLock() {
         lockOrientation();
         
         return () => {
-            if (typeof window !== 'undefined' && window.screen && window.screen.orientation && window.screen.orientation.unlock) {
-                try { window.screen.orientation.unlock(); } catch (e) {}
+            if (typeof window !== 'undefined' && window.screen && window.screen.orientation) {
+                try { 
+                    const orientation = window.screen.orientation as any;
+                    if (orientation.unlock) {
+                        orientation.unlock(); 
+                    }
+                } catch (e) {}
             }
         };
     }, []);
