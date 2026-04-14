@@ -27,6 +27,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         selectedTargetGods,
         toggleTargetGod,
         playCard,
+        discardForEnergy,
         endTurn,
         isSelectingTarget,
         requiredTargets,
@@ -146,7 +147,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         // Assume playCard with a special flag or dedicated discard action
         // For now, I'll use playCard and handle it in the store if it supports it, 
         // OR add it to the interaction list.
-        playCard(selectedCard.id, undefined, [], true); // 4th param as isDiscard
+        discardForEnergy(selectedCard.id); 
         selectCard(null);
     };
 
