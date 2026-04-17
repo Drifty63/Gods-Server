@@ -108,8 +108,8 @@
 .heroCard {
   width: 140px;
   height: 200px;
-  max-width: calc(22vh * 0.7);
-  max-height: 22vh;
+  max-width: calc(26vh * 0.7);
+  max-height: 26vh;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
@@ -350,8 +350,8 @@
 .spellCardBack {
   width: 80px;
   height: 110px;
-  max-width: calc(18vh * 0.72);
-  max-height: 18vh;
+  max-width: calc(22vh * 0.72);
+  max-height: 22vh;
   background: linear-gradient(135deg, #4f46e5, #1e1b4b);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -366,8 +366,8 @@
 .spellCard {
   width: 160px;
   height: 220px;
-  max-width: calc(23vh * 0.72);
-  max-height: 23vh;
+  max-width: calc(28vh * 0.72);
+  max-height: 28vh;
   background: linear-gradient(160deg, rgba(31, 41, 55, 0.95), rgba(15, 23, 42, 0.95));
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 12px;
@@ -443,7 +443,13 @@
 .spellSelected {
   border-color: var(--color-accent);
   box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
-  transform: translateY(-50px) scale(1.1) !important;
+}
+
+.wrapperSelected {
+  transform: translateY(-50px) scale(1.1) rotate(0deg) !important;
+  z-index: 100 !important;
+  margin-left: 20px;
+  margin-right: 70px;
 }
 
 /* --- UI WIDGETS --- */
@@ -599,8 +605,8 @@
   .heroCard {
     width: 85px;
     height: 125px;
-    max-width: calc(22vh * 0.7);
-    max-height: 22vh;
+    max-width: calc(30vh * 0.7);
+    max-height: 30vh;
     border-radius: 6px;
   }
 
@@ -657,8 +663,8 @@
   .spellCard {
     width: 100px;
     height: 140px;
-    max-width: calc(23vh * 0.72);
-    max-height: 23vh;
+    max-width: calc(32vh * 0.72);
+    max-height: 32vh;
     padding: 4px;
     border-radius: 6px;
   }
@@ -686,8 +692,9 @@
     top: -4px; left: -4px;
   }
 
-  .spellSelected {
-    transform: translateY(-20px) scale(1.1) !important;
+  .wrapperSelected {
+    transform: translateY(-20px) scale(1.1) rotate(0deg) !important;
+    z-index: 100 !important;
   }
 
   /* Opponent Hand */

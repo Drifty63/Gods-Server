@@ -41,7 +41,7 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
 
     return (
         <div 
-            className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper}`} 
+            className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper} ${isSelected ? styles.wrapperSelected : ''}`} 
             onClick={onClick}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
