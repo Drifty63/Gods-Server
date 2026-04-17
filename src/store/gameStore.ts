@@ -25,7 +25,7 @@ interface GameStore {
 
     // État pour sélection de cartes (hand/discard)
     isSelectingCards: boolean;
-    cardSelectionSource: 'hand' | 'discard' | null;
+    cardSelectionSource: 'hand' | 'discard' | 'opponent_discard' | null;
     cardSelectionCount: number;
     cardSelectionTitle: string;
     pendingCardSelectionEffect: string | null;  // L'effet en attente de sélection
@@ -99,7 +99,7 @@ interface GameStore {
     getValidAllyTargets: () => GodState[];   // Cibles alliées valides
 
     // Actions pour sélection de cartes
-    startCardSelection: (source: 'hand' | 'discard', count: number, title: string, effectId: string) => void;
+    startCardSelection: (source: 'hand' | 'discard' | 'opponent_discard', count: number, title: string, effectId: string) => void;
     confirmCardSelection: (selectedCards: SpellCard[]) => void;
     cancelCardSelection: () => void;
     getCardsForSelection: () => SpellCard[];
@@ -897,7 +897,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (cardToCheck) {
             const hasRecycle = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'recycle_from_discard');
             const hasPutBottom = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'put_cards_bottom');
-            const hasHealDist = cardToCheck.effects.some(e => e.id === 'demeter_s3' || (e.type === 'custom' && e.customEffectId === 'distribute_heal_5'));
+            const hasHealDist = cardToCheck.effects.some(e => (e.type === 'custom' && e.customEffectId === 'distribute_heal_5'));
             const hasApplyWeakness = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'apply_weakness');
 
             if (hasRecycle || hasPutBottom || hasHealDist || hasApplyWeakness) {

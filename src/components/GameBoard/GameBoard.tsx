@@ -10,6 +10,16 @@ import { SpellCardUI } from './components/SpellCardUI';
 import { SpellCard, GodState } from '@/types/cards';
 import styles from './GameBoard.module.css';
 
+// Modals pour effets spéciaux
+import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionModal';
+import OptionalChoiceModal from '@/components/OptionalChoiceModal/OptionalChoiceModal';
+import ElementSelectionModal from '@/components/ElementSelectionModal/ElementSelectionModal';
+import LightningActionModal from '@/components/LightningActionModal/LightningActionModal';
+import PlayerSelectionModal from '@/components/PlayerSelectionModal/PlayerSelectionModal';
+import DeadGodSelectionModal from '@/components/DeadGodSelectionModal/DeadGodSelectionModal';
+import ZombieDamageModal from '@/components/ZombieDamageModal/ZombieDamageModal';
+import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
+
 interface GameBoardProps {
     isOnlineMode?: boolean;
     onAction?: (action: { type: string; payload?: any }) => void;
@@ -33,7 +43,47 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         requiredTargets,
         startTargetSelection,
         playerId,
-        playAITurn
+        playAITurn,
+        
+        // États Modals
+        isSelectingCards,
+        cardSelectionSource,
+        cardSelectionCount,
+        cardSelectionTitle,
+        confirmCardSelection,
+        cancelCardSelection,
+        
+        isShowingOptionalChoice,
+        optionalChoiceTitle,
+        optionalChoiceDescription,
+        confirmOptionalChoice,
+        cancelOptionalChoice,
+        
+        isSelectingElement,
+        setSelectedElement,
+        
+        isSelectingLightningAction,
+        setLightningAction,
+        
+        isSelectingPlayer,
+        playerSelectionTitle,
+        confirmPlayerSelection,
+        cancelPlayerSelection,
+        
+        isSelectingDeadGod,
+        deadGodSelectionTitle,
+        confirmDeadGodSelection,
+        cancelDeadGodSelection,
+        
+        isShowingZombieDamage,
+        zombieDamageGodId,
+        confirmZombieDamage,
+        cancelZombieDamage,
+        
+        isDistributingHeal,
+        healDistributionTotal,
+        confirmHealDistribution,
+        cancelHealDistribution
     } = useGameStore();
 
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -351,6 +401,78 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                     <button className={styles.btnPremium} style={{ marginTop: '30px' }} onClick={() => setViewingDiscard(null)}>Fermer</button>
                 </div>
             )}
+
+            {/* MODALS D'EFFETS SPÉCIAUX */}
+            <CardSelectionModal 
+                isOpen={isSelectingCards}
+                title={cardSelectionTitle}
+                requiredCount={cardSelectionCount}
+                cards={cardSelectionSource === 'hand' ? player.hand : (cardSelectionSource === 'discard' ? player.discard : opponent.discard)}
+                onConfirm={confirmCardSelection}
+                onCancel={cancelCardSelection}
+            />
+
+            <OptionalChoiceModal 
+                isOpen={isShowingOptionalChoice}
+                title={optionalChoiceTitle}
+                description={optionalChoiceDescription}
+                onAccept={() => confirmOptionalChoice(true)}
+                onDecline={() => confirmOptionalChoice(false)}
+            />
+
+            <ElementSelectionModal 
+                isOpen={isSelectingElement}
+                onSelect={(el) => {
+                    setSelectedElement(el);
+                    if (selectedCard) {
+                        playCard(selectedCard.id, undefined, selectedTargetGods.map(g => g.card.id));
+                    }
+                }}
+                onCancel={() => useGameStore.setState({ isSelectingElement: false })}
+            />
+
+            <LightningActionModal 
+                isOpen={isSelectingLightningAction}
+                onSelect={(action) => {
+                    setLightningAction(action);
+                    if (selectedCard) {
+                        playCard(selectedCard.id, undefined, selectedTargetGods.map(g => g.card.id), action);
+                    }
+                }}
+                onCancel={() => useGameStore.setState({ isSelectingLightningAction: false })}
+            />
+
+            <PlayerSelectionModal 
+                isOpen={isSelectingPlayer}
+                title={playerSelectionTitle}
+                onSelectSelf={() => confirmPlayerSelection(true)}
+                onSelectOpponent={() => confirmPlayerSelection(false)}
+                onCancel={cancelPlayerSelection}
+            />
+
+            <DeadGodSelectionModal 
+                isOpen={isSelectingDeadGod}
+                title={deadGodSelectionTitle}
+                deadGods={player.gods.filter(g => g.isDead)}
+                onSelectGod={confirmDeadGodSelection}
+                onCancel={cancelDeadGodSelection}
+            />
+
+            <ZombieDamageModal 
+                isOpen={isShowingZombieDamage}
+                zombieGod={player.gods.find(g => g.card.id === zombieDamageGodId) || null}
+                enemyGods={opponent.gods}
+                onSelectTarget={confirmZombieDamage}
+                onSkip={cancelZombieDamage}
+            />
+
+            <HealDistributionModal 
+                isOpen={isDistributingHeal}
+                totalHeal={healDistributionTotal}
+                allies={player.gods}
+                onConfirm={confirmHealDistribution}
+                onCancel={cancelHealDistribution}
+            />
         </div>
     );
 }

@@ -63,6 +63,8 @@ export interface EffectContext {
     selectedCardIds?: string[];
     healDistribution?: { godId: string, amount: number }[];
     optionalChoice?: boolean;
+    selectedElement?: Element;
+    lightningAction?: 'apply' | 'remove';
 }
 
 type CustomEffectHandler = (ctx: EffectContext) => void;
@@ -893,7 +895,7 @@ export class GameEngine {
             engine: this,
             player,
             opponent,
-            castingGod: this.findCastingGod(card, player),
+            castingGod: player.gods.find(g => g.card.id === card.godId && !g.isDead),
             card,
             targets,
             targetGodId,
