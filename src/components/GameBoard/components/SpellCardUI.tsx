@@ -47,8 +47,6 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
             onMouseLeave={onMouseLeave}
         >
             <div className={`${styles.spellCard} ${isSelected ? styles.spellSelected : ''}`} style={{ 
-                width: isMinimal ? '130px' : (isMini ? '100px' : '160px'),
-                height: isMinimal ? '180px' : (isMini ? '140px' : '220px'),
                 padding: isMinimal ? '4px' : '8px'
             }}>
                 <div className={styles.spellCost} style={{ 
