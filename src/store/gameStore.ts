@@ -936,8 +936,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
             const hasTempResurrect = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'temp_resurrect');
             const hasVisionTartare = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'vision_tartare');
             const hasCascadeHeal = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
+            const hasRetrieveDiscard = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'retrieve_discard');
+            const hasCopyDiscard = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'copy_discard_spell');
 
-            if (hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal) {
+            if (hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal || hasRetrieveDiscard || hasCopyDiscard) {
                 // Pour ces sorts, on doit d'abord vérifier si on a besoin de cibles avant d'ouvrir le modal
                 const neededTargets = get().getRequiredTargetCount(cardToCheck);
                 if (neededTargets > 0 && selectedTargetGods.length < neededTargets) {
@@ -965,6 +967,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         get().startOptionalChoice("Pouvoir des ténèbres", "Défausser 2 cartes du deck pour +1 dégât par cible ?", "vision_tartare", targetGodIds || (targetGodId ? [targetGodId] : []));
                     } else if (hasCascadeHeal) {
                         get().startOptionalChoice("Direction du flux", "Gauche (3,2,1) ou Droite (3,2,1) ?", "cascade_heal_choice", []);
+                    } else if (hasRetrieveDiscard) {
+                        get().startCardSelection('discard', 1, "Récupérer une carte", 'retrieve_discard');
+                    } else if (hasCopyDiscard) {
+                        get().startCardSelection('opponent_discard', 1, "Copier un sort en Ténèbres", 'copy_discard_spell');
                     }
                 }
                 return playResult;

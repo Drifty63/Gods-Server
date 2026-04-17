@@ -120,6 +120,14 @@ export function handleGodDeath(owner: PlayerState, god: GodState, state: GameSta
     god.isDead = true;
     god.statusEffects = [];
 
+    // Gérer les zombies (Perséphone)
+    if (god.isZombie && god.zombieCard) {
+        owner.discard.push(god.zombieCard);
+        god.zombieCard = undefined;
+        god.isZombie = false;
+        god.zombieOwnerId = undefined;
+    }
+
     // Retirer les cartes du dieu mort de la main, deck et défausse
     const godId = god.card.id;
 

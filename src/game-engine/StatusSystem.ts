@@ -90,6 +90,14 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
                 handleGodDeath(player, god, state);
             }
         }
+        
+        // 3. Zombie Tick (Perséphone) - Inflige 1 dégât chaque tour
+        if (god.isZombie && !god.isDead) {
+            god.currentHealth -= 1;
+            if (god.currentHealth <= 0) {
+                handleGodDeath(player, god, state);
+            }
+        }
 
         // 3. Décrémenter les durées
         god.statusEffects = god.statusEffects.filter(effect => {
