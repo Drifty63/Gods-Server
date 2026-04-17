@@ -38,7 +38,10 @@ export const HeroCard: React.FC<HeroCardProps> = ({ god, isTargeted, onClick }) 
                         {status.type === 'regen' && '💚'}
                         {status.type === 'lightning' && '⚡'}
                         {status.type === 'stun' && '💫'}
-                        {status.stacks > 1 && `x${status.stacks}`}
+                        {status.type === 'provocation' && '🎯'}
+                        {status.type === 'weakness' && '💔'}
+                        {status.type === 'weakness_immunity' && '💠'}
+                        {status.stacks > 1 && <span className={styles.stacksCount}>{status.stacks}</span>}
                     </div>
                 ))}
             </div>
