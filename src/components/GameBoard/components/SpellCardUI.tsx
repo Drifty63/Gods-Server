@@ -6,20 +6,27 @@ interface SpellCardUIProps {
     card: SpellCard;
     isSelected?: boolean;
     onClick?: () => void;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
     isHidden?: boolean;
     isMini?: boolean;
+    isMinimal?: boolean; // Show only image and cost
 }
 
-export const SpellCardUI: React.FC<SpellCardUIProps> = ({ card, isSelected, onClick, isHidden, isMini }) => {
+export const SpellCardUI: React.FC<SpellCardUIProps> = ({ 
+    card, isSelected, onClick, onMouseEnter, onMouseLeave, isHidden, isMini, isMinimal 
+}) => {
     if (isHidden) {
         return (
             <div 
                 className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper}`} 
                 onClick={onClick}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
             >
                 <div className={styles.spellCardBack} style={{ 
-                    width: isMini ? '100px' : '160px', 
-                    height: isMini ? '140px' : '220px', 
+                    width: isMini ? '100px' : '140px', 
+                    height: isMini ? '140px' : '190px', 
                     backgroundImage: 'url(/images/card-back.png)', 
                     backgroundSize: 'cover', 
                     backgroundPosition: 'center',
@@ -36,18 +43,38 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({ card, isSelected, onCl
         <div 
             className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper}`} 
             onClick={onClick}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
         >
-            <div className={`${styles.spellCard} ${isSelected ? styles.spellSelected : ''}`}>
-                <div className={styles.spellCost}>{card.energyCost}</div>
+            <div className={`${styles.spellCard} ${isSelected ? styles.spellSelected : ''}`} style={{ 
+                width: isMinimal ? '130px' : (isMini ? '100px' : '160px'),
+                height: isMinimal ? '180px' : (isMini ? '140px' : '220px'),
+                padding: isMinimal ? '4px' : '8px'
+            }}>
+                <div className={styles.spellCost} style={{ 
+                    width: isMinimal ? '28px' : '32px', 
+                    height: isMinimal ? '28px' : '32px',
+                    fontSize: isMinimal ? '1rem' : '1.1rem'
+                }}>{card.energyCost}</div>
                 {card.imageUrl && (
-                    <img src={card.imageUrl} alt={card.name} className={styles.spellImage} />
+                    <img 
+                        src={card.imageUrl} 
+                        alt={card.name} 
+                        className={styles.spellImage} 
+                        style={{ height: isMinimal ? '100%' : '100px', marginBottom: isMinimal ? '0' : '8px' }} 
+                    />
                 )}
-                <div className={styles.spellTitle} style={{ marginTop: card.imageUrl ? '0' : '10px' }}>{card.name}</div>
-                <div className={styles.spellDesc}>{card.description}</div>
-                {card.energyGain > 0 && (
-                    <div style={{ textAlign: 'center', fontSize: '0.7rem', color: '#10b981', marginTop: '5px' }}>
-                        +{card.energyGain} Energy
-                    </div>
+                
+                {!isMinimal && (
+                    <>
+                        <div className={styles.spellTitle} style={{ marginTop: card.imageUrl ? '0' : '10px' }}>{card.name}</div>
+                        <div className={styles.spellDesc}>{card.description}</div>
+                        {card.energyGain > 0 && (
+                            <div style={{ textAlign: 'center', fontSize: '0.7rem', color: '#10b981', marginTop: '5px' }}>
+                                +{card.energyGain} Energy
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

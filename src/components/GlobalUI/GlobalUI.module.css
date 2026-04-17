@@ -841,3 +841,53 @@
 .rulesContent::-webkit-scrollbar-thumb:hover {
     background: rgba(212, 175, 55, 0.5);
 }
+
+/* ================================
+   LANDSCAPE MOBILE TWEAKS
+   ================================ */
+@media (max-height: 500px) {
+    .optionsModal,
+    .rewardsModal,
+    .questsModal {
+        max-width: 90vw;
+        max-height: 90vh;
+        padding: 16px;
+    }
+
+    .optionsModal h2,
+    .rewardsModal h2,
+    .questsModal h2 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .optionsContent {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .optionsSection {
+        padding: 8px;
+    }
+
+    .homeButton {
+        grid-column: span 2;
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .rewardsList, .questsList {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .rewardItem, .questItem {
+        padding: 8px;
+    }
+
+    .rewardsFooter, .questsFooter {
+        padding-top: 10px;
+    }
+}

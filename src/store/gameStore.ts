@@ -893,6 +893,96 @@ export const useGameStore = create<GameStore>((set, get) => ({
             return playResult;
         }
 
+        // 4. CAS SPÉCIAL : Interception Hestia / Nyx / Déméter (Modals)
+        if (cardToCheck) {
+            const hasRecycle = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'recycle_from_discard');
+            const hasPutBottom = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'put_cards_bottom');
+            const hasHealDist = cardToCheck.effects.some(e => e.id === 'demeter_s3' || (e.type === 'custom' && e.customEffectId === 'distribute_heal_5'));
+            const hasApplyWeakness = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'apply_weakness');
+
+            if (hasRecycle || hasPutBottom || hasHealDist || hasApplyWeakness) {
+                // Pour ces sorts, on doit d'abord vérifier si on a l'élément si c'est Artémis
+                if (hasApplyWeakness && !selectedElement) {
+                    set({ isSelectingElement: true, selectedCard: cardToCheck });
+                    return { success: true, message: "Sélectionnez l'élément de faiblesse" };
+                }
+
+                // Jouer la carte d'abord (consomme énergie)
+                const playResult = engine.executeAction({
+                    type: 'play_card',
+                    playerId,
+                    cardId,
+                    targetGodId,
+                    targetGodIds,
+                    selectedElement: selectedElement || undefined
+                });
+
+                if (playResult.success) {
+                    set({ gameState: cloneGameState(engine.getState()) });
+
+                    if (hasRecycle) {
+                        get().startCardSelection('discard', 2, "Recycler dans le deck", 'recycle_from_discard');
+                    } else if (hasPutBottom) {
+                        get().startCardSelection('hand', 3, "Placer sous le deck", 'put_cards_bottom');
+                    } else if (hasHealDist) {
+                        get().startHealDistribution(5);
+                    }
+                }
+                return playResult;
+            }
+
+            // Perséphone / Zéphyr / Séléné Modals
+            const hasFreeRecycle = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'free_recycle');
+            const hasTempResurrect = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'temp_resurrect');
+            const hasVisionTartare = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'vision_tartare');
+            const hasCascadeHeal = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
+
+            if (hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal) {
+                // Pour ces sorts, on doit d'abord vérifier si on a besoin de cibles avant d'ouvrir le modal
+                const neededTargets = get().getRequiredTargetCount(cardToCheck);
+                if (neededTargets > 0 && selectedTargetGods.length < neededTargets) {
+                    set({ isSelectingTarget: true, selectedCard: cardToCheck });
+                    return { success: true, message: "Sélectionnez les cibles" };
+                }
+
+                // Jouer la carte
+                const playResult = engine.executeAction({
+                    type: 'play_card',
+                    playerId,
+                    cardId,
+                    targetGodId,
+                    targetGodIds,
+                });
+
+                if (playResult.success) {
+                    set({ gameState: cloneGameState(engine.getState()) });
+
+                    if (hasFreeRecycle) {
+                        get().startPlayerSelection("Mélanger défausse et deck sans fatigue", "free_recycle");
+                    } else if (hasTempResurrect) {
+                        get().startDeadGodSelection("Ressusciter un dieu allié en zombie (5 PV)", "temp_resurrect");
+                    } else if (hasVisionTartare) {
+                        get().startOptionalChoice("Pouvoir des ténèbres", "Défausser 2 cartes du deck pour +1 dégât par cible ?", "vision_tartare", targetGodIds || (targetGodId ? [targetGodId] : []));
+                    } else if (hasCascadeHeal) {
+                        get().startOptionalChoice("Direction du flux", "Gauche (3,2,1) ou Droite (3,2,1) ?", "cascade_heal_choice", []);
+                    }
+                }
+                return playResult;
+            }
+
+            const hasEnemyCardSelect = cardToCheck.effects.some(e => e.type === 'custom' && (e.customEffectId === 'choose_discard_enemy' || e.customEffectId === 'choose_hand_to_deck'));
+            if (hasEnemyCardSelect) {
+                const playResult = engine.executeAction({ type: 'play_card', playerId, cardId, targetGodId, targetGodIds });
+                if (playResult.success) {
+                    set({ gameState: cloneGameState(engine.getState()) });
+                    const effectId = cardToCheck.effects.find(e => e.type === 'custom' && (e.customEffectId === 'choose_discard_enemy' || e.customEffectId === 'choose_hand_to_deck'))?.customEffectId || '';
+                    const count = cardToCheck.effects.find(e => e.customEffectId === effectId)?.value || 1;
+                    get().startEnemyCardSelection(count, "Choisissez une carte adverse", effectId);
+                }
+                return playResult;
+            }
+        }
+
         // =========================================================
 
         // Utiliser les cibles multiples si disponibles

@@ -77,7 +77,7 @@
 /* --- ARENA --- */
 .arenaContainer {
   position: absolute;
-  top: 15%;
+  top: 12%; /* Un peu plus haut pour laisser de la place en bas */
   bottom: 0px; 
   left: 0; right: 0;
   z-index: 10;
@@ -101,7 +101,7 @@
 
 .playerRow {
   transform: rotateX(-5deg);
-  margin-bottom: 150px;
+  margin-bottom: 250px; /* Augmenté de 150px à 250px pour ne pas cacher les PV */
 }
 
 /* --- HERO (GOD) CARD --- */
@@ -264,18 +264,23 @@
 /* --- HAND AREA --- */
 .handArea {
   position: absolute;
-  bottom: -30px;
+  bottom: -40px; /* Un peu plus bas par défaut */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   justify-content: center;
   width: 100%;
-  z-index: 50;
+  z-index: 100; /* Toujours au dessus pour l'interaction */
   transition: bottom 0.2s ease;
+  pointer-events: none; /* Permet de cliquer à travers si on touche pas une carte */
+}
+
+.handArea > * {
+  pointer-events: auto; /* Mais les cartes elles réagissent */
 }
 
 .handArea:hover {
-  bottom: 0px;
+  bottom: -10px; /* Remonte un peu mais pas trop pour pas tout cacher */
 }
 
 /* Cards fan out like a real hand */
@@ -557,7 +562,11 @@
   
   .row {
     gap: 8px;
-    margin-bottom: 0 !important;
+    margin-bottom: 20px !important; /* Ajout d'une marge même sur mobile */
+  }
+
+  .playerRow {
+    margin-bottom: 120px !important; /* Grande marge pour voir les HP des dieux sur mobile */
   }
 
   .heroCard {
@@ -661,30 +670,24 @@
 
   /* Orb */
   .energyOrbContainer {
-    bottom: 0px;
+    bottom: 5px;
     right: 5px;
-    width: 50px;
-    height: 50px;
-    transform: scale(0.8);
+    width: 65px; /* Augmenté pour accessibilité tactile */
+    height: 65px;
+    transform: scale(0.9);
   }
   
   .energyOrb {
-    font-size: 1.2rem;
+    font-size: 1.5rem; /* Un peu plus gros */
   }
   
-  /* Turn Indicator */
-  .turnIndicator {
-    top: 50%;
-    padding: 4px 12px;
-    font-size: 0.6rem;
-    background: transparent;
-    border: none;
-    box-shadow: none !important;
+  /* Row spacing */
+  .playerRow {
+    margin-bottom: 90px !important; /* Ajusté pour mode paysage mobile */
   }
   
-  /* Deck and Discard */
-  .deckAndDiscard {
-    transform: scale(0.6);
+  .arenaContainer {
+    padding-bottom: 50px;
   }
 }
 

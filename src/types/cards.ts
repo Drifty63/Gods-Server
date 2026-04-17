@@ -141,4 +141,6 @@ export interface GameAction {
     selectedElement?: Element;      // Élément choisi pour apply_weakness (Artémis)
     lightningAction?: 'apply' | 'remove';  // Choix pour les sorts de Zeus (appliquer ou retirer ⚡)
     optionalChoice?: boolean;       // Pour les sorts copiés avec effet optionnel (ex: Vision du Tartare copiée)
+    selectedCardIds?: string[];      // Pour le recyclage (Hestia) ou le placement en bas du deck (Nyx)
+    healDistribution?: { godId: string, amount: number }[]; // Pour la distribution de soin (Déméter)
 }

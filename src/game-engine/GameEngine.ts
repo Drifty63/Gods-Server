@@ -59,8 +59,10 @@ export interface EffectContext {
     card: SpellCard;
     targets: GodState[];
     targetGodId?: string;
-    selectedElement?: Element;
-    lightningAction?: 'apply' | 'remove';
+    targetGodIds?: string[];
+    selectedCardIds?: string[];
+    healDistribution?: { godId: string, amount: number }[];
+    optionalChoice?: boolean;
 }
 
 type CustomEffectHandler = (ctx: EffectContext) => void;
@@ -100,16 +102,24 @@ registerEffect('revive_god', (ctx) => {
 });
 
 registerEffect('distribute_heal_5', (ctx) => {
-    // Pour l'IA : distribution automatique.
-    // Pour le joueur humain : le store gère via modal.
-    if (ctx.player.id !== 'player1') {
+    const totalToHeal = 5;
+    if (ctx.healDistribution && ctx.healDistribution.length > 0) {
+        // Mode manuel (Joueur ou Action complète)
+        for (const dist of ctx.healDistribution) {
+            const god = ctx.player.gods.find(g => g.card.id === dist.godId);
+            if (god && !god.isDead) {
+                healGod(god, dist.amount);
+            }
+        }
+    } else {
+        // Mode automatique (IA ou fallback)
         const alive = ctx.player.gods.filter(g => !g.isDead);
         if (alive.length === 0) return;
-        const healPer = Math.floor(5 / alive.length);
-        const remainder = 5 % alive.length;
+        const healPer = Math.floor(totalToHeal / alive.length);
+        const remainder = totalToHeal % alive.length;
         alive.forEach((ally, i) => {
             const amount = healPer + (i < remainder ? 1 : 0);
-            ally.currentHealth = Math.min(ally.currentHealth + amount, ally.card.maxHealth);
+            healGod(ally, amount);
         });
     }
 });
@@ -273,12 +283,40 @@ registerEffect('prison_mill', (ctx) => {
 });
 
 // === NYX ===
-registerEffect('shuffle_hand_draw_blind', (_ctx) => {
-    // Géré par le store via CardSelectionModal
+registerEffect('shuffle_hand_draw_blind', (ctx) => {
+    if (ctx.opponent.hand.length === 0) return;
+    const rndIdx = Math.floor(Math.random() * ctx.opponent.hand.length);
+    const card = ctx.opponent.hand.splice(rndIdx, 1)[0];
+    cleanBlindCard(card);
+    ctx.opponent.deck.push(card);
+    shuffleArray(ctx.opponent.deck);
+
+    if (ctx.opponent.deck.length > 0) {
+        const drawn = ctx.opponent.deck.shift()!;
+        drawn.isHiddenFromOwner = true;
+        drawn.revealedToPlayerId = ctx.player.id;
+        ctx.opponent.hand.push(drawn);
+    }
 });
 
-registerEffect('shuffle_hand_draw_blind_2', (_ctx) => {
-    // Géré par le store via CardSelectionModal
+registerEffect('shuffle_hand_draw_blind_2', (ctx) => {
+    for (let i = 0; i < 2; i++) {
+        if (ctx.opponent.hand.length === 0) break;
+        const rndIdx = Math.floor(Math.random() * ctx.opponent.hand.length);
+        const card = ctx.opponent.hand.splice(rndIdx, 1)[0];
+        cleanBlindCard(card);
+        ctx.opponent.deck.push(card);
+    }
+    shuffleArray(ctx.opponent.deck);
+
+    for (let i = 0; i < 2; i++) {
+        if (ctx.opponent.deck.length > 0) {
+            const drawn = ctx.opponent.deck.shift()!;
+            drawn.isHiddenFromOwner = true;
+            drawn.revealedToPlayerId = ctx.player.id;
+            ctx.opponent.hand.push(drawn);
+        }
+    }
 });
 
 registerEffect('shuffle_all_hand_draw_blind', (ctx) => {
@@ -324,8 +362,46 @@ registerEffect('heal_by_energy', (ctx) => {
     }
 });
 
-registerEffect('recycle_from_discard', (_ctx) => { /* store-managed */ });
-registerEffect('put_cards_bottom', (_ctx) => { /* store-managed */ });
+registerEffect('recycle_from_discard', (ctx) => {
+    if (ctx.selectedCardIds && ctx.selectedCardIds.length > 0) {
+        // Mode manuel
+        for (const cardId of ctx.selectedCardIds) {
+            const index = ctx.player.discard.findIndex(c => c.id === cardId);
+            if (index !== -1) {
+                const [card] = ctx.player.discard.splice(index, 1);
+                ctx.player.deck.push(card);
+            }
+        }
+    } else {
+        // Mode auto (IA) : Prend les 2 dernières cartes (sauf celle qu'il vient de jouer)
+        const candidates = ctx.player.discard.slice(0, -1);
+        const count = Math.min(2, candidates.length);
+        for (let i = 0; i < count; i++) {
+            const card = ctx.player.discard.shift()!;
+            ctx.player.deck.push(card);
+        }
+    }
+    shuffleArray(ctx.player.deck);
+});
+
+registerEffect('put_cards_bottom', (ctx) => {
+    if (ctx.selectedCardIds && ctx.selectedCardIds.length > 0) {
+        for (const cardId of ctx.selectedCardIds) {
+            const index = ctx.player.hand.findIndex(c => c.id === cardId);
+            if (index !== -1) {
+                const [card] = ctx.player.hand.splice(index, 1);
+                ctx.player.deck.push(card);
+            }
+        }
+    } else {
+        // Mode auto (IA) : Met 3 cartes au hasard de la main en bas du deck
+        const count = Math.min(3, ctx.player.hand.length);
+        for (let i = 0; i < count; i++) {
+            const [card] = ctx.player.hand.splice(0, 1);
+            ctx.player.deck.push(card);
+        }
+    }
+});
 
 // === THANATOS ===
 function damageWithDeadCount(ctx: EffectContext, baseDmg: number, multiplier: number, countSource: 'allies' | 'enemies') {
@@ -405,17 +481,83 @@ registerEffect('replay_action', (ctx) => {
     ctx.player.hasPlayedCard = false;
 });
 
-// === Store-managed effects (no-op in engine) ===
+registerEffect('choose_discard_enemy', (ctx) => {
+    const target = ctx.opponent;
+    const cardsToDiscard = ctx.selectedCardIds || [target.hand[0]?.id].filter(Boolean);
+    
+    for (const cardId of cardsToDiscard) {
+        const idx = target.hand.findIndex(c => c.id === cardId);
+        if (idx !== -1) {
+            const card = target.hand.splice(idx, 1)[0];
+            cleanBlindCard(card);
+            target.discard.push(card);
+        }
+    }
+});
+
+registerEffect('shuffle_god_cards', (ctx) => {
+    // Dans l'idéal, on a ctx.targetGodId du dieu dont on veut shuffler les cartes
+    const targetGodId = ctx.targetGodId;
+    if (!targetGodId) return;
+
+    const targetPlayer = [...ctx.engine.getState().players].find(p => p.gods.some(g => g.card.id === targetGodId));
+    if (!targetPlayer) return;
+
+    const cardsToShuffle = targetPlayer.hand.filter(c => c.godId === targetGodId);
+    if (cardsToShuffle.length > 0) {
+        targetPlayer.hand = targetPlayer.hand.filter(c => c.godId !== targetGodId);
+        targetPlayer.deck.push(...cardsToShuffle);
+        shuffleArray(targetPlayer.deck);
+    }
+});
+
+registerEffect('free_recycle', (ctx) => {
+    // Si pas de choix, cible soi-même
+    const target = ctx.player; 
+    target.deck.push(...target.discard);
+    target.discard = [];
+    shuffleArray(target.deck);
+});
+
+// === Store-managed effects (fallback for UI compatibility) ===
 for (const id of [
-    'retrieve_discard', 'copy_discard_spell', 'free_recycle',
-    'optional_mill_boost', 'choose_discard_enemy', 'temp_resurrect',
-    'shuffle_god_cards'
+    'retrieve_discard', 'copy_discard_spell'
 ]) {
     registerEffect(id, (_ctx) => { /* géré par le store via modal */ });
 }
 
 // === VISION DU TARTARE ===
-registerEffect('vision_tartare', (_ctx) => { /* géré par le store modal Oui/Non */ });
+registerEffect('vision_tartare', (ctx) => {
+    // Si c'est un choix manuel (Joueur ou IA qui a déjà décidé)
+    const bonus = ctx.optionalChoice === true;
+    
+    if (bonus && ctx.player.deck.length >= 2) {
+        // Défausser 2 cartes
+        for (let i = 0; i < 2; i++) {
+            const card = ctx.player.deck.shift()!;
+            ctx.player.discard.push(card);
+        }
+    }
+
+    const damage = bonus ? 2 : 1;
+    for (const target of ctx.targets) {
+        dealDamage(target, damage, ctx.opponent, ctx.engine.getState(), { element: 'darkness' });
+    }
+});
+
+// === PERSÉPHONE ZOMBIE ===
+registerEffect('temp_resurrect', (ctx) => {
+    const deadGod = ctx.player.gods.find(g => g.isDead); // En auto, prend le premier mort
+    if (!deadGod || ctx.player.deck.length === 0) return;
+
+    const zombieCard = ctx.player.deck.shift()!;
+    deadGod.isDead = false;
+    deadGod.currentHealth = 5;
+    deadGod.isZombie = true;
+    deadGod.zombieCard = zombieCard;
+    deadGod.zombieOwnerId = ctx.player.id;
+    deadGod.statusEffects = [];
+});
 
 // ─────────────────────────────────────────────
 // Utilitaires module
@@ -509,7 +651,11 @@ export class GameEngine {
         for (const effect of card.effects) {
             if (effect.target === 'same') {
                 if (lastUsedTargetId) {
-                    this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
+                    this.applyEffect(
+                        effect, card, lastUsedTargetId, action.selectedElement, 
+                        action.lightningAction, [lastUsedTargetId],
+                        action.selectedCardIds, action.healDistribution, action.optionalChoice
+                    );
                 }
                 continue;
             }
@@ -522,15 +668,31 @@ export class GameEngine {
                     continue;
                 }
                 const currentTarget = targetIds[targetIndex];
-                this.applyEffect(effect, card, currentTarget, action.selectedElement, action.lightningAction, [currentTarget]);
+                this.applyEffect(
+                    effect, card, currentTarget, action.selectedElement, 
+                    action.lightningAction, [currentTarget],
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                );
                 lastUsedTargetId = currentTarget;
                 targetIndex++;
             } else if (!effect.target && effect.type === 'custom') {
-                this.applyEffect(effect, card, action.targetGodId, action.selectedElement, action.lightningAction, targetIds.length > 0 ? targetIds : undefined);
+                this.applyEffect(
+                    effect, card, action.targetGodId, action.selectedElement, 
+                    action.lightningAction, targetIds.length > 0 ? targetIds : undefined,
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                );
             } else if (!effect.target && lastUsedTargetId) {
-                this.applyEffect(effect, card, lastUsedTargetId, action.selectedElement, action.lightningAction, [lastUsedTargetId]);
+                this.applyEffect(
+                    effect, card, lastUsedTargetId, action.selectedElement, 
+                    action.lightningAction, [lastUsedTargetId],
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                );
             } else {
-                this.applyEffect(effect, card, action.targetGodId, action.selectedElement, action.lightningAction, action.targetGodIds);
+                this.applyEffect(
+                    effect, card, action.targetGodId, action.selectedElement, 
+                    action.lightningAction, action.targetGodIds,
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                );
             }
         }
 
@@ -604,7 +766,10 @@ export class GameEngine {
             targetGodId: action.targetGodId,
             targetGodIds: action.targetGodIds,
             selectedElement: action.selectedElement,
-            lightningAction: action.lightningAction
+            lightningAction: action.lightningAction,
+            selectedCardIds: action.selectedCardIds,
+            healDistribution: action.healDistribution,
+            optionalChoice: action.optionalChoice
         };
 
         const result = this.playCard(playAction);
@@ -715,11 +880,30 @@ export class GameEngine {
         targetGodId?: string,
         selectedElement?: Element,
         lightningAction?: 'apply' | 'remove',
-        targetGodIds?: string[]
+        targetGodIds?: string[],
+        selectedCardIds?: string[],
+        healDistribution?: { godId: string, amount: number }[],
+        optionalChoice?: boolean
     ): void {
         const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
         const targets = this.resolveTargets(effect.target, player, opponent, targetGodId, targetGodIds);
+
+        const ctx: EffectContext = {
+            engine: this,
+            player,
+            opponent,
+            castingGod: this.findCastingGod(card, player),
+            card,
+            targets,
+            targetGodId,
+            targetGodIds,
+            selectedElement,
+            lightningAction,
+            selectedCardIds,
+            healDistribution,
+            optionalChoice
+        };
 
         switch (effect.type) {
             case 'damage':

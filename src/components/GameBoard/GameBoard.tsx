@@ -254,6 +254,9 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                                 card={card}
                                 isHidden={!isRevealedToMe} 
                                 isMini={true}
+                                isMinimal={isRevealedToMe}
+                                onMouseEnter={() => isRevealedToMe && setHoveredCard(card)}
+                                onMouseLeave={() => setHoveredCard(null)}
                             />
                         </div>
                     );
@@ -277,6 +280,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                 hand={player.hand}
                 selectedCard={selectedCard}
                 onSelectCard={handleCardClick}
+                onHoverCard={setHoveredCard}
             />
 
             {/* ACTION UI (Play or Target) */}
