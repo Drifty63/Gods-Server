@@ -164,19 +164,30 @@ function HomeContent() {
         </div>
       </div>
 
+      {/* Compteur d'ambroisie : DOIT rester en dehors de <nav> (position:fixed dessus, mais
+          .bottomNav a un backdrop-filter, qui crée un containing block pour ses descendants en
+          position:fixed — le compteur se positionnait donc par rapport à la barre du bas,
+          en bas de l'écran, au lieu du viewport entier). */}
+      <div className={styles.currencyDisplay}>
+        <Image
+          src="/icons/ambroisie.png"
+          alt="Ambroisie"
+          width={24}
+          height={24}
+          className={styles.currencyIcon}
+        />
+        <span className={styles.currencyAmount}>{userAmbroisie.toLocaleString()}</span>
+      </div>
+
+      {/* Options en haut à gauche (même logique que le compteur d'ambroisie : en dehors de
+          <nav> pour ne pas hériter de son backdrop-filter) : ça laisse exactement 5 boutons
+          dans la barre du bas, parfaitement symétrique autour de "Jouer". */}
+      <button className={styles.settingsButton} onClick={handleOptionsClick} aria-label="Options">
+        <span className={styles.navIcon}>⚙️</span>
+      </button>
+
       {/* Barre de navigation en bas */}
       <nav className={styles.bottomNav}>
-        <div className={styles.currencyDisplay}>
-          <Image
-            src="/icons/ambroisie.png"
-            alt="Ambroisie"
-            width={24}
-            height={24}
-            className={styles.currencyIcon}
-          />
-          <span className={styles.currencyAmount}>{userAmbroisie.toLocaleString()}</span>
-        </div>
-
         <Link href="/shop" className={styles.navItem}>
           <Image src="/shop_icon.png" alt="Boutique" width={32} height={32} className={styles.navIconImage} />
           <span className={styles.navLabel}>Boutique</span>
@@ -187,31 +198,25 @@ function HomeContent() {
           <span className={styles.navLabel}>Deck</span>
         </Link>
 
+        {/* Bouton JOUER au centre de la barre : action principale, mise en avant */}
+        <Link href="/play" className={styles.playButton}>
+          <span className={styles.playIcon}>⚔️</span>
+          <span className={styles.playLabel}>Jouer</span>
+        </Link>
+
         <Link href="/social" className={styles.navItem}>
           <span className={styles.navIcon}>💬</span>
           <span className={styles.navLabel}>Social</span>
         </Link>
-        
-        {/* Options / Settings in Nav now */}
-        <button className={styles.navItem} onClick={handleOptionsClick}>
-            <span className={styles.navIcon}>⚙️</span>
-            <span className={styles.navLabel}>Options</span>
-        </button>
 
         <Link href="/profile" className={styles.navItem}>
           <span className={styles.navIcon}>👤</span>
           <span className={styles.navLabel}>Profil</span>
         </Link>
-
-        {/* Bouton central JOUER décalé en bas */}
-        <Link href="/play" className={styles.playButton}>
-          <span className={styles.playIcon}>⚔️</span>
-          <span className={styles.playLabel}>Jouer</span>
-        </Link>
       </nav>
 
       {/* Footer discret */}
-      <footer className={styles.footer} style={{ position: 'fixed', bottom: '5px', right: '10px', fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', zIndex: 10 }}>
+      <footer className={styles.footer} style={{ position: 'fixed', bottom: 'calc(72px + env(safe-area-inset-bottom))', right: '10px', fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', zIndex: 10 }}>
         <p>2025 GODS SERIE 1 • Aseo, Drift & Zedycuss</p>
       </footer>
     </main>

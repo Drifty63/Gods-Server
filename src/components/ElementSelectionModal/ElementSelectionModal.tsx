@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { createPortal } from 'react-dom';
+import ModalShell from '@/components/ModalShell/ModalShell';
 import styles from './ElementSelectionModal.module.css';
 import { Element } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
@@ -25,34 +25,28 @@ export default function ElementSelectionModal({
     onSelect,
     onCancel
 }: ElementSelectionModalProps) {
-    if (!isOpen) return null;
-    if (typeof window === 'undefined') return null;
-
-    return createPortal(
-        <div className={styles.overlay}>
-            <div className={styles.modal}>
-                <h2 className={styles.title}>⭐ Coup Critique</h2>
-                <p className={styles.description}>
-                    Sélectionnez l&apos;élément de faiblesse à appliquer à la cible
-                </p>
-                <div className={styles.grid}>
-                    {ELEMENTS.map((el) => (
-                        <button
-                            key={el.id}
-                            className={styles.elementButton}
-                            style={{ '--el-color': el.color } as any}
-                            onClick={() => onSelect(el.id)}
-                        >
-                            <span className={styles.symbol}>{ELEMENT_SYMBOLS[el.id]}</span>
-                            <span className={styles.name}>{el.name}</span>
-                        </button>
-                    ))}
-                </div>
-                <button className={styles.cancelButton} onClick={onCancel}>
-                    Annuler
-                </button>
+    return (
+        <ModalShell isOpen={isOpen} onCancel={onCancel} accentColor="#f59e0b">
+            <h2 className={styles.title}>⭐ Coup Critique</h2>
+            <p className={styles.description}>
+                Sélectionnez l&apos;élément de faiblesse à appliquer à la cible
+            </p>
+            <div className={styles.grid}>
+                {ELEMENTS.map((el) => (
+                    <button
+                        key={el.id}
+                        className={styles.elementButton}
+                        style={{ '--el-color': el.color } as React.CSSProperties}
+                        onClick={() => onSelect(el.id)}
+                    >
+                        <span className={styles.symbol}>{ELEMENT_SYMBOLS[el.id]}</span>
+                        <span className={styles.name}>{el.name}</span>
+                    </button>
+                ))}
             </div>
-        </div>,
-        document.body
+            <button className={styles.cancelButton} onClick={onCancel}>
+                Annuler
+            </button>
+        </ModalShell>
     );
 }

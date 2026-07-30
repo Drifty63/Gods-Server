@@ -113,6 +113,15 @@ export interface PlayerState {
     afkTurns?: number;                   // Compteur de tours AFK (sans jouer de carte) - pour anti-AFK online
 }
 
+// Entrée du log de combat : permet à un joueur de vérifier après coup quelle carte a été jouée,
+// notamment la sienne (ou celle de l'adversaire) s'il ne l'a pas vue passer.
+export interface GameLogEntry {
+    turnNumber: number;
+    playerId: string;
+    playerName: string;
+    message: string;
+}
+
 // État de la partie
 export interface GameState {
     id: string;
@@ -124,6 +133,7 @@ export interface GameState {
     players: [PlayerState, PlayerState];
     winnerId?: string;
     winReason?: 'elimination' | 'turn_limit' | 'surrender' | 'draw';  // Raison de la victoire (ou match nul)
+    log: GameLogEntry[];             // Historique des cartes jouées/défaussées, consultable en jeu
     createdAt: Date;
     updatedAt: Date;
 }
@@ -143,4 +153,12 @@ export interface GameAction {
     optionalChoice?: boolean;       // Pour les sorts copiés avec effet optionnel (ex: Vision du Tartare copiée)
     selectedCardIds?: string[];      // Pour le recyclage (Hestia) ou le placement en bas du deck (Nyx)
     healDistribution?: { godId: string, amount: number }[]; // Pour la distribution de soin (Déméter)
+    selectedPlayerTarget?: 'self' | 'opponent'; // Pour le choix de joueur (Zéphyr - free_recycle)
+    /**
+     * Si true, les effets custom qui nécessitent un choix du joueur (voir DEFERRED_CUSTOM_EFFECTS
+     * dans GameEngine.ts) ne sont PAS résolus par playCard : la carte est bien jouée (coût payé,
+     * carte défaussée) mais l'effet custom attend un appel à resolveDeferredEffect() une fois le
+     * choix du joueur connu. Évite la double-exécution (auto + confirmation manuelle).
+     */
+    deferCustomEffect?: boolean;
 }

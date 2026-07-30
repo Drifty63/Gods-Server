@@ -2,6 +2,7 @@
 
 import { GodState, Element } from '@/types/cards';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
+import { getStatusIcon } from '@/data/statusIcons';
 import Image from 'next/image';
 import styles from './GodCard.module.css';
 
@@ -151,18 +152,6 @@ export default function GodCard({
             )}
         </div>
     );
-}
-
-function getStatusIcon(status: string): string {
-    switch (status) {
-        case 'poison': return '🧪';
-        case 'lightning': return '⚡';
-        case 'shield': return '🛡️';
-        case 'provocation': return '😤';
-        case 'stun': return '🌀';
-        case 'weakness_immunity': return '🌟';
-        default: return '✨';
-    }
 }
 
 

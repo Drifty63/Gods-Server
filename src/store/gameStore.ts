@@ -25,7 +25,7 @@ interface GameStore {
 
     // État pour sélection de cartes (hand/discard)
     isSelectingCards: boolean;
-    cardSelectionSource: 'hand' | 'discard' | 'opponent_discard' | null;
+    cardSelectionSource: 'hand' | 'discard' | null;
     cardSelectionCount: number;
     cardSelectionTitle: string;
     pendingCardSelectionEffect: string | null;  // L'effet en attente de sélection
@@ -55,6 +55,10 @@ interface GameStore {
     isShowingZombieDamage: boolean;
     zombieDamageGodId: string | null;
 
+    // ID de la carte dont l'effet custom a été différé (deferCustomEffect) en attendant
+    // le choix du joueur dans une des modales ci-dessus. Résolu via engine.resolveDeferredEffect().
+    pendingEffectCardId: string | null;
+
     // Actions
     initGame: (
         player1Gods: GodCard[],
@@ -78,7 +82,15 @@ interface GameStore {
     addTargetGod: (god: GodState) => void;  // Ajouter une cible à la liste
     toggleTargetGod: (god: GodState) => void;  // Ajouter ou retirer une cible
     setLightningAction: (action: 'apply' | 'remove') => void;  // Choisir l'action foudre
-    playCard: (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => { success: boolean; message: string };
+    /**
+     * `pending: true` signale que le résultat n'est PAS une carte jouée : une modale de choix
+     * préalable (élément de faiblesse, action foudre...) vient de s'ouvrir et un second appel à
+     * playCard() est attendu une fois le choix fait. L'appelant (GameBoard) ne doit alors PAS
+     * effacer selectedCard/selectedTargetGods ni afficher l'aperçu "sort lancé" — sinon le
+     * second appel n'a plus de carte/cibles à rejouer et le sort ne part jamais (bug corrigé :
+     * "il faut lancer le sort deux fois").
+     */
+    playCard: (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => { success: boolean; message: string; pending?: boolean };
     playCardWithChoice: (cardId: string, targetGodId?: string, targetGodIds?: string[], choice?: boolean) => { success: boolean; message: string };
     discardForEnergy: (cardId: string) => { success: boolean; message: string };
     endTurn: (ignoreZombieCheck?: boolean) => { success: boolean; message: string };
@@ -99,7 +111,7 @@ interface GameStore {
     getValidAllyTargets: () => GodState[];   // Cibles alliées valides
 
     // Actions pour sélection de cartes
-    startCardSelection: (source: 'hand' | 'discard' | 'opponent_discard', count: number, title: string, effectId: string) => void;
+    startCardSelection: (source: 'hand' | 'discard', count: number, title: string, effectId: string) => void;
     confirmCardSelection: (selectedCards: SpellCard[]) => void;
     cancelCardSelection: () => void;
     getCardsForSelection: () => SpellCard[];
@@ -157,6 +169,57 @@ interface GameStore {
 // Cela force React à détecter le changement et déclencher un re-render
 const cloneGameState = (state: GameState): GameState => {
     return JSON.parse(JSON.stringify(state));
+};
+
+// État "toutes les modales fermées". Une seule modale de choix doit jamais être active à la
+// fois : chaque startXxx() ci-dessous applique ce patch AVANT d'ouvrir la sienne, pour garantir
+// qu'ouvrir une nouvelle modale ferme systématiquement toute modale précédente encore active
+// (plutôt que de laisser plusieurs isSelectingX à true en même temps, ce qui pouvait faire
+// apparaître une modale "en arrière-plan" ou en file d'attente derrière une autre).
+const ALL_MODALS_CLOSED = {
+    isSelectingCards: false,
+    cardSelectionSource: null as 'hand' | 'discard' | null,
+    cardSelectionCount: 0,
+    cardSelectionTitle: '',
+    pendingCardSelectionEffect: null as string | null,
+
+    isDistributingHeal: false,
+    healDistributionTotal: 0,
+
+    isSelectingEnemyCards: false,
+    enemyCardSelectionCount: 0,
+    enemyCardSelectionTitle: '',
+    pendingEnemyCardEffect: null as string | null,
+
+    isShowingOptionalChoice: false,
+    optionalChoiceTitle: '',
+    optionalChoiceDescription: '',
+    pendingOptionalEffect: null as string | null,
+    pendingOptionalTargetGodIds: [] as string[],
+
+    isSelectingPlayer: false,
+    playerSelectionTitle: '',
+    pendingPlayerEffect: null as string | null,
+
+    isSelectingDeadGod: false,
+    deadGodSelectionTitle: '',
+    pendingZombieEffect: null as string | null,
+
+    isSelectingGod: false,
+    godSelectionTitle: '',
+    pendingGodEffect: null as string | null,
+    godSelectionTargetType: null as 'ally' | 'enemy' | 'any' | null,
+
+    isShowingZombieDamage: false,
+    zombieDamageGodId: null as string | null,
+
+    isSelectingElement: false,
+    isSelectingLightningAction: false,
+
+    // pendingEffectCardId n'est PAS remis à null ici : il est posé une fois par playCard() au
+    // moment où la carte est jouée (avant l'ouverture de la modale de choix), et lu par le
+    // confirm* correspondant. Le réinitialiser au moment d'ouvrir la modale casserait le lien.
+    // Il est explicitement nettoyé par chaque confirm*/cancel* une fois le choix résolu.
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -220,6 +283,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // État initial pour zombie damage de fin de tour
     isShowingZombieDamage: false,
     zombieDamageGodId: null,
+
+    pendingEffectCardId: null,
 
     // Initialiser une nouvelle partie
     initGame: (player1Gods, player1Deck, player2Gods, player2Deck, isPlayer1First, soloMode = true, options) => {
@@ -412,6 +477,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Méthodes pour la sélection de cartes
     startCardSelection: (source, count, title, effectId) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isSelectingCards: true,
             cardSelectionSource: source,
             cardSelectionCount: count,
@@ -421,35 +487,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     confirmCardSelection: (selectedCards) => {
-        const { engine, pendingCardSelectionEffect, playerId, cardSelectionSource } = get();
+        const { engine, pendingCardSelectionEffect, playerId, pendingEffectCardId } = get();
         if (!engine || !pendingCardSelectionEffect) return;
 
         const player = engine.getState().players.find(p => p.id === playerId);
         if (!player) return;
 
         // Exécuter l'effet avec les cartes sélectionnées
-        if (pendingCardSelectionEffect === 'recycle_from_discard') {
-            // Remettre les cartes sélectionnées dans le deck
-            for (const card of selectedCards) {
-                const index = player.discard.findIndex(c => c.id === card.id);
-                if (index !== -1) {
-                    const [removedCard] = player.discard.splice(index, 1);
-                    player.deck.push(removedCard);
-                }
-            }
-            // Mélanger le deck
-            for (let i = player.deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [player.deck[i], player.deck[j]] = [player.deck[j], player.deck[i]];
-            }
-        } else if (pendingCardSelectionEffect === 'put_cards_bottom') {
-            // Mettre les cartes sélectionnées en bas du deck
-            for (const card of selectedCards) {
-                const index = player.hand.findIndex(c => c.id === card.id);
-                if (index !== -1) {
-                    const [removedCard] = player.hand.splice(index, 1);
-                    player.deck.push(removedCard);
-                }
+        if (pendingCardSelectionEffect === 'recycle_from_discard' || pendingCardSelectionEffect === 'put_cards_bottom') {
+            // L'effet différé lors du play_card initial est résolu ici avec le vrai choix du
+            // joueur (le handler centralisé dans GameEngine.ts fait le travail, pas de duplication).
+            if (pendingEffectCardId) {
+                engine.resolveDeferredEffect(pendingEffectCardId, {
+                    selectedCardIds: selectedCards.map(c => c.id),
+                });
             }
         } else if (pendingCardSelectionEffect === 'retrieve_discard') {
             // Perséphone - Récupérer une carte de la défausse et la mettre en main
@@ -480,6 +531,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 const mockCard = { ...copiedCard, element: 'darkness' as const, energyCost: 0 };
                 const neededTargets = get().getRequiredTargetCount(mockCard);
 
+                const hasCascadeHeal = copiedCard.effects.some(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
+
                 if (neededTargets > 0) {
                     // Lancer la sélection de cible
                     set({
@@ -489,8 +542,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         // On utilise pendingEnemyCardEffect pour stocker le contexte (HACK mais efficace)
                         pendingEnemyCardEffect: `cast_copy:${originalCardId || ''}:${copiedCard.id}`
                     });
+                } else if (hasCascadeHeal) {
+                    // Marée Basse copiée n'a pas de cible directe mais a quand même besoin du
+                    // choix de direction : sans ce cas, l'effet était auparavant exécuté sans
+                    // jamais ouvrir la modale de choix (donc sans jamais soigner personne).
+                    set({
+                        ...ALL_MODALS_CLOSED,
+                        isShowingOptionalChoice: true,
+                        optionalChoiceTitle: "Direction du flux",
+                        optionalChoiceDescription: "Gauche (Ouest) ou Droite (Est) ?",
+                        pendingOptionalEffect: `copy_cascade_heal:${originalCardId || ''}:${copiedCard.id}`,
+                        pendingOptionalTargetGodIds: [],
+                    });
                 } else {
-                    // Pas de cible nécessaire, exécuter directement
+                    // Pas de cible ni de choix nécessaire, exécuter directement
                     engine.executeAction({
                         type: 'cast_copied_spell',
                         playerId,
@@ -511,6 +576,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             cardSelectionCount: 0,
             cardSelectionTitle: '',
             pendingCardSelectionEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
@@ -521,6 +587,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             cardSelectionCount: 0,
             cardSelectionTitle: '',
             pendingCardSelectionEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
@@ -532,10 +599,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (!player) return [];
 
         if (cardSelectionSource === 'discard') {
-            // Si c'est pour recycler, on ne doit pas pouvoir recycler la carte qu'on vient de jouer
-            // La carte jouée est toujours la dernière de la défausse car elle y est mise à la fin de playCard
-            if (pendingCardSelectionEffect === 'recycle_from_discard' && player.discard.length > 0) {
-                // Retourner toutes les cartes sauf la dernière
+            // On ne doit jamais pouvoir se sélectionner soi-même : ni recycler la carte qu'on
+            // vient de jouer (recycle_from_discard), ni copier "Pouvoirs des Âmes" avec
+            // elle-même (copy_discard_spell). La carte jouée est toujours la dernière de la
+            // défausse du joueur (elle y est mise à la fin de playCard, juste avant l'ouverture
+            // de cette modale de sélection).
+            const excludesLastPlayed =
+                pendingCardSelectionEffect === 'recycle_from_discard' ||
+                pendingCardSelectionEffect?.startsWith('copy_discard_spell');
+            if (excludesLastPlayed && player.discard.length > 0) {
                 return player.discard.slice(0, player.discard.length - 1);
             }
             return player.discard;
@@ -547,17 +619,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Méthodes pour distribution de soins
     startHealDistribution: (totalHeal) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isDistributingHeal: true,
             healDistributionTotal: totalHeal,
         });
     },
 
     confirmHealDistribution: (distribution) => {
-        const { engine, playerId, healDistributionTotal } = get();
+        const { engine, healDistributionTotal, pendingEffectCardId } = get();
         if (!engine) return;
-
-        const player = engine.getState().players.find(p => p.id === playerId);
-        if (!player) return;
 
         // Valider que le total distribué ne dépasse pas le total autorisé
         const totalDistributed = distribution.reduce((sum, d) => sum + d.amount, 0);
@@ -566,26 +636,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
             return; // Rejeter la distribution invalide
         }
 
-        // Appliquer les soins à chaque dieu selon la distribution
-        for (const { godId, amount } of distribution) {
-            const god = player.gods.find(g => g.card.id === godId);
-            if (god && !god.isDead && amount > 0) {
-                // Retirer le poison (min entre heal et stacks de poison)
-                const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
-                if (poisonIndex !== -1) {
-                    const poisonToRemove = Math.min(amount, god.statusEffects[poisonIndex].stacks);
-                    god.statusEffects[poisonIndex].stacks -= poisonToRemove;
-                    if (god.statusEffects[poisonIndex].stacks <= 0) {
-                        god.statusEffects.splice(poisonIndex, 1);
-                    }
-                }
-
-                // Soigner
-                god.currentHealth = Math.min(
-                    god.currentHealth + amount,
-                    god.card.maxHealth
-                );
-            }
+        // Résout l'effet différé via le handler centralisé (distribute_heal_5 dans GameEngine.ts),
+        // qui applique déjà les soins via healGod (retrait de poison cohérent avec le reste du jeu).
+        if (pendingEffectCardId) {
+            engine.resolveDeferredEffect(pendingEffectCardId, {
+                healDistribution: distribution.filter(d => d.amount > 0),
+            });
         }
 
         // Mettre à jour l'état et fermer le modal
@@ -593,6 +649,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             gameState: cloneGameState(engine.getState()),
             isDistributingHeal: false,
             healDistributionTotal: 0,
+            pendingEffectCardId: null,
         });
 
         // En mode solo, finir le tour automatiquement après la confirmation
@@ -608,12 +665,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({
             isDistributingHeal: false,
             healDistributionTotal: 0,
+            pendingEffectCardId: null,
         });
     },
 
     // Méthodes pour sélection de cartes adverses (Nyx)
     startEnemyCardSelection: (count, title, effectId) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isSelectingEnemyCards: true,
             enemyCardSelectionCount: count,
             enemyCardSelectionTitle: title,
@@ -622,21 +681,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     confirmEnemyCardSelection: (selectedCardIds) => {
-        const { engine, playerId, pendingEnemyCardEffect, enemyCardSelectionCount } = get();
+        const { engine, playerId, pendingEnemyCardEffect, pendingEffectCardId } = get();
         if (!engine || !pendingEnemyCardEffect) return;
 
         const opponent = engine.getState().players.find(p => p.id !== playerId);
         if (!opponent) return;
 
-        // Cas spécial : choose_discard_enemy (Vent d'Ouest) = simple défausse
+        // Cas spécial : choose_discard_enemy (Vent d'Ouest) = simple défausse.
+        // Effet différé, résolu via le handler centralisé (déjà prêt pour selectedCardIds).
         if (pendingEnemyCardEffect === 'choose_discard_enemy') {
-            for (const cardId of selectedCardIds) {
-                const cardIndex = opponent.hand.findIndex(c => c.id === cardId);
-                if (cardIndex !== -1) {
-                    const card = opponent.hand.splice(cardIndex, 1)[0];
-                    card.isHiddenFromOwner = false;
-                    opponent.discard.push(card); // Défausse, pas dans le deck
-                }
+            if (pendingEffectCardId) {
+                engine.resolveDeferredEffect(pendingEffectCardId, { selectedCardIds });
             }
         } else {
             // Comportement par défaut (Nyx) : mélange dans deck + pioche à l'envers
@@ -674,6 +729,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             enemyCardSelectionCount: 0,
             enemyCardSelectionTitle: '',
             pendingEnemyCardEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
@@ -683,6 +739,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             enemyCardSelectionCount: 0,
             enemyCardSelectionTitle: '',
             pendingEnemyCardEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
@@ -789,6 +846,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     // Vision du Tartare : proposer de défausser 2 cartes pour +1 dégât
                     // Stocker le contexte pour après le choix
                     set({
+                        ...ALL_MODALS_CLOSED,
                         isShowingOptionalChoice: true,
                         optionalChoiceTitle: "Pouvoir des ténèbres",
                         optionalChoiceDescription: "Défausser 2 cartes du deck pour +1 dégât par cible ?",
@@ -802,12 +860,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         isSelectingTarget: false,
                         pendingEnemyCardEffect: null
                     });
-                    return { success: true, message: "Choisissez l'option bonus" };
+                    return { success: true, pending: true, message: "Choisissez l'option bonus" };
                 }
 
                 if (hasCascadeHeal) {
                     // Marée Basse : proposer le choix de direction
                     set({
+                        ...ALL_MODALS_CLOSED,
                         isShowingOptionalChoice: true,
                         optionalChoiceTitle: "Direction du flux",
                         optionalChoiceDescription: "Gauche (Ouest) ou Droite (Est) ?",
@@ -820,7 +879,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         isSelectingTarget: false,
                         pendingEnemyCardEffect: null
                     });
-                    return { success: true, message: "Choisissez la direction" };
+                    return { success: true, pending: true, message: "Choisissez la direction" };
                 }
             }
 
@@ -859,6 +918,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const player = engine.getState().players.find(p => p.id === playerId);
         const cardToCheck = player?.hand.find(c => c.id === cardId);
 
+        // CAS SPÉCIAL : Sorts de Zeus avec lightning_toggle — ouvrir le choix Appliquer/Retirer
+        // avant de jouer la carte. Ce modal (LightningActionModal / isSelectingLightningAction)
+        // était câblé côté UI (GameBoard.tsx) mais jamais déclenché : isSelectingLightningAction
+        // n'était mis à true nulle part, donc ces sorts s'exécutaient toujours en mode "auto"
+        // (appliquer si absent, retirer si présent) sans jamais laisser le joueur choisir.
+        if (cardToCheck && get().needsLightningChoice(cardToCheck) && !lightningAction && !selectedLightningAction) {
+            set({ ...ALL_MODALS_CLOSED, isSelectingLightningAction: true, selectedCard: cardToCheck });
+            return { success: true, pending: true, message: "Choisissez l'action foudre" };
+        }
+
         if (cardToCheck && cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'copy_discard_spell')) {
             // JOUER LA CARTE D'ABORD (dépense l'énergie, défausse la carte)
             const playResult = engine.executeAction({
@@ -877,15 +946,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // 3. CAS SPÉCIAL : Interception du sort Zéphyr "Vent de Face" (shuffle_god_cards)
         if (cardToCheck && cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'shuffle_god_cards')) {
-            // Jouer la carte (payer le coût) mais ne pas exécuter l'effet custom ici
+            // Jouer la carte (payer le coût) ; l'effet custom est différé jusqu'au choix du dieu
             const playResult = engine.executeAction({
                 type: 'play_card',
                 playerId,
                 cardId,
+                deferCustomEffect: true,
             });
 
             if (playResult.success) {
-                set({ gameState: cloneGameState(engine.getState()) });
+                set({ gameState: cloneGameState(engine.getState()), pendingEffectCardId: cardId });
                 // Ouvrir le modal de sélection de dieu (tous les dieux vivants)
                 get().startGodSelection("Choisissez un dieu dont les cartes retourneront dans le deck", `shuffle_god_cards:${cardId}`, 'any');
             }
@@ -903,22 +973,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
             if (hasRecycle || hasPutBottom || hasHealDist || hasApplyWeakness) {
                 // Pour ces sorts, on doit d'abord vérifier si on a l'élément si c'est Artémis
                 if (hasApplyWeakness && !selectedElement) {
-                    set({ isSelectingElement: true, selectedCard: cardToCheck });
-                    return { success: true, message: "Sélectionnez l'élément de faiblesse" };
+                    set({ ...ALL_MODALS_CLOSED, isSelectingElement: true, selectedCard: cardToCheck });
+                    return { success: true, pending: true, message: "Sélectionnez l'élément de faiblesse" };
                 }
 
-                // Jouer la carte d'abord (consomme énergie)
+                // Jouer la carte d'abord (consomme énergie). Les effets custom qui ont besoin
+                // du choix du joueur (recycle_from_discard, put_cards_bottom, distribute_heal_5)
+                // sont différés : ils seront résolus par resolveDeferredEffect() dans le confirm*
+                // correspondant, pour éviter qu'ils s'exécutent une première fois en mode "auto".
                 const playResult = engine.executeAction({
                     type: 'play_card',
                     playerId,
                     cardId,
                     targetGodId,
                     targetGodIds,
-                    selectedElement: selectedElement || undefined
+                    selectedElement: selectedElement || undefined,
+                    deferCustomEffect: hasRecycle || hasPutBottom || hasHealDist,
                 });
 
                 if (playResult.success) {
-                    set({ gameState: cloneGameState(engine.getState()) });
+                    set({ gameState: cloneGameState(engine.getState()), pendingEffectCardId: cardId });
 
                     if (hasRecycle) {
                         get().startCardSelection('discard', 2, "Recycler dans le deck", 'recycle_from_discard');
@@ -932,14 +1006,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
             }
 
             // Perséphone / Zéphyr / Séléné Modals
+            // (copy_discard_spell n'est PAS dans ce groupe : il est intercepté plus haut, avant
+            // ce bloc, et cible toujours la défausse du joueur qui l'a joué — voir plus haut.)
             const hasFreeRecycle = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'free_recycle');
             const hasTempResurrect = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'temp_resurrect');
             const hasVisionTartare = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'vision_tartare');
             const hasCascadeHeal = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
             const hasRetrieveDiscard = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'retrieve_discard');
-            const hasCopyDiscard = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'copy_discard_spell');
 
-            if (hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal || hasRetrieveDiscard || hasCopyDiscard) {
+            if (hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal || hasRetrieveDiscard) {
                 // Pour ces sorts, on doit d'abord vérifier si on a besoin de cibles avant d'ouvrir le modal
                 const neededTargets = get().getRequiredTargetCount(cardToCheck);
                 if (neededTargets > 0 && selectedTargetGods.length < neededTargets) {
@@ -947,30 +1022,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     return { success: true, message: "Sélectionnez les cibles" };
                 }
 
-                // Jouer la carte
+                // Jouer la carte. free_recycle, temp_resurrect, vision_tartare et cascade_heal_choice
+                // ont besoin du choix du joueur : ils sont différés jusqu'au confirm* correspondant.
                 const playResult = engine.executeAction({
                     type: 'play_card',
                     playerId,
                     cardId,
                     targetGodId,
                     targetGodIds,
+                    deferCustomEffect: hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal,
                 });
 
                 if (playResult.success) {
-                    set({ gameState: cloneGameState(engine.getState()) });
+                    set({ gameState: cloneGameState(engine.getState()), pendingEffectCardId: cardId });
 
                     if (hasFreeRecycle) {
                         get().startPlayerSelection("Mélanger défausse et deck sans fatigue", "free_recycle");
                     } else if (hasTempResurrect) {
-                        get().startDeadGodSelection("Ressusciter un dieu allié en zombie (5 PV)", "temp_resurrect");
+                        get().startDeadGodSelection("Invoquer un dieu allié mort en zombie (5 PV)", "temp_resurrect");
                     } else if (hasVisionTartare) {
                         get().startOptionalChoice("Pouvoir des ténèbres", "Défausser 2 cartes du deck pour +1 dégât par cible ?", "vision_tartare", targetGodIds || (targetGodId ? [targetGodId] : []));
                     } else if (hasCascadeHeal) {
                         get().startOptionalChoice("Direction du flux", "Gauche (3,2,1) ou Droite (3,2,1) ?", "cascade_heal_choice", []);
                     } else if (hasRetrieveDiscard) {
                         get().startCardSelection('discard', 1, "Récupérer une carte", 'retrieve_discard');
-                    } else if (hasCopyDiscard) {
-                        get().startCardSelection('opponent_discard', 1, "Copier un sort en Ténèbres", 'copy_discard_spell');
                     }
                 }
                 return playResult;
@@ -978,10 +1053,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             const hasEnemyCardSelect = cardToCheck.effects.some(e => e.type === 'custom' && (e.customEffectId === 'choose_discard_enemy' || e.customEffectId === 'choose_hand_to_deck'));
             if (hasEnemyCardSelect) {
-                const playResult = engine.executeAction({ type: 'play_card', playerId, cardId, targetGodId, targetGodIds });
+                const effectId = cardToCheck.effects.find(e => e.type === 'custom' && (e.customEffectId === 'choose_discard_enemy' || e.customEffectId === 'choose_hand_to_deck'))?.customEffectId || '';
+                const playResult = engine.executeAction({
+                    type: 'play_card', playerId, cardId, targetGodId, targetGodIds,
+                    deferCustomEffect: effectId === 'choose_discard_enemy',
+                });
                 if (playResult.success) {
-                    set({ gameState: cloneGameState(engine.getState()) });
-                    const effectId = cardToCheck.effects.find(e => e.type === 'custom' && (e.customEffectId === 'choose_discard_enemy' || e.customEffectId === 'choose_hand_to_deck'))?.customEffectId || '';
+                    set({ gameState: cloneGameState(engine.getState()), pendingEffectCardId: cardId });
                     const count = cardToCheck.effects.find(e => e.customEffectId === effectId)?.value || 1;
                     get().startEnemyCardSelection(count, "Choisissez une carte adverse", effectId);
                 }
@@ -1267,6 +1345,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // === ACTIONS POUR CONFIRMATION OPTIONNELLE (optional_mill_boost) ===
     startOptionalChoice: (title, description, effectId, targetGodIds) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isShowingOptionalChoice: true,
             optionalChoiceTitle: title,
             optionalChoiceDescription: description,
@@ -1276,156 +1355,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     confirmOptionalChoice: (accepted) => {
-        const { engine, playerId, pendingOptionalEffect, pendingOptionalTargetGodIds } = get();
+        const { engine, playerId, pendingOptionalEffect, pendingOptionalTargetGodIds, pendingEffectCardId } = get();
         if (!engine || !pendingOptionalEffect) return;
 
-        const player = engine.getState().players.find(p => p.id === playerId);
-        const opponent = engine.getState().players.find(p => p.id !== playerId);
-        if (!player || !opponent) return;
-
-        // Vision du Tartare : inflige les dégâts de base (1) + bonus (+1 si accepté)
-        if (pendingOptionalEffect === 'vision_tartare') {
-            let damagePerTarget = 1; // Dégât de base
-
-            if (accepted) {
-                // Défausser 2 cartes du dessus du deck
-                for (let i = 0; i < 2 && player.deck.length > 0; i++) {
-                    const card = player.deck.shift()!;
-                    player.discard.push(card);
-                }
-                damagePerTarget = 2; // Dégât de base + bonus
+        if (pendingOptionalEffect === 'vision_tartare' || pendingOptionalEffect === 'cascade_heal_choice') {
+            // Effet différé lors du play_card initial : résolu ici avec le vrai choix du joueur,
+            // via le handler centralisé dans GameEngine.ts (plus de recalcul manuel de
+            // dégâts/bouclier/soin/poison dans le store, qui causait le bug de double-exécution).
+            // Les cibles (pour vision_tartare) doivent être retransmises : resolveDeferredEffect
+            // recalcule les cibles depuis zéro, il ne réutilise pas celles du play_card initial.
+            if (pendingEffectCardId) {
+                engine.resolveDeferredEffect(pendingEffectCardId, {
+                    optionalChoice: accepted,
+                    targetGodIds: pendingOptionalTargetGodIds.length > 0 ? pendingOptionalTargetGodIds : undefined,
+                });
             }
-
-            // Infliger les dégâts à toutes les cibles en une seule fois
-            for (const targetId of pendingOptionalTargetGodIds) {
-                const target = opponent.gods.find(g => g.card.id === targetId && !g.isDead);
-                if (target) {
-                    // Gestion du bouclier
-                    let remainingDamage = damagePerTarget;
-                    const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                    if (shieldIndex !== -1) {
-                        const shieldStacks = target.statusEffects[shieldIndex].stacks;
-                        const absorbedDamage = Math.min(shieldStacks, remainingDamage);
-                        target.statusEffects[shieldIndex].stacks -= absorbedDamage;
-                        remainingDamage -= absorbedDamage;
-                        if (target.statusEffects[shieldIndex].stacks <= 0) {
-                            target.statusEffects.splice(shieldIndex, 1);
-                        }
-                    }
-                    if (remainingDamage > 0) {
-                        target.currentHealth -= remainingDamage;
-                        if (target.currentHealth <= 0) {
-                            // Utiliser killGod pour gérer proprement la mort (retrait cartes, victoire)
-                            engine.killGod(opponent.id, target.card.id);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Séléné - Marée Basse : choix de direction du soin en cascade
-        if (pendingOptionalEffect === 'cascade_heal_choice') {
-            // Récupérer les dieux alliés vivants
-            const aliveAllies = player.gods.filter(g => !g.isDead);
-            const healAmounts = [3, 2, 1]; // Toujours 3, 2, 1 en partant de la source du flux
-
-            if (accepted) {
-                // Gauche vers Droite (Flux Ouest) : On parcourt normalement [0, 1, 2]
-                for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
-                    const god = aliveAllies[i];
-                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
-                    // Le soin retire le poison
-                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
-                    if (poisonIndex !== -1) {
-                        god.statusEffects.splice(poisonIndex, 1);
-                    }
-                }
-            } else {
-                // Droite vers Gauche (Flux Est) : On parcourt en sens inverse (du dernier au premier)
-                // Le dernier (tout à droite) prend le max (healAmounts[0] = 3)
-                const reversedAllies = [...aliveAllies].reverse();
-                for (let i = 0; i < reversedAllies.length && i < healAmounts.length; i++) {
-                    const god = reversedAllies[i];
-                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
-                    // Le soin retire le poison
-                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
-                    if (poisonIndex !== -1) {
-                        god.statusEffects.splice(poisonIndex, 1);
-                    }
-                }
-            }
-        }
-
-        // === SORTS COPIÉS : Vision du Tartare ===
-        if (pendingOptionalEffect?.startsWith('copy_vision_tartare:')) {
+        } else if (pendingOptionalEffect.startsWith('copy_vision_tartare:') || pendingOptionalEffect.startsWith('copy_cascade_heal:')) {
+            // Sort copié : le choix est connu AVANT l'exécution (aucun play_card préalable ici),
+            // donc un unique appel à cast_copied_spell suffit, pas de déferrement nécessaire.
             const parts = pendingOptionalEffect.split(':');
+            const originalCardId = parts[1] || undefined;
             const copiedCardId = parts[2];
 
-            let damagePerTarget = 1; // Dégât de base
-
-            if (accepted) {
-                // Défausser 2 cartes du dessus du deck
-                for (let i = 0; i < 2 && player.deck.length > 0; i++) {
-                    const card = player.deck.shift()!;
-                    player.discard.push(card);
-                }
-                damagePerTarget = 2; // Dégât de base + bonus
-            }
-
-            // Infliger les dégâts aux cibles
-            for (const targetId of pendingOptionalTargetGodIds) {
-                const target = opponent.gods.find(g => g.card.id === targetId && !g.isDead);
-                if (target) {
-                    // Gestion du bouclier
-                    let remainingDamage = damagePerTarget;
-                    const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                    if (shieldIndex !== -1) {
-                        const shieldStacks = target.statusEffects[shieldIndex].stacks;
-                        const absorbedDamage = Math.min(shieldStacks, remainingDamage);
-                        target.statusEffects[shieldIndex].stacks -= absorbedDamage;
-                        remainingDamage -= absorbedDamage;
-                        if (target.statusEffects[shieldIndex].stacks <= 0) {
-                            target.statusEffects.splice(shieldIndex, 1);
-                        }
-                    }
-                    if (remainingDamage > 0) {
-                        target.currentHealth -= remainingDamage;
-                        if (target.currentHealth <= 0) {
-                            // Utiliser killGod pour gérer proprement la mort (retrait cartes, victoire)
-                            engine.killGod(opponent.id, target.card.id);
-                        }
-                    }
-                }
-            }
-        }
-
-        // === SORTS COPIÉS : Marée Basse ===
-        if (pendingOptionalEffect?.startsWith('copy_cascade_heal:')) {
-            const aliveAllies = player.gods.filter(g => !g.isDead);
-            const healAmounts = [3, 2, 1];
-
-            if (accepted) {
-                // Gauche vers Droite (Flux Ouest)
-                for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
-                    const god = aliveAllies[i];
-                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
-                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
-                    if (poisonIndex !== -1) {
-                        god.statusEffects.splice(poisonIndex, 1);
-                    }
-                }
-            } else {
-                // Droite vers Gauche (Flux Est)
-                const reversedAllies = [...aliveAllies].reverse();
-                for (let i = 0; i < reversedAllies.length && i < healAmounts.length; i++) {
-                    const god = reversedAllies[i];
-                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
-                    const poisonIndex = god.statusEffects.findIndex(s => s.type === 'poison');
-                    if (poisonIndex !== -1) {
-                        god.statusEffects.splice(poisonIndex, 1);
-                    }
-                }
-            }
+            engine.executeAction({
+                type: 'cast_copied_spell',
+                playerId,
+                originalCardId,
+                copiedCardId,
+                targetGodId: pendingOptionalTargetGodIds[0],
+                targetGodIds: pendingOptionalTargetGodIds.length > 0 ? pendingOptionalTargetGodIds : undefined,
+                optionalChoice: accepted,
+            });
         }
 
         // Fermer le modal et mettre à jour l'état
@@ -1436,6 +1396,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             optionalChoiceDescription: '',
             pendingOptionalEffect: null,
             pendingOptionalTargetGodIds: [],
+            pendingEffectCardId: null,
         });
     },
 
@@ -1446,12 +1407,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
             optionalChoiceDescription: '',
             pendingOptionalEffect: null,
             pendingOptionalTargetGodIds: [],
+            pendingEffectCardId: null,
         });
     },
 
     // === ACTIONS POUR CHOIX DE JOUEUR (free_recycle) ===
     startPlayerSelection: (title, effectId) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isSelectingPlayer: true,
             playerSelectionTitle: title,
             pendingPlayerEffect: effectId,
@@ -1459,27 +1422,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     confirmPlayerSelection: (targetSelf) => {
-        const { engine, playerId, pendingPlayerEffect } = get();
+        const { engine, pendingPlayerEffect, pendingEffectCardId } = get();
         if (!engine || !pendingPlayerEffect) return;
 
-        const player = engine.getState().players.find(p => p.id === playerId);
-        const opponent = engine.getState().players.find(p => p.id !== playerId);
-        if (!player || !opponent) return;
-
-        if (pendingPlayerEffect === 'free_recycle') {
-            // Choisir le joueur cible
-            const targetPlayer = targetSelf ? player : opponent;
-
-            // Mélanger défausse dans le deck
-            targetPlayer.deck.push(...targetPlayer.discard);
-            targetPlayer.discard = [];
-
-            // Mélanger le deck (Fisher-Yates)
-            for (let i = targetPlayer.deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [targetPlayer.deck[i], targetPlayer.deck[j]] = [targetPlayer.deck[j], targetPlayer.deck[i]];
-            }
-            // PAS d'augmentation de fatigue, PAS de dégâts
+        if (pendingPlayerEffect === 'free_recycle' && pendingEffectCardId) {
+            // Effet différé résolu ici avec le vrai choix du joueur (le handler centralisé
+            // dans GameEngine.ts fait le mélange, pas de deuxième copie de l'algorithme ici).
+            engine.resolveDeferredEffect(pendingEffectCardId, {
+                selectedPlayerTarget: targetSelf ? 'self' : 'opponent',
+            });
         }
 
         // Fermer le modal et mettre à jour l'état
@@ -1488,6 +1439,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isSelectingPlayer: false,
             playerSelectionTitle: '',
             pendingPlayerEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
@@ -1496,12 +1448,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isSelectingPlayer: false,
             playerSelectionTitle: '',
             pendingPlayerEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
     // === ACTIONS POUR ZOMBIE RESURRECTION (Perséphone - temp_resurrect) ===
     startDeadGodSelection: (title, effectId) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isSelectingDeadGod: true,
             deadGodSelectionTitle: title,
             pendingZombieEffect: effectId,
@@ -1509,27 +1463,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     confirmDeadGodSelection: (godId) => {
-        const { engine, playerId, pendingZombieEffect } = get();
+        const { engine, pendingZombieEffect, pendingEffectCardId } = get();
         if (!engine || !pendingZombieEffect) return;
 
-        const player = engine.getState().players.find(p => p.id === playerId);
-        if (!player) return;
-
-        // Trouver le dieu mort
-        const deadGod = player.gods.find(g => g.card.id === godId && g.isDead);
-        if (!deadGod) return;
-
-        if (pendingZombieEffect === 'temp_resurrect' && player.deck.length > 0) {
-            // Prendre la carte du dessus du deck
-            const zombieCard = player.deck.shift()!;
-
-            // Ressusciter le dieu en zombie
-            deadGod.isDead = false;
-            deadGod.currentHealth = 5;  // 5 PV
-            deadGod.isZombie = true;
-            deadGod.zombieCard = zombieCard;
-            deadGod.zombieOwnerId = playerId;
-            deadGod.statusEffects = [];  // Reset les effets de statut
+        if (pendingZombieEffect === 'temp_resurrect' && pendingEffectCardId) {
+            // Effet différé résolu ici avec le dieu choisi par le joueur (le handler centralisé
+            // temp_resurrect dans GameEngine.ts respecte désormais targetGodId).
+            engine.resolveDeferredEffect(pendingEffectCardId, { targetGodId: godId });
         }
 
         // Fermer le modal et mettre à jour l'état
@@ -1538,6 +1478,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isSelectingDeadGod: false,
             deadGodSelectionTitle: '',
             pendingZombieEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
@@ -1546,12 +1487,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isSelectingDeadGod: false,
             deadGodSelectionTitle: '',
             pendingZombieEffect: null,
+            pendingEffectCardId: null,
         });
     },
 
     // === ACTIONS POUR ZOMBIE DAMAGE DE FIN DE TOUR ===
     startZombieDamage: (godId) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isShowingZombieDamage: true,
             zombieDamageGodId: godId,
         });
@@ -1594,6 +1537,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // === ACTIONS POUR SÉLECTION DE DIEU VIVANT (Zéphyr - shuffle_god_cards) ===
     startGodSelection: (title, effectId, targetType) => {
         set({
+            ...ALL_MODALS_CLOSED,
             isSelectingGod: true,
             godSelectionTitle: title,
             pendingGodEffect: effectId,
@@ -1602,46 +1546,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     confirmGodSelection: (godId) => {
-        const { engine, playerId, pendingGodEffect } = get();
+        const { engine, pendingGodEffect, pendingEffectCardId } = get();
         if (!engine || !pendingGodEffect) return;
 
-        const player = engine.getState().players.find(p => p.id === playerId);
-        const opponent = engine.getState().players.find(p => p.id !== playerId);
-        if (!player || !opponent) return;
-
-        // Trouver le dieu cible (peut être allié ou ennemi selon l'effet)
-        let targetGod = player.gods.find(g => g.card.id === godId && !g.isDead);
-        let targetPlayer = player;
-
-        if (!targetGod) {
-            targetGod = opponent.gods.find(g => g.card.id === godId && !g.isDead);
-            targetPlayer = opponent;
-        }
-
-        if (!targetGod) return;
-
-        // Gérer l'effet shuffle_god_cards
-        if (pendingGodEffect.startsWith('shuffle_god_cards')) {
-            // Récupérer l'ID de la carte originale si présent
-            const parts = pendingGodEffect.split(':');
-            const originalCardId = parts.length > 1 ? parts[1] : null;
-
-            // Trouver les cartes du dieu sélectionné dans la main du joueur cible
-            const cardsToShuffle = targetPlayer.hand.filter(c => c.godId === godId);
-
-            if (cardsToShuffle.length > 0) {
-                // Retirer ces cartes de la main
-                targetPlayer.hand = targetPlayer.hand.filter(c => c.godId !== godId);
-
-                // Les ajouter au deck
-                targetPlayer.deck.push(...cardsToShuffle);
-
-                // Mélanger le deck (Fisher-Yates)
-                for (let i = targetPlayer.deck.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [targetPlayer.deck[i], targetPlayer.deck[j]] = [targetPlayer.deck[j], targetPlayer.deck[i]];
-                }
-            }
+        // Gérer l'effet shuffle_god_cards : effet différé résolu via le handler centralisé
+        // dans GameEngine.ts (plus de deuxième copie du Fisher-Yates ici).
+        if (pendingGodEffect.startsWith('shuffle_god_cards') && pendingEffectCardId) {
+            engine.resolveDeferredEffect(pendingEffectCardId, { targetGodId: godId });
         }
 
         // Fermer le modal et mettre à jour l'état
@@ -1651,6 +1562,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             godSelectionTitle: '',
             pendingGodEffect: null,
             godSelectionTargetType: null,
+            pendingEffectCardId: null,
         });
     },
 
@@ -1660,6 +1572,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             godSelectionTitle: '',
             pendingGodEffect: null,
             godSelectionTargetType: null,
+            pendingEffectCardId: null,
         });
     },
 

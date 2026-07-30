@@ -1,25 +1,16 @@
-/**
- * @deprecated LEGACY COMPONENT - Remplacé par la sélection directe sur le plateau de jeu
- * 
- * Ce modal était utilisé pour le choix de cible des dégâts zombie
- * Il a été remplacé par une interface de sélection directe dans GameBoard.tsx.
- * 
- * Conservé pour référence.
- * 
- * @see GameBoard.tsx - handleZombieTargetClick, handleConfirmDirectZombieDamage
- */
 'use client';
 
 import React from 'react';
 import type { GodState } from '@/types/cards';
-import Portal from '@/components/Portal/Portal';
+import ModalShell from '@/components/ModalShell/ModalShell';
 import styles from './ZombieDamageModal.module.css';
 
 interface ZombieDamageModalProps {
     isOpen: boolean;
     zombieGod: GodState | null;
     enemyGods: GodState[];
-    onSelectTarget: (godId: string | null) => void;  // null = skip
+    onSelectTarget: (godId: string) => void;
+    /** Uniquement utilisé quand il n'y a plus aucune cible vivante à attaquer. */
     onSkip: () => void;
 }
 
@@ -30,14 +21,16 @@ export default function ZombieDamageModal({
     onSelectTarget,
     onSkip
 }: ZombieDamageModalProps) {
-    if (!isOpen || !zombieGod) return null;
-
     const aliveEnemies = enemyGods.filter(g => !g.isDead);
+    // L'attaque du zombie est obligatoire tant qu'une cible existe : impossible de fermer la
+    // modale (clic sur le fond, bouton passer) sans avoir choisi. On ne "passe" automatiquement
+    // que s'il n'y a plus aucun ennemi vivant à cibler.
+    const hasTargets = aliveEnemies.length > 0;
 
     return (
-        <Portal>
-            <div className={styles.overlay}>
-                <div className={styles.modal}>
+        <ModalShell isOpen={isOpen && !!zombieGod} onCancel={hasTargets ? undefined : onSkip} accentColor="#8e44ad" maxWidth={550}>
+            {zombieGod && (
+                <>
                     <div className={styles.zombieInfo}>
                         <div
                             className={styles.zombieImage}
@@ -51,11 +44,13 @@ export default function ZombieDamageModal({
 
                     <h2 className={styles.title}>⚰️ Brûlure Rémanente</h2>
                     <p className={styles.description}>
-                        Votre zombie peut infliger 1 dégât à un ennemi. Choisissez une cible ou passez.
+                        {hasTargets
+                            ? 'Votre zombie inflige obligatoirement 1 dégât ténèbres à un ennemi. Choisissez la cible.'
+                            : "Votre zombie n'a aucune cible disponible ce tour-ci."}
                     </p>
 
                     <div className={styles.targetsContainer}>
-                        {aliveEnemies.length === 0 ? (
+                        {!hasTargets ? (
                             <p className={styles.noTargets}>Aucun ennemi vivant</p>
                         ) : (
                             aliveEnemies.map(enemy => (
@@ -75,12 +70,14 @@ export default function ZombieDamageModal({
                         )}
                     </div>
 
-                    <button className={styles.skipButton} onClick={onSkip}>
-                        ⏭️ Passer (ne pas attaquer)
-                    </button>
-                </div>
-            </div>
-        </Portal>
+                    {!hasTargets && (
+                        <button className={styles.skipButton} onClick={onSkip}>
+                            Continuer
+                        </button>
+                    )}
+                </>
+            )}
+        </ModalShell>
     );
 }
 

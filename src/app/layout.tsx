@@ -4,7 +4,6 @@ import "./globals.css";
 
 import GlobalUI from "@/components/GlobalUI/GlobalUI";
 import { AuthProvider } from "@/contexts/AuthContext";
-import ClientOrientationLock from "@/components/ClientOrientationLock";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -64,7 +63,6 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.variable} ${cinzel.variable} ${cinzelDecorative.variable}`}>
-        <ClientOrientationLock />
         <AuthProvider>
           <GlobalUI />
           {children}

@@ -233,7 +233,7 @@ export const FATIGUE_RULES = {
 export const SPECIAL_MECHANICS = {
     zombie: {
         name: 'Zombie',
-        description: 'Un dieu mort peut être ressuscité en zombie (5 PV). Il inflige automatiquement 1 dégât par tour à un ennemi au choix.',
+        description: 'Un dieu mort peut être invoqué en zombie (5 PV). Il inflige automatiquement 1 dégât par tour à un ennemi au choix.',
         god: 'Perséphone'
     },
     blind_cards: {

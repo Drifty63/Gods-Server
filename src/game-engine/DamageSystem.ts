@@ -3,7 +3,7 @@
  * Remplace les 15+ copies de logique de dégâts éparpillées dans l'ancien code
  */
 
-import { GodState, PlayerState, GameState } from '@/types/cards';
+import { GodState, PlayerState, GameState, SpellCard } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
 import type { Element } from '@/types/cards';
 
@@ -128,20 +128,25 @@ export function handleGodDeath(owner: PlayerState, god: GodState, state: GameSta
         god.zombieOwnerId = undefined;
     }
 
-    // Retirer les cartes du dieu mort de la main, deck et défausse
+    // Retirer les cartes du dieu mort de la main, deck et défausse, et les conserver
+    // dans removedCards (au lieu de les détruire) : c'est ce qui permet aux sorts de
+    // résurrection complète (revive_god, resurrect_two) de les rendre au deck ensuite.
     const godId = god.card.id;
 
-    const removeFromArray = (arr: any[], predicate: (item: any) => boolean) => {
+    const moveToRemoved = (arr: SpellCard[]) => {
         for (let i = arr.length - 1; i >= 0; i--) {
-            if (predicate(arr[i])) {
-                arr.splice(i, 1);
+            if (arr[i].godId === godId) {
+                const [card] = arr.splice(i, 1);
+                delete card.isHiddenFromOwner;
+                delete card.revealedToPlayerId;
+                owner.removedCards.push(card);
             }
         }
     };
 
-    removeFromArray(owner.hand, (c: any) => c.godId === godId);
-    removeFromArray(owner.deck, (c: any) => c.godId === godId);
-    removeFromArray(owner.discard, (c: any) => c.godId === godId);
+    moveToRemoved(owner.hand);
+    moveToRemoved(owner.deck);
+    moveToRemoved(owner.discard);
 
     // Vérifier la condition de victoire
     const allDead = owner.gods.every(g => g.isDead);

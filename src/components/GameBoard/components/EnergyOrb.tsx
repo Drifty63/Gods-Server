@@ -13,8 +13,8 @@ export const EnergyOrb: React.FC<EnergyOrbProps> = ({ energy, onClick }) => {
                 {energy}
             </div>
             {/* Optional label below the orb */}
-            <div style={{ textAlign: 'center', fontSize: '0.8rem', marginTop: '8px', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                End Turn
+            <div className={styles.energyOrbLabel}>
+                Fin de tour
             </div>
         </div>
     );

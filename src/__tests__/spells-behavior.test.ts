@@ -72,6 +72,7 @@ function createTestGameState(
             createPlayerState('player1', 'Joueur 1', player1Gods),
             createPlayerState('player2', 'Joueur 2', player2Gods),
         ],
+        log: [],
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -639,6 +640,396 @@ describe('Conditions de victoire', () => {
         // La partie est terminée
         expect(engine.getState().status).toBe('finished');
         expect(engine.getState().winnerId).toBe('player1');
+    });
+});
+
+// =====================================================
+// TESTS DE RÉGRESSION - FIX DOUBLE-EXÉCUTION (PERSÉPHONE / SÉLÉNÉ / DÉMÉTER / ZÉPHYR)
+// =====================================================
+// Ces sorts nécessitent un choix du joueur (cible, direction, distribution...). Avant le fix,
+// gameStore.ts jouait la carte via engine.executeAction() SANS le choix (ce qui exécutait déjà
+// le handler "auto" une première fois), puis ré-appliquait l'effet une seconde fois manuellement
+// une fois le choix connu. Ces tests reproduisent exactement le flux en 2 temps que gameStore.ts
+// utilise désormais : play_card avec deferCustomEffect: true, puis resolveDeferredEffect() une
+// fois le choix connu — et vérifient qu'il n'y a bien qu'UNE seule application de l'effet.
+
+describe('Perséphone - Vision du Tartare (vision_tartare)', () => {
+    it('inflige exactement 1 dégât par cible quand le bonus est refusé (pas de double dégât)', () => {
+        const engine = new GameEngine(createTestGameState(['persephone', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'persephone_generator_2');
+
+        const enemies = engine.getOpponent().gods;
+        const [t1, t2] = enemies;
+        const h1 = t1.currentHealth;
+        const h2 = t2.currentHealth;
+
+        const playResult = engine.executeAction({
+            type: 'play_card',
+            playerId: 'player1',
+            cardId: 'persephone_generator_2',
+            targetGodIds: [t1.card.id, t2.card.id],
+            deferCustomEffect: true,
+        });
+        expect(playResult.success).toBe(true);
+        // Différé : aucun dégât ne doit encore avoir été appliqué
+        expect(t1.currentHealth).toBe(h1);
+        expect(t2.currentHealth).toBe(h2);
+
+        const resolveResult = engine.resolveDeferredEffect('persephone_generator_2', {
+            optionalChoice: false,
+            targetGodIds: [t1.card.id, t2.card.id],
+        });
+        expect(resolveResult.success).toBe(true);
+
+        expect(h1 - t1.currentHealth).toBe(1);
+        expect(h2 - t2.currentHealth).toBe(1);
+    });
+
+    it('inflige exactement 2 dégâts par cible et défausse 2 cartes quand le bonus est accepté', () => {
+        const engine = new GameEngine(createTestGameState(['persephone', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'persephone_generator_2');
+
+        const enemies = engine.getOpponent().gods;
+        const [t1, t2] = enemies;
+        const h1 = t1.currentHealth;
+        const h2 = t2.currentHealth;
+        const deckSizeBefore = engine.getCurrentPlayer().deck.length;
+
+        engine.executeAction({
+            type: 'play_card',
+            playerId: 'player1',
+            cardId: 'persephone_generator_2',
+            targetGodIds: [t1.card.id, t2.card.id],
+            deferCustomEffect: true,
+        });
+        engine.resolveDeferredEffect('persephone_generator_2', {
+            optionalChoice: true,
+            targetGodIds: [t1.card.id, t2.card.id],
+        });
+
+        expect(h1 - t1.currentHealth).toBe(2);
+        expect(h2 - t2.currentHealth).toBe(2);
+        expect(engine.getCurrentPlayer().deck.length).toBe(deckSizeBefore - 2);
+    });
+
+    it('en mode auto (IA, sans deferCustomEffect) inflige le dégât de base une seule fois', () => {
+        const engine = new GameEngine(createTestGameState(['persephone', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'persephone_generator_2');
+
+        const enemies = engine.getOpponent().gods;
+        const [t1, t2] = enemies;
+        const h1 = t1.currentHealth;
+        const h2 = t2.currentHealth;
+
+        engine.executeAction({
+            type: 'play_card',
+            playerId: 'player1',
+            cardId: 'persephone_generator_2',
+            targetGodIds: [t1.card.id, t2.card.id],
+        });
+
+        expect(h1 - t1.currentHealth).toBe(1);
+        expect(h2 - t2.currentHealth).toBe(1);
+    });
+});
+
+describe('Perséphone - Brûlure Rémanente (temp_resurrect)', () => {
+    it('ressuscite le dieu choisi par le joueur, pas systématiquement le premier mort trouvé', () => {
+        const engine = new GameEngine(createTestGameState(['persephone', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'persephone_skill_2');
+
+        const player = engine.getCurrentPlayer();
+        const [, zeus, hestia] = player.gods; // zeus = premier mort, hestia = choix du joueur
+        zeus.isDead = true;
+        zeus.currentHealth = 0;
+        hestia.isDead = true;
+        hestia.currentHealth = 0;
+
+        engine.executeAction({
+            type: 'play_card',
+            playerId: 'player1',
+            cardId: 'persephone_skill_2',
+            deferCustomEffect: true,
+        });
+
+        // Différé : personne ne doit encore être ressuscité
+        expect(zeus.isDead).toBe(true);
+        expect(hestia.isDead).toBe(true);
+
+        engine.resolveDeferredEffect('persephone_skill_2', { targetGodId: hestia.card.id });
+
+        expect(hestia.isDead).toBe(false);
+        expect(hestia.isZombie).toBe(true);
+        expect(hestia.currentHealth).toBe(5);
+        // Le dieu NON choisi doit rester mort (pas de résurrection en double)
+        expect(zeus.isDead).toBe(true);
+    });
+});
+
+describe('Séléné - Marée Basse (cascade_heal_choice)', () => {
+    function setup() {
+        const engine = new GameEngine(createTestGameState(['selene', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'selene_skill_2');
+        const [selene, zeus, hestia] = engine.getCurrentPlayer().gods;
+        selene.currentHealth = 1;
+        zeus.currentHealth = 1;
+        hestia.currentHealth = 1;
+        return { engine, selene, zeus, hestia };
+    }
+
+    it('flux Ouest (choix accepté) soigne 3/2/1 dans l\'ordre des alliés', () => {
+        const { engine, selene, zeus, hestia } = setup();
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'selene_skill_2', deferCustomEffect: true,
+        });
+        engine.resolveDeferredEffect('selene_skill_2', { optionalChoice: true });
+
+        expect(selene.currentHealth).toBe(1 + 3);
+        expect(zeus.currentHealth).toBe(1 + 2);
+        expect(hestia.currentHealth).toBe(1 + 1);
+    });
+
+    it('flux Est (choix refusé) soigne 1/2/3 dans l\'ordre des alliés (inversé)', () => {
+        const { engine, selene, zeus, hestia } = setup();
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'selene_skill_2', deferCustomEffect: true,
+        });
+        engine.resolveDeferredEffect('selene_skill_2', { optionalChoice: false });
+
+        expect(selene.currentHealth).toBe(1 + 1);
+        expect(zeus.currentHealth).toBe(1 + 2);
+        expect(hestia.currentHealth).toBe(1 + 3);
+    });
+
+    it('soigne bien quand le sort est copié (cast_copied_spell) au lieu de ne rien faire', () => {
+        // Reproduit le bug où "Marée Basse" copiée par Perséphone ne soignait personne :
+        // neededTargets === 0 pour cascade_heal_choice, donc l'ancien code exécutait
+        // cast_copied_spell sans jamais demander la direction, et l'effet n'était pas enregistré
+        // dans GameEngine.ts (il retombait dans la branche "custom non implémenté").
+        // Séléné doit être vivante dans l'équipe du joueur : castingGod (résolu depuis card.godId
+        // de la carte copiée, ici 'selene') doit exister parmi les dieux du joueur pour que
+        // playCard accepte de jouer la copie.
+        const engine = new GameEngine(createTestGameState(['persephone', 'selene', 'hestia'], ['hades', 'ares', 'athena']));
+        const player = engine.getCurrentPlayer();
+        player.gods.forEach(g => { g.currentHealth = 1; });
+
+        const mareeBasse = getSpellsByGodId('selene').find(s => s.id === 'selene_skill_2')!;
+        player.discard.push({ ...mareeBasse, id: 'copied_maree_basse' });
+
+        engine.executeAction({
+            type: 'cast_copied_spell',
+            playerId: 'player1',
+            copiedCardId: 'copied_maree_basse',
+            optionalChoice: true,
+        });
+
+        expect(player.gods[0].currentHealth).toBe(1 + 3);
+        expect(player.gods[1].currentHealth).toBe(1 + 2);
+        expect(player.gods[2].currentHealth).toBe(1 + 1);
+    });
+});
+
+describe('Résurrection complète et deck (removedCards)', () => {
+    it('les cartes d\'un dieu mort sont conservées dans removedCards (pas détruites)', () => {
+        const engine = new GameEngine(createTestGameState(['demeter', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        const player = engine.getCurrentPlayer();
+
+        const countDemeterCards = () =>
+            [...player.hand, ...player.deck, ...player.discard].filter(c => c.godId === 'demeter').length;
+
+        const totalBefore = countDemeterCards();
+        expect(totalBefore).toBeGreaterThan(0); // sanity check sur les données de test
+
+        engine.killGod('player1', 'demeter');
+
+        expect(countDemeterCards()).toBe(0);
+        expect(player.removedCards.filter(c => c.godId === 'demeter').length).toBe(totalBefore);
+    });
+
+    it('Graine de vie (revive_god) rend au deck les cartes du dieu ressuscité et mélange', () => {
+        const engine = new GameEngine(createTestGameState(['demeter', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'demeter_skill_2');
+
+        const player = engine.getCurrentPlayer();
+        const zeus = player.gods.find(g => g.card.id === 'zeus')!;
+        engine.killGod('player1', 'zeus');
+        expect(zeus.isDead).toBe(true);
+        expect(player.removedCards.some(c => c.godId === 'zeus')).toBe(true);
+
+        engine.executeAction({
+            type: 'play_card',
+            playerId: 'player1',
+            cardId: 'demeter_skill_2',
+            targetGodId: 'zeus',
+        });
+
+        expect(zeus.isDead).toBe(false);
+        expect(zeus.currentHealth).toBe(8);
+        expect(player.removedCards.some(c => c.godId === 'zeus')).toBe(false);
+        expect(player.deck.some(c => c.godId === 'zeus')).toBe(true);
+    });
+});
+
+describe('Déméter - Fertilisation (distribute_heal_5)', () => {
+    it('respecte la distribution manuelle du joueur (pas de répartition auto écrasée)', () => {
+        const engine = new GameEngine(createTestGameState(['demeter', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'demeter_skill_1');
+
+        const [demeter, zeus, hestia] = engine.getCurrentPlayer().gods;
+        demeter.currentHealth = 1;
+        zeus.currentHealth = 1;
+        hestia.currentHealth = 1;
+
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'demeter_skill_1', deferCustomEffect: true,
+        });
+
+        // Différé : aucun soin encore appliqué
+        expect(demeter.currentHealth).toBe(1);
+
+        engine.resolveDeferredEffect('demeter_skill_1', {
+            healDistribution: [
+                { godId: demeter.card.id, amount: 5 },
+                { godId: zeus.card.id, amount: 0 },
+                { godId: hestia.card.id, amount: 0 },
+            ],
+        });
+
+        expect(demeter.currentHealth).toBe(6);
+        expect(zeus.currentHealth).toBe(1);
+        expect(hestia.currentHealth).toBe(1);
+    });
+});
+
+describe('Zéphyr - Bourrasque Chanceuse (free_recycle)', () => {
+    it('recycle la défausse de l\'adversaire quand le joueur choisit "adversaire", pas la sienne', () => {
+        const engine = new GameEngine(createTestGameState(['zephyr', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'zephyr_utility_1');
+
+        const player = engine.getCurrentPlayer();
+        const opponent = engine.getOpponent();
+        player.discard.push({ ...player.deck[0] });
+        opponent.discard.push({ ...opponent.deck[0] });
+        const playerDiscardBefore = player.discard.length;
+        const opponentDiscardBefore = opponent.discard.length;
+
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'zephyr_utility_1', deferCustomEffect: true,
+        });
+
+        // Différé : aucune défausse ne doit encore avoir été recyclée
+        expect(player.discard.length).toBe(playerDiscardBefore + 1); // +1 = zephyr_utility_1 lui-même
+        expect(opponent.discard.length).toBe(opponentDiscardBefore);
+
+        engine.resolveDeferredEffect('zephyr_utility_1', { selectedPlayerTarget: 'opponent' });
+
+        expect(opponent.discard.length).toBe(0);
+        // La défausse du joueur (avec zephyr_utility_1 dedans) ne doit PAS avoir été touchée
+        expect(player.discard.length).toBe(playerDiscardBefore + 1);
+    });
+});
+
+describe('Zéphyr - Vent d\'Ouest (choose_discard_enemy)', () => {
+    it('défausse uniquement la carte choisie par le joueur, pas une carte automatique en plus', () => {
+        const engine = new GameEngine(createTestGameState(['zephyr', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'zephyr_generator_2');
+
+        const opponent = engine.getOpponent();
+        const handSizeBefore = opponent.hand.length;
+        const chosenCard = opponent.hand[opponent.hand.length - 1]; // volontairement pas hand[0]
+
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'zephyr_generator_2', deferCustomEffect: true,
+        });
+
+        // Différé : aucune carte adverse défaussée pour l'instant
+        expect(opponent.hand.length).toBe(handSizeBefore);
+
+        engine.resolveDeferredEffect('zephyr_generator_2', { selectedCardIds: [chosenCard.id] });
+
+        expect(opponent.hand.length).toBe(handSizeBefore - 1);
+        expect(opponent.hand.some(c => c.id === chosenCard.id)).toBe(false);
+    });
+});
+
+describe('Statut untargetable (Ruse d\'Ulysse)', () => {
+    it('un dieu inciblable ne peut pas être choisi comme cible ennemie', () => {
+        const engine = new GameEngine(createTestGameState(['poseidon', 'zeus', 'hestia'], ['ulysses', 'ares', 'athena']));
+        const ulysses = engine.getOpponent().gods.find(g => g.card.id === 'ulysses')!;
+        ulysses.statusEffects.push({ type: 'untargetable', stacks: 1, duration: 2 });
+
+        const validTargets = engine.getValidTargets('enemy_god');
+        expect(validTargets.some(g => g.card.id === 'ulysses')).toBe(false);
+
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'poseidon_generator_1');
+        const initialHealth = ulysses.currentHealth;
+
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'poseidon_generator_1', targetGodId: 'ulysses',
+        });
+
+        // La résolution de cible doit échouer silencieusement : pas de dégâts appliqués
+        expect(ulysses.currentHealth).toBe(initialHealth);
+    });
+
+    it('un dieu inciblable reste ciblable et soignable par son propre camp', () => {
+        const engine = new GameEngine(createTestGameState(['ulysses', 'aphrodite', 'hestia'], ['ares', 'hades', 'athena']));
+        const ulysses = engine.getCurrentPlayer().gods.find(g => g.card.id === 'ulysses')!;
+        ulysses.statusEffects.push({ type: 'untargetable', stacks: 1, duration: 2 });
+        ulysses.currentHealth = 1;
+
+        // getValidTargets('ally_god') ne doit pas exclure les alliés inciblables (untargetable
+        // ne protège que contre l'adversaire, pas contre les soins de son propre camp)
+        expect(engine.getValidTargets('ally_god').some(g => g.card.id === 'ulysses')).toBe(true);
+
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'aphrodite_skill_1'); // heal: 3, target: ally_god
+
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'aphrodite_skill_1', targetGodId: 'ulysses',
+        });
+
+        expect(ulysses.currentHealth).toBe(4);
+    });
+});
+
+describe('Journal de combat', () => {
+    it('enregistre une carte jouée avec le bon joueur, tour et nom de carte', () => {
+        const engine = new GameEngine(createTestGameState());
+        engine.getCurrentPlayer().energy = 10;
+        addCardToHand(engine, 'poseidon_generator_1');
+        const enemy = getEnemyGod(engine);
+
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'poseidon_generator_1', targetGodId: enemy.card.id,
+        });
+
+        const log = engine.getState().log;
+        expect(log.length).toBe(1);
+        expect(log[0].playerId).toBe('player1');
+        expect(log[0].turnNumber).toBe(1);
+        expect(log[0].message).toContain('Trident de Poséidon');
+    });
+
+    it('enregistre une carte défaussée pour énergie', () => {
+        const engine = new GameEngine(createTestGameState());
+        const cardToDiscard = engine.getCurrentPlayer().hand[0];
+
+        engine.executeAction({ type: 'discard_for_energy', playerId: 'player1', cardId: cardToDiscard.id });
+
+        const log = engine.getState().log;
+        expect(log.length).toBe(1);
+        expect(log[0].message).toContain(cardToDiscard.name);
     });
 });
 

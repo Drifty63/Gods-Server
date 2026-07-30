@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { createPortal } from 'react-dom';
+import ModalShell from '@/components/ModalShell/ModalShell';
 import styles from './OptionalChoiceModal.module.css';
 
 interface OptionalChoiceModalProps {
@@ -10,6 +10,10 @@ interface OptionalChoiceModalProps {
     description: string;
     onAccept: () => void;
     onDecline: () => void;
+    /** Libellé du bouton "accepter". Par défaut "✅ Oui". */
+    acceptLabel?: string;
+    /** Libellé du bouton "refuser". Par défaut "❌ Non". */
+    declineLabel?: string;
 }
 
 export default function OptionalChoiceModal({
@@ -17,35 +21,22 @@ export default function OptionalChoiceModal({
     title,
     description,
     onAccept,
-    onDecline
+    onDecline,
+    acceptLabel = '✅ Oui',
+    declineLabel = '❌ Non',
 }: OptionalChoiceModalProps) {
-    if (!isOpen) return null;
-
-    // Utiliser createPortal pour monter le modal dans document.body
-    // afin qu'il passe au-dessus de tous les autres éléments
-    if (typeof window === 'undefined') return null;
-
-    return createPortal(
-        <div className={styles.overlay}>
-            <div className={styles.modal}>
-                <h2 className={styles.title}>{title}</h2>
-                <p className={styles.description}>{description}</p>
-                <div className={styles.buttonContainer}>
-                    <button
-                        className={styles.declineButton}
-                        onClick={onDecline}
-                    >
-                        ❌ Non
-                    </button>
-                    <button
-                        className={styles.acceptButton}
-                        onClick={onAccept}
-                    >
-                        ✅ Oui
-                    </button>
-                </div>
+    return (
+        <ModalShell isOpen={isOpen} onCancel={onDecline} accentColor="#9b59b6">
+            <h2 className={styles.title}>{title}</h2>
+            <p className={styles.description}>{description}</p>
+            <div className={styles.buttonContainer}>
+                <button className={styles.declineButton} onClick={onDecline}>
+                    {declineLabel}
+                </button>
+                <button className={styles.acceptButton} onClick={onAccept}>
+                    {acceptLabel}
+                </button>
             </div>
-        </div>,
-        document.body
+        </ModalShell>
     );
 }

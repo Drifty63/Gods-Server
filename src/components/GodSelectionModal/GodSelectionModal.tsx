@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { GodState } from '@/types/cards';
-import Portal from '@/components/Portal/Portal';
+import ModalShell from '@/components/ModalShell/ModalShell';
 import styles from './GodSelectionModal.module.css';
 
 // Map des éléments vers des emojis
@@ -35,8 +35,6 @@ export default function GodSelectionModal({
     onSelectGod,
     onCancel
 }: GodSelectionModalProps) {
-    if (!isOpen) return null;
-
     // Filtrer les dieux selon le type de cible
     const availableGods: { god: GodState; isAlly: boolean }[] = [];
 
@@ -49,44 +47,40 @@ export default function GodSelectionModal({
     }
 
     return (
-        <Portal>
-            <div className={styles.overlay}>
-                <div className={styles.modal}>
-                    <h2 className={styles.title}>{title}</h2>
-                    <p className={styles.description}>
-                        Les cartes du dieu sélectionné seront replacées dans le deck et mélangées.
-                    </p>
-                    <div className={styles.godsContainer}>
-                        {availableGods.length === 0 ? (
-                            <p className={styles.noGods}>Aucun dieu disponible</p>
-                        ) : (
-                            availableGods.map(({ god, isAlly }) => (
-                                <button
-                                    key={god.card.id}
-                                    className={`${styles.godButton} ${isAlly ? styles.allyGod : styles.enemyGod}`}
-                                    onClick={() => onSelectGod(god.card.id)}
-                                >
-                                    <div
-                                        className={styles.godImage}
-                                        style={{ backgroundImage: `url(${god.card.imageUrl})` }}
-                                    />
-                                    <span className={styles.godName}>{god.card.name}</span>
-                                    <span className={styles.godElement}>
-                                        {ELEMENT_EMOJI[god.card.element] || '✨'}
-                                    </span>
-                                    <span className={styles.godTeam}>
-                                        {isAlly ? '🛡️ Allié' : '⚔️ Ennemi'}
-                                    </span>
-                                </button>
-                            ))
-                        )}
-                    </div>
-                    <button className={styles.cancelButton} onClick={onCancel}>
-                        Annuler
-                    </button>
-                </div>
+        <ModalShell isOpen={isOpen} onCancel={onCancel} accentColor="#4a9e4a" maxWidth={700}>
+            <h2 className={styles.title}>{title}</h2>
+            <p className={styles.description}>
+                Les cartes du dieu sélectionné seront replacées dans le deck et mélangées.
+            </p>
+            <div className={styles.godsContainer}>
+                {availableGods.length === 0 ? (
+                    <p className={styles.noGods}>Aucun dieu disponible</p>
+                ) : (
+                    availableGods.map(({ god, isAlly }) => (
+                        <button
+                            key={god.card.id}
+                            className={`${styles.godButton} ${isAlly ? styles.allyGod : styles.enemyGod}`}
+                            onClick={() => onSelectGod(god.card.id)}
+                        >
+                            <div
+                                className={styles.godImage}
+                                style={{ backgroundImage: `url(${god.card.imageUrl})` }}
+                            />
+                            <span className={styles.godName}>{god.card.name}</span>
+                            <span className={styles.godElement}>
+                                {ELEMENT_EMOJI[god.card.element] || '✨'}
+                            </span>
+                            <span className={styles.godTeam}>
+                                {isAlly ? '🛡️ Allié' : '⚔️ Ennemi'}
+                            </span>
+                        </button>
+                    ))
+                )}
             </div>
-        </Portal>
+            <button className={styles.cancelButton} onClick={onCancel}>
+                Annuler
+            </button>
+        </ModalShell>
     );
 }
 

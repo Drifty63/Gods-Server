@@ -1,5 +1,6 @@
 import React from 'react';
 import { SpellCard } from '@/types/cards';
+import { getReadableSpellDescription } from '@/data/spellDescriptions';
 import styles from '../GameBoard.module.css';
 
 interface SpellCardUIProps {
@@ -11,10 +12,14 @@ interface SpellCardUIProps {
     isHidden?: boolean;
     isMini?: boolean;
     isMinimal?: boolean; // Show only image and cost
+    /** Carte injouable dans l'état actuel (énergie insuffisante, pas votre tour, dieu mort...) :
+     *  grisée, mais toujours cliquable pour que le joueur comprenne pourquoi via le message
+     *  d'erreur, plutôt que de découvrir l'échec seulement après avoir ciblé et confirmé. */
+    isDisabled?: boolean;
 }
 
-export const SpellCardUI: React.FC<SpellCardUIProps> = ({ 
-    card, isSelected, onClick, onMouseEnter, onMouseLeave, isHidden, isMini, isMinimal 
+export const SpellCardUI: React.FC<SpellCardUIProps> = ({
+    card, isSelected, onClick, onMouseEnter, onMouseLeave, isHidden, isMini, isMinimal, isDisabled
 }) => {
     if (isHidden) {
         return (
@@ -40,20 +45,16 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
     }
 
     return (
-        <div 
-            className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper} ${isSelected ? styles.wrapperSelected : ''}`} 
+        <div
+            className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper} ${isSelected ? styles.wrapperSelected : ''} ${isDisabled ? styles.spellCardDisabled : ''}`}
             onClick={onClick}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
-            <div className={`${styles.spellCard} ${isSelected ? styles.spellSelected : ''}`} style={{ 
+            <div className={`${styles.spellCard} ${isSelected ? styles.spellSelected : ''}`} style={{
                 padding: isMinimal ? '4px' : '8px'
             }}>
-                <div className={styles.spellCost} style={{ 
-                    width: isMinimal ? '28px' : '32px', 
-                    height: isMinimal ? '28px' : '32px',
-                    fontSize: isMinimal ? '1rem' : '1.1rem'
-                }}>{card.energyCost}</div>
+                <div className={styles.spellCost}>{card.energyCost}</div>
                 {card.imageUrl && (
                     <img 
                         src={card.imageUrl} 
@@ -66,7 +67,7 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
                 {!isMinimal && (
                     <>
                         <div className={styles.spellTitle} style={{ marginTop: card.imageUrl ? '0' : '10px' }}>{card.name}</div>
-                        <div className={styles.spellDesc}>{card.description}</div>
+                        <div className={styles.spellDesc}>{getReadableSpellDescription(card)}</div>
                         {card.energyGain > 0 && (
                             <div style={{ textAlign: 'center', fontSize: '0.7rem', color: '#10b981', marginTop: '5px' }}>
                                 +{card.energyGain} Energy

@@ -1,20 +1,9 @@
-/**
- * @deprecated LEGACY COMPONENT - Remplacé par la sélection directe sur le plateau de jeu
- * 
- * Ce modal était utilisé pour la distribution de soins (Fertilisation, etc.)
- * Il a été remplacé par une interface de distribution directe dans GameBoard.tsx
- * pour une meilleure UX (cliquer directement sur les dieux alliés).
- * 
- * Conservé pour référence et potentielle réutilisation.
- * 
- * @see GameBoard.tsx - handleHealGodClick, handleConfirmDirectHealDistribution
- */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { GodState } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
+import ModalShell from '@/components/ModalShell/ModalShell';
 import styles from './HealDistributionModal.module.css';
 
 interface HealDistributionModalProps {
@@ -33,12 +22,6 @@ export default function HealDistributionModal({
     onCancel
 }: HealDistributionModalProps) {
     const [distribution, setDistribution] = useState<Record<string, number>>({});
-    const [mounted, setMounted] = useState(false);
-
-    // Attendre le montage côté client pour le portal
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Reset distribution when modal opens
     // Utiliser une ref pour tracker si c'est la première ouverture
@@ -55,8 +38,6 @@ export default function HealDistributionModal({
         }
         prevIsOpen.current = isOpen;
     }, [isOpen, allies]); // On garde allies pour initialiser correctement, mais on protège avec prevIsOpen
-
-    if (!isOpen || !mounted) return null;
 
     const totalAssigned = Object.values(distribution).reduce((sum, val) => sum + val, 0);
     const remaining = totalHeal - totalAssigned;
@@ -92,9 +73,8 @@ export default function HealDistributionModal({
 
     const livingAllies = allies.filter(a => !a.isDead);
 
-    const modalContent = (
-        <div className={styles.overlay}>
-            <div className={styles.modal}>
+    return (
+        <ModalShell isOpen={isOpen} onCancel={onCancel} accentColor="#4caf50" maxWidth={700}>
                 <h2 className={styles.title}>💚 Répartir les soins</h2>
                 <p className={styles.instruction}>
                     Répartissez <strong>{totalHeal}</strong> points de soin entre vos alliés
@@ -171,9 +151,6 @@ export default function HealDistributionModal({
                         ✅ Confirmer ({totalAssigned} soins)
                     </button>
                 </div>
-            </div>
-        </div>
+        </ModalShell>
     );
-
-    return createPortal(modalContent, document.body);
 }

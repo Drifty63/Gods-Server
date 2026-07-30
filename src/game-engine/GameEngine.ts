@@ -65,7 +65,29 @@ export interface EffectContext {
     optionalChoice?: boolean;
     selectedElement?: Element;
     lightningAction?: 'apply' | 'remove';
+    selectedPlayerTarget?: 'self' | 'opponent';
 }
+
+// ─────────────────────────────────────────────
+// Effets custom nécessitant un choix du joueur humain (modale)
+// ─────────────────────────────────────────────
+// Quand une carte porteuse d'un de ces effets est jouée avec action.deferCustomEffect === true,
+// playCard() paie le coût et défausse la carte MAIS n'exécute PAS le handler custom ci-dessous.
+// Le store doit ensuite appeler engine.resolveDeferredEffect(cardId, choix) une fois le choix du
+// joueur connu. Cela évite qu'un handler "auto" (pensé pour l'IA) s'exécute une première fois avec
+// des valeurs par défaut, puis qu'une deuxième implémentation manuelle dans le store ne ré-applique
+// l'effet une seconde fois avec le vrai choix du joueur (bug de double-exécution).
+export const DEFERRED_CUSTOM_EFFECTS = new Set<string>([
+    'free_recycle',
+    'temp_resurrect',
+    'vision_tartare',
+    'cascade_heal_choice',
+    'distribute_heal_5',
+    'recycle_from_discard',
+    'put_cards_bottom',
+    'choose_discard_enemy',
+    'shuffle_god_cards',
+]);
 
 type CustomEffectHandler = (ctx: EffectContext) => void;
 
@@ -127,6 +149,19 @@ registerEffect('distribute_heal_5', (ctx) => {
 });
 
 // === SÉLÉNÉ ===
+registerEffect('cascade_heal_choice', (ctx) => {
+    // accepted (true) = flux Gauche→Droite (Ouest), sinon flux Droite→Gauche (Est)
+    // En mode auto (IA), pas de choix connu : on retient toujours le flux Ouest par défaut.
+    const accepted = ctx.optionalChoice !== false;
+    const aliveAllies = ctx.player.gods.filter(g => !g.isDead);
+    const healAmounts = [3, 2, 1];
+    const orderedAllies = accepted ? aliveAllies : [...aliveAllies].reverse();
+
+    for (let i = 0; i < orderedAllies.length && i < healAmounts.length; i++) {
+        healGod(orderedAllies[i], healAmounts[i]);
+    }
+});
+
 registerEffect('resurrect_two', (ctx) => {
     const deadGods = ctx.player.gods.filter(g => g.isDead).slice(0, 2);
     for (const god of deadGods) {
@@ -514,8 +549,8 @@ registerEffect('shuffle_god_cards', (ctx) => {
 });
 
 registerEffect('free_recycle', (ctx) => {
-    // Si pas de choix, cible soi-même
-    const target = ctx.player; 
+    // Si pas de choix (IA), cible soi-même. Sinon respecte le choix du joueur.
+    const target = ctx.selectedPlayerTarget === 'opponent' ? ctx.opponent : ctx.player;
     target.deck.push(...target.discard);
     target.discard = [];
     shuffleArray(target.deck);
@@ -549,7 +584,10 @@ registerEffect('vision_tartare', (ctx) => {
 
 // === PERSÉPHONE ZOMBIE ===
 registerEffect('temp_resurrect', (ctx) => {
-    const deadGod = ctx.player.gods.find(g => g.isDead); // En auto, prend le premier mort
+    // Priorité au choix du joueur (ctx.targetGodId) ; en auto (IA), prend le premier mort trouvé.
+    const deadGod = ctx.targetGodId
+        ? ctx.player.gods.find(g => g.card.id === ctx.targetGodId && g.isDead)
+        : ctx.player.gods.find(g => g.isDead);
     if (!deadGod || ctx.player.deck.length === 0) return;
 
     const zombieCard = ctx.player.deck.shift()!;
@@ -580,6 +618,33 @@ function cleanBlindCard(card: SpellCard): void {
 
 function findOwner(god: GodState, ctx: EffectContext): PlayerState {
     return ctx.player.gods.includes(god) ? ctx.player : ctx.opponent;
+}
+
+/**
+ * Un dieu "inciblable" (statut untargetable, ex: Ruse d'Ulysse) ne peut pas être choisi comme
+ * cible par un effet adverse (dégâts, statut négatif, etc). Il reste ciblable par les effets de
+ * son propre camp (soin, buff) — seule la sélection PAR L'ADVERSAIRE doit être bloquée.
+ */
+function isUntargetable(god: GodState): boolean {
+    return god.statusEffects.some(s => s.type === 'untargetable' && s.stacks > 0);
+}
+
+const LOG_HISTORY_LIMIT = 200;
+
+/**
+ * Ajoute une entrée au log de combat (consultable en jeu), pour qu'un joueur puisse vérifier
+ * après coup quelle carte a été jouée — la sienne ou celle de l'adversaire — s'il l'a manquée.
+ */
+function logAction(state: GameState, player: PlayerState, message: string): void {
+    state.log.push({
+        turnNumber: state.turnNumber,
+        playerId: player.id,
+        playerName: player.name,
+        message,
+    });
+    if (state.log.length > LOG_HISTORY_LIMIT) {
+        state.log.splice(0, state.log.length - LOG_HISTORY_LIMIT);
+    }
 }
 
 // ═══════════════════════════════════════════════
@@ -649,16 +714,42 @@ export class GameEngine {
 
         player.hasPlayedCard = true;
 
+        // Un effet custom nécessitant un choix humain est différé : on ne l'exécute pas ici,
+        // le store rappellera engine.resolveDeferredEffect() une fois le choix connu.
+        const isDeferred = (effect: SpellCard['effects'][0]) =>
+            !!action.deferCustomEffect &&
+            effect.type === 'custom' &&
+            !!effect.customEffectId &&
+            DEFERRED_CUSTOM_EFFECTS.has(effect.customEffectId);
+
         // Appliquer les effets
         for (const effect of card.effects) {
+            if (isDeferred(effect)) continue;
+
             if (effect.target === 'same') {
                 if (lastUsedTargetId) {
                     this.applyEffect(
-                        effect, card, lastUsedTargetId, action.selectedElement, 
+                        effect, card, lastUsedTargetId, action.selectedElement,
                         action.lightningAction, [lastUsedTargetId],
-                        action.selectedCardIds, action.healDistribution, action.optionalChoice
+                        action.selectedCardIds, action.healDistribution, action.optionalChoice,
+                        action.selectedPlayerTarget
                     );
                 }
+                continue;
+            }
+
+            if (effect.target === 'self') {
+                // La cible est implicitement le dieu qui lance le sort : resolveTargets('self', ...)
+                // exige un targetGodId, qui n'est jamais fourni par l'appelant pour ce cas (aucune
+                // sélection de cible n'est demandée au joueur). Sans ce cas, l'effet ne s'appliquait
+                // jamais (bouclier/statut "sur soi" silencieusement ignorés).
+                this.applyEffect(
+                    effect, card, castingGod.card.id, action.selectedElement,
+                    action.lightningAction, [castingGod.card.id],
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice,
+                    action.selectedPlayerTarget
+                );
+                lastUsedTargetId = castingGod.card.id;
                 continue;
             }
 
@@ -671,29 +762,33 @@ export class GameEngine {
                 }
                 const currentTarget = targetIds[targetIndex];
                 this.applyEffect(
-                    effect, card, currentTarget, action.selectedElement, 
+                    effect, card, currentTarget, action.selectedElement,
                     action.lightningAction, [currentTarget],
-                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice,
+                    action.selectedPlayerTarget
                 );
                 lastUsedTargetId = currentTarget;
                 targetIndex++;
             } else if (!effect.target && effect.type === 'custom') {
                 this.applyEffect(
-                    effect, card, action.targetGodId, action.selectedElement, 
+                    effect, card, action.targetGodId, action.selectedElement,
                     action.lightningAction, targetIds.length > 0 ? targetIds : undefined,
-                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice,
+                    action.selectedPlayerTarget
                 );
             } else if (!effect.target && lastUsedTargetId) {
                 this.applyEffect(
-                    effect, card, lastUsedTargetId, action.selectedElement, 
+                    effect, card, lastUsedTargetId, action.selectedElement,
                     action.lightningAction, [lastUsedTargetId],
-                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice,
+                    action.selectedPlayerTarget
                 );
             } else {
                 this.applyEffect(
-                    effect, card, action.targetGodId, action.selectedElement, 
+                    effect, card, action.targetGodId, action.selectedElement,
                     action.lightningAction, action.targetGodIds,
-                    action.selectedCardIds, action.healDistribution, action.optionalChoice
+                    action.selectedCardIds, action.healDistribution, action.optionalChoice,
+                    action.selectedPlayerTarget
                 );
             }
         }
@@ -703,7 +798,48 @@ export class GameEngine {
         cleanBlindCard(card);
         player.discard.push(card);
 
+        logAction(this.state, player, `a joué ${card.name}`);
+
         return { success: true, message: `${card.name} joué avec succès` };
+    }
+
+    // ─── Résolution différée d'un effet custom (choix du joueur) ─────
+
+    /**
+     * Résout un effet custom qui avait été différé (deferCustomEffect: true) lors du play_card
+     * initial, une fois le choix du joueur connu (cible, direction, distribution, etc.).
+     * Recherche la carte dans la défausse du joueur courant (elle y a déjà été mise par playCard).
+     */
+    resolveDeferredEffect(
+        cardId: string,
+        extra: {
+            targetGodId?: string;
+            targetGodIds?: string[];
+            selectedCardIds?: string[];
+            healDistribution?: { godId: string, amount: number }[];
+            optionalChoice?: boolean;
+            selectedElement?: Element;
+            lightningAction?: 'apply' | 'remove';
+            selectedPlayerTarget?: 'self' | 'opponent';
+        }
+    ): { success: boolean; message: string } {
+        const player = this.getCurrentPlayer();
+        const card = player.discard.find(c => c.id === cardId);
+        if (!card) return { success: false, message: 'Carte introuvable dans la défausse' };
+
+        const effect = card.effects.find(
+            e => e.type === 'custom' && e.customEffectId && DEFERRED_CUSTOM_EFFECTS.has(e.customEffectId)
+        );
+        if (!effect) return { success: false, message: 'Aucun effet différé sur cette carte' };
+
+        this.applyEffect(
+            effect, card,
+            extra.targetGodId, extra.selectedElement, extra.lightningAction,
+            extra.targetGodIds, extra.selectedCardIds, extra.healDistribution, extra.optionalChoice,
+            extra.selectedPlayerTarget
+        );
+
+        return { success: true, message: `${card.name} résolu` };
     }
 
     // ─── Défausser pour énergie ────────────
@@ -723,8 +859,10 @@ export class GameEngine {
         if (!player.hasDiscardedForEnergy) {
             player.energy = Math.min(player.energy + 1, MAX_ENERGY);
             player.hasDiscardedForEnergy = true;
+            logAction(this.state, player, `a défaussé ${card.name} (+1 énergie)`);
             return { success: true, message: `${card.name} défaussé, +1 énergie` };
         }
+        logAction(this.state, player, `a défaussé ${card.name}`);
         return { success: true, message: `${card.name} défaussé (énergie déjà gagnée ce tour)` };
     }
 
@@ -821,8 +959,9 @@ export class GameEngine {
         nextPlayer.hasPlayedCard = false;
         nextPlayer.hasDiscardedForEnergy = false;
 
-        // Gagner 1 énergie de base (plafonnée)
-        nextPlayer.energy = Math.min(nextPlayer.energy + 1, MAX_ENERGY);
+        // Pas de gain d'énergie passif en début de tour : l'énergie ne vient que des cartes
+        // générateurs (energyGain) et de la défausse volontaire contre énergie
+        // (discardForEnergy, une fois par tour).
 
         // Piocher jusqu'à la limite
         this.drawToHandLimit(nextPlayer);
@@ -885,7 +1024,8 @@ export class GameEngine {
         targetGodIds?: string[],
         selectedCardIds?: string[],
         healDistribution?: { godId: string, amount: number }[],
-        optionalChoice?: boolean
+        optionalChoice?: boolean,
+        selectedPlayerTarget?: 'self' | 'opponent'
     ): void {
         const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
@@ -904,7 +1044,8 @@ export class GameEngine {
             lightningAction,
             selectedCardIds,
             healDistribution,
-            optionalChoice
+            optionalChoice,
+            selectedPlayerTarget
         };
 
         switch (effect.type) {
@@ -996,18 +1137,12 @@ export class GameEngine {
                 const effectId = effect.customEffectId || '';
                 const handler = customEffects.get(effectId);
                 if (handler) {
-                    const castingGod = player.gods.find(g => g.card.id === card.godId && !g.isDead);
-                    handler({
-                        engine: this,
-                        player,
-                        opponent,
-                        castingGod,
-                        card,
-                        targets,
-                        targetGodId,
-                        selectedElement,
-                        lightningAction
-                    });
+                    // Réutilise ctx tel quel : il porte déjà selectedCardIds/healDistribution/
+                    // optionalChoice/selectedPlayerTarget/targetGodIds nécessaires aux handlers
+                    // en mode "choix du joueur" (avant cette correction, ces champs étaient
+                    // silencieusement perdus ici, ce qui forçait les handlers custom à toujours
+                    // retomber sur leur branche "auto").
+                    handler(ctx);
                 } else {
                     console.warn(`Effet custom non implémenté: ${effectId}`);
                 }
@@ -1028,7 +1163,7 @@ export class GameEngine {
         switch (targetType) {
             case 'enemy_god':
                 if (targetGodId) {
-                    const t = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                    const t = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead && !isUntargetable(g));
                     return t ? [t] : [];
                 }
                 return [];
@@ -1043,6 +1178,7 @@ export class GameEngine {
             case 'any_god':
                 if (targetGodId) {
                     const t = [...player.gods, ...opponent.gods].find(g => g.card.id === targetGodId && !g.isDead);
+                    if (t && opponent.gods.includes(t) && isUntargetable(t)) return [];
                     return t ? [t] : [];
                 }
                 return [];
@@ -1055,7 +1191,7 @@ export class GameEngine {
                 return [];
 
             case 'all_enemies':
-                return opponent.gods.filter(g => !g.isDead);
+                return opponent.gods.filter(g => !g.isDead && !isUntargetable(g));
 
             case 'all_allies':
                 return player.gods.filter(g => !g.isDead);
@@ -1069,11 +1205,14 @@ export class GameEngine {
 
             default:
                 if (targetGodIds && targetGodIds.length > 0) {
-                    return [...player.gods, ...opponent.gods].filter(g => targetGodIds.includes(g.card.id) && !g.isDead);
+                    return [...player.gods, ...opponent.gods].filter(
+                        g => targetGodIds.includes(g.card.id) && !g.isDead && !(opponent.gods.includes(g) && isUntargetable(g))
+                    );
                 }
                 if (targetGodId) {
                     const all = [...player.gods, ...opponent.gods];
                     const t = all.find(g => g.card.id === targetGodId && !g.isDead);
+                    if (t && opponent.gods.includes(t) && isUntargetable(t)) return [];
                     return t ? [t] : [];
                 }
                 return [];
@@ -1099,7 +1238,7 @@ export class GameEngine {
         const opponent = this.getOpponent();
 
         const provokers = opponent.gods.filter(
-            g => !g.isDead && g.statusEffects.some(s => s.type === 'provocation')
+            g => !g.isDead && !isUntargetable(g) && g.statusEffects.some(s => s.type === 'provocation')
         );
 
         if (provokers.length > 0 && targetType === 'enemy_god' && !isMultiTarget) {
@@ -1107,10 +1246,13 @@ export class GameEngine {
         }
 
         switch (targetType) {
-            case 'enemy_god': return opponent.gods.filter(g => !g.isDead);
+            case 'enemy_god': return opponent.gods.filter(g => !g.isDead && !isUntargetable(g));
             case 'ally_god': return player.gods.filter(g => !g.isDead);
             case 'dead_ally_god': return player.gods.filter(g => g.isDead);
-            case 'any_god': return [...player.gods, ...opponent.gods].filter(g => !g.isDead);
+            case 'any_god': return [
+                ...player.gods.filter(g => !g.isDead),
+                ...opponent.gods.filter(g => !g.isDead && !isUntargetable(g)),
+            ];
             default: return [];
         }
     }
@@ -1119,7 +1261,7 @@ export class GameEngine {
         const opponent = this.getOpponent();
         if (targetType === 'enemy_god') {
             return opponent.gods.filter(
-                g => !g.isDead && g.statusEffects.some(s => s.type === 'provocation')
+                g => !g.isDead && !isUntargetable(g) && g.statusEffects.some(s => s.type === 'provocation')
             );
         }
         return [];
@@ -1194,6 +1336,7 @@ export class GameEngine {
                 createPlayerState(player1Id, player1Name, player1Gods, player1Deck, isPlayer1First),
                 createPlayerState(player2Id, player2Name, player2Gods, player2Deck, !isPlayer1First),
             ],
+            log: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         };

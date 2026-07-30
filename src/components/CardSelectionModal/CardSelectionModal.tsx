@@ -1,20 +1,9 @@
-/**
- * @deprecated LEGACY COMPONENT - Remplacé par la sélection directe sur le plateau de jeu
- * 
- * Ce modal était utilisé pour la sélection de cartes (défausse, recyclage, etc.)
- * Il a été remplacé par une interface de sélection directe dans GameBoard.tsx
- * pour une meilleure UX (moins de popups bloquants).
- * 
- * Conservé pour référence et potentielle réutilisation dans d'autres contextes.
- * 
- * @see GameBoard.tsx - handleDiscardCardSelect, handleConfirmDirectCardSelection
- */
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { SpellCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
+import ModalShell from '@/components/ModalShell/ModalShell';
 import styles from './CardSelectionModal.module.css';
 
 interface CardSelectionModalProps {
@@ -37,12 +26,6 @@ export default function CardSelectionModal({
     blindMode = false
 }: CardSelectionModalProps) {
     const [selectedCards, setSelectedCards] = useState<SpellCard[]>([]);
-    const [mounted, setMounted] = useState(false);
-
-    // Attendre le montage côté client pour le portal
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Reset selection when modal opens
     useEffect(() => {
@@ -50,8 +33,6 @@ export default function CardSelectionModal({
             setSelectedCards([]);
         }
     }, [isOpen]);
-
-    if (!isOpen || !mounted) return null;
 
     const handleCardClick = (card: SpellCard) => {
         if (selectedCards.some(c => c.id === card.id)) {
@@ -77,85 +58,81 @@ export default function CardSelectionModal({
         return card.isHiddenFromOwner === true; // En mode blind : seules les cartes déjà révélées sont visibles
     };
 
-    const modalContent = (
-        <div className={styles.overlay}>
-            <div className={styles.modal}>
-                <h2 className={styles.title}>{title}</h2>
-                <p className={styles.instruction}>
-                    Sélectionnez {requiredCount} carte{requiredCount > 1 ? 's' : ''}
-                    ({selectedCards.length}/{requiredCount})
-                </p>
+    return (
+        <ModalShell isOpen={isOpen} onCancel={onCancel} accentColor="#9b59b6" maxWidth={800}>
+            <h2 className={styles.title}>{title}</h2>
+            <p className={styles.instruction}>
+                Sélectionnez {requiredCount} carte{requiredCount > 1 ? 's' : ''}
+                ({selectedCards.length}/{requiredCount})
+            </p>
 
-                {cards.length === 0 ? (
-                    <p className={styles.emptyMessage}>Aucune carte disponible</p>
-                ) : (
-                    <div className={styles.cardsGrid}>
-                        {cards.map((card, index) => (
-                            isCardRevealed(card) ? (
-                                // Carte révélée - affichage normal
-                                <div
-                                    key={card.id}
-                                    className={`${styles.card} ${isCardSelected(card.id) ? styles.selected : ''} ${styles.revealed}`}
-                                    onClick={() => handleCardClick(card)}
-                                >
-                                    <div className={styles.cardHeader}>
-                                        <span className={styles.element}>
-                                            {ELEMENT_SYMBOLS[card.element]}
-                                        </span>
-                                        <span className={styles.cost}>
-                                            {card.energyCost > 0 ? `⚡${card.energyCost}` : ''}
-                                            {card.energyGain > 0 ? `+${card.energyGain}` : ''}
-                                        </span>
-                                    </div>
-                                    <div className={styles.cardName}>{card.name}</div>
-                                    <div className={styles.cardType}>
-                                        {card.type === 'generator' && '🔋 Générateur'}
-                                        {card.type === 'competence' && '⚔️ Compétence'}
-                                        {card.type === 'utility' && '🛠️ Utilitaire'}
-                                    </div>
-                                    <span className={styles.revealedBadge}>👁️</span>
-                                    {isCardSelected(card.id) && (
-                                        <div className={styles.selectedBadge}>✓</div>
-                                    )}
+            {cards.length === 0 ? (
+                <p className={styles.emptyMessage}>Aucune carte disponible</p>
+            ) : (
+                <div className={styles.cardsGrid}>
+                    {cards.map((card, index) => (
+                        isCardRevealed(card) ? (
+                            // Carte révélée - affichage normal
+                            <div
+                                key={card.id}
+                                className={`${styles.card} ${isCardSelected(card.id) ? styles.selected : ''} ${styles.revealed}`}
+                                onClick={() => handleCardClick(card)}
+                            >
+                                <div className={styles.cardHeader}>
+                                    <span className={styles.element}>
+                                        {ELEMENT_SYMBOLS[card.element]}
+                                    </span>
+                                    <span className={styles.cost}>
+                                        {card.energyCost > 0 ? `⚡${card.energyCost}` : ''}
+                                        {card.energyGain > 0 ? `+${card.energyGain}` : ''}
+                                    </span>
                                 </div>
-                            ) : (
-                                // Carte cachée - dos de carte
-                                <div
-                                    key={card.id}
-                                    className={`${styles.cardBack} ${isCardSelected(card.id) ? styles.selected : ''}`}
-                                    onClick={() => handleCardClick(card)}
-                                >
-                                    <span className={styles.cardBackIcon}>🎴</span>
-                                    <span className={styles.cardBackNumber}>{index + 1}</span>
-                                    {isCardSelected(card.id) && (
-                                        <div className={styles.selectedBadge}>✓</div>
-                                    )}
+                                <div className={styles.cardName}>{card.name}</div>
+                                <div className={styles.cardType}>
+                                    {card.type === 'generator' && '🔋 Générateur'}
+                                    {card.type === 'competence' && '⚔️ Compétence'}
+                                    {card.type === 'utility' && '🛠️ Utilitaire'}
                                 </div>
-                            )
-                        ))}
-                    </div>
-                )}
-
-                <div className={styles.actions}>
-                    {onCancel && (
-                        <button
-                            className={styles.cancelButton}
-                            onClick={onCancel}
-                        >
-                            ❌ Annuler
-                        </button>
-                    )}
-                    <button
-                        className={styles.confirmButton}
-                        onClick={handleConfirm}
-                        disabled={selectedCards.length === 0}
-                    >
-                        ✅ Confirmer ({selectedCards.length})
-                    </button>
+                                <span className={styles.revealedBadge}>👁️</span>
+                                {isCardSelected(card.id) && (
+                                    <div className={styles.selectedBadge}>✓</div>
+                                )}
+                            </div>
+                        ) : (
+                            // Carte cachée - dos de carte
+                            <div
+                                key={card.id}
+                                className={`${styles.cardBack} ${isCardSelected(card.id) ? styles.selected : ''}`}
+                                onClick={() => handleCardClick(card)}
+                            >
+                                <span className={styles.cardBackIcon}>🎴</span>
+                                <span className={styles.cardBackNumber}>{index + 1}</span>
+                                {isCardSelected(card.id) && (
+                                    <div className={styles.selectedBadge}>✓</div>
+                                )}
+                            </div>
+                        )
+                    ))}
                 </div>
-            </div>
-        </div>
-    );
+            )}
 
-    return createPortal(modalContent, document.body);
+            <div className={styles.actions}>
+                {onCancel && (
+                    <button
+                        className={styles.cancelButton}
+                        onClick={onCancel}
+                    >
+                        ❌ Annuler
+                    </button>
+                )}
+                <button
+                    className={styles.confirmButton}
+                    onClick={handleConfirm}
+                    disabled={selectedCards.length === 0}
+                >
+                    ✅ Confirmer ({selectedCards.length})
+                </button>
+            </div>
+        </ModalShell>
+    );
 }

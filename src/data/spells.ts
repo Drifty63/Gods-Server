@@ -1075,7 +1075,7 @@ export const ALL_SPELLS: SpellCard[] = [
         energyCost: 1,
         energyGain: 0,
         effects: [
-            { type: 'custom', customEffectId: 'temp_resurrect', description: 'Ressuscite un dieu avec 5 PV, inflige 1 dégât chaque tour' }
+            { type: 'custom', customEffectId: 'temp_resurrect', description: 'Invoque un zombie (5 PV) à partir d\'un dieu mort, inflige 1 dégât chaque tour' }
         ],
         imageUrl: '/cards/spells/spell_persephone_brulure.png',
         description: '☠️ → 💀5💚 | 1🩸⏳',
