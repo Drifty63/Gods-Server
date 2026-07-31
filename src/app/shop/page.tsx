@@ -6,7 +6,7 @@ import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { getVisibleGods, getGodById } from '@/data/gods';
-import { purchaseGod, purchaseCoffret, GOD_PRICE, GOD_PROMO_PRICE, COFFRET_PRICE, STARTER_PACKS } from '@/services/firebase';
+import { purchaseGod, purchaseCoffret, GOD_PRICE, GOD_PROMO_PRICE, COFFRET_PRICE, STARTER_PACKS } from '@/services/supabase-profile';
 
 // Cycle annuel des dieux en promo
 const MONTHLY_GODS: { [key: number]: string } = {
@@ -48,9 +48,9 @@ export default function ShopPage() {
     // Utiliser l'ambroisie du profil ou 0 par défaut
     const userAmbroisie = profile?.ambroisie ?? 0;
     // Dieux possédés
-    const godsOwned = profile?.collection.godsOwned ?? [];
+    const godsOwned = profile?.gods_owned ?? [];
     // Filtrer les dieux selon le statut créateur
-    const visibleGods = useMemo(() => getVisibleGods(profile?.isCreator || false), [profile?.isCreator]);
+    const visibleGods = useMemo(() => getVisibleGods(profile?.is_creator || false), [profile?.is_creator]);
 
     // Vérifier si un dieu est possédé
     const isGodOwned = (godId: string) => godsOwned.includes(godId);
@@ -158,7 +158,7 @@ export default function ShopPage() {
         setPurchaseMessage(null);
 
         try {
-            const result = await purchaseGod(user.uid, godId, isPromo);
+            const result = await purchaseGod(godId, isPromo);
             setPurchaseMessage({ type: result.success ? 'success' : 'error', text: result.message });
             if (result.success) {
                 await refreshProfile();
@@ -183,7 +183,7 @@ export default function ShopPage() {
         setPurchaseMessage(null);
 
         try {
-            const result = await purchaseCoffret(user.uid, coffretId);
+            const result = await purchaseCoffret(coffretId);
             setPurchaseMessage({ type: result.success ? 'success' : 'error', text: result.message });
             if (result.success) {
                 await refreshProfile();

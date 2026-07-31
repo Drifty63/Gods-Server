@@ -73,7 +73,7 @@ export default function SocialPage() {
     // Classement
     const myRank = useMemo(() => {
         if (!user) return null;
-        const index = MOCK_LEADERBOARD.findIndex(entry => entry.odemonUid === user.uid);
+        const index = MOCK_LEADERBOARD.findIndex(entry => entry.odemonUid === user.id);
         return index >= 0 ? index + 1 : null;
     }, [user]);
 

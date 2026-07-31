@@ -58,8 +58,8 @@ function DuelContent() {
 
     // Obtenir les cartes par catégorie pour le mode Duel
     const duelCards = getDuelCards(
-        profile?.collection?.godsOwned || [],
-        profile?.isCreator || false
+        profile?.gods_owned || [],
+        profile?.is_creator || false
     );
     const { gods: ownedGods, creatures, servants } = duelCards;
 

@@ -4,9 +4,8 @@
 // Fournit l'état de l'utilisateur connecté à toute l'application
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { getSupabaseClient } from '@/services/supabase-realtime';
 import {
-    auth,
-    onAuthStateChanged,
     getUserProfile,
     loginWithEmail,
     loginWithGoogle as loginWithGoogleFn,
@@ -16,7 +15,7 @@ import {
     updateAvatar,
     type User,
     type UserProfile
-} from '@/services/firebase';
+} from '@/services/supabase-profile';
 
 interface AuthContextType {
     user: User | null;
@@ -27,7 +26,7 @@ interface AuthContextType {
 
     // Actions
     login: (email: string, password: string) => Promise<void>;
-    loginGoogle: () => Promise<boolean>; // Retourne true si nouveau compte (pour rediriger vers setup)
+    loginGoogle: () => Promise<void>; // Redirige vers Google ; RequireAuth gère l'aiguillage vers /profile/setup au retour
     register: (email: string, password: string, username: string) => Promise<void>;
     signOut: () => Promise<void>;
     updateProfile: (username: string, avatar: string) => Promise<void>;
@@ -50,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const userProfile = await getUserProfile(uid);
             setProfile(userProfile);
-            console.log('Profil chargé:', userProfile);
         } catch (err) {
             console.error('Erreur chargement profil:', err);
             setProfile(null);
@@ -59,14 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Écouter les changements d'état d'authentification
+    // Écouter les changements d'état d'authentification (onAuthStateChange émet un événement
+    // INITIAL_SESSION dès l'abonnement, pas besoin d'un getSession() séparé au montage)
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            console.log('Auth state changed:', firebaseUser?.email);
-            setUser(firebaseUser);
+        const supabase = getSupabaseClient();
 
-            if (firebaseUser) {
-                await loadProfile(firebaseUser.uid);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            setUser(session?.user ?? null);
+
+            if (session?.user) {
+                await loadProfile(session.user.id);
             } else {
                 setProfile(null);
             }
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => subscription.unsubscribe();
     }, [loadProfile]);
 
     // Connexion avec email
@@ -83,32 +83,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(true);
         try {
             const user = await loginWithEmail(email, password);
-            // Charger le profil après connexion
-            await loadProfile(user.uid);
+            await loadProfile(user.id);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
-            setError(translateFirebaseError(errorMessage));
+            setError(translateSupabaseAuthError(errorMessage));
             throw err;
         } finally {
             setLoading(false);
         }
     };
 
-    // Connexion avec Google - Retourne isNewUser pour rediriger vers setup si besoin
-    const loginGoogle = async (): Promise<boolean> => {
+    // Connexion avec Google (redirige, ne revient jamais synchronement)
+    const loginGoogle = async (): Promise<void> => {
         setError(null);
         setLoading(true);
         try {
-            const { user, isNewUser } = await loginWithGoogleFn();
-            // Charger le profil après connexion
-            await loadProfile(user.uid);
-            return isNewUser;
+            await loginWithGoogleFn();
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion Google';
-            setError(translateFirebaseError(errorMessage));
-            throw err;
-        } finally {
+            setError(translateSupabaseAuthError(errorMessage));
             setLoading(false);
+            throw err;
         }
     };
 
@@ -118,11 +113,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(true);
         try {
             const user = await registerWithEmail(email, password, username);
-            // Charger le profil après inscription
-            await loadProfile(user.uid);
+            await loadProfile(user.id);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur d\'inscription';
-            setError(translateFirebaseError(errorMessage));
+            setError(translateSupabaseAuthError(errorMessage));
             throw err;
         } finally {
             setLoading(false);
@@ -148,14 +142,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setError(null);
         try {
-            await updateUsername(user.uid, username);
-            await updateAvatar(user.uid, avatar);
+            await updateUsername(user.id, username);
+            await updateAvatar(user.id, avatar);
 
             // Rafraîchir le profil
-            await loadProfile(user.uid);
+            await loadProfile(user.id);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Erreur de mise à jour';
-            setError(translateFirebaseError(errorMessage));
+            setError(translateSupabaseAuthError(errorMessage));
             throw err;
         }
     };
@@ -163,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Rafraîchir le profil
     const refreshProfile = useCallback(async () => {
         if (!user) return;
-        await loadProfile(user.uid);
+        await loadProfile(user.id);
     }, [user, loadProfile]);
 
     // Effacer les erreurs
@@ -198,37 +192,25 @@ export function useAuth() {
     return context;
 }
 
-// Traduction des erreurs Firebase en français
-function translateFirebaseError(errorMessage: string): string {
-    if (errorMessage.includes('auth/email-already-in-use')) {
-        return 'Cette adresse email est déjà utilisée.';
-    }
-    if (errorMessage.includes('auth/username-already-in-use')) {
+// Traduction des erreurs Supabase Auth / Postgres en français
+function translateSupabaseAuthError(errorMessage: string): string {
+    if (errorMessage.includes('profiles_username_lower_idx') || errorMessage.includes('auth/username-already-in-use')) {
         return 'Ce nom d\'utilisateur est déjà pris. Choisis-en un autre.';
     }
-    if (errorMessage.includes('auth/invalid-email')) {
+    if (errorMessage.includes('User already registered')) {
+        return 'Cette adresse email est déjà utilisée.';
+    }
+    if (errorMessage.includes('Unable to validate email address') || errorMessage.includes('invalid')) {
         return 'Adresse email invalide.';
     }
-    if (errorMessage.includes('auth/weak-password')) {
+    if (errorMessage.includes('Password should be at least')) {
         return 'Le mot de passe doit contenir au moins 6 caractères.';
     }
-    if (errorMessage.includes('auth/user-not-found')) {
-        return 'Aucun compte associé à cette adresse email.';
-    }
-    if (errorMessage.includes('auth/wrong-password')) {
-        return 'Mot de passe incorrect.';
-    }
-    if (errorMessage.includes('auth/too-many-requests')) {
-        return 'Trop de tentatives. Réessayez plus tard.';
-    }
-    if (errorMessage.includes('auth/popup-closed-by-user')) {
-        return 'Connexion annulée.';
-    }
-    if (errorMessage.includes('auth/invalid-credential')) {
+    if (errorMessage.includes('Invalid login credentials')) {
         return 'Email ou mot de passe incorrect.';
     }
-    if (errorMessage.includes('permission-denied') || errorMessage.includes('PERMISSION_DENIED')) {
-        return 'Accès refusé. Vérifie les règles Firestore.';
+    if (errorMessage.includes('too many requests') || errorMessage.includes('rate limit')) {
+        return 'Trop de tentatives. Réessayez plus tard.';
     }
     return errorMessage;
 }

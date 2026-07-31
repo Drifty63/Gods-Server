@@ -24,7 +24,7 @@ function HomeContent() {
   // Utiliser l'ambroisie du profil ou 0 par défaut
   const userAmbroisie = profile?.ambroisie ?? 0;
   // Filtrer les dieux selon le statut créateur
-  const visibleGods = useMemo(() => getVisibleGods(profile?.isCreator || false), [profile?.isCreator]);
+  const visibleGods = useMemo(() => getVisibleGods(profile?.is_creator || false), [profile?.is_creator]);
 
   // Carrousel automatique des dieux (10 secondes)
   useEffect(() => {

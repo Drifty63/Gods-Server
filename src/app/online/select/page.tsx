@@ -6,40 +6,29 @@ import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { getOwnedGods, getGodById } from '@/data/gods';
 import { GodCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
-import { auth, getUserProfile, SavedDeck } from '@/services/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { SavedDeck } from '@/services/supabase-profile';
+import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import styles from './page.module.css';
 
 export default function OnlineSelectPage() {
     const router = useRouter();
     const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName, rpsPhase } = useMultiplayer();
+    const { profile } = useAuth();
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [hasRejoined, setHasRejoined] = useState(false);
-    const [isCreator, setIsCreator] = useState(false);
-    const [godsOwned, setGodsOwned] = useState<string[]>([]);
-    const [savedDecks, setSavedDecks] = useState<SavedDeck[]>([]);
     const [showDecks, setShowDecks] = useState(true);
+
+    const isCreator = profile?.is_creator || false;
+    const godsOwned = useMemo(() => profile?.gods_owned || [], [profile?.gods_owned]);
+    const savedDecks: SavedDeck[] = profile?.savedDecks || [];
 
     // Filtrer les dieux selon ceux possédés par le joueur
     const availableGods = useMemo(() => getOwnedGods(godsOwned, isCreator), [godsOwned, isCreator]);
 
     // Decks complets (4 dieux)
     const completeDecks = useMemo(() => savedDecks.filter(d => d.godIds.length === 4), [savedDecks]);
-
-    // Récupérer le profil et les dieux possédés
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const profile = await getUserProfile(user.uid);
-                setIsCreator(profile?.isCreator || false);
-                setGodsOwned(profile?.collection.godsOwned || []);
-                setSavedDecks(profile?.savedDecks || []);
-            }
-        });
-        return () => unsubscribe();
-    }, []);
 
     // Reprendre la session au chargement (gameId+token+isHost persistés par la page précédente)
     useEffect(() => {

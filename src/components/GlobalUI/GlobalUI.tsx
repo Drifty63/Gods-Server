@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest } from '@/services/firebase';
+import { getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest } from '@/services/supabase-profile';
 import styles from './GlobalUI.module.css';
 
 // Mock data pour les récompenses (sera remplacé plus tard)
@@ -75,7 +75,7 @@ export default function GlobalUI() {
         if (!user) return;
         setQuestsLoading(true);
         try {
-            const data = await getDailyQuests(user.uid);
+            const data = await getDailyQuests();
             setDailyQuests(data.quests);
         } catch (error) {
             console.error('Erreur chargement quêtes:', error);
@@ -96,7 +96,7 @@ export default function GlobalUI() {
         if (!user || claimingQuest) return;
         setClaimingQuest(questId);
         try {
-            const result = await claimQuestReward(user.uid, questId);
+            const result = await claimQuestReward(questId);
             if (result.success) {
                 // Mettre à jour localement
                 setDailyQuests(prev => prev.map(q =>
@@ -117,7 +117,7 @@ export default function GlobalUI() {
         if (!user || claimingQuest) return;
         setClaimingQuest('all');
         try {
-            const result = await claimAllQuestRewards(user.uid);
+            const result = await claimAllQuestRewards();
             if (result.success) {
                 // Mettre à jour localement
                 setDailyQuests(prev => prev.map(q =>

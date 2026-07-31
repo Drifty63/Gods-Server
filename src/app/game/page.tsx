@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import GameBoard from '@/components/GameBoard/GameBoard';
 import TeamSelection from '@/components/TeamSelection/TeamSelection';
 import RockPaperScissors from '@/components/RockPaperScissors/RockPaperScissors';
 import { ALL_GODS, getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
-import { auth, getUserProfile } from '@/services/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import styles from './page.module.css';
 import Link from 'next/link';
 
@@ -22,21 +21,11 @@ interface SelectedTeams {
 
 export default function GamePage() {
     const { initGame, resetGame } = useGameStore();
+    const { profile } = useAuth();
     const [phase, setPhase] = useState<GamePhase>('team_selection');
     const [error, setError] = useState<string | null>(null);
     const [selectedTeams, setSelectedTeams] = useState<SelectedTeams | null>(null);
-    const [isCreator, setIsCreator] = useState(false);
-
-    // Récupérer le statut créateur
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const profile = await getUserProfile(user.uid);
-                setIsCreator(profile?.isCreator || false);
-            }
-        });
-        return () => unsubscribe();
-    }, []);
+    const isCreator = profile?.is_creator || false;
 
     // Étape 1: Sélection des équipes terminée
     const handleTeamsSelected = (playerTeam: string[], aiTeam: string[]) => {

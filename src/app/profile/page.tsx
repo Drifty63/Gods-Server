@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMostPlayedGod } from '@/services/firebase';
+import { getMostPlayedGod } from '@/services/supabase-profile';
 import { ALL_GODS } from '@/data/gods';
 import { getRankByFerveur, getRankProgress } from '@/data/ranks';
 import styles from './page.module.css';
@@ -102,7 +102,7 @@ export default function ProfilePage() {
         : '0.0';
 
     // Dieu le plus joué
-    const mostPlayed = getMostPlayedGod(profile.godPlayCounts);
+    const mostPlayed = getMostPlayedGod(profile.god_play_counts);
     const mostPlayedGod = mostPlayed ? ALL_GODS.find(g => g.id === mostPlayed.godId) : null;
 
     return (
@@ -196,7 +196,7 @@ export default function ProfilePage() {
                         </div>
                         <div className={styles.statsRow}>
                             <div className={styles.statItem}>
-                                <span className={styles.statValue}>{profile.collection.godsOwned.length}/12</span>
+                                <span className={styles.statValue}>{profile.gods_owned.length}/12</span>
                                 <span className={styles.statLabel}>Dieux obtenus</span>
                             </div>
                             <div className={styles.statItem}>
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                             {/* Section Dieux débloqués */}
                             <h3 className={styles.modalSubtitle}>Mes Dieux</h3>
                             <div className={styles.avatarGrid}>
-                                {profile.collection.godsOwned.map((godId) => {
+                                {profile.gods_owned.map((godId) => {
                                     const god = ALL_GODS.find(g => g.id === godId);
                                     if (!god) return null;
                                     const avatarPath = god.imageUrl;

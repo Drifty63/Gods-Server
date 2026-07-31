@@ -7,7 +7,7 @@ import styles from './page.module.css';
 import { getOwnedGods, getVisibleGods, God } from '@/data/gods';
 import { getSpellsForGod, SpellCard } from '@/data/mock_spells';
 import { useAuth } from '@/contexts/AuthContext';
-import { saveDecks, SavedDeck } from '@/services/firebase';
+import { saveDecks, SavedDeck } from '@/services/supabase-profile';
 
 // Nombre max de decks
 const MAX_DECKS = 5;
@@ -60,8 +60,8 @@ export default function DeckPage() {
     const [showBuyModal, setShowBuyModal] = useState<{ god: God } | null>(null);
 
     // Dieux possédés et visibles
-    const godsOwned = profile?.collection.godsOwned ?? [];
-    const isCreator = profile?.isCreator || false;
+    const godsOwned = profile?.gods_owned ?? [];
+    const isCreator = profile?.is_creator || false;
     const availableGods = useMemo(() => getOwnedGods(godsOwned, isCreator), [godsOwned, isCreator]);
     const visibleGods = useMemo(() => getVisibleGods(isCreator), [isCreator]);
 
@@ -127,7 +127,7 @@ export default function DeckPage() {
         setSaveMessage(null);
 
         try {
-            await saveDecks(user.uid, decks);
+            await saveDecks(decks);
             await refreshProfile();
             setSaveMessage({ type: 'success', text: 'Decks sauvegardés !' });
         } catch (error) {

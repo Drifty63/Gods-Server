@@ -3,9 +3,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 let client: SupabaseClient | null = null;
 
 /**
- * Client Supabase unique côté navigateur (auth anonyme désactivée, on n'utilise que
- * Postgres + Realtime + les Edge Functions). Remplace l'ancien singleton socket.io
- * (voir src/services/socket.ts, retiré) — même rôle, même pattern.
+ * Client Supabase unique côté navigateur : Postgres + Realtime + Edge Functions + Auth
+ * (session persistée -- remplace Firebase Auth, voir src/services/supabase-profile.ts).
  */
 export function getSupabaseClient(): SupabaseClient {
     if (client) return client;
@@ -18,7 +17,7 @@ export function getSupabaseClient(): SupabaseClient {
     }
 
     client = createClient(url, anonKey, {
-        auth: { persistSession: false },
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
     });
 
     return client;

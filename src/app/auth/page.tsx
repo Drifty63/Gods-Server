@@ -77,13 +77,9 @@ function AuthContent() {
         clearError();
 
         try {
-            const isNewUser = await loginGoogle();
-            // Rediriger vers setup si nouveau compte, sinon vers accueil
-            if (isNewUser) {
-                router.push('/profile/setup');
-            } else {
-                router.push('/');
-            }
+            // Redirige vers Google puis revient sur l'app ; RequireAuth aiguille ensuite
+            // vers /profile/setup si le compte n'a pas encore de dieux.
+            await loginGoogle();
         } catch {
             // L'erreur est gérée par le contexte
         }

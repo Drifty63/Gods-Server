@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { isUsernameTaken, updateUsername, updateAvatar, STARTER_PACKS, claimStarterPack, StarterPackId } from '@/services/firebase';
+import { isUsernameTaken, updateUsername, updateAvatar, STARTER_PACKS, claimStarterPack, StarterPackId } from '@/services/supabase-profile';
 import { ALL_GODS } from '@/data/gods';
 import styles from './page.module.css';
 
@@ -25,7 +25,7 @@ export default function ProfileSetupPage() {
     const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
 
     // Déterminer si c'est un utilisateur existant (a déjà un pseudo mais pas de dieux)
-    const isExistingUser = profile && profile.username && profile.collection.godsOwned.length === 0;
+    const isExistingUser = profile && profile.username && profile.gods_owned.length === 0;
 
     // Rediriger si pas connecté
     useEffect(() => {
@@ -36,7 +36,7 @@ export default function ProfileSetupPage() {
 
     // Si le profil a déjà des dieux, rediriger vers l'accueil
     useEffect(() => {
-        if (!loading && profile && profile.collection.godsOwned.length > 0) {
+        if (!loading && profile && profile.gods_owned.length > 0) {
             router.push('/');
         }
     }, [profile, loading, router]);
@@ -59,8 +59,8 @@ export default function ProfileSetupPage() {
             if (profile.avatar && !profile.avatar.startsWith('http')) {
                 setSelectedAvatar(profile.avatar);
             }
-        } else if (user?.displayName) {
-            setUsername(user.displayName);
+        } else if (user?.user_metadata?.full_name) {
+            setUsername(user.user_metadata.full_name);
         } else if (user?.email) {
             setUsername(user.email.split('@')[0]);
         }
@@ -133,12 +133,12 @@ export default function ProfileSetupPage() {
             if (user) {
                 // Pour les nouveaux utilisateurs, mettre à jour le pseudo et l'avatar
                 if (!isExistingUser) {
-                    await updateUsername(user.uid, username);
-                    await updateAvatar(user.uid, selectedAvatar);
+                    await updateUsername(user.id, username);
+                    await updateAvatar(user.id, selectedAvatar);
                 }
 
                 // Attribuer le pack starter
-                await claimStarterPack(user.uid, selectedPack);
+                await claimStarterPack(selectedPack);
 
                 // Rafraîchir le profil et rediriger
                 await refreshProfile();

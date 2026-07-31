@@ -32,7 +32,7 @@ export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps
         if (pathname === '/profile/setup') return;
 
         // Rediriger vers setup si l'utilisateur n'a pas de dieux (nouvel utilisateur ou ancien sans coffret)
-        if (profile && profile.collection.godsOwned.length === 0) {
+        if (profile && profile.gods_owned.length === 0) {
             console.log('⚠️ Utilisateur sans dieux, redirection vers /profile/setup');
             router.push('/profile/setup');
             return;
@@ -63,7 +63,7 @@ export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps
     }
 
     // Ne rien afficher si redirection vers setup en cours
-    if (profile && profile.collection.godsOwned.length === 0 && pathname !== '/profile/setup') {
+    if (profile && profile.gods_owned.length === 0 && pathname !== '/profile/setup') {
         return null;
     }
 

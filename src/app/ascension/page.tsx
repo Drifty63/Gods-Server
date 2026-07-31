@@ -36,8 +36,8 @@ function AscensionContent() {
 
     // Dieux possédés par le joueur (SEULEMENT les dieux, pas créatures/serviteurs)
     const ownedGods = getOwnedGods(
-        profile?.collection?.godsOwned || [],
-        profile?.isCreator || false
+        profile?.gods_owned || [],
+        profile?.is_creator || false
     );
 
     const handleSelectGod = (godId: string) => {

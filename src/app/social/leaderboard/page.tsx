@@ -27,13 +27,13 @@ export default function LeaderboardPage() {
     // Trouver la position du joueur actuel
     const myRank = useMemo(() => {
         if (!user) return null;
-        const index = leaderboard.findIndex(entry => entry.odemonUid === user.uid);
+        const index = leaderboard.findIndex(entry => entry.odemonUid === user.id);
         return index >= 0 ? index + 1 : null;
     }, [leaderboard, user]);
 
     const myEntry = useMemo(() => {
         if (!user) return null;
-        return leaderboard.find(entry => entry.odemonUid === user.uid) || null;
+        return leaderboard.find(entry => entry.odemonUid === user.id) || null;
     }, [leaderboard, user]);
 
     return (
@@ -145,7 +145,7 @@ export default function LeaderboardPage() {
                     {leaderboard.slice(3).map((player, index) => (
                         <div
                             key={player.odemonUid}
-                            className={`${styles.leaderboardRow} ${player.odemonUid === user?.uid ? styles.myRow : ''}`}
+                            className={`${styles.leaderboardRow} ${player.odemonUid === user?.id ? styles.myRow : ''}`}
                         >
                             <span className={styles.rank}>{index + 4}</span>
                             <div className={styles.playerInfo}>
