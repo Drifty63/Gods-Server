@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Socket } from 'socket.io-client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { GodCard } from '@/types/cards';
-import { getSocket } from '@/services/socket';
+import { getSupabaseClient } from '@/services/supabase-realtime';
 
 export interface MultiplayerGame {
     gameId: string;
@@ -40,367 +40,398 @@ export interface RpsResult {
     result: 'host_wins' | 'guest_wins' | 'draw';
 }
 
+interface GameRow {
+    id: string;
+    status: MultiplayerGame['status'];
+    host_name: string;
+    guest_name: string | null;
+    host_gods: GodCard[] | null;
+    guest_gods: GodCard[] | null;
+    rps_host_chosen: boolean;
+    rps_guest_chosen: boolean;
+    rps_result: RpsResult | null;
+    rps_winner: 'host' | 'guest' | null;
+    first_player: 'host' | 'guest' | null;
+    game_state: Record<string, unknown> | null;
+}
+
+const QUEUE_HEARTBEAT_MS = 15000;
+const RPS_REVEAL_MS = 2500;
+
+/**
+ * Couche multijoueur : remplace l'ancien transport Socket.io par Supabase (Postgres + Realtime
+ * + Edge Functions). L'API publique retournée par ce hook reste volontairement proche de
+ * l'ancienne (mêmes noms de champs/fonctions) pour que les pages /online/* n'aient besoin que
+ * de changements ciblés plutôt que d'une réécriture complète — voir le plan de migration.
+ */
 export function useMultiplayer() {
-    const socketRef = useRef<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const [currentGame, setCurrentGame] = useState<MultiplayerGame | null>(null);
-    const [availableGames, setAvailableGames] = useState<{ id: string; hostName: string }[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [currentGame, setCurrentGame] = useState<MultiplayerGame | null>(null);
+    const [opponentName, setOpponentName] = useState<string | null>(null);
     const [opponentReady, setOpponentReady] = useState(false);
     const [gameStartData, setGameStartData] = useState<GameStartData | null>(null);
-    const [lastAction, setLastAction] = useState<GameAction | null>(null);
     const [syncedState, setSyncedState] = useState<Record<string, unknown> | null>(null);
     const [opponentDisconnected, setOpponentDisconnected] = useState(false);
 
-    // Nouveaux états pour le matchmaking
     const [isInQueue, setIsInQueue] = useState(false);
     const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
-    const [opponentName, setOpponentName] = useState<string | null>(null);
 
-    // États pour Pierre-Feuille-Ciseaux
     const [rpsPhase, setRpsPhase] = useState<'waiting' | 'choosing' | 'result' | 'deciding' | null>(null);
     const [rpsResult, setRpsResult] = useState<RpsResult | null>(null);
     const [opponentChoseRps, setOpponentChoseRps] = useState(false);
     const [isRpsWinner, setIsRpsWinner] = useState(false);
 
-    // Connexion au serveur
-    useEffect(() => {
-        const socket = getSocket();
-        socketRef.current = socket;
+    // Identité de session courante : perdue à chaque changement de page (nouvelle instance du
+    // hook), reconstruite via resumeGame() à partir de ce que la page a persisté (sessionStorage).
+    const gameIdRef = useRef<string | null>(null);
+    const tokenRef = useRef<string | null>(null);
+    const isHostRef = useRef(false);
+    const gameChannelRef = useRef<RealtimeChannel | null>(null);
+    const queueIdRef = useRef<string | null>(null);
+    const queueChannelRef = useRef<RealtimeChannel | null>(null);
+    const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const pendingActionRef = useRef<GameAction | null>(null);
+    const lastRpsRevealKeyRef = useRef<string | null>(null);
 
-        if (socket.connected) {
-            setIsConnected(true);
+    const applyGameRow = useCallback((row: GameRow) => {
+        const isHost = isHostRef.current;
+
+        setCurrentGame({
+            gameId: row.id,
+            hostName: row.host_name || '',
+            guestName: row.guest_name || undefined,
+            status: row.status,
+            isHost,
+        });
+
+        if (row.host_name && row.guest_name) {
+            setOpponentName(isHost ? row.guest_name : row.host_name);
         }
 
-        const onConnect = () => {
-            setIsConnected(true);
-            setError(null);
-            console.log('Connecté au serveur');
-        };
+        setOpponentReady(isHost ? !!row.guest_gods : !!row.host_gods);
 
-        const onDisconnect = () => {
-            setIsConnected(false);
-            setIsInQueue(false);
-            console.log('Déconnecté du serveur');
-        };
-
-        const onConnectError = (err: Error) => {
-            setError(`Erreur de connexion: ${err.message}`);
-            setIsInQueue(false);
-        };
-
-        // Matchmaking events
-        const onQueueJoined = (data: QueueStatus) => {
-            setIsInQueue(true);
-            setQueueStatus(data);
-        };
-
-        const onQueueStatus = (data: QueueStatus) => {
-            setQueueStatus(data);
-        };
-
-        const onQueueLeft = () => {
-            setIsInQueue(false);
-            setQueueStatus(null);
-        };
-
-        const onMatchFound = (data: { gameId: string; isHost: boolean; opponentName: string }) => {
-            setIsInQueue(false);
-            setQueueStatus(null);
-            setOpponentName(data.opponentName);
-            setCurrentGame({
-                gameId: data.gameId,
-                hostName: data.isHost ? '' : data.opponentName,
-                guestName: data.isHost ? data.opponentName : '',
-                status: 'selecting',
-                isHost: data.isHost
-            });
-        };
-
-        // Événements de partie
-        const onGameCreated = (data: { gameId: string; isHost: boolean }) => {
-            setCurrentGame({
-                gameId: data.gameId,
-                hostName: '',
-                status: 'waiting',
-                isHost: data.isHost
-            });
-        };
-
-        const onPlayerJoined = (data: { hostName: string; guestName: string; status: string }) => {
-            setCurrentGame(prev => prev ? {
-                ...prev,
-                hostName: data.hostName,
-                guestName: data.guestName,
-                status: data.status as MultiplayerGame['status']
-            } : null);
-        };
-
-        const onOpponentSelected = () => {
-            setOpponentReady(true);
-        };
-
-        const onGameStart = (data: GameStartData) => {
-            console.log('Game Start Received!', data);
-            setGameStartData(data);
-            setCurrentGame(prev => prev ? { ...prev, status: 'playing' } : null);
-        };
-
-        const onGameAction = (action: GameAction) => {
-            setLastAction(action);
-        };
-
-        const onSyncState = (data: { gameState: Record<string, unknown> }) => {
-            setSyncedState(data.gameState);
-        };
-
-        const onPlayerDisconnected = () => {
+        if (row.status === 'finished') {
             setOpponentDisconnected(true);
-        };
+            setError((prev) => prev ?? "Votre adversaire a quitté la partie");
+        }
 
-        const onOpponentReconnected = () => {
-            setOpponentDisconnected(false);
-        };
-
-        const onOpponentLeft = () => {
-            setOpponentDisconnected(true);
-            setError("Votre adversaire a quitté la partie");
-        };
-
-        const onGamesList = (games: { id: string; hostName: string }[]) => {
-            setAvailableGames(games);
-        };
-
-        const onError = (data: { message: string }) => {
-            setError(data.message);
-        };
-
-        // ===== ÉVÉNEMENTS RPS =====
-        const onRpsStart = () => {
-            console.log('RPS Start!');
-            setRpsPhase('choosing');
-            setRpsResult(null);
-            setOpponentChoseRps(false);
-            setIsRpsWinner(false);
-            setCurrentGame(prev => prev ? { ...prev, status: 'rps' } : null);
-        };
-
-        const onRpsOpponentChose = () => {
-            setOpponentChoseRps(true);
-        };
-
-        const onRpsResult = (data: RpsResult) => {
-            console.log('RPS Result:', data);
-            setRpsResult(data);
+        // Révélation RPS (victoire/défaite/égalité) : déclenchée quand rps_result change.
+        const revealKey = row.rps_result ? `${row.status}:${JSON.stringify(row.rps_result)}` : null;
+        if (revealKey && revealKey !== lastRpsRevealKeyRef.current) {
+            lastRpsRevealKeyRef.current = revealKey;
+            const result = row.rps_result as RpsResult;
+            setRpsResult(result);
             setRpsPhase('result');
             setOpponentChoseRps(false);
 
-            // Déterminer si on est le gagnant (récupérer isHost depuis sessionStorage pour éviter les closures obsolètes)
-            if (data.result !== 'draw') {
-                const isHostFromStorage = typeof window !== 'undefined' && sessionStorage.getItem('isHost') === 'true';
-                const weWon = (isHostFromStorage && data.result === 'host_wins') ||
-                    (!isHostFromStorage && data.result === 'guest_wins');
-                setIsRpsWinner(weWon);
-
-                if (weWon) {
-                    // On a gagné, on passe en phase de décision
-                    setTimeout(() => {
-                        setRpsPhase('deciding');
-                        setCurrentGame(prev => prev ? { ...prev, status: 'rps_deciding' } : null);
-                    }, 2500);
-                }
-            } else {
-                // Égalité - recommencer après un délai
+            if (result.result === 'draw') {
                 setTimeout(() => {
                     setRpsPhase('choosing');
                     setRpsResult(null);
-                }, 2500);
+                }, RPS_REVEAL_MS);
+            } else {
+                const weWon = row.rps_winner === (isHost ? 'host' : 'guest');
+                setIsRpsWinner(weWon);
+                if (weWon) {
+                    setTimeout(() => setRpsPhase('deciding'), RPS_REVEAL_MS);
+                }
             }
-        };
+        } else if (row.status === 'rps') {
+            setOpponentChoseRps(isHost ? !!row.rps_guest_chosen : !!row.rps_host_chosen);
+            setRpsPhase((prev) => (prev === 'result' ? prev : 'choosing'));
+        }
 
-        const onRejoined = (data: { gameId: string; isHost: boolean; status: string; gameState?: Record<string, unknown> }) => {
-            console.log('Rejoined game:', data);
-            setCurrentGame({
-                gameId: data.gameId,
-                hostName: '',
-                status: data.status as MultiplayerGame['status'],
-                isHost: data.isHost
+        if (row.status === 'playing' && row.host_gods && row.guest_gods && row.first_player) {
+            setGameStartData({
+                hostGods: row.host_gods,
+                guestGods: row.guest_gods,
+                hostName: row.host_name,
+                guestName: row.guest_name || '',
+                firstPlayer: row.first_player,
+                rpsWinner: row.rps_winner || undefined,
             });
-            if (data.gameState) {
-                setSyncedState(data.gameState);
-            }
-        };
+        }
 
-        // Attacher les écouteurs
-        socket.on('connect', onConnect);
-        socket.on('disconnect', onDisconnect);
-        socket.on('connect_error', onConnectError);
-        socket.on('queue_joined', onQueueJoined);
-        socket.on('queue_status', onQueueStatus);
-        socket.on('queue_left', onQueueLeft);
-        socket.on('match_found', onMatchFound);
-        socket.on('game_created', onGameCreated);
-        socket.on('player_joined', onPlayerJoined);
-        socket.on('opponent_selected', onOpponentSelected);
-        socket.on('game_start', onGameStart);
-        socket.on('game_action', onGameAction);
-        socket.on('sync_state', onSyncState);
-        socket.on('player_disconnected', onPlayerDisconnected);
-        socket.on('opponent_reconnected', onOpponentReconnected);
-        socket.on('opponent_left', onOpponentLeft);
-        socket.on('games_list', onGamesList);
-        socket.on('error', onError);
-        socket.on('rejoined', onRejoined);
-        // RPS events
-        socket.on('rps_start', onRpsStart);
-        socket.on('rps_opponent_chose', onRpsOpponentChose);
-        socket.on('rps_result', onRpsResult);
+        if (row.game_state) {
+            setSyncedState(row.game_state);
+        }
+    }, []);
 
+    const attachToGame = useCallback(async (gameId: string, token: string, isHost: boolean) => {
+        const supabase = getSupabaseClient();
+        gameIdRef.current = gameId;
+        tokenRef.current = token;
+        isHostRef.current = isHost;
+
+        if (gameChannelRef.current) {
+            supabase.removeChannel(gameChannelRef.current);
+            gameChannelRef.current = null;
+        }
+
+        const { data: row, error: fetchErr } = await supabase
+            .from('games')
+            .select('*')
+            .eq('id', gameId)
+            .single();
+        if (fetchErr) {
+            setError('Partie introuvable');
+            return;
+        }
+        applyGameRow(row as GameRow);
+
+        const channel = supabase.channel(`game:${gameId}`);
+        channel
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${gameId}` },
+                (payload) => applyGameRow(payload.new as GameRow)
+            )
+            .on('presence', { event: 'sync' }, () => {
+                const state = channel.presenceState();
+                const opponentSide = isHostRef.current ? 'guest' : 'host';
+                const present = Object.values(state).some((entries) =>
+                    (entries as Array<{ side?: string }>).some((p) => p.side === opponentSide)
+                );
+                setOpponentDisconnected(!present);
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    setIsConnected(true);
+                    setError(null);
+                    await channel.track({ side: isHostRef.current ? 'host' : 'guest' });
+                    // Rattrapage : Supabase Realtime ne rejoue pas les événements manqués
+                    // pendant une coupure réseau — cette relecture (déclenchée à CHAQUE
+                    // (ré)abonnement, pas seulement le premier) rattrape un état qui aurait
+                    // changé pendant que ce client était déconnecté.
+                    const { data: freshRow } = await supabase
+                        .from('games')
+                        .select('*')
+                        .eq('id', gameId)
+                        .single();
+                    if (freshRow) applyGameRow(freshRow as GameRow);
+                } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                    setIsConnected(false);
+                }
+            });
+
+        gameChannelRef.current = channel;
+    }, [applyGameRow]);
+
+    const subscribeToQueue = useCallback((queueId: string) => {
+        const supabase = getSupabaseClient();
+        const channel = supabase.channel(`queue:${queueId}`);
+        channel
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'matchmaking_queue', filter: `id=eq.${queueId}` },
+                async (payload) => {
+                    const row = payload.new as { matched_game_id: string | null };
+                    if (!row.matched_game_id) return;
+
+                    const { data } = await supabase.functions.invoke('claim-queue-token', {
+                        body: { queueId },
+                    });
+                    if (!data?.token) return;
+
+                    if (heartbeatRef.current) {
+                        clearInterval(heartbeatRef.current);
+                        heartbeatRef.current = null;
+                    }
+                    supabase.removeChannel(channel);
+                    queueChannelRef.current = null;
+                    queueIdRef.current = null;
+                    setIsInQueue(false);
+                    setQueueStatus(null);
+                    setOpponentName(data.isHost ? data.guestName || null : data.hostName || null);
+                    await attachToGame(data.gameId, data.token, data.isHost);
+                }
+            )
+            .subscribe();
+        queueChannelRef.current = channel;
+    }, [attachToGame]);
+
+    useEffect(() => {
+        setIsConnected(true);
         return () => {
-            socket.off('connect', onConnect);
-            socket.off('disconnect', onDisconnect);
-            socket.off('connect_error', onConnectError);
-            socket.off('queue_joined', onQueueJoined);
-            socket.off('queue_status', onQueueStatus);
-            socket.off('queue_left', onQueueLeft);
-            socket.off('match_found', onMatchFound);
-            socket.off('game_created', onGameCreated);
-            socket.off('player_joined', onPlayerJoined);
-            socket.off('opponent_selected', onOpponentSelected);
-            socket.off('game_start', onGameStart);
-            socket.off('game_action', onGameAction);
-            socket.off('sync_state', onSyncState);
-            socket.off('player_disconnected', onPlayerDisconnected);
-            socket.off('opponent_reconnected', onOpponentReconnected);
-            socket.off('opponent_left', onOpponentLeft);
-            socket.off('games_list', onGamesList);
-            socket.off('error', onError);
-            socket.off('rejoined', onRejoined);
-            // RPS cleanup
-            socket.off('rps_start', onRpsStart);
-            socket.off('rps_opponent_chose', onRpsOpponentChose);
-            socket.off('rps_result', onRpsResult);
+            const supabase = getSupabaseClient();
+            if (gameChannelRef.current) supabase.removeChannel(gameChannelRef.current);
+            if (queueChannelRef.current) supabase.removeChannel(queueChannelRef.current);
+            if (heartbeatRef.current) clearInterval(heartbeatRef.current);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // =====================================
     // MATCHMAKING
     // =====================================
 
-    const joinQueue = useCallback((playerName: string, rating?: number) => {
-        if (socketRef.current) {
-            socketRef.current.emit('join_queue', { playerName, rating });
+    const joinQueue = useCallback(async (playerName: string, rating?: number) => {
+        const supabase = getSupabaseClient();
+        const { data, error: insErr } = await supabase
+            .from('matchmaking_queue')
+            .insert({ player_name: playerName, rating: rating ?? 1000, ranked: true })
+            .select()
+            .single();
+        if (insErr || !data) {
+            setError(insErr?.message ?? "Erreur file d'attente");
+            return;
         }
-    }, []);
+        queueIdRef.current = data.id;
+        setIsInQueue(true);
+        setQueueStatus({ position: 1, total: 1 });
+        subscribeToQueue(data.id);
+        heartbeatRef.current = setInterval(() => {
+            supabase
+                .from('matchmaking_queue')
+                .update({ last_seen: new Date().toISOString() })
+                .eq('id', data.id)
+                .then();
+        }, QUEUE_HEARTBEAT_MS);
+    }, [subscribeToQueue]);
 
-    const leaveQueue = useCallback(() => {
-        if (socketRef.current) {
-            socketRef.current.emit('leave_queue');
+    const leaveQueue = useCallback(async () => {
+        const supabase = getSupabaseClient();
+        if (heartbeatRef.current) {
+            clearInterval(heartbeatRef.current);
+            heartbeatRef.current = null;
         }
+        if (queueChannelRef.current) {
+            supabase.removeChannel(queueChannelRef.current);
+            queueChannelRef.current = null;
+        }
+        if (queueIdRef.current) {
+            await supabase.from('matchmaking_queue').delete().eq('id', queueIdRef.current);
+            queueIdRef.current = null;
+        }
+        setIsInQueue(false);
+        setQueueStatus(null);
     }, []);
 
     // =====================================
     // PARTIES PRIVÉES
     // =====================================
 
-    const createPrivateGame = useCallback((playerName: string) => {
-        if (socketRef.current) {
-            socketRef.current.emit('create_private_game', { playerName });
+    const createPrivateGame = useCallback(async (playerName: string) => {
+        const supabase = getSupabaseClient();
+        const { data, error: fnErr } = await supabase.functions.invoke('create-private-game', {
+            body: { playerName },
+        });
+        if (fnErr || !data?.gameId) {
+            setError(data?.error ?? fnErr?.message ?? 'Erreur de création de partie');
+            return;
         }
-    }, []);
+        await attachToGame(data.gameId, data.hostToken, true);
+    }, [attachToGame]);
 
-    const joinPrivateGame = useCallback((gameId: string, playerName: string) => {
-        if (socketRef.current) {
-            socketRef.current.emit('join_private_game', { gameId, playerName });
-            setCurrentGame({
-                gameId,
-                hostName: '',
-                status: 'selecting',
-                isHost: false
-            });
+    const joinPrivateGame = useCallback(async (gameId: string, playerName: string) => {
+        const supabase = getSupabaseClient();
+        const { data, error: fnErr } = await supabase.functions.invoke('join-private-game', {
+            body: { gameId, playerName },
+        });
+        if (fnErr || !data?.guestToken) {
+            setError(data?.error ?? fnErr?.message ?? 'Impossible de rejoindre cette partie');
+            return;
         }
-    }, []);
+        setOpponentName(data.hostName || null);
+        await attachToGame(gameId, data.guestToken, false);
+    }, [attachToGame]);
 
     // =====================================
-    // ANCIENNES FONCTIONS (compatibilité)
+    // REPRISE (remplace l'ancien rejoinGame) : réattache le hook à une session déjà en
+    // cours après un changement de page, à partir de {gameId, token, isHost} persistés
+    // côté page (sessionStorage) — plus de handshake serveur nécessaire, l'état vit dans
+    // Postgres, pas dans la mémoire d'un process.
     // =====================================
 
-    const createGame = useCallback((playerName: string) => {
-        createPrivateGame(playerName);
-    }, [createPrivateGame]);
-
-    const joinGame = useCallback((gameId: string, playerName: string) => {
-        joinPrivateGame(gameId, playerName);
-    }, [joinPrivateGame]);
-
-    const refreshGames = useCallback(() => {
-        if (socketRef.current) {
-            socketRef.current.emit('list_games');
-        }
-    }, []);
+    const resumeGame = useCallback(async (gameId: string, token: string, isHost: boolean) => {
+        await attachToGame(gameId, token, isHost);
+    }, [attachToGame]);
 
     // =====================================
     // GAMEPLAY
     // =====================================
 
-    const selectGods = useCallback((gods: GodCard[]) => {
-        if (socketRef.current) {
-            socketRef.current.emit('select_gods', { gods });
-        }
+    const selectGods = useCallback(async (gods: GodCard[]) => {
+        if (!gameIdRef.current || !tokenRef.current) return;
+        const supabase = getSupabaseClient();
+        const { data, error: fnErr } = await supabase.functions.invoke('select-gods', {
+            body: { gameId: gameIdRef.current, token: tokenRef.current, gods },
+        });
+        if (fnErr || data?.error) setError(data?.error ?? fnErr?.message ?? 'Erreur');
     }, []);
 
     const sendAction = useCallback((action: GameAction) => {
-        if (socketRef.current) {
-            socketRef.current.emit('game_action', action);
+        pendingActionRef.current = action;
+    }, []);
+
+    const syncState = useCallback(async (gameState: Record<string, unknown>) => {
+        if (!gameIdRef.current || !tokenRef.current) return;
+        const supabase = getSupabaseClient();
+        const action = pendingActionRef.current;
+        pendingActionRef.current = null;
+        const { data, error: fnErr } = await supabase.functions.invoke('sync-game-state', {
+            body: { gameId: gameIdRef.current, token: tokenRef.current, action, gameState },
+        });
+        if (fnErr) {
+            setError(fnErr.message);
+            return;
+        }
+        if (data?.ok === false) {
+            setError(data.reason || 'Action refusée');
         }
     }, []);
 
-    const syncState = useCallback((gameState: Record<string, unknown>) => {
-        if (socketRef.current) {
-            socketRef.current.emit('sync_state', { gameState });
+    const leaveGame = useCallback(async () => {
+        const supabase = getSupabaseClient();
+        if (gameIdRef.current && tokenRef.current) {
+            await supabase.functions.invoke('leave-game', {
+                body: { gameId: gameIdRef.current, token: tokenRef.current },
+            });
         }
-    }, []);
-
-    const leaveGame = useCallback(() => {
-        if (socketRef.current) {
-            socketRef.current.emit('leave_game');
+        if (gameChannelRef.current) {
+            supabase.removeChannel(gameChannelRef.current);
+            gameChannelRef.current = null;
         }
+        gameIdRef.current = null;
+        tokenRef.current = null;
+        isHostRef.current = false;
         setCurrentGame(null);
         setGameStartData(null);
         setOpponentReady(false);
         setOpponentDisconnected(false);
         setOpponentName(null);
+        setSyncedState(null);
+        setRpsPhase(null);
+        setRpsResult(null);
     }, []);
 
-    const rejoinGame = useCallback((gameId: string, playerName: string) => {
-        if (socketRef.current) {
-            socketRef.current.emit('rejoin_game', { gameId, playerName });
-        }
-    }, []);
+    const clearError = useCallback(() => setError(null), []);
 
-    const clearLastAction = useCallback(() => {
-        setLastAction(null);
-    }, []);
-
-    const clearError = useCallback(() => {
-        setError(null);
-    }, []);
+    const getSessionInfo = useCallback(() => ({
+        gameId: gameIdRef.current,
+        token: tokenRef.current,
+        isHost: isHostRef.current,
+    }), []);
 
     // =====================================
     // PIERRE-FEUILLE-CISEAUX
     // =====================================
 
-    const sendRpsChoice = useCallback((choice: RpsChoice) => {
-        if (socketRef.current) {
-            socketRef.current.emit('rps_choice', { choice });
-        }
+    const sendRpsChoice = useCallback(async (choice: RpsChoice) => {
+        if (!gameIdRef.current || !tokenRef.current) return;
+        const supabase = getSupabaseClient();
+        await supabase.functions.invoke('rps-choice', {
+            body: { gameId: gameIdRef.current, token: tokenRef.current, choice },
+        });
     }, []);
 
-    const sendRpsDecision = useCallback((goFirst: boolean) => {
-        if (socketRef.current) {
-            socketRef.current.emit('rps_decide', { goFirst });
-        }
+    const sendRpsDecision = useCallback(async (goFirst: boolean) => {
+        if (!gameIdRef.current || !tokenRef.current) return;
+        const supabase = getSupabaseClient();
+        const { data } = await supabase.functions.invoke('rps-decide', {
+            body: { gameId: gameIdRef.current, token: tokenRef.current, goFirst },
+        });
+        if (data?.error) setError(data.error);
     }, []);
 
     return {
@@ -420,7 +451,6 @@ export function useMultiplayer() {
         opponentName,
         opponentReady,
         gameStartData,
-        lastAction,
         syncedState,
         opponentDisconnected,
 
@@ -433,18 +463,15 @@ export function useMultiplayer() {
         sendRpsDecision,
 
         // Actions
-        createGame,
         createPrivateGame,
-        joinGame,
         joinPrivateGame,
-        availableGames,
-        refreshGames,
+        resumeGame,
+        // Identifiants de la session courante, à persister côté page (sessionStorage) pour
+        // pouvoir appeler resumeGame() après un changement de page.
+        getSessionInfo,
         selectGods,
         sendAction,
         syncState,
         leaveGame,
-        rejoinGame,
-        clearLastAction,
     };
 }
-

@@ -24,28 +24,28 @@ export default function OnlineRpsPage() {
         gameStartData,
         sendRpsChoice,
         sendRpsDecision,
-        rejoinGame,
+        resumeGame,
     } = useMultiplayer();
 
     const [hasChosen, setHasChosen] = useState(false);
     const [myChoice, setMyChoice] = useState<RpsChoice | null>(null);
     const [hasRejoined, setHasRejoined] = useState(false);
 
-    // Rejoindre la partie au chargement
+    // Reprendre la session au chargement (gameId+token+isHost persistés par la page précédente)
     useEffect(() => {
         if (isConnected && !hasRejoined) {
             const gameId = sessionStorage.getItem('gameId');
-            const playerName = sessionStorage.getItem('playerName');
+            const token = sessionStorage.getItem('multiplayerToken');
+            const isHost = sessionStorage.getItem('isHost') === 'true';
 
-            if (gameId && playerName) {
-                console.log('Rejoining RPS from page:', gameId);
-                rejoinGame(gameId, playerName);
+            if (gameId && token) {
+                resumeGame(gameId, token, isHost);
                 setHasRejoined(true);
             } else {
                 router.push('/online');
             }
         }
-    }, [isConnected, hasRejoined, rejoinGame, router]);
+    }, [isConnected, hasRejoined, resumeGame, router]);
 
     const [isRedirecting, setIsRedirecting] = useState(false);
 

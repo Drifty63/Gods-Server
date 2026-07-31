@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMultiplayer, GameAction, GameStartData } from '@/hooks/useMultiplayer';
+import { useMultiplayer, GameStartData } from '@/hooks/useMultiplayer';
 import { useGameStore } from '@/store/gameStore';
 import { ALL_SPELLS } from '@/data/spells';
 import GameBoard from '@/components/GameBoard/GameBoard';
@@ -12,16 +12,14 @@ export default function OnlineGamePage() {
     const router = useRouter();
     const {
         isConnected,
-        lastAction,
         syncedState,
         opponentDisconnected,
         error,
         clearError,
         sendAction,
         syncState,
-        clearLastAction,
         leaveGame,
-        rejoinGame,
+        resumeGame,
     } = useMultiplayer();
 
     const {
@@ -32,6 +30,7 @@ export default function OnlineGamePage() {
     const [isInitialized, setIsInitialized] = useState(false);
     const [isHost, setIsHost] = useState(false);
     const [multiplayerData, setMultiplayerData] = useState<GameStartData | null>(null);
+    const [hasResumed, setHasResumed] = useState(false);
 
     // Charger les données de session
     useEffect(() => {
@@ -50,52 +49,30 @@ export default function OnlineGamePage() {
         setIsHost(host);
     }, [router]);
 
-    // Reconnexion au socket après un refresh ou une micro-déconnexion
+    // Reprendre la session (gameId+token+isHost persistés par la page précédente) : plus de
+    // poignée de main serveur nécessaire, l'état vit dans Postgres — un rechargement de page ou
+    // une micro-coupure réseau n'a besoin que de se réabonner, ce que le hook rattrape déjà tout
+    // seul (voir attachToGame) à chaque reconnexion du canal Realtime.
     useEffect(() => {
-        if (isConnected && multiplayerData) {
+        if (!hasResumed && multiplayerData) {
             const gameId = sessionStorage.getItem('gameId');
-            const playerName = sessionStorage.getItem('playerName');
-
-            if (gameId && playerName) {
-                console.log('Attempting to rejoin game:', gameId);
-                rejoinGame(gameId, playerName);
+            const token = sessionStorage.getItem('multiplayerToken');
+            const isHostFlag = sessionStorage.getItem('isHost') === 'true';
+            if (gameId && token) {
+                resumeGame(gameId, token, isHostFlag);
+                setHasResumed(true);
             }
         }
-    }, [isConnected, multiplayerData, rejoinGame]);
+    }, [hasResumed, multiplayerData, resumeGame]);
 
-    // État pour l'overlay de reconnection
-    const [isReconnecting, setIsReconnecting] = useState(false);
-    const [reconnectAttempts, setReconnectAttempts] = useState(0);
-
-    // Gérer les micro-déconnexions
+    // Initialiser la partie : l'hôte construit l'état initial et l'écrit une fois dans Postgres ;
+    // le suiveur attend simplement que syncedState (alimenté par Realtime) contienne cet état —
+    // plus besoin de sonder le serveur toutes les secondes comme avant (ask_initial_state a
+    // disparu, l'état étant maintenant lu directement depuis la ligne de la partie).
     useEffect(() => {
-        if (!isConnected && isInitialized) {
-            // On vient de perdre la connexion en pleine partie
-            setIsReconnecting(true);
-            setReconnectAttempts(prev => prev + 1);
-        } else if (isConnected && isReconnecting) {
-            // Reconnection réussie !
-            const gameId = sessionStorage.getItem('gameId');
-            const playerName = sessionStorage.getItem('playerName');
+        if (!multiplayerData || isInitialized) return;
 
-            if (gameId && playerName) {
-                console.log('Reconnected! Rejoining game...');
-                rejoinGame(gameId, playerName);
-            }
-
-            // Attendre un peu que le serveur nous renvoie l'état
-            setTimeout(() => {
-                setIsReconnecting(false);
-                setReconnectAttempts(0);
-            }, 1000);
-        }
-    }, [isConnected, isInitialized, isReconnecting, rejoinGame]);
-
-    // Initialiser la partie
-    useEffect(() => {
-        if (!multiplayerData) return;
-
-        if (isHost && !isInitialized) {
+        if (isHost) {
             const myGods = multiplayerData.hostGods;
             const opponentGods = multiplayerData.guestGods;
 
@@ -108,59 +85,15 @@ export default function OnlineGamePage() {
             setIsInitialized(true);
 
             const state = useGameStore.getState().gameState;
-            sendAction({
-                type: 'sync_initial_state',
-                payload: { state: state as unknown as Record<string, unknown> }
-            });
-
-        } else if (!isHost && !isInitialized) {
-            const interval = setInterval(() => {
-                sendAction({
-                    type: 'ask_initial_state',
-                    payload: {}
-                });
-            }, 1000);
-
-            return () => clearInterval(interval);
+            sendAction({ type: 'sync_initial_state', payload: {} });
+            syncState(state as unknown as Record<string, unknown>);
+        } else if (syncedState) {
+            useGameStore.getState().initWithState(syncedState as any, 'player2');
+            setIsInitialized(true);
         }
-    }, [multiplayerData, isHost, isInitialized, initGame, sendAction]);
+    }, [multiplayerData, isHost, isInitialized, initGame, sendAction, syncState, syncedState]);
 
-    // Traiter les actions reçues
-    useEffect(() => {
-        if (lastAction) {
-            switch (lastAction.type) {
-                case 'ask_initial_state':
-                    if (isHost && isInitialized && gameState) {
-                        sendAction({
-                            type: 'sync_initial_state',
-                            payload: { state: gameState as unknown as Record<string, unknown> }
-                        });
-                    }
-                    break;
-
-                case 'sync_initial_state':
-                    if (!isHost && !isInitialized && multiplayerData) {
-                        const receivedState = lastAction.payload.state as any;
-                        useGameStore.getState().initWithState(receivedState, 'player2');
-                        setIsInitialized(true);
-                    }
-                    break;
-
-                // Les actions play_card, discard, end_turn sont maintenant ignorées ici
-                // car on synchronise l'état complet via syncedState
-                // Cela évite les bugs où l'action est rejouée avec la mauvaise perspective
-                case 'play_card':
-                case 'discard':
-                case 'end_turn':
-                    // On ne fait rien ici - l'état sera synchronisé via syncedState
-                    console.log('Action received (will sync via state):', lastAction.type);
-                    break;
-            }
-            clearLastAction();
-        }
-    }, [lastAction, gameState, clearLastAction, isHost, isInitialized, multiplayerData, sendAction]);
-
-    // Appliquer l'état synchronisé
+    // Appliquer les mises à jour d'état reçues après l'initialisation.
     useEffect(() => {
         if (syncedState && isInitialized) {
             useGameStore.getState().syncGameState(syncedState as any);
@@ -172,11 +105,12 @@ export default function OnlineGamePage() {
         sessionStorage.removeItem('multiplayerData');
         sessionStorage.removeItem('isHost');
         sessionStorage.removeItem('gameId');
+        sessionStorage.removeItem('multiplayerToken');
         sessionStorage.removeItem('opponentName');
         router.push('/online');
     };
 
-    // Overlay d'erreur (partie introuvable après reconnection)
+    // Overlay d'erreur (partie introuvable — expirée, ou nettoyée après une trop longue coupure)
     if (error && error.includes('introuvable')) {
         return (
             <div className={styles.disconnectedOverlay}>
@@ -192,27 +126,6 @@ export default function OnlineGamePage() {
                     }}>
                         Retour au lobby
                     </button>
-                </div>
-            </div>
-        );
-    }
-
-    // Overlay de reconnection (micro-déconnexion)
-    if (isReconnecting) {
-        return (
-            <div className={styles.disconnectedOverlay}>
-                <div className={styles.disconnectedModal}>
-                    <div className={styles.spinner}></div>
-                    <h2>🔄 Reconnection en cours...</h2>
-                    <p>Tentative {reconnectAttempts}/20</p>
-                    <p style={{ fontSize: '0.8em', opacity: 0.7 }}>
-                        Votre partie sera restaurée automatiquement
-                    </p>
-                    {reconnectAttempts >= 10 && (
-                        <button onClick={handleLeaveGame} style={{ marginTop: '1rem' }}>
-                            Abandonner et quitter
-                        </button>
-                    )}
                 </div>
             </div>
         );
@@ -243,14 +156,6 @@ export default function OnlineGamePage() {
                 <p style={{ fontSize: '0.8em', opacity: 0.7 }}>
                     {isConnected ? (isHost ? "Création de la partie..." : "Synchronisation...") : "Connexion au serveur..."}
                 </p>
-                {!isHost && isConnected && (
-                    <button
-                        onClick={() => sendAction({ type: 'ask_initial_state', payload: {} })}
-                        className={styles.retryButton}
-                    >
-                        Forcer la synchronisation
-                    </button>
-                )}
             </div>
         );
     }
@@ -260,7 +165,7 @@ export default function OnlineGamePage() {
             <div className={styles.multiplayerHeader}>
                 <span className={styles.connectionIndicator}>
                     <span className={`${styles.dot} ${isConnected ? styles.connected : styles.disconnected}`} />
-                    {isConnected ? 'En ligne' : 'Déconnecté'}
+                    {isConnected ? 'En ligne' : 'Reconnexion...'}
                 </span>
                 <span className={styles.playerInfo}>
                     🌐 {isHost ? multiplayerData?.hostName : multiplayerData?.guestName} vs {isHost ? multiplayerData?.guestName : multiplayerData?.hostName}

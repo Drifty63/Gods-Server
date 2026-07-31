@@ -13,7 +13,7 @@ import styles from './page.module.css';
 
 export default function OnlineSelectPage() {
     const router = useRouter();
-    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, rejoinGame, opponentName, rpsPhase } = useMultiplayer();
+    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName, rpsPhase } = useMultiplayer();
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [hasRejoined, setHasRejoined] = useState(false);
@@ -41,22 +41,22 @@ export default function OnlineSelectPage() {
         return () => unsubscribe();
     }, []);
 
-    // Rejoindre la partie au chargement
+    // Reprendre la session au chargement (gameId+token+isHost persistés par la page précédente)
     useEffect(() => {
         if (isConnected && !hasRejoined) {
             const gameId = sessionStorage.getItem('gameId');
-            const playerName = sessionStorage.getItem('playerName');
+            const token = sessionStorage.getItem('multiplayerToken');
+            const isHost = sessionStorage.getItem('isHost') === 'true';
 
-            if (gameId && playerName) {
-                console.log('Rejoining game from select page:', gameId, playerName);
-                rejoinGame(gameId, playerName);
+            if (gameId && token) {
+                resumeGame(gameId, token, isHost);
                 setHasRejoined(true);
             } else {
-                console.error('No gameId found, returning to online lobby');
+                console.error('No gameId/token found, returning to online lobby');
                 router.push('/online');
             }
         }
-    }, [isConnected, hasRejoined, rejoinGame, router]);
+    }, [isConnected, hasRejoined, resumeGame, router]);
 
     // Rediriger vers RPS quand les deux joueurs ont sélectionné
     useEffect(() => {

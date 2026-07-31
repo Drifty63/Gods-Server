@@ -22,6 +22,7 @@ export default function OnlinePage() {
         opponentName,
         createPrivateGame,
         joinPrivateGame,
+        getSessionInfo,
     } = useMultiplayer();
 
     const [playerName, setPlayerName] = useState('');
@@ -58,9 +59,14 @@ export default function OnlinePage() {
     // Redirection quand un match est trouvé
     useEffect(() => {
         if (currentGame && currentGame.status === 'selecting') {
-            // Sauvegarder les données de session
-            sessionStorage.setItem('gameId', currentGame.gameId);
-            sessionStorage.setItem('isHost', String(currentGame.isHost));
+            // Sauvegarder les données de session : gameId+token+isHost permettent de reprendre
+            // la session (resumeGame) sur chaque page suivante sans nouvelle poignée de main
+            // serveur — l'état vit dans Postgres, pas dans la mémoire d'un process.
+            const { gameId, token, isHost } = getSessionInfo();
+            if (!gameId || !token) return;
+            sessionStorage.setItem('gameId', gameId);
+            sessionStorage.setItem('multiplayerToken', token);
+            sessionStorage.setItem('isHost', String(isHost));
             sessionStorage.setItem('playerName', playerName);
             if (opponentName) {
                 sessionStorage.setItem('opponentName', opponentName);
@@ -68,7 +74,7 @@ export default function OnlinePage() {
 
             router.push('/online/select');
         }
-    }, [currentGame, playerName, opponentName, router]);
+    }, [currentGame, playerName, opponentName, router, getSessionInfo]);
 
     const handleJoinQueue = (ranked: boolean = true) => {
         if (!playerName.trim()) {
