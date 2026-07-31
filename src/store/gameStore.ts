@@ -103,6 +103,7 @@ interface GameStore {
     isMyTurn: () => boolean;
     canPlayCard: (card: SpellCard) => boolean;
     getRequiredTargetCount: (card: SpellCard) => number;
+    getMaxSelectableTargets: (card: SpellCard) => number;
     needsLightningChoice: (card: SpellCard) => boolean;  // Vérifier si la carte nécessite un choix foudre
     needsElementChoice: (card: SpellCard) => boolean;  // Vérifier si la carte nécessite un choix d'élément
     setSelectedElement: (element: import('@/types/cards').Element) => void;  // Choisir l'élément
@@ -409,7 +410,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     toggleTargetGod: (god) => {
-        const { selectedTargetGods, requiredTargets } = get();
+        const { selectedTargetGods, requiredTargets, engine, selectedCard } = get();
+
+        // Respecter la provocation (taunt) : si un ennemi provocateur est vivant, un effet à
+        // cible ennemie unique ne peut viser QUE lui. getValidTargets() portait déjà cette
+        // logique côté moteur (utilisée par l'IA) mais rien ne l'appliquait côté joueur — on
+        // pouvait donc cliquer n'importe quel ennemi et ignorer complètement le provocateur.
+        if (engine && selectedCard) {
+            const targetType = selectedCard.effects.find(e =>
+                e.target === 'enemy_god' || e.target === 'ally_god' || e.target === 'any_god' || e.target === 'dead_ally_god'
+            )?.target;
+            if (targetType) {
+                const isMultiTarget = requiredTargets > 1;
+                const validTargets = engine.getValidTargets(targetType, isMultiTarget);
+                const isAlreadySelectedTarget = selectedTargetGods.some(g => g.card.id === god.card.id);
+                // On laisse toujours désélectionner une cible déjà choisie, même si elle ne
+                // serait plus valide entre-temps ; seul l'AJOUT d'une nouvelle cible est filtré.
+                if (!isAlreadySelectedTarget && !validTargets.some(g => g.card.id === god.card.id)) {
+                    return;
+                }
+            }
+        }
 
         // Si déjà sélectionné, on retire
         const isAlreadySelected = selectedTargetGods.some(g => g.card.id === god.card.id);
@@ -445,6 +466,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
             }
         }
         return count;
+    },
+
+    // Nombre de cibles DISTINCTES réellement sélectionnables pour cette carte en l'état actuel
+    // du plateau (peut être < getRequiredTargetCount quand il ne reste par ex. plus qu'un seul
+    // ennemi vivant pour un sort qui en réclame 2) : sert à ne pas bloquer le joueur dans un
+    // mode ciblage qu'il ne pourra jamais compléter faute d'assez de cibles distinctes.
+    getMaxSelectableTargets: (card) => {
+        const { engine } = get();
+        if (!engine) return 0;
+        const nominal = get().getRequiredTargetCount(card);
+        if (nominal === 0) return 0;
+        const targetType = card.effects.find(e =>
+            e.target === 'enemy_god' || e.target === 'ally_god' || e.target === 'any_god' || e.target === 'dead_ally_god'
+        )?.target;
+        // Pas de type de cible "classique" identifié (ex: vision_tartare, sans champ target
+        // dédié) : on ne sait pas calculer un nombre de cibles valides distinct, on garde le
+        // comportement d'origine plutôt que de risquer de bloquer un autre sort par erreur.
+        if (!targetType) return nominal;
+        const isMultiTarget = nominal > 1;
+        const valid = engine.getValidTargets(targetType, isMultiTarget);
+        return Math.min(nominal, valid.length);
     },
 
     needsLightningChoice: (card: SpellCard): boolean => {

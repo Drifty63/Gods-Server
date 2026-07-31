@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { ArenaArea } from './components/ArenaArea';
 import { HandArea } from './components/HandArea';
-import { EnergyOrb } from './components/EnergyOrb';
 import { DeckAndDiscard } from './components/DeckAndDiscard';
 import { SpellCardUI } from './components/SpellCardUI';
+import { CardFlight, CardFlightData } from './components/CardFlight';
 import { SpellCard, GodState } from '@/types/cards';
 import { getReadableSpellDescription } from '@/data/spellDescriptions';
 import styles from './GameBoard.module.css';
@@ -44,6 +44,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         endTurn,
         isSelectingTarget,
         requiredTargets,
+        getMaxSelectableTargets,
         startTargetSelection,
         playerId,
         playAITurn,
@@ -101,8 +102,25 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     const [lastOpponentCard, setLastOpponentCard] = useState<SpellCard | null>(null);
     const [previousDiscardCount, setPreviousDiscardCount] = useState<number>(0);
     const [viewingDiscard, setViewingDiscard] = useState<SpellCard[] | null>(null);
+    const [zoomedDiscardCard, setZoomedDiscardCard] = useState<SpellCard | null>(null);
     const [isLogOpen, setIsLogOpen] = useState(false);
     const [hoveredCard, setHoveredCard] = useState<SpellCard | null>(null);
+    const [cardFlight, setCardFlight] = useState<CardFlightData | null>(null);
+    const flightIdRef = useRef(0);
+
+    // Anime une carte qui quitte la main et se pose sur le dieu qui la lance : capture les
+    // positions DOM avant/après (technique FLIP), voir CardFlight.tsx.
+    const triggerCardFlight = (card: SpellCard, fromEl: Element | null, toEl: Element | null) => {
+        if (!fromEl || !toEl) return;
+        flightIdRef.current += 1;
+        setCardFlight({
+            id: flightIdRef.current,
+            imageUrl: card.imageUrl,
+            name: card.name,
+            from: fromEl.getBoundingClientRect(),
+            to: toEl.getBoundingClientRect(),
+        });
+    };
 
 
     // Safety checks
@@ -135,15 +153,36 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         if (!opponent) return;
         
         if (opponent.discard.length > previousDiscardCount) {
+            // La défausse adverse grandit dans 3 cas : l'adversaire JOUE une carte, l'adversaire
+            // la DÉFAUSSE pour gagner de l'énergie, OU un de NOS sorts (ex: Grande Vague, Colère
+            // de Poséidon) envoie des cartes de sa main/deck dans SA défausse — seul le premier
+            // cas doit être annoncé. hasPlayedCard seul ne suffit pas : il reste "true" tout le
+            // tour suivant une fois posé (remis à false seulement au DÉBUT du tour de son
+            // propriétaire, pas à la fin), donc si l'IA avait joué à son tour précédent, il
+            // restait vrai pendant tout notre tour et déclenchait à tort "ADVERSAIRE JOUE" quand
+            // un de nos sorts la faisait défausser. Il faut donc aussi vérifier que c'est
+            // effectivement SON tour en ce moment.
+            const isOpponentsTurn = gameState.currentPlayerId === opponent.id;
+            if (!isOpponentsTurn || !opponent.hasPlayedCard) {
+                setPreviousDiscardCount(opponent.discard.length);
+                return;
+            }
+
             // New card added to opponent's discard pile
             const card = opponent.discard[opponent.discard.length - 1];
             setLastOpponentCard(card);
-            
+
+            // Anime la carte adverse depuis sa main (approximée par le conteneur, la carte
+            // individuelle a déjà disparu du DOM à ce stade) vers le dieu qui vient de la lancer.
+            const handEl = document.querySelector('[data-hand-area="opponent"]');
+            const casterEl = document.querySelector(`[data-god-key="opponent-${card.godId}"]`);
+            triggerCardFlight(card, handEl, casterEl);
+
             // Clear the notification after 4 seconds
             const timer = setTimeout(() => {
                 setLastOpponentCard(null);
             }, 4000);
-            
+
             return () => clearTimeout(timer);
         }
         setPreviousDiscardCount(opponent.discard.length);
@@ -191,8 +230,34 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
     const handleGodTarget = (god: GodState) => {
         if (!myTurn || !isSelectingTarget) return;
-        
+
         toggleTargetGod(god);
+    };
+
+    // Cliquer n'importe où en dehors de la main / du panneau de détail / d'un bouton désélectionne
+    // la carte en cours, sans avoir à recliquer dessus. On lit l'état frais du store (plutôt que
+    // les valeurs de ce rendu, potentiellement obsolètes) car un clic sur "CIBLER" par exemple
+    // vient tout juste d'ouvrir la sélection de cible au moment même où cet événement remonte —
+    // il ne faut surtout pas annuler ce choix qui vient de se faire.
+    const handleBoardBackgroundClick = (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('button') || target.closest(`.${styles.handArea}`) || target.closest(`.${styles.cardDetailPanel}`)) {
+            return;
+        }
+        const state = useGameStore.getState();
+        if (!state.selectedCard) return;
+        const choiceInProgress = state.isSelectingTarget
+            || state.isSelectingCards
+            || state.isDistributingHeal
+            || state.isShowingOptionalChoice
+            || state.isSelectingPlayer
+            || state.isSelectingDeadGod
+            || state.isSelectingGod
+            || state.isShowingZombieDamage
+            || state.isSelectingElement
+            || state.isSelectingLightningAction;
+        if (choiceInProgress) return;
+        state.selectCard(null);
     };
 
     const [playedCardPreview, setPlayedCardPreview] = useState<SpellCard | null>(null);
@@ -201,6 +266,18 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         if (!selectedCard) return;
         const cardBeingPlayed = selectedCard;
         const targetIds = selectedTargetGods.map(g => g.card.id);
+        // Complète jusqu'au nombre nominal de cibles en répétant la dernière choisie : le moteur
+        // applique chaque effet à cibles multiples positionnellement (1 cible par effet), donc un
+        // sort à 2 cibles n'appliquerait son 2e effet à personne si un seul ennemi était en vie et
+        // sélectionnable — ce même dieu encaisse alors les deux effets, plutôt qu'un blocage.
+        while (targetIds.length > 0 && targetIds.length < requiredTargets) {
+            targetIds.push(targetIds[targetIds.length - 1]);
+        }
+
+        // Capturées AVANT playCard() : une fois la carte réellement jouée, son élément DOM en
+        // main disparaît dès le prochain rendu.
+        const handEl = document.querySelector(`[data-hand-card-id="${cardBeingPlayed.id}"]`);
+        const casterEl = document.querySelector(`[data-god-key="player-${cardBeingPlayed.godId}"]`);
 
         const result = playCard(cardBeingPlayed.id, undefined, targetIds, lightningAction);
 
@@ -219,7 +296,8 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             return;
         }
 
-        // Succès réel : la carte a bien été jouée.
+        // Succès réel : la carte a bien été jouée — elle vole de la main jusqu'au dieu qui la lance.
+        triggerCardFlight(cardBeingPlayed, handEl, casterEl);
         setPlayedCardPreview(cardBeingPlayed);
         setTimeout(() => setPlayedCardPreview(null), 2000);
         setErrorMsg(null);
@@ -244,10 +322,21 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     const playerCasterGodId = selectedCard?.godId || playedCardPreview?.godId || null;
     const opponentCasterGodId = lastOpponentCard?.godId || null;
 
+    // Nombre de cibles réellement à sélectionner avant que CONFIRMER apparaisse : peut être
+    // inférieur au nombre nominal (requiredTargets) s'il ne reste pas assez de cibles distinctes
+    // valides (ex: un sort à 2 cibles ennemies alors qu'un seul ennemi est encore en vie) —
+    // sinon le joueur restait bloqué en mode ciblage sans jamais pouvoir confirmer.
+    const maxSelectableTargets = selectedCard ? getMaxSelectableTargets(selectedCard) : requiredTargets;
+
     return (
-        <div className={styles.gameBoard}>
+        <div className={styles.gameBoard} onClick={handleBoardBackgroundClick}>
             {/* BACKGROUND EFFECTS */}
+            <div className={styles.terrainTexture} />
             <div className={styles.bgParticles} />
+            <div className={styles.vignette} />
+
+            {/* CARTE JOUÉE : vol animé de la main jusqu'au dieu qui la lance */}
+            <CardFlight flight={cardFlight} onComplete={() => setCardFlight(null)} />
 
             {/* ERROR TOAST */}
             {errorMsg && (
@@ -258,34 +347,22 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
             {/* OPPONENT ACTION PREVIEW (RIGHT) */}
             {lastOpponentCard && (
-                <div className={styles.playedCardPreview} style={{ borderColor: 'var(--color-danger)' }}>
+                <div className={`${styles.playedCardPreview} ${styles.playedCardPreviewOpponent}`} style={{ borderColor: 'var(--color-danger)' }}>
                     <div className={styles.previewTitle} style={{ color: 'var(--color-danger)', textShadow: '0 0 15px rgba(239, 68, 68, 0.5)' }}>
                         ADVERSAIRE JOUE
                     </div>
-                    <div className={styles.detailCardImage}>
-                        <img src={lastOpponentCard.imageUrl} alt={lastOpponentCard.name} />
-                    </div>
-                    <div className={styles.previewContent}>
-                        <h3 className={styles.previewName}>{lastOpponentCard.name}</h3>
-                        <p className={styles.previewDesc}>{getReadableSpellDescription(lastOpponentCard)}</p>
+                    <div className={styles.previewBody}>
+                        <div className={styles.previewContent}>
+                            <h3 className={styles.previewName}>{lastOpponentCard.name}</h3>
+                            <p className={styles.previewDesc}>{getReadableSpellDescription(lastOpponentCard)}</p>
+                        </div>
+                        <div className={styles.detailCardImage}>
+                            <img src={lastOpponentCard.imageUrl} alt={lastOpponentCard.name} />
+                        </div>
                     </div>
                 </div>
             )}
 
-
-            {/* TURN INDICATOR */}
-            <div className={`${styles.turnIndicator} ${myTurn ? styles.turnMyTurn : styles.turnEnemyTurn}`}>
-                {myTurn ? 'Vos Dieux Attendent Vos Ordres' : 'Tour de l\'Adversaire'}
-            </div>
-
-            {/* JOURNAL DE COMBAT */}
-            <button
-                className={styles.logButton}
-                onClick={() => setIsLogOpen(true)}
-                aria-label="Journal de combat"
-            >
-                📜
-            </button>
 
             {/* CARD DETAIL PANEL (Master Duel Style - LEFT) */}
             {(selectedCard || hoveredCard) && (
@@ -320,16 +397,18 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                 </div>
             )}
 
-            {/* PLAYED CARD PREVIEW (RIGHT) */}
+            {/* PLAYED CARD PREVIEW (BAS, entre le bouton fin de tour et le cadre deck/défausse/énergie) */}
             {playedCardPreview && (
-                <div className={styles.playedCardPreview}>
+                <div className={`${styles.playedCardPreview} ${styles.playedCardPreviewSelf}`}>
                     <div className={styles.previewTitle}>SORT LANCÉ</div>
-                    <div className={styles.detailCardImage}>
-                        <img src={playedCardPreview.imageUrl} alt={playedCardPreview.name} />
-                    </div>
-                    <div className={styles.previewContent}>
-                        <h3 className={styles.previewName}>{playedCardPreview.name}</h3>
-                        <p className={styles.previewDesc}>{getReadableSpellDescription(playedCardPreview)}</p>
+                    <div className={styles.previewBody}>
+                        <div className={styles.previewContent}>
+                            <h3 className={styles.previewName}>{playedCardPreview.name}</h3>
+                            <p className={styles.previewDesc}>{getReadableSpellDescription(playedCardPreview)}</p>
+                        </div>
+                        <div className={styles.detailCardImage}>
+                            <img src={playedCardPreview.imageUrl} alt={playedCardPreview.name} />
+                        </div>
                     </div>
                 </div>
             )}
@@ -347,7 +426,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             />
 
             {/* OPPONENT HAND */}
-            <div className={styles.handAreaOpponent}>
+            <div className={styles.handAreaOpponent} data-hand-area="opponent">
                 {opponent.hand.map((card, idx) => {
                     const angle = (idx - (opponent.hand.length - 1) / 2) * 5;
                     const isRevealedToMe = card.revealedToPlayerId === player.id;
@@ -368,13 +447,9 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                         </div>
                     );
                 })}
-                {/* Visual card count indicator */}
-                <div style={{ position: 'absolute', top: '90px', fontSize: '0.7rem', color: '#f59e0b', fontWeight: 'bold' }}>
-                    Main adverse ({opponent.hand.length})
-                </div>
             </div>
 
-            {/* ARENA */}
+            {/* ARENA (inclut la barre fin de tour / indicateur de tour / journal, entre les 2 rangées) */}
             <ArenaArea
                 player={player}
                 opponent={opponent}
@@ -382,6 +457,19 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                 onTargetGod={handleGodTarget}
                 playerCasterGodId={playerCasterGodId}
                 opponentCasterGodId={opponentCasterGodId}
+                myTurn={myTurn}
+                turnNumber={gameState.turnNumber}
+                onOpenLog={() => setIsLogOpen(true)}
+                onEndTurn={() => {
+                    if (myTurn) {
+                        const result = endTurn();
+                        if (!result.success) {
+                            setErrorMsg(result.message);
+                        } else if (onAction) {
+                            onAction({ type: 'end_turn' });
+                        }
+                    }
+                }}
             />
 
             {/* BOTTOM HUD */}
@@ -414,30 +502,13 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             )}
 
             {/* ACTION UI (Target Confirmation) */}
-            {isSelectingTarget && requiredTargets > 0 && selectedTargetGods.length === requiredTargets && (
+            {isSelectingTarget && requiredTargets > 0 && selectedTargetGods.length === maxSelectableTargets && (
                 <div style={{ position: 'absolute', bottom: '160px', left: '50%', transform: 'translateX(-50%)', zIndex: 500 }}>
                     <button className={styles.btnPremium} onClick={() => handlePlayConfirmed()}>
                         CONFIRMER {selectedCard?.name}
                     </button>
                 </div>
             )}
-
-            {/* ENERGY & END TURN */}
-            <EnergyOrb 
-                energy={player.energy} 
-                onClick={() => {
-                    if (myTurn) {
-                        const result = endTurn();
-                        if (!result.success) {
-                            setErrorMsg(result.message);
-                        } else {
-                            if (onAction) {
-                                onAction({ type: 'end_turn' });
-                            }
-                        }
-                    }
-                }} 
-            />
 
             {/* DISCARD VIEWER MODAL */}
             {viewingDiscard && (
@@ -446,15 +517,43 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                     backgroundColor: 'rgba(0, 0, 0, 0.85)', zIndex: 2000,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '16px', boxSizing: 'border-box'
-                }} onClick={() => setViewingDiscard(null)}>
+                }} onClick={() => { setViewingDiscard(null); setZoomedDiscardCard(null); }}>
                     <h2 style={{ color: 'white', marginBottom: '14px', fontFamily: 'var(--font-logo)', fontSize: 'clamp(1rem, 4vw, 1.3rem)' }}>Contenu de la Corbeille</h2>
 
                     {viewingDiscard.length === 0 ? (
                         <div style={{ color: '#94a3b8', fontSize: '1rem', fontStyle: 'italic' }}>Cette corbeille est vide.</div>
+                    ) : zoomedDiscardCard ? (
+                        // Vue détaillée d'une carte de la corbeille : même format que le panneau de
+                        // détail des cartes en main, pour pouvoir vraiment lire l'effet complet.
+                        <div
+                            className={styles.cardDetailPanel}
+                            style={{ position: 'relative', bottom: 'auto', maxHeight: 'none', width: 'min(360px, 100%)' }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className={styles.detailCardImage}>
+                                <img src={zoomedDiscardCard.imageUrl} alt={zoomedDiscardCard.name} />
+                            </div>
+                            <div className={styles.detailContent}>
+                                <h2 className={styles.detailName}>{zoomedDiscardCard.name}</h2>
+                                <div className={styles.detailType}><span>EFFET / DESCRIPTION:</span></div>
+                                <p className={styles.detailDescription}>{getReadableSpellDescription(zoomedDiscardCard)}</p>
+                                <div className={styles.detailType} style={{ marginTop: '10px' }}>
+                                    <span>COÛT: ⚡ {zoomedDiscardCard.energyCost} Énergie</span>
+                                </div>
+                                <button className={styles.btnPremium} style={{ marginTop: '12px' }} onClick={() => setZoomedDiscardCard(null)}>
+                                    ← Retour
+                                </button>
+                            </div>
+                        </div>
                     ) : (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', width: '100%', maxHeight: '65dvh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
                             {viewingDiscard.map((card, idx) => (
-                                <div key={idx} className={styles.spellCard} style={{ cursor: 'default', transform: 'none' }}>
+                                <div
+                                    key={idx}
+                                    className={styles.spellCard}
+                                    style={{ cursor: 'pointer', transform: 'none' }}
+                                    onClick={() => setZoomedDiscardCard(card)}
+                                >
                                     <div className={styles.spellCost}>{card.energyCost}</div>
                                     {card.imageUrl && <img src={card.imageUrl} alt={card.name} className={styles.spellImage} />}
                                     <div className={styles.spellTitle}>{card.name}</div>
@@ -463,7 +562,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                             ))}
                         </div>
                     )}
-                    <button className={styles.btnPremium} style={{ marginTop: '16px' }} onClick={() => setViewingDiscard(null)}>Fermer</button>
+                    <button className={styles.btnPremium} style={{ marginTop: '16px' }} onClick={() => { setViewingDiscard(null); setZoomedDiscardCard(null); }}>Fermer</button>
                 </div>
             )}
 

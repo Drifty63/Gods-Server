@@ -1,6 +1,7 @@
 import React from 'react';
 import { SpellCard } from '@/types/cards';
 import { getReadableSpellDescription } from '@/data/spellDescriptions';
+import { ELEMENT_COLORS } from '@/game-engine/ElementSystem';
 import styles from '../GameBoard.module.css';
 
 interface SpellCardUIProps {
@@ -23,22 +24,20 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
 }) => {
     if (isHidden) {
         return (
-            <div 
-                className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper}`} 
+            <div
+                className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper}`}
+                data-hand-card-id={card.id}
                 onClick={onClick}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
             >
-                <div className={styles.spellCardBack} style={{ 
-                    width: isMini ? '100px' : '140px', 
-                    height: isMini ? '140px' : '190px', 
-                    backgroundImage: 'url(/images/card-back.png)', 
-                    backgroundSize: 'cover', 
-                    backgroundPosition: 'center',
-                    border: isSelected ? '2px solid #f59e0b' : '1px solid rgba(255,255,255,0.2)',
-                    boxShadow: isSelected ? '0 0 30px rgba(245, 158, 11, 0.6)' : '0 4px 10px rgba(0,0,0,0.5)'
+                <div className={styles.spellCardBack} style={{
+                    width: isMini ? '100px' : '140px',
+                    height: isMini ? '140px' : '190px',
+                    border: isSelected ? '2px solid #f59e0b' : undefined,
+                    boxShadow: isSelected ? '0 0 30px rgba(245, 158, 11, 0.6)' : undefined
                 }}>
-                    <span style={{ opacity: 0 }}>G</span>
+                    <span className={styles.spellCardBackTitle}>GODS</span>
                 </div>
             </div>
         );
@@ -47,13 +46,15 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
     return (
         <div
             className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper} ${isSelected ? styles.wrapperSelected : ''} ${isDisabled ? styles.spellCardDisabled : ''}`}
+            data-hand-card-id={card.id}
             onClick={onClick}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
             <div className={`${styles.spellCard} ${isSelected ? styles.spellSelected : ''}`} style={{
-                padding: isMinimal ? '4px' : '8px'
-            }}>
+                padding: isMinimal ? '4px' : '8px',
+                '--element-color': ELEMENT_COLORS[card.element].primary,
+            } as React.CSSProperties}>
                 <div className={styles.spellCost}>{card.energyCost}</div>
                 {card.imageUrl && (
                     <img 

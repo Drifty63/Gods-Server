@@ -1,0 +1,43 @@
+.flightLayer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 500;
+}
+
+.flyingCard {
+    position: fixed;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 158, 11, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease-in 0.22s;
+    will-change: transform, opacity;
+}
+
+.flyingCard img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.landingBurst {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.9), rgba(245, 158, 11, 0) 70%);
+    opacity: 0;
+}
+
+.landingBurst.show {
+    animation: burstPop 0.42s ease-out forwards;
+}
+
+@keyframes burstPop {
+    0% { opacity: 0.85; transform: scale(1); }
+    100% { opacity: 0; transform: scale(16); }
+}

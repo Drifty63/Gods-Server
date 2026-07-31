@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GodState } from '@/types/cards';
 import { getStatusIcon } from '@/data/statusIcons';
+import { ELEMENT_COLORS } from '@/game-engine/ElementSystem';
 import styles from '../GameBoard.module.css';
 
 interface HeroCardProps {
@@ -10,6 +11,9 @@ interface HeroCardProps {
      *  l'adversaire) : mis en avant avec une bordure dorée distincte de la cible (rouge), pour
      *  qu'on comprenne d'un coup d'œil qui lance quoi. */
     isCaster?: boolean;
+    /** Identifiant stable (côté-préfixé, ex "player-zeus") utilisé pour retrouver cet élément
+     *  DOM via document.querySelector lors de l'animation de vol de carte (voir CardFlight). */
+    godKey?: string;
     onClick: () => void;
 }
 
@@ -19,7 +23,7 @@ interface Impact {
     amount: number;
 }
 
-export const HeroCard: React.FC<HeroCardProps> = ({ god, isTargeted, isCaster, onClick }) => {
+export const HeroCard: React.FC<HeroCardProps> = ({ god, isTargeted, isCaster, godKey, onClick }) => {
     const healthPercent = Math.max(0, (god.currentHealth / god.card.maxHealth) * 100);
 
     // Effet visuel temporaire (flash coloré + nombre flottant) quand le dieu prend des dégâts
@@ -56,9 +60,17 @@ export const HeroCard: React.FC<HeroCardProps> = ({ god, isTargeted, isCaster, o
         'darkness': '💀'
     };
 
+    // Contour coloré par élément (comme les autres jeux de cartes) : la couleur d'identité du
+    // dieu (son propre élément), pas sa faiblesse — cohérent avec ELEMENT_COLORS déjà utilisé en
+    // sélection d'équipe. Les états d'interaction (ciblé/lanceur/mort) restent prioritaires,
+    // portés par leurs propres classes CSS plus spécifiques.
+    const elementColor = ELEMENT_COLORS[god.card.element].primary;
+
     return (
         <div
             className={`${styles.heroCard} ${god.isDead ? styles.dead : ''} ${isTargeted ? styles.targeted : ''} ${isCaster ? styles.caster : ''}`}
+            data-god-key={godKey}
+            style={{ '--element-color': elementColor } as React.CSSProperties}
             onClick={onClick}
         >
             <div className={styles.elementBadge}>
@@ -90,6 +102,13 @@ export const HeroCard: React.FC<HeroCardProps> = ({ god, isTargeted, isCaster, o
                         {impact.kind === 'damage' ? '-' : '+'}{impact.amount}
                     </span>
                 </div>
+            )}
+
+            {/* Réticule de ciblage : rend explicite qu'un dieu est déjà retenu comme cible,
+             *  notamment en pleine sélection multi-cibles (en attente d'une 2e cible par ex.),
+             *  où la seule bordure rouge de .targeted pouvait passer inaperçue. */}
+            {isTargeted && (
+                <div className={styles.targetMarker}>🎯</div>
             )}
 
             <div className={styles.heroInfo}>
