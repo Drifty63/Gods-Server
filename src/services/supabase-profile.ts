@@ -29,6 +29,15 @@ export interface DailyQuestsData {
     lastResetDate: string;
 }
 
+export interface MailboxReward {
+    id: string;
+    title: string;
+    description: string;
+    ambroisie_reward: number;
+    claimed: boolean;
+    created_at: string;
+}
+
 export interface UserProfile {
     id: string;
     email: string;
@@ -417,6 +426,37 @@ export async function toggleFavoriteFriend(friendshipId: string): Promise<void> 
     const supabase = getSupabaseClient();
     const { error } = await supabase.rpc('toggle_favorite_friend', { p_friendship_id: friendshipId });
     if (error) throw error;
+}
+
+// =====================================
+// RÉCOMPENSES (boîte de cadeaux)
+// =====================================
+
+export async function getMailboxRewards(): Promise<MailboxReward[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+        .from('mailbox_rewards')
+        .select('id, title, description, ambroisie_reward, claimed, created_at')
+        .order('claimed', { ascending: true })
+        .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as MailboxReward[];
+}
+
+export async function claimMailboxReward(rewardId: string): Promise<{ success: boolean; message: string; ambroisie_reward: number }> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('claim_mailbox_reward', { p_reward_id: rewardId });
+    if (error) throw error;
+    const rows = (data ?? []) as { success: boolean; message: string; ambroisie_reward: number }[];
+    return rows[0] ?? { success: false, message: 'Erreur inconnue', ambroisie_reward: 0 };
+}
+
+export async function claimAllMailboxRewards(): Promise<{ success: boolean; total_ambroisie: number }> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('claim_all_mailbox_rewards');
+    if (error) throw error;
+    const rows = (data ?? []) as { success: boolean; total_ambroisie: number }[];
+    return rows[0] ?? { success: false, total_ambroisie: 0 };
 }
 
 export type { User };

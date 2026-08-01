@@ -5,17 +5,18 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest } from '@/services/supabase-profile';
+import {
+    getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest,
+    getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, MailboxReward,
+} from '@/services/supabase-profile';
 import styles from './GlobalUI.module.css';
 
-// Mock data pour les récompenses (sera remplacé plus tard)
-const MOCK_REWARDS = [
-    { id: 1, text: "Remerciement des développeurs.", timeLeft: "29j restant" },
-    { id: 2, text: "Récompense défi 'Aphrodite' combat 1/5.", timeLeft: "29j restant" },
-    { id: 3, text: "Récompense défi 'Zeus' combat 3/5.", timeLeft: "29j restant" },
-    { id: 4, text: "Récompense pour retard sur la maintenance.", timeLeft: "29j restant" },
-    { id: 5, text: "Récompense 1000 téléchargements.", timeLeft: "29j restant" },
-];
+function formatRewardDate(iso: string): string {
+    const days = Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
+    if (days <= 0) return "Aujourd'hui";
+    if (days === 1) return 'Hier';
+    return `Il y a ${days}j`;
+}
 
 export default function GlobalUI() {
     const pathname = usePathname();
@@ -30,6 +31,11 @@ export default function GlobalUI() {
     const [dailyQuests, setDailyQuests] = useState<DailyQuest[]>([]);
     const [questsLoading, setQuestsLoading] = useState(false);
     const [claimingQuest, setClaimingQuest] = useState<string | null>(null);
+
+    // États pour la boîte de récompenses
+    const [mailboxRewards, setMailboxRewards] = useState<MailboxReward[]>([]);
+    const [rewardsLoading, setRewardsLoading] = useState(false);
+    const [claimingReward, setClaimingReward] = useState<string | null>(null);
 
     // Chrono de réinitialisation des quêtes (temps jusqu'à minuit)
     const [timeUntilReset, setTimeUntilReset] = useState('');
@@ -135,6 +141,65 @@ export default function GlobalUI() {
 
     // Vérifier s'il y a des récompenses à réclamer
     const hasClaimableRewards = dailyQuests.some(q => q.progress >= q.target && !q.claimed);
+
+    // Charger la boîte de récompenses
+    const loadMailboxRewards = useCallback(async () => {
+        if (!user) return;
+        setRewardsLoading(true);
+        try {
+            const data = await getMailboxRewards();
+            setMailboxRewards(data);
+        } catch (error) {
+            console.error('Erreur chargement récompenses:', error);
+        } finally {
+            setRewardsLoading(false);
+        }
+    }, [user]);
+
+    // Charger la boîte de récompenses quand la modal s'ouvre
+    useEffect(() => {
+        if (showRewardsModal && user) {
+            loadMailboxRewards();
+        }
+    }, [showRewardsModal, user, loadMailboxRewards]);
+
+    // Réclamer une récompense de la boîte
+    const handleClaimMailboxReward = async (rewardId: string) => {
+        if (!user || claimingReward) return;
+        setClaimingReward(rewardId);
+        try {
+            const result = await claimMailboxReward(rewardId);
+            if (result.success) {
+                setMailboxRewards(prev => prev.map(r =>
+                    r.id === rewardId ? { ...r, claimed: true } : r
+                ));
+                await refreshProfile();
+            }
+        } catch (error) {
+            console.error('Erreur réclamation récompense:', error);
+        } finally {
+            setClaimingReward(null);
+        }
+    };
+
+    // Réclamer toutes les récompenses de la boîte
+    const handleClaimAllMailboxRewards = async () => {
+        if (!user || claimingReward) return;
+        setClaimingReward('all');
+        try {
+            const result = await claimAllMailboxRewards();
+            if (result.success) {
+                setMailboxRewards(prev => prev.map(r => ({ ...r, claimed: true })));
+                await refreshProfile();
+            }
+        } catch (error) {
+            console.error('Erreur réclamation récompenses:', error);
+        } finally {
+            setClaimingReward(null);
+        }
+    };
+
+    const hasClaimableMailboxRewards = mailboxRewards.some(r => !r.claimed);
 
     // Charger les volumes depuis localStorage au montage
     useEffect(() => {
@@ -415,27 +480,51 @@ export default function GlobalUI() {
                         <h2>Récompenses :</h2>
 
                         <div className={styles.rewardsList}>
-                            {MOCK_REWARDS.map((reward) => (
-                                <div key={reward.id} className={styles.rewardItem}>
-                                    <span className={styles.rewardIcon}>🎁</span>
-                                    <div className={styles.rewardInfo}>
-                                        <p className={styles.rewardText}>{reward.text}</p>
-                                        <div className={styles.rewardMetadata}>
-                                            <span className={styles.rewardTime}>{reward.timeLeft}</span>
-                                            <button className={styles.acceptButton}>Accepter</button>
+                            {rewardsLoading ? (
+                                <p className={styles.rewardText}>Chargement...</p>
+                            ) : mailboxRewards.length === 0 ? (
+                                <p className={styles.rewardText}>Aucune récompense pour le moment.</p>
+                            ) : (
+                                mailboxRewards.map((reward) => (
+                                    <div key={reward.id} className={styles.rewardItem}>
+                                        <span className={styles.rewardIcon}>🎁</span>
+                                        <div className={styles.rewardInfo}>
+                                            <p className={styles.rewardText}>
+                                                {reward.title} — {reward.description} (+{reward.ambroisie_reward} 🍯)
+                                            </p>
+                                            <div className={styles.rewardMetadata}>
+                                                <span className={styles.rewardTime}>{formatRewardDate(reward.created_at)}</span>
+                                                {reward.claimed ? (
+                                                    <button className={styles.acceptButton} disabled>✓ Récupéré</button>
+                                                ) : (
+                                                    <button
+                                                        className={styles.acceptButton}
+                                                        onClick={() => handleClaimMailboxReward(reward.id)}
+                                                        disabled={claimingReward !== null}
+                                                    >
+                                                        {claimingReward === reward.id ? '...' : 'Accepter'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
 
                         <div className={styles.rewardsFooter}>
                             <button className={styles.closeButton} onClick={closeRewardsModal}>
                                 Fermer
                             </button>
-                            <button className={styles.acceptAllButton}>
-                                Tout récupérer
-                            </button>
+                            {hasClaimableMailboxRewards && (
+                                <button
+                                    className={styles.acceptAllButton}
+                                    onClick={handleClaimAllMailboxRewards}
+                                    disabled={claimingReward !== null}
+                                >
+                                    {claimingReward === 'all' ? 'Récupération...' : 'Tout récupérer'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
