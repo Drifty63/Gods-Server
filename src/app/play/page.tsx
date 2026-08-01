@@ -17,32 +17,39 @@ function PlayContent() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>‹ Retour</Link>
-                <h1 className={styles.title}>JOUER</h1>
+                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                    <span aria-hidden="true">‹</span>
+                </Link>
+                <div className={styles.headerText}>
+                    <h1 className={styles.title}>Jouer</h1>
+                    <p className={styles.subtitle}>Choisissez votre mode de combat</p>
+                </div>
             </header>
 
             {/* Modes de jeu */}
             <div className={styles.content}>
                 {/* Section PvP */}
-                <h2 className={styles.sectionTitle}>⚔️ Modes Compétitifs</h2>
+                <h2 className={styles.sectionTitle}>
+                    <span className={styles.sectionIcon}>⚔️</span> Modes Compétitifs
+                </h2>
                 <div className={styles.modesGrid}>
                     {/* Mode Duel - NOUVEAU */}
                     <Link href="/duel" className={`${styles.modeCard} ${styles.featured}`}>
-                        <div className={styles.newBadge}>NOUVEAU</div>
+                        <div className={styles.newBadge}>Nouveau</div>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>⚔️</span>
                         </div>
                         <div className={styles.modeInfo}>
                             <h2 className={styles.modeTitle}>Duel</h2>
                             <p className={styles.modeDescription}>
-                                PvP en ligne • Budget 13 points • Parties classées
+                                PvP classé • Budget 13 points
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
                     </Link>
 
                     {/* Mode En Ligne */}
-                    <Link href="/online" className={styles.modeCard}>
+                    <Link href="/online" className={`${styles.modeCard} ${styles.accentBlue}`}>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>🌐</span>
                         </div>
@@ -57,18 +64,20 @@ function PlayContent() {
                 </div>
 
                 {/* Section Solo */}
-                <h2 className={styles.sectionTitle}>🎮 Modes Solo</h2>
+                <h2 className={styles.sectionTitle}>
+                    <span className={styles.sectionIcon}>🎮</span> Modes Solo
+                </h2>
                 <div className={styles.modesGrid}>
                     {/* Mode Ascension - NOUVEAU */}
                     <Link href="/ascension" className={`${styles.modeCard} ${styles.featured}`}>
-                        <div className={styles.newBadge}>NOUVEAU</div>
+                        <div className={styles.newBadge}>Nouveau</div>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>🏔️</span>
                         </div>
                         <div className={styles.modeInfo}>
                             <h2 className={styles.modeTitle}>Ascension</h2>
                             <p className={styles.modeDescription}>
-                                Mode survie • 15 étages • Pas de heal
+                                15 étages • Aucun soin autorisé
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
@@ -82,7 +91,7 @@ function PlayContent() {
                         <div className={styles.modeInfo}>
                             <h2 className={styles.modeTitle}>Histoire</h2>
                             <p className={styles.modeDescription}>
-                                Découvrez l'épopée des dieux
+                                Découvrez l&apos;épopée des dieux
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
@@ -96,7 +105,7 @@ function PlayContent() {
                         <div className={styles.modeInfo}>
                             <h2 className={styles.modeTitle}>Entraînement</h2>
                             <p className={styles.modeDescription}>
-                                Affrontez l'IA
+                                Affrontez l&apos;IA
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>
@@ -104,7 +113,9 @@ function PlayContent() {
                 </div>
 
                 {/* Section Autres */}
-                <h2 className={styles.sectionTitle}>📚 Autres</h2>
+                <h2 className={styles.sectionTitle}>
+                    <span className={styles.sectionIcon}>📚</span> Autres
+                </h2>
                 <div className={styles.modesGrid}>
                     {/* Mode Tutoriel */}
                     <Link href="/rules" className={styles.modeCard}>
