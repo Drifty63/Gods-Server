@@ -559,6 +559,49 @@
     font-size: 1.1rem;
 }
 
+/* Quêtes et récompenses : même style/taille que .settingsButton, mais côté droit sous
+ * .currencyDisplay (empilés verticalement, pour ne pas empiéter sur le titre centré). */
+.questsButton,
+.rewardsButton {
+    position: fixed;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    backdrop-filter: blur(8px);
+    z-index: 900;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    animation: fadeIn 0.6s ease forwards;
+}
+
+.questsButton:hover,
+.questsButton:active,
+.rewardsButton:hover,
+.rewardsButton:active {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold-divine);
+    transform: scale(1.06);
+}
+
+.questsButton .navIcon,
+.rewardsButton .navIcon {
+    font-size: 1.1rem;
+}
+
+.questsButton {
+    top: calc(max(10px, env(safe-area-inset-top)) + 50px);
+}
+
+.rewardsButton {
+    top: calc(max(10px, env(safe-area-inset-top)) + 100px);
+}
+
 /* ================================
    MODAL DE JEU
    ================================ */

@@ -186,6 +186,15 @@ function HomeContent() {
         <span className={styles.navIcon}>⚙️</span>
       </button>
 
+      {/* Quêtes et récompenses en haut à droite, sous le compteur d'ambroisie (même
+          contrainte que .settingsButton/.currencyDisplay : en dehors de <nav>). */}
+      <button className={styles.questsButton} onClick={handleQuestsClick} aria-label="Quêtes journalières">
+        <span className={styles.navIcon}>📜</span>
+      </button>
+      <button className={styles.rewardsButton} onClick={handleRewardsClick} aria-label="Récompenses">
+        <span className={styles.navIcon}>🎁</span>
+      </button>
+
       {/* Barre de navigation en bas */}
       <nav className={styles.bottomNav}>
         <Link href="/shop" className={styles.navItem}>
