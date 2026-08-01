@@ -1101,4 +1101,88 @@
 .detailContent { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
 .detailName { font-family: var(--font-logo); color: var(--gold-divine); font-size: clamp(0.75rem, 3vw, 0.95rem); margin: 0; }
 .detailType { font-size: clamp(0.55rem, 2vw, 0.65rem); color: #94a3b8; font-weight: bold; }
+
+/* --- ÉCRAN DE FIN DE PARTIE (victoire/défaite) --- */
+.resultScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 28px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-glow);
+  backdrop-filter: blur(12px);
+  animation: resultPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 90vw;
+}
+
+@keyframes resultPopIn {
+  from { opacity: 0; transform: scale(0.85) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.resultIcon {
+  font-size: clamp(3rem, 12vw, 4.5rem);
+  filter: drop-shadow(0 0 20px currentColor);
+}
+
+.resultTitle {
+  font-family: var(--font-logo);
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.resultVictory .resultTitle,
+.resultVictory .resultIcon { color: var(--color-success); }
+.resultDefeat .resultTitle,
+.resultDefeat .resultIcon { color: var(--color-danger); }
+
+.resultSubtitle {
+  font-family: var(--font-ui);
+  color: var(--color-text-dim);
+  font-size: clamp(0.85rem, 3.5vw, 1rem);
+  text-align: center;
+  margin: 0;
+}
+
+.resultActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.resultButtonPrimary,
+.resultButtonSecondary {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: clamp(0.8rem, 3.2vw, 0.95rem);
+  padding: 12px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.resultButtonPrimary:active,
+.resultButtonSecondary:active { transform: scale(0.96); }
+
+.resultButtonPrimary {
+  background: linear-gradient(135deg, var(--color-accent), #d97706);
+  color: #1c1006;
+  border: none;
+}
+
+.resultButtonSecondary {
+  background: var(--glass-bg);
+  color: var(--color-text-main);
+}
+
+.resultButtonPrimary:hover,
+.resultButtonSecondary:hover { filter: brightness(1.1); }
 .detailDescription { font-size: clamp(0.6rem, 2.2vw, 0.72rem); color: #fff; line-height: 1.4; margin-top: 3px; }

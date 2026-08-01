@@ -26,9 +26,13 @@ Deno.serve(async (req: Request) => {
         const otherSide = side === 'host' ? 'guest' : 'host';
         const firstPlayer = goFirst ? side : otherSide;
 
+        // Effacer rps_result/rps_winner en même temps que le changement de statut : sinon la clé
+        // de dédoublonnage côté client (`${status}:${JSON.stringify(rps_result)}`) change à cause
+        // du statut même si rps_result est identique, ce qui refaisait croire à une nouvelle
+        // révélation RPS et relançait un second écran "Tu as gagné" juste après la redirection.
         const { error: updateErr } = await admin
             .from('games')
-            .update({ first_player: firstPlayer, status: 'playing' })
+            .update({ first_player: firstPlayer, status: 'playing', rps_result: null, rps_winner: null })
             .eq('id', gameId);
         if (updateErr) return jsonResponse({ error: updateErr.message }, 500);
 

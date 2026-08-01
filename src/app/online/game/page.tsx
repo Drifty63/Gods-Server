@@ -175,7 +175,7 @@ export default function OnlineGamePage() {
                 </button>
             </div>
 
-            <GameBoard onAction={(action) => {
+            <GameBoard isOnlineMode onAction={(action) => {
                 sendAction({
                     type: action.type as any,
                     payload: action.payload as Record<string, unknown>

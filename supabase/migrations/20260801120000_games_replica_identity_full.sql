@@ -1,0 +1,22 @@
+-- ============================================================
+-- Fix: Realtime UPDATE payloads intermittently missing host_gods/guest_gods.
+--
+-- host_gods/guest_gods are large jsonb arrays (god objects with long flavor text),
+-- so Postgres stores them out-of-line (TOAST). With the default REPLICA IDENTITY,
+-- logical replication (which powers Realtime) omits UNCHANGED TOASTed columns from
+-- the "new row" image of an UPDATE that doesn't touch them -- e.g. rps-choice or
+-- rps-decide only ever set rps_*/status/first_player, never host_gods/guest_gods.
+-- The client received those events with host_gods/guest_gods as null even though the
+-- actual row still had them, and since applyGameRow()'s `row.status === 'playing' &&
+-- row.host_gods && row.guest_gods && row.first_player` guard requires both, the RPS
+-- winner's decision would silently never produce gameStartData and the game would
+-- appear to hang right at "qui commence" -- this was the real root cause behind the
+-- "ça bloque au choix de tour" report, confirmed by instrumenting applyGameRow() and
+-- observing host_gods/guest_gods flip between present/missing across consecutive
+-- Realtime events for the same persisted row.
+--
+-- REPLICA IDENTITY FULL forces Postgres to include the full old+new row image (all
+-- columns, TOASTed or not) in every UPDATE's replication stream, closing this gap.
+-- ============================================================
+
+alter table public.games replica identity full;

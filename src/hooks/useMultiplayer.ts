@@ -221,33 +221,50 @@ export function useMultiplayer() {
     const subscribeToQueue = useCallback((queueId: string) => {
         const supabase = getSupabaseClient();
         const channel = supabase.channel(`queue:${queueId}`);
+
+        const handleQueueRow = async (row: { matched_game_id: string | null }) => {
+            if (!row.matched_game_id) return;
+
+            const { data } = await supabase.functions.invoke('claim-queue-token', {
+                body: { queueId },
+            });
+            if (!data?.token) return;
+
+            if (heartbeatRef.current) {
+                clearInterval(heartbeatRef.current);
+                heartbeatRef.current = null;
+            }
+            supabase.removeChannel(channel);
+            queueChannelRef.current = null;
+            queueIdRef.current = null;
+            setIsInQueue(false);
+            setQueueStatus(null);
+            setOpponentName(data.isHost ? data.guestName || null : data.hostName || null);
+            await attachToGame(data.gameId, data.token, data.isHost);
+        };
+
         channel
             .on(
                 'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'matchmaking_queue', filter: `id=eq.${queueId}` },
-                async (payload) => {
-                    const row = payload.new as { matched_game_id: string | null };
-                    if (!row.matched_game_id) return;
-
-                    const { data } = await supabase.functions.invoke('claim-queue-token', {
-                        body: { queueId },
-                    });
-                    if (!data?.token) return;
-
-                    if (heartbeatRef.current) {
-                        clearInterval(heartbeatRef.current);
-                        heartbeatRef.current = null;
-                    }
-                    supabase.removeChannel(channel);
-                    queueChannelRef.current = null;
-                    queueIdRef.current = null;
-                    setIsInQueue(false);
-                    setQueueStatus(null);
-                    setOpponentName(data.isHost ? data.guestName || null : data.hostName || null);
-                    await attachToGame(data.gameId, data.token, data.isHost);
-                }
+                (payload) => handleQueueRow(payload.new as { matched_game_id: string | null })
             )
-            .subscribe();
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    // Rattrapage : le trigger de pairage (try_pair_matchmaking) tourne de façon
+                    // synchrone dans la MÊME transaction que l'INSERT qui vient de créer cette
+                    // ligne -- pour le second joueur à rejoindre (celui dont l'INSERT déclenche
+                    // l'appariement), le pairage peut donc déjà avoir eu lieu avant que cet
+                    // abonnement Realtime n'existe, et l'UPDATE ne sera alors jamais reçu. Même
+                    // pattern de rattrapage que attachToGame.
+                    const { data: freshRow } = await supabase
+                        .from('matchmaking_queue')
+                        .select('matched_game_id')
+                        .eq('id', queueId)
+                        .single();
+                    if (freshRow) await handleQueueRow(freshRow);
+                }
+            });
         queueChannelRef.current = channel;
     }, [attachToGame]);
 

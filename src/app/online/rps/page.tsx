@@ -15,6 +15,8 @@ export default function OnlineRpsPage() {
     const router = useRouter();
     const {
         isConnected,
+        error,
+        clearError,
         currentGame,
         opponentName,
         rpsPhase,
@@ -118,6 +120,13 @@ export default function OnlineRpsPage() {
                 <p className={styles.subtitle}>
                     Pierre - Feuille - Ciseaux contre <span className={styles.opponentName}>{displayOpponentName}</span>
                 </p>
+
+                {error && (
+                    <div className={styles.errorBanner}>
+                        <span>⚠️ {error}</span>
+                        <button onClick={clearError}>✕</button>
+                    </div>
+                )}
 
                 {/* Phase de choix */}
                 {rpsPhase === 'choosing' && !hasChosen && (

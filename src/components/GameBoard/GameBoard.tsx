@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import { ArenaArea } from './components/ArenaArea';
 import { HandArea } from './components/HandArea';
@@ -29,6 +30,8 @@ interface GameBoardProps {
 }
 
 export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardProps) {
+    const router = useRouter();
+
     // --- STORE BOUNDARIES ---
     const {
         gameState,
@@ -123,12 +126,39 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     };
 
 
+    // Fin de partie : écran de victoire/défaite (auparavant un simple texte "Partie Terminée"
+    // sans suite possible, ce qui donnait l'impression que le jeu plantait à la fin d'un match).
+    if (gameState && gameState.status === 'finished') {
+        const isVictory = gameState.winnerId === playerId;
+        return (
+            <div className={styles.gameBoard} style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <div className={`${styles.resultScreen} ${isVictory ? styles.resultVictory : styles.resultDefeat}`}>
+                    <div className={styles.resultIcon}>{isVictory ? '🏆' : '💀'}</div>
+                    <h1 className={styles.resultTitle}>{isVictory ? 'VICTOIRE !' : 'DÉFAITE...'}</h1>
+                    <p className={styles.resultSubtitle}>
+                        {isVictory ? 'Vous avez triomphé sur le champ de bataille.' : 'Vos dieux sont tombés au combat.'}
+                    </p>
+                    {!isOnlineMode && (
+                        <div className={styles.resultActions}>
+                            <button className={styles.resultButtonPrimary} onClick={() => { window.location.href = '/game'; }}>
+                                🔄 Rejouer
+                            </button>
+                            <button className={styles.resultButtonSecondary} onClick={() => router.push('/')}>
+                                🏠 Retour à l&apos;accueil
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     // Safety checks
     if (!gameState || gameState.status !== 'playing') {
         return (
             <div className={styles.gameBoard} style={{ alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ fontSize: '2rem', textTransform: 'uppercase' }}>
-                    {gameState?.status === 'finished' ? 'Partie Terminée' : 'Chargement de L\'Olympe...'}
+                    Chargement de L&apos;Olympe...
                 </div>
             </div>
         );
