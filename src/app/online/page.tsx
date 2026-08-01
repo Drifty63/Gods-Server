@@ -123,10 +123,13 @@ export default function OnlinePage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>← Retour</Link>
-                <h1 className={styles.title}>🌐 Mode En Ligne</h1>
+                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                    <span aria-hidden="true">‹</span>
+                </Link>
+                <h1 className={styles.title}>🌐 En Ligne</h1>
                 <div className={`${styles.connectionStatus} ${isConnected ? styles.connected : styles.disconnected}`}>
-                    {isConnected ? '🟢 Connecté' : '🔴 Déconnecté'}
+                    <span className={styles.connectionDot} aria-hidden="true" />
+                    {isConnected ? 'Connecté' : 'Déconnecté'}
                 </div>
             </header>
 

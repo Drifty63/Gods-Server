@@ -173,8 +173,8 @@ export default function DeckPage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.pageHeader}>
-                <Link href="/" className={styles.backButton}>
-                    ‹ Retour
+                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                    <span aria-hidden="true">‹</span>
                 </Link>
                 <h1 className={styles.title}>Mes Decks</h1>
             </header>

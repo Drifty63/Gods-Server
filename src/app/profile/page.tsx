@@ -109,9 +109,11 @@ export default function ProfilePage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>‹ Retour</Link>
-                <h1 className={styles.title}>PROFIL</h1>
-                <button className={styles.settingsButton} onClick={handleSignOut}>🚪</button>
+                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                    <span aria-hidden="true">‹</span>
+                </Link>
+                <h1 className={styles.title}>Profil</h1>
+                <button className={styles.settingsButton} onClick={handleSignOut} aria-label="Se déconnecter">🚪</button>
             </header>
 
             <div className={styles.content}>

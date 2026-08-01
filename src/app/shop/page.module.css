@@ -11,45 +11,54 @@
     background-size: cover;
 }
 
-/* Header */
+/* Header : bouton retour circulaire + titre, avec une réserve d'espace à droite pour le
+ * bouton Options flottant global (fixed, top:20px right:20px, 44px) afin que le titre ne
+ * le chevauche jamais, même en toutes petites tailles d'écran. */
 .header {
     width: 100%;
     max-width: 800px;
-    margin: 0 auto 30px;
-    text-align: center;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     position: relative;
-    padding-top: 40px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 12px 72px 0 20px;
 }
 
 .backButton {
-    position: absolute;
-    left: 20px;
-    top: 45px;
-    background: none;
-    border: none;
-    color: var(--gold-divine);
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: transform 0.2s;
-    text-decoration: none;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-family: 'Cinzel', serif;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 12px;
+    color: var(--gold-divine);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
 }
 
-.backButton:hover {
-    transform: translateX(-5px);
+.backButton:hover,
+.backButton:active {
+    transform: translateX(-2px);
+    background: rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.5);
 }
 
 .title {
+    flex: 1;
+    min-width: 0;
     font-family: 'Cinzel', serif;
-    font-size: 2.5rem;
+    font-size: clamp(1.6rem, 7vw, 2.5rem);
     color: var(--gold-divine);
     text-transform: uppercase;
     text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    text-align: center;
     margin: 0;
 }
 
@@ -613,6 +622,19 @@
 
     .godsGrid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* La rangée onglets + solde ne tient pas sur une ligne avec 5 onglets sur mobile --
+     * on empile pour laisser aux onglets toute la largeur pour défiler proprement plutôt
+     * que de les faire chevaucher le badge d'ambroisie. */
+    .navRow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .goldBalance {
+        align-self: flex-end;
     }
 }
 

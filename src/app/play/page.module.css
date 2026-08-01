@@ -47,7 +47,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 60px 20px 4px;
+    padding: 8px 72px 20px 4px;
     position: relative;
     margin-bottom: 8px;
     z-index: 1;
@@ -288,7 +288,7 @@
 /* Very small phones */
 @media (max-width: 360px) {
     .header {
-        padding-right: 54px;
+        padding-right: 68px;
     }
 
     .title {

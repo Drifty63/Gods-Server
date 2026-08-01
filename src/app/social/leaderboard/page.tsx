@@ -40,8 +40,10 @@ export default function LeaderboardPage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/social" className={styles.backButton}>‹ Retour</Link>
-                <h1 className={styles.title}>CLASSEMENT</h1>
+                <Link href="/social" className={styles.backButton} aria-label="Retour">
+                    <span aria-hidden="true">‹</span>
+                </Link>
+                <h1 className={styles.title}>Classement</h1>
             </header>
 
             {/* Filtres */}

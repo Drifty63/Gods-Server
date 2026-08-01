@@ -6,38 +6,52 @@
     padding-bottom: 40px;
 }
 
-/* Header */
+/* Header : bouton retour circulaire + titre, avec une réserve d'espace à droite pour le
+ * bouton Options flottant global (fixed, top:20px right:20px, 44px). */
 .header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 30px 20px;
+    gap: 12px;
+    padding: 10px 56px 20px 0;
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .backButton {
-    position: absolute;
-    left: 20px;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--gold-divine);
     text-decoration: none;
-    font-family: 'Cinzel', serif;
-    font-size: 1.2rem;
-    transition: transform 0.2s;
+    font-size: 1.5rem;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-lg, 12px);
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.backButton:hover {
-    transform: translateX(-5px);
+.backButton:hover,
+.backButton:active {
+    transform: translateX(-2px);
+    background: rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.5);
 }
 
 .title {
+    flex: 1;
+    min-width: 0;
     font-family: 'Cinzel', serif;
-    font-size: 2.5rem;
+    font-size: clamp(1.4rem, 6vw, 2.5rem);
     color: var(--gold-divine);
     text-transform: uppercase;
     text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    text-align: center;
     margin: 0;
-    letter-spacing: 4px;
+    letter-spacing: 2px;
 }
 
 /* Filters */
@@ -88,6 +102,8 @@
     background: rgba(0, 0, 0, 0.3);
     border-radius: 16px;
     transition: all 0.3s ease;
+    min-width: 0;
+    flex: 1 1 0;
 }
 
 .podiumPosition.first {
@@ -359,12 +375,12 @@
 /* Responsive */
 @media (max-width: 600px) {
     .podium {
-        gap: 10px;
-        padding: 10px;
+        gap: 8px;
+        padding: 10px 0;
     }
 
     .podiumPosition {
-        padding: 15px;
+        padding: 10px 6px;
     }
 
     .podiumPosition.first {
@@ -372,17 +388,22 @@
     }
 
     .podiumAvatar {
-        width: 55px;
-        height: 55px;
+        width: 48px;
+        height: 48px;
     }
 
     .podiumAvatar.gold {
-        width: 70px;
-        height: 70px;
+        width: 60px;
+        height: 60px;
     }
 
-    .title {
-        font-size: 2rem;
+    .podiumName {
+        max-width: 72px;
+        font-size: 0.85rem;
+    }
+
+    .podiumRank {
+        font-size: 1.2rem;
     }
 
     .filters {

@@ -206,9 +206,10 @@ function StoryContent() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/play" className={styles.backButton}>‹ Retour</Link>
-                <h1 className={styles.title}>HISTOIRE</h1>
-                <div className={styles.headerSpacer} />
+                <Link href="/play" className={styles.backButton} aria-label="Retour">
+                    <span aria-hidden="true">‹</span>
+                </Link>
+                <h1 className={styles.title}>Histoire</h1>
             </header>
 
             {/* Sélection de chapitre ou histoire en cours */}

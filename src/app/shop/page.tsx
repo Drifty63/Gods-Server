@@ -200,7 +200,9 @@ export default function ShopPage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>‹ Retour</Link>
+                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                    <span aria-hidden="true">‹</span>
+                </Link>
                 <h1 className={styles.title}>Boutique</h1>
             </header>
 

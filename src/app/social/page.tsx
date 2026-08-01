@@ -81,8 +81,10 @@ export default function SocialPage() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton}>‹ Retour</Link>
-                <h1 className={styles.title}>SOCIAL</h1>
+                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                    <span aria-hidden="true">‹</span>
+                </Link>
+                <h1 className={styles.title}>Social</h1>
             </header>
 
             {/* Onglets */}

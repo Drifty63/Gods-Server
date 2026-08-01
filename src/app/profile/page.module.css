@@ -13,55 +13,63 @@
     background-attachment: fixed;
 }
 
-/* Header */
+/* Header : bouton retour + titre + déconnexion, tous en éléments flex normaux (plus
+ * d'absolute) pour ne jamais se chevaucher, avec une réserve à droite pour le bouton
+ * Options flottant global (fixed, top:20px right:20px, 44px). */
 .header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 30px 20px;
+    gap: 10px;
+    padding: 12px 72px 20px 16px;
     position: relative;
-    margin-bottom: 20px;
 }
 
-.backButton {
-    position: absolute;
-    left: 20px;
+.backButton,
+.settingsButton {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--gold-divine);
     text-decoration: none;
-    font-family: 'Cinzel', serif;
-    font-size: 1.2rem;
-    transition: transform 0.2s;
-    background: none;
-    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-lg, 12px);
     cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.backButton:hover,
+.backButton:active,
+.settingsButton:hover,
+.settingsButton:active {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.5);
 }
 
 .backButton:hover {
-    transform: translateX(-5px);
-}
-
-.title {
-    font-family: 'Cinzel', serif;
-    font-size: 2.5rem;
-    color: var(--gold-divine);
-    text-transform: uppercase;
-    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
-    margin: 0;
-    letter-spacing: 4px;
-}
-
-.settingsButton {
-    position: absolute;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: transform 0.2s;
+    transform: translateX(-2px);
 }
 
 .settingsButton:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
+}
+
+.title {
+    flex: 1;
+    min-width: 0;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 6.5vw, 2.5rem);
+    color: var(--gold-divine);
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+    text-align: center;
+    margin: 0;
+    letter-spacing: 2px;
 }
 
 /* Content */

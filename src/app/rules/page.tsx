@@ -22,8 +22,8 @@ export default function RulesPage() {
                 <section className={styles.section}>
                     <h2>🎯 But du Jeu</h2>
                     <p>
-                        Le but de <strong>GODS</strong> est de <strong>vaincre tous les dieux adverses</strong>
-                        en optimisant la gestion d'énergie et en exploitant les interactions élémentaires.
+                        Le but de <strong>GODS</strong> est de <strong>vaincre tous les dieux adverses</strong>{' '}
+                        en optimisant la gestion d&apos;énergie et en exploitant les interactions élémentaires.
                     </p>
                 </section>
 
@@ -164,7 +164,7 @@ export default function RulesPage() {
                     <h2>😫 Fatigue</h2>
                     <p>
                         Quand votre deck est vide, la défausse est mélangée pour former un nouveau deck.
-                        À chaque recyclage, tous vos dieux vivants subissent des <strong>dégâts croissants</strong>
+                        À chaque recyclage, tous vos dieux vivants subissent des <strong>dégâts croissants</strong>{' '}
                         (+1, +2, +3, etc.).
                     </p>
                 </section>

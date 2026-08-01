@@ -66,10 +66,12 @@ function AscensionContent() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/play" className={styles.backButton}>← Retour</Link>
-                <h1 className={styles.title}>🏔️ ASCENSION</h1>
+                <Link href="/play" className={styles.backButton} aria-label="Retour">
+                    ← Retour
+                </Link>
+                <h1 className={styles.title}>🏔️ Ascension</h1>
                 <div className={styles.bestFloor}>
-                    🏆 Meilleur: {bestFloor}
+                    🏆 {bestFloor}
                 </div>
             </header>
 

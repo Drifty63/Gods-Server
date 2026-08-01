@@ -121,11 +121,10 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false }: Te
         <div className={styles.container}>
             {/* Header avec bouton retour */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backLink}>
-                    ← Retour
+                <Link href="/" className={styles.backLink} aria-label="Retour à l'accueil">
+                    <span aria-hidden="true">‹</span>
                 </Link>
                 <h1 className={styles.title}>⚔️ Sélection des Équipes</h1>
-                <div className={styles.headerSpacer}></div>
             </header>
 
             <div className={styles.phaseIndicator}>
