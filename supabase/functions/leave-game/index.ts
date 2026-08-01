@@ -26,6 +26,18 @@ Deno.serve(async (req: Request) => {
 
         if (updated && updated.length > 0) {
             const game = updated[0];
+
+            // Même logique que report-match-result : compte pour les quêtes journalières même
+            // en cas d'abandon, classé ou non (grâce à la garde ci-dessus, ne se déclenche que
+            // pour un VRAI forfait -- si le résultat normal avait déjà été rapporté, updated
+            // serait vide et rien ici ne s'exécute deux fois).
+            if (game.host_user_id) {
+                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
+            }
+            if (game.guest_user_id) {
+                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+            }
+
             if (game.is_ranked && game.host_user_id && game.guest_user_id) {
                 const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
                 await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });

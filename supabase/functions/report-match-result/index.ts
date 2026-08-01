@@ -32,6 +32,17 @@ Deno.serve(async (req: Request) => {
         }
 
         const game = updated[0];
+
+        // Progression des quêtes journalières ("jouer une partie" / "gagner 3 parties") : pour
+        // toute partie en ligne terminée, classée ou non -- contrairement à la Ferveur/aux stats,
+        // volontairement pas limité au classé, sinon les parties amicales ne compteraient jamais.
+        if (game.host_user_id) {
+            await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
+        }
+        if (game.guest_user_id) {
+            await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+        }
+
         if (game.is_ranked && game.host_user_id && game.guest_user_id) {
             const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
             await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });

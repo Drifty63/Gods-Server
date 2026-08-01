@@ -275,7 +275,9 @@ export default function ShopPage() {
                         <div className={styles.subscriptionPrice}>
                             <span className={styles.priceValue}>4,99 €</span>
                         </div>
-                        <button className={styles.buyButton}>Acheter</button>
+                        <button className={`${styles.buyButton} ${styles.disabledButton}`} disabled>
+                            Bientôt disponible
+                        </button>
                     </div>
                 </section>
 
@@ -463,6 +465,9 @@ export default function ShopPage() {
                 {/* Section Ambroisie */}
                 <section id="section-ambroisie" className={styles.section}>
                     <h2 className={styles.sectionTitle}>🍯 Acheter de l'Ambroisie</h2>
+                    <p className={styles.comingSoonSubtext} style={{ marginTop: '-8px', marginBottom: '16px' }}>
+                        Le paiement par carte arrive bientôt. En attendant, gagnez de l&apos;ambroisie via les quêtes journalières !
+                    </p>
                     <div className={styles.ambroisieGrid}>
                         {AMBROISIE_PACKS.map((pack) => (
                             <div
@@ -482,7 +487,9 @@ export default function ShopPage() {
                                     </div>
                                 )}
                                 <div className={styles.realPrice}>{pack.price.toFixed(2).replace('.', ',')} €</div>
-                                <button className={styles.buyButton}>Acheter</button>
+                                <button className={`${styles.buyButton} ${styles.disabledButton}`} disabled>
+                                    Bientôt disponible
+                                </button>
                             </div>
                         ))}
                     </div>
