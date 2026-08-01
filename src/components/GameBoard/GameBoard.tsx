@@ -395,37 +395,60 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
 
             {/* CARD DETAIL PANEL (Master Duel Style - LEFT) */}
-            {(selectedCard || hoveredCard) && (
-                <div className={styles.cardDetailPanel}>
-                    <div className={styles.detailCardImage}>
-                        <img src={(selectedCard || hoveredCard)?.imageUrl} alt={(selectedCard || hoveredCard)?.name} />
-                    </div>
-                    <div className={styles.detailContent}>
-                        <h2 className={styles.detailName}>{(selectedCard || hoveredCard)?.name}</h2>
-                        <div className={styles.detailType}>
-                            <span>EFFET / DESCRIPTION:</span>
+            {(selectedCard || hoveredCard) && (() => {
+                const activeCard = selectedCard || hoveredCard;
+                const discardButton = selectedCard && myTurn && !isSelectingTarget && (
+                    <button
+                        className={styles.btnDiscard}
+                        onClick={(e) => { e.stopPropagation(); handleDiscard(); }}
+                    >
+                        🗑️ DÉFAUSSER
+                    </button>
+                );
+
+                // Carte cachée (effet Nyx) : le propriétaire peut la sélectionner pour la jouer
+                // ou la défausser à l'aveugle, mais ne doit voir ni son image, ni son nom, ni sa
+                // description -- avant ce correctif, ce panneau les affichait quand même.
+                if (activeCard?.isHiddenFromOwner) {
+                    return (
+                        <div className={styles.cardDetailPanel}>
+                            <div className={styles.detailCardImage}>
+                                <div className={styles.spellCardBack} style={{ width: '100%', height: '100%' }}>
+                                    <span className={styles.spellCardBackTitle}>GODS</span>
+                                </div>
+                            </div>
+                            <div className={styles.detailContent}>
+                                <h2 className={styles.detailName}>Carte cachée</h2>
+                                <p className={styles.detailDescription}>
+                                    Cette carte vous est inconnue (effet de Nyx). Vous pouvez la jouer ou la défausser à l&apos;aveugle, mais pas voir son effet à l&apos;avance.
+                                </p>
+                                {discardButton}
+                            </div>
                         </div>
-                        <p className={styles.detailDescription}>
-                            {(() => {
-                                const card = selectedCard || hoveredCard;
-                                return card ? getReadableSpellDescription(card) : '';
-                            })()}
-                        </p>
-                        <div className={styles.detailType} style={{ marginTop: '10px' }}>
-                            <span>COÛT: ⚡ {(selectedCard || hoveredCard)?.energyCost} Énergie</span>
+                    );
+                }
+
+                return (
+                    <div className={styles.cardDetailPanel}>
+                        <div className={styles.detailCardImage}>
+                            <img src={activeCard?.imageUrl} alt={activeCard?.name} />
                         </div>
-                        
-                        {selectedCard && myTurn && !isSelectingTarget && (
-                            <button 
-                                className={styles.btnDiscard} 
-                                onClick={(e) => { e.stopPropagation(); handleDiscard(); }}
-                            >
-                                🗑️ DÉFAUSSER
-                            </button>
-                        )}
+                        <div className={styles.detailContent}>
+                            <h2 className={styles.detailName}>{activeCard?.name}</h2>
+                            <div className={styles.detailType}>
+                                <span>EFFET / DESCRIPTION:</span>
+                            </div>
+                            <p className={styles.detailDescription}>
+                                {activeCard ? getReadableSpellDescription(activeCard) : ''}
+                            </p>
+                            <div className={styles.detailType} style={{ marginTop: '10px' }}>
+                                <span>COÛT: ⚡ {activeCard?.energyCost} Énergie</span>
+                            </div>
+                            {discardButton}
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* PLAYED CARD PREVIEW (BAS, entre le bouton fin de tour et le cadre deck/défausse/énergie) */}
             {playedCardPreview && (

@@ -68,8 +68,10 @@ export function canGodAct(god: GodState): boolean {
 /**
  * Applique les effets de fin de tour pour un joueur :
  * 1. Régénération (soin)
- * 2. Poison (dégâts, ignore le bouclier)
- * 3. Décrémente les durées et retire les statuts expirés
+ * 2. Décrémente les durées et retire les statuts expirés
+ *
+ * Le poison n'est PAS traité ici : il ne frappe que le dieu qui lance un sort, juste avant
+ * que celui-ci ne s'applique (voir applyPoisonOnCast, appelé depuis GameEngine.playCard).
  */
 export function tickStatusEffects(player: PlayerState, state: GameState): void {
     for (const god of player.gods) {
@@ -82,16 +84,7 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
             god.currentHealth = Math.min(god.currentHealth + healAmount, god.card.maxHealth);
         }
 
-        // 2. Poison (ignore le bouclier)
-        const poisonEffect = god.statusEffects.find(s => s.type === 'poison');
-        if (poisonEffect && poisonEffect.stacks > 0 && !god.isDead) {
-            god.currentHealth -= poisonEffect.stacks;
-            if (god.currentHealth <= 0) {
-                handleGodDeath(player, god, state);
-            }
-        }
-        
-        // 3. Zombie Tick (Perséphone) - Inflige 1 dégât chaque tour
+        // 2. Zombie Tick (Perséphone) - Inflige 1 dégât chaque tour
         if (god.isZombie && !god.isDead) {
             god.currentHealth -= 1;
             if (god.currentHealth <= 0) {
@@ -108,4 +101,24 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
             return true;
         });
     }
+}
+
+/**
+ * Poison : "Avant chaque sort, le dieu subit des dégâts égaux aux marques de poison" (voir
+ * /rules). Appelé depuis GameEngine.playCard juste avant que les effets du sort ne
+ * s'appliquent -- ignore le bouclier. Retourne true si ces dégâts tuent le dieu (le sort
+ * n'a alors pas lieu).
+ */
+export function applyPoisonOnCast(castingGod: GodState, player: PlayerState, state: GameState): boolean {
+    if (castingGod.isDead) return false;
+
+    const poisonEffect = castingGod.statusEffects.find(s => s.type === 'poison');
+    if (!poisonEffect || poisonEffect.stacks <= 0) return false;
+
+    castingGod.currentHealth -= poisonEffect.stacks;
+    if (castingGod.currentHealth <= 0) {
+        handleGodDeath(player, castingGod, state);
+        return true;
+    }
+    return false;
 }

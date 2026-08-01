@@ -114,7 +114,7 @@ export const STATUS_EFFECTS = {
     poison: {
         name: 'Poison',
         icon: '🧪',
-        description: 'Inflige X dégâts à la fin de chaque tour. Les dégâts ignorent le bouclier.',
+        description: 'Avant que le dieu ne lance un sort, il subit des dégâts égaux aux marques de poison. Les dégâts ignorent le bouclier.',
         stackable: true
     },
     shield: {
@@ -181,7 +181,8 @@ export const STATUS_EFFECTS = {
  * - OU Passer (ne rien faire)
  * 
  * Fin du tour:
- * 1. Application des effets de statut (poison, burn)
+ * 1. Régénération, effets de statut périodiques (le poison n'est PAS ici : il frappe
+ *    uniquement le dieu qui lance un sort, juste avant que celui-ci ne s'applique)
  * 2. Réduction de la durée des effets temporaires
  * 3. Passage au joueur suivant
  */

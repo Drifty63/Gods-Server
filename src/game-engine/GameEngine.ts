@@ -24,7 +24,7 @@ import {
 import type { Element } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
 import { dealDamage, healGod, handleGodDeath, addShield } from './DamageSystem';
-import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects } from './StatusSystem';
+import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects, applyPoisonOnCast } from './StatusSystem';
 
 // ─────────────────────────────────────────────
 // Constantes
@@ -707,12 +707,24 @@ export class GameEngine {
         // Payer et gagner l'énergie (plafonnée)
         player.energy = Math.min(player.energy - card.energyCost + card.energyGain, MAX_ENERGY);
 
+        player.hasPlayedCard = true;
+
+        // Poison : le dieu subit ses dégâts de poison juste avant de lancer son sort, et ça
+        // peut le tuer avant que le sort ne s'applique. Remplace l'ancien tick de poison en fin
+        // de tour, qui frappait tous les dieux empoisonnés du joueur chaque tour qu'ils lancent
+        // un sort ou non -- ce n'était pas la règle annoncée (voir /rules).
+        if (applyPoisonOnCast(castingGod, player, this.state)) {
+            player.hand.splice(cardIndex, 1);
+            cleanBlindCard(card);
+            player.discard.push(card);
+            logAction(this.state, player, `${castingGod.card.name} meurt du poison avant de lancer ${card.name}`);
+            return { success: true, message: `${castingGod.card.name} meurt du poison avant de lancer son sort` };
+        }
+
         // Préparer les cibles
         const targetIds = action.targetGodIds || (action.targetGodId ? [action.targetGodId] : []);
         let targetIndex = 0;
         let lastUsedTargetId: string | undefined;
-
-        player.hasPlayedCard = true;
 
         // Un effet custom nécessitant un choix humain est différé : on ne l'exécute pas ici,
         // le store rappellera engine.resolveDeferredEffect() une fois le choix connu.
