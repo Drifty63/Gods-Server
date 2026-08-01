@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
             .update({ status: 'finished', winner_id: winnerSide, finished_at: new Date().toISOString() })
             .eq('id', gameId)
             .neq('status', 'finished')
-            .select('id, host_user_id, guest_user_id, is_ranked');
+            .select('id, host_user_id, guest_user_id, is_ranked, is_private');
         if (updateErr) return jsonResponse({ error: updateErr.message }, 500);
 
         if (!updated || updated.length === 0) {
@@ -33,14 +33,18 @@ Deno.serve(async (req: Request) => {
 
         const game = updated[0];
 
-        // Progression des quêtes journalières ("jouer une partie" / "gagner 3 parties") : pour
-        // toute partie en ligne terminée, classée ou non -- contrairement à la Ferveur/aux stats,
-        // volontairement pas limité au classé, sinon les parties amicales ne compteraient jamais.
-        if (game.host_user_id) {
-            await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
-        }
-        if (game.guest_user_id) {
-            await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+        // Progression des quêtes journalières ("jouer une partie" / "gagner 3 parties") : une
+        // partie qui arrive ICI (et pas via le forfait de leave-game) s'est terminée normalement
+        // (PV à 0), donc compte pour les DEUX joueurs -- classée ou non, mais seulement en
+        // matchmaking aléatoire (is_private=false) : pas pour les parties privées / défis entre
+        // amis, sur demande explicite.
+        if (!game.is_private) {
+            if (game.host_user_id) {
+                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
+            }
+            if (game.guest_user_id) {
+                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+            }
         }
 
         if (game.is_ranked && game.host_user_id && game.guest_user_id) {

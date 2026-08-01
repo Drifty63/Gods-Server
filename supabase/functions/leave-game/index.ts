@@ -21,21 +21,21 @@ Deno.serve(async (req: Request) => {
             .update({ status: 'finished', winner_id: winnerSide, finished_at: new Date().toISOString() })
             .eq('id', gameId)
             .neq('status', 'finished')
-            .select('id, host_user_id, guest_user_id, is_ranked');
+            .select('id, host_user_id, guest_user_id, is_ranked, is_private');
         if (error) return jsonResponse({ error: error.message }, 500);
 
         if (updated && updated.length > 0) {
             const game = updated[0];
 
-            // Même logique que report-match-result : compte pour les quêtes journalières même
-            // en cas d'abandon, classé ou non (grâce à la garde ci-dessus, ne se déclenche que
-            // pour un VRAI forfait -- si le résultat normal avait déjà été rapporté, updated
-            // serait vide et rien ici ne s'exécute deux fois).
-            if (game.host_user_id) {
-                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
-            }
-            if (game.guest_user_id) {
-                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+            // Quêtes journalières : un abandon ne doit PAS pouvoir servir à compléter une quête
+            // -- seul le joueur resté (déclaré vainqueur par forfait) reçoit la progression,
+            // jamais celui qui quitte. Comme pour un vrai résultat, uniquement en matchmaking
+            // aléatoire (is_private=false), jamais en partie privée / défi entre amis.
+            if (!game.is_private) {
+                const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
+                if (winnerUserId) {
+                    await admin.rpc('bump_daily_quest_progress', { p_user_id: winnerUserId, p_won: true });
+                }
             }
 
             if (game.is_ranked && game.host_user_id && game.guest_user_id) {
