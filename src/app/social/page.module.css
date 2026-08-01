@@ -1156,3 +1156,82 @@
         height: 55px;
     }
 }
+
+/* =================== AVATAR IMAGE (remplace les emoji du mock) =================== */
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* =================== RECHERCHE : AJOUTER UN AMI =================== */
+.searchHint {
+    text-align: center;
+    color: #888;
+    font-size: 0.85rem;
+    padding: 8px 0;
+}
+
+.actionMessage {
+    padding: 10px 16px;
+    margin-bottom: 12px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    color: var(--gold-divine);
+    font-size: 0.85rem;
+    text-align: center;
+    cursor: pointer;
+}
+
+.searchResultsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+}
+
+.searchResultCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+.addFriendButton {
+    padding: 8px 14px;
+    background: linear-gradient(145deg, var(--gold-divine), var(--bronze-antique));
+    color: #0a0a1a;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.pendingLabel {
+    font-size: 0.75rem;
+    color: #888;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+/* =================== MODAL DÉFI =================== */
+.challengeCode {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    text-align: center;
+    color: var(--gold-divine);
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px dashed rgba(212, 175, 55, 0.4);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+}

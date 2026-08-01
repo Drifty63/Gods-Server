@@ -282,11 +282,11 @@ export function useMultiplayer() {
     // MATCHMAKING
     // =====================================
 
-    const joinQueue = useCallback(async (playerName: string, rating?: number) => {
+    const joinQueue = useCallback(async (playerName: string, ranked: boolean = true, userId?: string, rating?: number) => {
         const supabase = getSupabaseClient();
         const { data, error: insErr } = await supabase
             .from('matchmaking_queue')
-            .insert({ player_name: playerName, rating: rating ?? 1000, ranked: true })
+            .insert({ player_name: playerName, rating: rating ?? 1000, ranked, user_id: userId ?? null })
             .select()
             .single();
         if (insErr || !data) {
@@ -398,6 +398,17 @@ export function useMultiplayer() {
         }
     }, []);
 
+    // Signale la fin de partie (déclenchée localement dès que le moteur passe en 'finished') pour
+    // que le résultat soit persisté (Ferveur/stats/historique) côté serveur. Les deux clients le
+    // détectent indépendamment et appellent ceci -- l'Edge Function ne traite que le premier appel.
+    const reportMatchResult = useCallback(async (didIWin: boolean) => {
+        if (!gameIdRef.current || !tokenRef.current) return;
+        const supabase = getSupabaseClient();
+        await supabase.functions.invoke('report-match-result', {
+            body: { gameId: gameIdRef.current, token: tokenRef.current, didIWin },
+        });
+    }, []);
+
     const leaveGame = useCallback(async () => {
         const supabase = getSupabaseClient();
         if (gameIdRef.current && tokenRef.current) {
@@ -489,6 +500,7 @@ export function useMultiplayer() {
         selectGods,
         sendAction,
         syncState,
+        reportMatchResult,
         leaveGame,
     };
 }

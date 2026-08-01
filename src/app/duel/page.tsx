@@ -123,7 +123,8 @@ function DuelContent() {
         setView('searching');
         sessionStorage.setItem('gameMode', 'duel');
         sessionStorage.setItem('selectedGods', JSON.stringify(selectedCards));
-        joinQueue(profile.username);
+        // Le Duel est toujours classé (même infrastructure de matchmaking que "Partie Classée").
+        joinQueue(profile.username, true, profile.id);
     };
 
     const handleCancelSearch = () => {

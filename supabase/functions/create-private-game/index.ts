@@ -1,5 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { getAdminClient, generateUniqueGameId } from '../_shared/admin-client.ts';
+import { getRequestUser } from '../_shared/auth-client.ts';
 
 Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -10,6 +11,11 @@ Deno.serve(async (req: Request) => {
             return jsonResponse({ error: 'playerName requis' }, 400);
         }
 
+        // Rattache la partie au compte du créateur quand il est connecté (toujours vrai en
+        // pratique : /online exige un compte) -- utilisé pour le statut "en partie" des amis.
+        // Non bloquant si absent : une partie privée reste jouable sans lui.
+        const caller = await getRequestUser(req);
+
         const admin = getAdminClient();
         const gameId = await generateUniqueGameId(admin);
 
@@ -19,6 +25,7 @@ Deno.serve(async (req: Request) => {
             is_private: true,
             is_ranked: false,
             host_name: playerName,
+            host_user_id: caller?.id ?? null,
         });
         if (gameErr) return jsonResponse({ error: gameErr.message }, 500);
 

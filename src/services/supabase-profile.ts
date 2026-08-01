@@ -54,9 +54,65 @@ export interface UserProfile {
     starter_pack: string | null;
     daily_quests: DailyQuestsData | null;
     god_play_counts: Record<string, number>;
+    ferveur: number;
     created_at: string;
     last_login_at: string;
+    last_active_at: string;
     savedDecks: SavedDeck[]; // fetched from the saved_decks table, attached client-side
+}
+
+export interface LeaderboardEntry {
+    id: string;
+    username: string;
+    avatar: string;
+    ferveur: number;
+    victories: number;
+}
+
+export interface FriendEntry {
+    friendship_id: string;
+    id: string;
+    username: string;
+    avatar: string;
+    ferveur: number;
+    is_favorite: boolean;
+    online: boolean;
+    in_game: boolean;
+}
+
+export interface PendingRequestEntry {
+    friendship_id: string;
+    id: string;
+    username: string;
+    avatar: string;
+    created_at: string;
+}
+
+export interface UserSearchResult {
+    id: string;
+    username: string;
+    avatar: string;
+    ferveur: number;
+    relationship: 'none' | 'pending' | 'accepted' | 'blocked';
+}
+
+export interface PublicProfile {
+    id: string;
+    username: string;
+    avatar: string;
+    ferveur: number;
+    level: number;
+    stats: UserProfile['stats'];
+}
+
+export interface MatchHistoryEntry {
+    id: string;
+    game_id: string | null;
+    opponent_id: string | null;
+    opponent_name: string;
+    result: 'victory' | 'defeat';
+    ferveur_change: number;
+    created_at: string;
 }
 
 // =====================================
@@ -267,6 +323,100 @@ export function getMostPlayedGod(
     }
 
     return maxGodId ? { godId: maxGodId, count: maxCount } : null;
+}
+
+// =====================================
+// CLASSEMENT (Ferveur)
+// =====================================
+
+export async function getLeaderboard(limit: number = 100): Promise<LeaderboardEntry[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('get_leaderboard', { p_limit: limit });
+    if (error) throw error;
+    return (data ?? []) as LeaderboardEntry[];
+}
+
+export async function getPublicProfile(userId: string): Promise<PublicProfile | null> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('get_public_profile', { p_user_id: userId });
+    if (error) throw error;
+    const rows = (data ?? []) as PublicProfile[];
+    return rows[0] ?? null;
+}
+
+export async function getMatchHistory(limit: number = 20): Promise<MatchHistoryEntry[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+        .from('match_history')
+        .select('id, game_id, opponent_id, opponent_name, result, ferveur_change, created_at')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as MatchHistoryEntry[];
+}
+
+// Heartbeat de présence : appelé périodiquement pendant que l'app est ouverte pour que
+// get_friends_list() puisse dériver un statut "En ligne" approximatif (activité < 2min).
+export async function pingLastActive(uid: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    await supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', uid);
+}
+
+// =====================================
+// AMIS
+// =====================================
+
+export async function getFriendsList(): Promise<FriendEntry[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('get_friends_list');
+    if (error) throw error;
+    return (data ?? []) as FriendEntry[];
+}
+
+export async function getPendingRequests(): Promise<PendingRequestEntry[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('get_pending_requests');
+    if (error) throw error;
+    return (data ?? []) as PendingRequestEntry[];
+}
+
+export async function searchUsers(query: string): Promise<UserSearchResult[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('search_users', { p_query: query });
+    if (error) throw error;
+    return (data ?? []) as UserSearchResult[];
+}
+
+export async function sendFriendRequest(username: string): Promise<{ success: boolean; message: string }> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('send_friend_request', { p_username: username });
+    if (error) throw error;
+    const rows = (data ?? []) as { success: boolean; message: string }[];
+    return rows[0] ?? { success: false, message: 'Erreur inconnue' };
+}
+
+export async function respondFriendRequest(friendshipId: string, accept: boolean): Promise<void> {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.rpc('respond_friend_request', { p_friendship_id: friendshipId, p_accept: accept });
+    if (error) throw error;
+}
+
+export async function removeFriendship(friendshipId: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.rpc('remove_friendship', { p_friendship_id: friendshipId });
+    if (error) throw error;
+}
+
+export async function blockUser(friendshipId: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.rpc('block_user', { p_friendship_id: friendshipId });
+    if (error) throw error;
+}
+
+export async function toggleFavoriteFriend(friendshipId: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.rpc('toggle_favorite_friend', { p_friendship_id: friendshipId });
+    if (error) throw error;
 }
 
 export type { User };

@@ -1,5 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { getAdminClient } from '../_shared/admin-client.ts';
+import { getRequestUser } from '../_shared/auth-client.ts';
 
 Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -8,6 +9,7 @@ Deno.serve(async (req: Request) => {
         const { gameId, playerName } = await req.json();
         if (!gameId || !playerName) return jsonResponse({ error: 'gameId et playerName requis' }, 400);
 
+        const caller = await getRequestUser(req);
         const admin = getAdminClient();
         const { data: game, error: gameErr } = await admin
             .from('games')
@@ -29,7 +31,7 @@ Deno.serve(async (req: Request) => {
 
         const { error: updateErr } = await admin
             .from('games')
-            .update({ guest_name: playerName, status: 'selecting' })
+            .update({ guest_name: playerName, status: 'selecting', guest_user_id: caller?.id ?? null })
             .eq('id', gameId);
         if (updateErr) return jsonResponse({ error: updateErr.message }, 500);
 

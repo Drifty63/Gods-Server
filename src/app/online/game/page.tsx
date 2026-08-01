@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiplayer, GameStartData } from '@/hooks/useMultiplayer';
 import { useGameStore } from '@/store/gameStore';
@@ -18,12 +18,14 @@ export default function OnlineGamePage() {
         clearError,
         sendAction,
         syncState,
+        reportMatchResult,
         leaveGame,
         resumeGame,
     } = useMultiplayer();
 
     const {
         gameState,
+        playerId,
         initGame,
     } = useGameStore();
 
@@ -31,6 +33,7 @@ export default function OnlineGamePage() {
     const [isHost, setIsHost] = useState(false);
     const [multiplayerData, setMultiplayerData] = useState<GameStartData | null>(null);
     const [hasResumed, setHasResumed] = useState(false);
+    const hasReportedResultRef = useRef(false);
 
     // Charger les données de session
     useEffect(() => {
@@ -99,6 +102,17 @@ export default function OnlineGamePage() {
             useGameStore.getState().syncGameState(syncedState as any);
         }
     }, [syncedState, isInitialized]);
+
+    // Fin de partie : signaler le résultat une seule fois (Ferveur/stats/historique côté
+    // serveur, voir apply_match_result). Les deux clients détectent 'finished' indépendamment
+    // via l'état synchronisé -- le ref local évite un double appel depuis CE client, et
+    // report-match-result gère lui-même la course entre les deux clients.
+    useEffect(() => {
+        if (gameState?.status === 'finished' && !hasReportedResultRef.current) {
+            hasReportedResultRef.current = true;
+            reportMatchResult(gameState.winnerId === playerId);
+        }
+    }, [gameState?.status, gameState?.winnerId, playerId, reportMatchResult]);
 
     const handleLeaveGame = () => {
         leaveGame();

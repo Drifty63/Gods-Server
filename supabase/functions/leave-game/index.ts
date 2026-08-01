@@ -12,11 +12,25 @@ Deno.serve(async (req: Request) => {
         const side = await resolveSide(admin, gameId, token);
         if (!side) return jsonResponse({ error: 'Jeton invalide' }, 401);
 
-        const { error } = await admin
+        // Si la partie n'était pas déjà terminée, quitter compte comme un forfait : l'autre
+        // joueur est déclaré vainqueur. Même garde anti-doublon que report-match-result --
+        // si la partie était déjà finie (résultat normal déjà rapporté), ce update est un no-op.
+        const winnerSide = side === 'host' ? 'guest' : 'host';
+        const { data: updated, error } = await admin
             .from('games')
-            .update({ status: 'finished', finished_at: new Date().toISOString() })
-            .eq('id', gameId);
+            .update({ status: 'finished', winner_id: winnerSide, finished_at: new Date().toISOString() })
+            .eq('id', gameId)
+            .neq('status', 'finished')
+            .select('id, host_user_id, guest_user_id, is_ranked');
         if (error) return jsonResponse({ error: error.message }, 500);
+
+        if (updated && updated.length > 0) {
+            const game = updated[0];
+            if (game.is_ranked && game.host_user_id && game.guest_user_id) {
+                const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
+                await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });
+            }
+        }
 
         return jsonResponse({ ok: true });
     } catch (e) {

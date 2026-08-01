@@ -1,81 +1,209 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
-import { getRankByFerveur, getRankProgress, RANKS } from '@/data/ranks';
-
-// Données mock pour les amis (limité à 25) avec Ferveur
-const MOCK_FRIENDS = [
-    { id: 1, odemonUid: 'uid1', username: 'ZeusLord', level: 15, status: 'online', avatar: '⚡', isFavorite: false, ferveur: 1280 },
-    { id: 2, odemonUid: 'uid2', username: 'PoseidonKing', level: 12, status: 'online', avatar: '💧', isFavorite: true, ferveur: 720 },
-    { id: 3, odemonUid: 'uid3', username: 'HadesReaper', level: 18, status: 'ingame', avatar: '🔥', isFavorite: false, ferveur: 1650 },
-    { id: 4, odemonUid: 'uid4', username: 'AthenaWise', level: 10, status: 'offline', avatar: '☀️', isFavorite: false, ferveur: 380 },
-    { id: 5, odemonUid: 'uid5', username: 'AresWarrior', level: 14, status: 'offline', avatar: '🌿', isFavorite: true, ferveur: 550 },
-];
-
-// Données mock pour les demandes d'amis
-const MOCK_REQUESTS = [
-    { id: 1, odemonUid: 'req1', username: 'NyxShadow', level: 8, avatar: '💀' },
-    { id: 2, odemonUid: 'req2', username: 'ApollonMusic', level: 11, avatar: '💨' },
-];
-
-// Données mock pour le classement avec Ferveur (Top 100 joueurs max)
-const MOCK_LEADERBOARD = [
-    { odemonUid: 'uid1', username: 'DivineMaster', level: 25, ferveur: 2650, mostPlayedGodImage: '/cards/gods/zeus.png', stats: { gamesWon: 156 } },
-    { odemonUid: 'uid2', username: 'OlympusChamp', level: 23, ferveur: 2180, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 142 } },
-    { odemonUid: 'uid3', username: 'TitanSlayer', level: 22, ferveur: 1820, mostPlayedGodImage: '/cards/gods/hades.png', stats: { gamesWon: 138 } },
-    { odemonUid: 'uid4', username: 'GodOfWar', level: 21, ferveur: 1560, mostPlayedGodImage: '/cards/gods/ares.png', stats: { gamesWon: 127 } },
-    { odemonUid: 'uid5', username: 'MythicHero', level: 20, ferveur: 1320, mostPlayedGodImage: '/cards/gods/athena.png', stats: { gamesWon: 118 } },
-    { odemonUid: 'uid6', username: 'LightBringer', level: 19, ferveur: 980, mostPlayedGodImage: '/cards/gods/apollon.png', stats: { gamesWon: 105 } },
-    { odemonUid: 'uid7', username: 'ShadowMaster', level: 18, ferveur: 620, mostPlayedGodImage: '/cards/gods/nyx.png', stats: { gamesWon: 98 } },
-    { odemonUid: 'uid8', username: 'SeaKing', level: 17, ferveur: 340, mostPlayedGodImage: '/cards/gods/poseidon.png', stats: { gamesWon: 92 } },
-].sort((a, b) => b.ferveur - a.ferveur).slice(0, 100); // Tri par ferveur décroissante, max 100
+import { useMultiplayer } from '@/hooks/useMultiplayer';
+import { RequireAuth } from '@/components/Auth/RequireAuth';
+import { getRankByFerveur, RANKS } from '@/data/ranks';
+import {
+    getFriendsList,
+    getPendingRequests,
+    getLeaderboard,
+    searchUsers,
+    sendFriendRequest,
+    respondFriendRequest,
+    removeFriendship,
+    blockUser,
+    toggleFavoriteFriend,
+    type FriendEntry,
+    type PendingRequestEntry,
+    type LeaderboardEntry,
+    type UserSearchResult,
+} from '@/services/supabase-profile';
 
 type TabType = 'friends' | 'leaderboard';
+type FriendStatus = 'online' | 'ingame' | 'offline';
+
+function AvatarImage({ src, alt, size }: { src: string; alt: string; size: number }) {
+    const url = src && src.startsWith('/') ? src : '/avatars/default.png';
+    return <Image src={url} alt={alt} width={size} height={size} className={styles.avatarImg} />;
+}
+
+function getFriendStatus(f: FriendEntry): FriendStatus {
+    if (f.in_game) return 'ingame';
+    if (f.online) return 'online';
+    return 'offline';
+}
+
+function getStatusText(status: FriendStatus): string {
+    switch (status) {
+        case 'online': return 'En ligne';
+        case 'ingame': return 'En partie';
+        default: return 'Hors ligne';
+    }
+}
 
 export default function SocialPage() {
+    return (
+        <RequireAuth>
+            <SocialContent />
+        </RequireAuth>
+    );
+}
+
+function SocialContent() {
+    const router = useRouter();
     const { user, profile } = useAuth();
+    const { createPrivateGame, currentGame, leaveGame, getSessionInfo } = useMultiplayer();
+
     const [activeTab, setActiveTab] = useState<TabType>('friends');
 
-    // États pour les amis
+    // Amis
+    const [friends, setFriends] = useState<FriendEntry[]>([]);
+    const [pendingRequests, setPendingRequests] = useState<PendingRequestEntry[]>([]);
+    const [loadingFriends, setLoadingFriends] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+    const [searching, setSearching] = useState(false);
     const [showRequestsModal, setShowRequestsModal] = useState(false);
     const [showOptionsModal, setShowOptionsModal] = useState<string | null>(null);
-    const [favorites, setFavorites] = useState<string[]>(
-        MOCK_FRIENDS.filter(f => f.isFavorite).map(f => f.odemonUid)
+    const [actionMessage, setActionMessage] = useState<string | null>(null);
+    const [challengeTarget, setChallengeTarget] = useState<FriendEntry | null>(null);
+
+    // Classement
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+    const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+    const [expandedRank, setExpandedRank] = useState<string | null>(null);
+
+    const loadFriendsData = useCallback(async () => {
+        setLoadingFriends(true);
+        try {
+            const [f, r] = await Promise.all([getFriendsList(), getPendingRequests()]);
+            setFriends(f);
+            setPendingRequests(r);
+        } catch (err) {
+            console.error('Erreur chargement amis:', err);
+        } finally {
+            setLoadingFriends(false);
+        }
+    }, []);
+
+    useEffect(() => { loadFriendsData(); }, [loadFriendsData]);
+
+    useEffect(() => {
+        if (activeTab !== 'leaderboard') return;
+        setLoadingLeaderboard(true);
+        getLeaderboard(200)
+            .then(setLeaderboard)
+            .catch((err) => console.error('Erreur chargement classement:', err))
+            .finally(() => setLoadingLeaderboard(false));
+    }, [activeTab]);
+
+    // Recherche pour ajouter un ami (débattue, distincte du filtre local ci-dessous)
+    useEffect(() => {
+        const q = searchQuery.trim();
+        if (q.length < 2) {
+            setSearchResults([]);
+            return;
+        }
+        setSearching(true);
+        const timer = setTimeout(async () => {
+            try {
+                setSearchResults(await searchUsers(q));
+            } catch (err) {
+                console.error('Erreur recherche:', err);
+            } finally {
+                setSearching(false);
+            }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    const filteredFriends = useMemo(() => {
+        const q = searchQuery.toLowerCase();
+        return friends.filter((f) => f.username.toLowerCase().includes(q));
+    }, [friends, searchQuery]);
+
+    const addableResults = useMemo(
+        () => searchResults.filter((r) => r.relationship !== 'accepted'),
+        [searchResults]
     );
 
-    // State pour l'accordéon des rangs
-    const [expandedRank, setExpandedRank] = useState<string | null>(null);
-    const filteredFriends = MOCK_FRIENDS
-        .filter(friend => friend.username.toLowerCase().includes(searchQuery.toLowerCase()))
-        .slice(0, 25);
+    const myRank = useMemo(() => {
+        if (!user) return null;
+        const index = leaderboard.findIndex((entry) => entry.id === user.id);
+        return index >= 0 ? index + 1 : null;
+    }, [leaderboard, user]);
 
-    const toggleFavorite = (odemonUid: string) => {
-        setFavorites(prev =>
-            prev.includes(odemonUid)
-                ? prev.filter(id => id !== odemonUid)
-                : [...prev, odemonUid]
-        );
-    };
-
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'online': return 'En ligne';
-            case 'ingame': return 'En partie';
-            default: return 'Hors ligne';
+    const handleSendRequest = async (username: string) => {
+        setActionMessage(null);
+        try {
+            const res = await sendFriendRequest(username);
+            setActionMessage(res.message);
+            if (res.success) {
+                setSearchResults(await searchUsers(searchQuery.trim()));
+                loadFriendsData();
+            }
+        } catch {
+            setActionMessage("Erreur lors de l'envoi de la demande");
         }
     };
 
-    // Classement
-    const myRank = useMemo(() => {
-        if (!user) return null;
-        const index = MOCK_LEADERBOARD.findIndex(entry => entry.odemonUid === user.id);
-        return index >= 0 ? index + 1 : null;
-    }, [user]);
+    const handleAccept = async (friendshipId: string) => {
+        await respondFriendRequest(friendshipId, true);
+        loadFriendsData();
+    };
+
+    const handleReject = async (friendshipId: string) => {
+        await respondFriendRequest(friendshipId, false);
+        loadFriendsData();
+    };
+
+    const handleToggleFavorite = async (friendshipId: string) => {
+        setFriends((prev) => prev.map((f) => (f.friendship_id === friendshipId ? { ...f, is_favorite: !f.is_favorite } : f)));
+        await toggleFavoriteFriend(friendshipId);
+    };
+
+    const handleBlock = async (friendshipId: string) => {
+        setShowOptionsModal(null);
+        await blockUser(friendshipId);
+        loadFriendsData();
+    };
+
+    const handleRemove = async (friendshipId: string) => {
+        setShowOptionsModal(null);
+        await removeFriendship(friendshipId);
+        loadFriendsData();
+    };
+
+    const handleChallenge = async (friend: FriendEntry) => {
+        if (!profile?.username) return;
+        setChallengeTarget(friend);
+        await createPrivateGame(profile.username);
+    };
+
+    const closeChallengeModal = () => {
+        if (challengeTarget) leaveGame();
+        setChallengeTarget(null);
+    };
+
+    // Une fois que l'ami rejoint la partie privée créée pour le défi, on embarque comme pour
+    // une création de partie privée classique (même logique que src/app/online/page.tsx).
+    useEffect(() => {
+        if (!challengeTarget || !currentGame || currentGame.status !== 'selecting') return;
+        const { gameId, token, isHost } = getSessionInfo();
+        if (!gameId || !token) return;
+        sessionStorage.setItem('gameId', gameId);
+        sessionStorage.setItem('multiplayerToken', token);
+        sessionStorage.setItem('isHost', String(isHost));
+        sessionStorage.setItem('playerName', profile?.username || '');
+        sessionStorage.setItem('opponentName', challengeTarget.username);
+        router.push('/online/select');
+    }, [currentGame, challengeTarget, profile, router, getSessionInfo]);
 
     return (
         <main className={styles.main}>
@@ -107,88 +235,127 @@ export default function SocialPage() {
                 {/* =============== TAB AMIS =============== */}
                 {activeTab === 'friends' && (
                     <>
-                        {/* Barre de recherche + Bouton demandes */}
                         <div className={styles.searchRow}>
                             <div className={styles.searchContainer}>
                                 <span className={styles.searchIcon}>🔍</span>
                                 <input
                                     type="text"
-                                    placeholder="Rechercher un ami..."
+                                    placeholder="Rechercher ou ajouter un ami..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className={styles.searchInput}
                                 />
                             </div>
-                            <button
-                                className={styles.requestsButton}
-                                onClick={() => setShowRequestsModal(true)}
-                            >
+                            <button className={styles.requestsButton} onClick={() => setShowRequestsModal(true)}>
                                 📨
-                                {MOCK_REQUESTS.length > 0 && (
-                                    <span className={styles.requestsBadge}>{MOCK_REQUESTS.length}</span>
+                                {pendingRequests.length > 0 && (
+                                    <span className={styles.requestsBadge}>{pendingRequests.length}</span>
                                 )}
                             </button>
                         </div>
 
-                        {/* Compteur amis */}
+                        {actionMessage && (
+                            <div className={styles.actionMessage} onClick={() => setActionMessage(null)}>
+                                {actionMessage}
+                            </div>
+                        )}
+
+                        {/* Résultats de recherche pour ajouter un nouvel ami */}
+                        {searchQuery.trim().length >= 2 && (
+                            <div className={styles.searchResultsSection}>
+                                {searching ? (
+                                    <p className={styles.searchHint}>Recherche...</p>
+                                ) : addableResults.length === 0 ? (
+                                    <p className={styles.searchHint}>Aucun nouveau joueur trouvé</p>
+                                ) : (
+                                    addableResults.map((r) => (
+                                        <div key={r.id} className={styles.searchResultCard}>
+                                            <div className={styles.friendLeft}>
+                                                <div className={styles.friendAvatar}>
+                                                    <AvatarImage src={r.avatar} alt={r.username} size={40} />
+                                                </div>
+                                                <span className={styles.friendName}>{r.username}</span>
+                                            </div>
+                                            {r.relationship === 'pending' ? (
+                                                <span className={styles.pendingLabel}>Demande envoyée</span>
+                                            ) : r.relationship === 'blocked' ? (
+                                                <span className={styles.pendingLabel}>Indisponible</span>
+                                            ) : (
+                                                <button className={styles.addFriendButton} onClick={() => handleSendRequest(r.username)}>
+                                                    + Ajouter
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+
                         <div className={styles.friendsCount}>
                             {filteredFriends.length} ami{filteredFriends.length > 1 ? 's' : ''}
                             <span className={styles.maxFriends}> / 25 max</span>
                         </div>
 
-                        {/* Liste des amis */}
                         <div className={styles.friendsList}>
-                            {filteredFriends.length === 0 ? (
+                            {loadingFriends ? (
+                                <div className={styles.emptyState}>
+                                    <p className={styles.emptyMessage}>Chargement...</p>
+                                </div>
+                            ) : filteredFriends.length === 0 ? (
                                 <div className={styles.emptyState}>
                                     <span className={styles.emptyIcon}>👥</span>
                                     <p className={styles.emptyMessage}>Aucun ami trouvé</p>
                                 </div>
                             ) : (
-                                filteredFriends.map(friend => (
-                                    <div key={friend.id} className={styles.friendCard}>
-                                        <div className={styles.friendLeft}>
-                                            <div className={styles.friendAvatar}>
-                                                <span>{friend.avatar}</span>
-                                                <span className={`${styles.statusDot} ${styles[friend.status]}`} />
+                                filteredFriends.map((friend) => {
+                                    const status = getFriendStatus(friend);
+                                    return (
+                                        <div key={friend.friendship_id} className={styles.friendCard}>
+                                            <div className={styles.friendLeft}>
+                                                <div className={styles.friendAvatar}>
+                                                    <AvatarImage src={friend.avatar} alt={friend.username} size={44} />
+                                                    <span className={`${styles.statusDot} ${styles[status]}`} />
+                                                </div>
+                                                <div className={styles.friendInfo}>
+                                                    <span className={styles.friendName}>{friend.username}</span>
+                                                    <span className={styles.friendStatus}>{getStatusText(status)}</span>
+                                                </div>
                                             </div>
-                                            <div className={styles.friendInfo}>
-                                                <span className={styles.friendName}>{friend.username}</span>
-                                                <span className={styles.friendStatus}>{getStatusText(friend.status)}</span>
-                                            </div>
-                                        </div>
 
-                                        <div className={styles.friendActions}>
-                                            <button
-                                                className={`${styles.actionButton} ${styles.fightButton}`}
-                                                title="Défier"
-                                                disabled={friend.status === 'offline'}
-                                            >
-                                                ⚔️
-                                            </button>
-                                            <Link
-                                                href={`/profile/${friend.odemonUid}`}
-                                                className={`${styles.actionButton} ${styles.profileButton}`}
-                                                title="Profil"
-                                            >
-                                                👤
-                                            </Link>
-                                            <button
-                                                className={`${styles.actionButton} ${styles.favoriteButton} ${favorites.includes(friend.odemonUid) ? styles.isFavorite : ''}`}
-                                                onClick={() => toggleFavorite(friend.odemonUid)}
-                                                title="Favori"
-                                            >
-                                                {favorites.includes(friend.odemonUid) ? '❤️' : '🤍'}
-                                            </button>
-                                            <button
-                                                className={`${styles.actionButton} ${styles.optionsButton}`}
-                                                onClick={() => setShowOptionsModal(friend.odemonUid)}
-                                                title="Options"
-                                            >
-                                                ⋮
-                                            </button>
+                                            <div className={styles.friendActions}>
+                                                <button
+                                                    className={`${styles.actionButton} ${styles.fightButton}`}
+                                                    title="Défier"
+                                                    disabled={status === 'offline'}
+                                                    onClick={() => handleChallenge(friend)}
+                                                >
+                                                    ⚔️
+                                                </button>
+                                                <Link
+                                                    href={`/profile/${friend.id}`}
+                                                    className={`${styles.actionButton} ${styles.profileButton}`}
+                                                    title="Profil"
+                                                >
+                                                    👤
+                                                </Link>
+                                                <button
+                                                    className={`${styles.actionButton} ${styles.favoriteButton} ${friend.is_favorite ? styles.isFavorite : ''}`}
+                                                    onClick={() => handleToggleFavorite(friend.friendship_id)}
+                                                    title="Favori"
+                                                >
+                                                    {friend.is_favorite ? '❤️' : '🤍'}
+                                                </button>
+                                                <button
+                                                    className={`${styles.actionButton} ${styles.optionsButton}`}
+                                                    onClick={() => setShowOptionsModal(friend.friendship_id)}
+                                                    title="Options"
+                                                >
+                                                    ⋮
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
                     </>
@@ -197,102 +364,103 @@ export default function SocialPage() {
                 {/* =============== TAB CLASSEMENT =============== */}
                 {activeTab === 'leaderboard' && (
                     <>
-                        {/* Titre Classement Global */}
                         <div className={styles.leaderboardTitle}>
                             <span>🏆</span>
                             <h2>Classement Global</h2>
                         </div>
 
-                        {/* Podium Top 3 */}
-                        <div className={styles.podium}>
-                            {/* 2ème place */}
-                            <div className={`${styles.podiumPosition} ${styles.second}`}>
-                                <div className={styles.podiumAvatar}>
-                                    <Image src={MOCK_LEADERBOARD[1].mostPlayedGodImage} alt="" width={50} height={50} className={styles.podiumImage} />
-                                </div>
-                                <span className={styles.podiumRank}>2</span>
-                                <span className={styles.podiumName}>{MOCK_LEADERBOARD[1].username}</span>
-                                <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(MOCK_LEADERBOARD[1].ferveur).gradient }}>
-                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[1].ferveur).icon}</span>
-                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[1].ferveur).name}</span>
-                                </div>
-                                <span className={styles.podiumFerveur}>{MOCK_LEADERBOARD[1].ferveur} 🔥</span>
-                            </div>
+                        {loadingLeaderboard ? (
+                            <p className={styles.searchHint}>Chargement du classement...</p>
+                        ) : leaderboard.length < 3 ? (
+                            <p className={styles.searchHint}>Pas encore assez de joueurs classés.</p>
+                        ) : (
+                            <>
+                                {myRank && (
+                                    <p className={styles.searchHint}>Votre position : #{myRank}</p>
+                                )}
 
-                            {/* 1ère place */}
-                            <div className={`${styles.podiumPosition} ${styles.first}`}>
-                                <div className={styles.crownIcon}>👑</div>
-                                <div className={`${styles.podiumAvatar} ${styles.gold}`}>
-                                    <Image src={MOCK_LEADERBOARD[0].mostPlayedGodImage} alt="" width={60} height={60} className={styles.podiumImage} />
-                                </div>
-                                <span className={styles.podiumRank}>1</span>
-                                <span className={styles.podiumName}>{MOCK_LEADERBOARD[0].username}</span>
-                                <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(MOCK_LEADERBOARD[0].ferveur).gradient }}>
-                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[0].ferveur).icon}</span>
-                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[0].ferveur).name}</span>
-                                </div>
-                                <span className={styles.podiumFerveur}>{MOCK_LEADERBOARD[0].ferveur} 🔥</span>
-                            </div>
-
-                            {/* 3ème place */}
-                            <div className={`${styles.podiumPosition} ${styles.third}`}>
-                                <div className={styles.podiumAvatar}>
-                                    <Image src={MOCK_LEADERBOARD[2].mostPlayedGodImage} alt="" width={50} height={50} className={styles.podiumImage} />
-                                </div>
-                                <span className={styles.podiumRank}>3</span>
-                                <span className={styles.podiumName}>{MOCK_LEADERBOARD[2].username}</span>
-                                <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(MOCK_LEADERBOARD[2].ferveur).gradient }}>
-                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[2].ferveur).icon}</span>
-                                    <span>{getRankByFerveur(MOCK_LEADERBOARD[2].ferveur).name}</span>
-                                </div>
-                                <span className={styles.podiumFerveur}>{MOCK_LEADERBOARD[2].ferveur} 🔥</span>
-                            </div>
-                        </div>
-
-                        {/* Liste classement */}
-                        <div className={styles.leaderboardList}>
-                            {MOCK_LEADERBOARD.slice(3).map((player, index) => {
-                                const playerRank = getRankByFerveur(player.ferveur);
-                                return (
-                                    <div key={player.odemonUid} className={styles.leaderboardRow}>
-                                        <span className={styles.rank}>{index + 4}</span>
-                                        <div className={styles.playerInfo}>
-                                            <div className={styles.playerAvatar}>
-                                                <Image src={player.mostPlayedGodImage} alt="" width={35} height={35} className={styles.avatarImage} />
-                                            </div>
-                                            <div className={styles.playerDetails}>
-                                                <span className={styles.playerName}>{player.username}</span>
-                                                <span className={styles.playerRankBadge} style={{ color: playerRank.color }}>
-                                                    {playerRank.icon} {playerRank.name}
-                                                </span>
-                                            </div>
+                                {/* Podium Top 3 */}
+                                <div className={styles.podium}>
+                                    <div className={`${styles.podiumPosition} ${styles.second}`}>
+                                        <div className={styles.podiumAvatar}>
+                                            <AvatarImage src={leaderboard[1].avatar} alt="" size={50} />
                                         </div>
-                                        <span className={styles.ferveur}>{player.ferveur} 🔥</span>
+                                        <span className={styles.podiumRank}>2</span>
+                                        <span className={styles.podiumName}>{leaderboard[1].username}</span>
+                                        <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(leaderboard[1].ferveur).gradient }}>
+                                            <span>{getRankByFerveur(leaderboard[1].ferveur).icon}</span>
+                                            <span>{getRankByFerveur(leaderboard[1].ferveur).name}</span>
+                                        </div>
+                                        <span className={styles.podiumFerveur}>{leaderboard[1].ferveur} 🔥</span>
                                     </div>
-                                );
-                            })}
-                        </div>
+
+                                    <div className={`${styles.podiumPosition} ${styles.first}`}>
+                                        <div className={styles.crownIcon}>👑</div>
+                                        <div className={`${styles.podiumAvatar} ${styles.gold}`}>
+                                            <AvatarImage src={leaderboard[0].avatar} alt="" size={60} />
+                                        </div>
+                                        <span className={styles.podiumRank}>1</span>
+                                        <span className={styles.podiumName}>{leaderboard[0].username}</span>
+                                        <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(leaderboard[0].ferveur).gradient }}>
+                                            <span>{getRankByFerveur(leaderboard[0].ferveur).icon}</span>
+                                            <span>{getRankByFerveur(leaderboard[0].ferveur).name}</span>
+                                        </div>
+                                        <span className={styles.podiumFerveur}>{leaderboard[0].ferveur} 🔥</span>
+                                    </div>
+
+                                    <div className={`${styles.podiumPosition} ${styles.third}`}>
+                                        <div className={styles.podiumAvatar}>
+                                            <AvatarImage src={leaderboard[2].avatar} alt="" size={50} />
+                                        </div>
+                                        <span className={styles.podiumRank}>3</span>
+                                        <span className={styles.podiumName}>{leaderboard[2].username}</span>
+                                        <div className={styles.podiumRankBadge} style={{ background: getRankByFerveur(leaderboard[2].ferveur).gradient }}>
+                                            <span>{getRankByFerveur(leaderboard[2].ferveur).icon}</span>
+                                            <span>{getRankByFerveur(leaderboard[2].ferveur).name}</span>
+                                        </div>
+                                        <span className={styles.podiumFerveur}>{leaderboard[2].ferveur} 🔥</span>
+                                    </div>
+                                </div>
+
+                                {/* Liste classement */}
+                                <div className={styles.leaderboardList}>
+                                    {leaderboard.slice(3, 50).map((player, index) => {
+                                        const playerRank = getRankByFerveur(player.ferveur);
+                                        return (
+                                            <div key={player.id} className={styles.leaderboardRow}>
+                                                <span className={styles.rank}>{index + 4}</span>
+                                                <div className={styles.playerInfo}>
+                                                    <div className={styles.playerAvatar}>
+                                                        <AvatarImage src={player.avatar} alt="" size={35} />
+                                                    </div>
+                                                    <div className={styles.playerDetails}>
+                                                        <span className={styles.playerName}>{player.username}</span>
+                                                        <span className={styles.playerRankBadge} style={{ color: playerRank.color }}>
+                                                            {playerRank.icon} {playerRank.name}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span className={styles.ferveur}>{player.ferveur} 🔥</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
+                        )}
 
                         {/* Section des paliers - Pyramide */}
                         <div className={styles.ranksSection}>
                             <h3 className={styles.ranksSectionTitle}>Votre progression</h3>
                             <div className={styles.pyramid}>
                                 {[...RANKS].reverse().map((rank, index) => {
-                                    // TODO: Utiliser profile?.ferveur quand disponible dans UserProfile
-                                    const userFerveur = 450; // Valeur mock pour démo
+                                    const userFerveur = profile?.ferveur ?? 0;
                                     const userRank = getRankByFerveur(userFerveur);
                                     const isCurrentRank = rank.id === userRank.id;
                                     const isPassed = userFerveur >= rank.minFerveur;
                                     const isExpanded = expandedRank === rank.id;
 
-                                    // Trouver les amis dans ce palier
-                                    const friendsInRank = MOCK_FRIENDS.filter(friend => {
-                                        const friendRank = getRankByFerveur(friend.ferveur);
-                                        return friendRank.id === rank.id;
-                                    });
-
-                                    // Calcul de la largeur pyramidale (plus étroit en haut)
-                                    const pyramidWidth = 50 + (index * 5.5); // De 50% à 100%
+                                    const friendsInRank = friends.filter((friend) => getRankByFerveur(friend.ferveur).id === rank.id);
+                                    const pyramidWidth = 50 + index * 5.5;
 
                                     return (
                                         <div
@@ -300,7 +468,6 @@ export default function SocialPage() {
                                             className={`${styles.pyramidTier} ${isCurrentRank ? styles.currentTier : ''} ${isPassed ? styles.passedTier : styles.lockedTier}`}
                                             style={{ width: `${pyramidWidth}%` }}
                                         >
-                                            {/* Header cliquable */}
                                             <div
                                                 className={styles.tierHeader}
                                                 onClick={() => setExpandedRank(isExpanded ? null : rank.id)}
@@ -317,7 +484,6 @@ export default function SocialPage() {
                                                 <span className={styles.tierArrow}>{isExpanded ? '▼' : '▶'}</span>
                                             </div>
 
-                                            {/* Contenu déplié */}
                                             {isExpanded && (
                                                 <div className={styles.tierContent}>
                                                     {isCurrentRank && (
@@ -327,9 +493,8 @@ export default function SocialPage() {
                                                             <span className={styles.tierUserFerveur}>{userFerveur} 🔥</span>
                                                         </div>
                                                     )}
-                                                    {friendsInRank.map(friend => (
+                                                    {friendsInRank.map((friend) => (
                                                         <div key={friend.id} className={styles.tierFriend}>
-                                                            <span className={styles.tierFriendAvatar}>{friend.avatar}</span>
                                                             <span className={styles.tierFriendName}>{friend.username}</span>
                                                             <span className={styles.tierFriendFerveur}>{friend.ferveur} 🔥</span>
                                                         </div>
@@ -353,27 +518,28 @@ export default function SocialPage() {
                 <div className={styles.modalOverlay} onClick={() => setShowRequestsModal(false)}>
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                         <button className={styles.modalClose} onClick={() => setShowRequestsModal(false)}>✕</button>
-                        <h2 className={styles.modalTitle}>📨 Demandes d'amis</h2>
-                        {MOCK_REQUESTS.length === 0 ? (
+                        <h2 className={styles.modalTitle}>📨 Demandes d&apos;amis</h2>
+                        {pendingRequests.length === 0 ? (
                             <div className={styles.emptyRequests}>
                                 <span>📭</span>
                                 <p>Aucune demande</p>
                             </div>
                         ) : (
                             <div className={styles.requestsList}>
-                                {MOCK_REQUESTS.map(request => (
-                                    <div key={request.id} className={styles.requestCard}>
+                                {pendingRequests.map((request) => (
+                                    <div key={request.friendship_id} className={styles.requestCard}>
                                         <div className={styles.requestLeft}>
-                                            <div className={styles.requestAvatar}><span>{request.avatar}</span></div>
+                                            <div className={styles.requestAvatar}>
+                                                <AvatarImage src={request.avatar} alt={request.username} size={40} />
+                                            </div>
                                             <div className={styles.requestInfo}>
                                                 <span className={styles.requestName}>{request.username}</span>
-                                                <span className={styles.requestLevel}>Niv. {request.level}</span>
                                             </div>
                                         </div>
                                         <div className={styles.requestActions}>
-                                            <Link href={`/profile/${request.odemonUid}`} className={styles.requestProfileButton}>👤</Link>
-                                            <button className={styles.acceptButton}>✓</button>
-                                            <button className={styles.rejectButton}>✕</button>
+                                            <Link href={`/profile/${request.id}`} className={styles.requestProfileButton}>👤</Link>
+                                            <button className={styles.acceptButton} onClick={() => handleAccept(request.friendship_id)}>✓</button>
+                                            <button className={styles.rejectButton} onClick={() => handleReject(request.friendship_id)}>✕</button>
                                         </div>
                                     </div>
                                 ))}
@@ -387,10 +553,40 @@ export default function SocialPage() {
             {showOptionsModal && (
                 <div className={styles.modalOverlay} onClick={() => setShowOptionsModal(null)}>
                     <div className={styles.optionsModalContent} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.optionItem}><span>🔇</span> Masquer notifications</button>
-                        <button className={styles.optionItem}><span>🚫</span> Bloquer</button>
-                        <button className={`${styles.optionItem} ${styles.danger}`}><span>🗑️</span> Supprimer</button>
+                        <button className={`${styles.optionItem} ${styles.danger}`} onClick={() => handleBlock(showOptionsModal)}>
+                            <span>🚫</span> Bloquer
+                        </button>
+                        <button className={`${styles.optionItem} ${styles.danger}`} onClick={() => handleRemove(showOptionsModal)}>
+                            <span>🗑️</span> Supprimer
+                        </button>
                         <button className={styles.optionCancel} onClick={() => setShowOptionsModal(null)}>Annuler</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Défi (partie privée créée pour un ami) */}
+            {challengeTarget && (
+                <div className={styles.modalOverlay} onClick={closeChallengeModal}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.modalClose} onClick={closeChallengeModal}>✕</button>
+                        <h2 className={styles.modalTitle}>⚔️ Défier {challengeTarget.username}</h2>
+                        {currentGame?.gameId ? (
+                            <>
+                                <p className={styles.searchHint}>Partagez ce code avec {challengeTarget.username} :</p>
+                                <div className={styles.challengeCode}>{currentGame.gameId}</div>
+                                <button
+                                    className={styles.addFriendButton}
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(currentGame.gameId);
+                                    }}
+                                >
+                                    📋 Copier le code
+                                </button>
+                                <p className={styles.searchHint}>En attente de {challengeTarget.username}...</p>
+                            </>
+                        ) : (
+                            <p className={styles.searchHint}>Création de la partie...</p>
+                        )}
                     </div>
                 </div>
             )}

@@ -533,6 +533,21 @@
     color: #666;
 }
 
+.matchOpponent {
+    width: 90px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 600;
+}
+
+.matchFerveurChange {
+    width: 90px;
+    text-align: right;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
 .noHistory {
     display: flex;
     flex-direction: column;

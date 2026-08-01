@@ -5,11 +5,20 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { useAuth } from '@/contexts/AuthContext';
+import { RequireAuth } from '@/components/Auth/RequireAuth';
 import styles from './page.module.css';
 
 export default function OnlinePage() {
+    return (
+        <RequireAuth>
+            <OnlineContent />
+        </RequireAuth>
+    );
+}
+
+function OnlineContent() {
     const router = useRouter();
-    const { profile } = useAuth();
+    const { user, profile } = useAuth();
     const {
         isConnected,
         error,
@@ -84,7 +93,7 @@ export default function OnlinePage() {
         localStorage.setItem('playerName', playerName);
         sessionStorage.setItem('gameMode', ranked ? 'ranked' : 'casual');
         setMode('matchmaking');
-        joinQueue(playerName);
+        joinQueue(playerName, ranked, user?.id);
     };
 
     const handleLeaveQueue = () => {

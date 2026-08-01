@@ -5,25 +5,28 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMostPlayedGod } from '@/services/supabase-profile';
+import { getMostPlayedGod, getMatchHistory, type MatchHistoryEntry } from '@/services/supabase-profile';
 import { ALL_GODS } from '@/data/gods';
 import { getRankByFerveur, getRankProgress } from '@/data/ranks';
 import styles from './page.module.css';
 
-// Données mock pour l'historique des parties (20 dernières)
-const MOCK_MATCH_HISTORY = [
-    { id: 1, playerGods: ['zeus', 'poseidon', 'athena', 'apollon'], opponentGods: ['hades', 'ares', 'nyx', 'artemis'], result: 'victory', turns: 8, matchType: 'ranked' },
-    { id: 2, playerGods: ['hades', 'nyx', 'ares', 'hermes'], opponentGods: ['zeus', 'athena', 'artemis', 'poseidon'], result: 'defeat', turns: 12, matchType: 'ranked' },
-    { id: 3, playerGods: ['apollon', 'artemis', 'hermes', 'athena'], opponentGods: ['poseidon', 'hades', 'nyx', 'ares'], result: 'victory', turns: 6, matchType: 'friendly' },
-    { id: 4, playerGods: ['zeus', 'ares', 'hephaïstos', 'poseidon'], opponentGods: ['apollon', 'artemis', 'athena', 'hermes'], result: 'victory', turns: 9, matchType: 'private' },
-    { id: 5, playerGods: ['poseidon', 'nyx', 'hermes', 'hades'], opponentGods: ['zeus', 'athena', 'ares', 'apollon'], result: 'defeat', turns: 15, matchType: 'ranked' },
-    { id: 6, playerGods: ['athena', 'artemis', 'apollon', 'zeus'], opponentGods: ['hephaïstos', 'hermes', 'nyx', 'hades'], result: 'victory', turns: 7, matchType: 'friendly' },
-];
+function formatMatchDate(iso: string): string {
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return "À l'instant";
+    if (diffMin < 60) return `Il y a ${diffMin} min`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `Il y a ${diffH} h`;
+    const diffD = Math.floor(diffH / 24);
+    return `Il y a ${diffD} j`;
+}
 
 export default function ProfilePage() {
     const router = useRouter();
     const { user, profile, loading, profileLoading, signOut, updateProfile, refreshProfile } = useAuth();
     const [showAvatarModal, setShowAvatarModal] = useState(false);
+    const [matchHistory, setMatchHistory] = useState<MatchHistoryEntry[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(true);
 
     useEffect(() => {
         // Rafraîchir le profil au chargement si user existe mais pas de profil
@@ -31,6 +34,14 @@ export default function ProfilePage() {
             refreshProfile();
         }
     }, [user, profile, profileLoading, refreshProfile]);
+
+    useEffect(() => {
+        if (!user) return;
+        getMatchHistory(20)
+            .then(setMatchHistory)
+            .catch((err) => console.error('Erreur historique parties:', err))
+            .finally(() => setHistoryLoading(false));
+    }, [user]);
 
     // Rediriger si non connecté
     useEffect(() => {
@@ -93,8 +104,7 @@ export default function ProfilePage() {
         );
     }
 
-    // TODO: Utiliser profile?.ferveur quand disponible dans UserProfile
-    const userFerveur = 450; // Valeur mock pour démo
+    const userFerveur = profile.ferveur;
     const userRank = getRankByFerveur(userFerveur);
     const rankProgress = getRankProgress(userFerveur);
     const winRate = profile.stats.totalGames > 0
@@ -216,60 +226,33 @@ export default function ProfilePage() {
                         <span className={styles.sectionTitle}>Historique des parties</span>
                     </div>
                     <div className={styles.historyContent}>
-                        {MOCK_MATCH_HISTORY.slice(0, 20).map((match) => {
-                            const getGodIcon = (godId: string) => {
-                                const god = ALL_GODS.find(g => g.id === godId);
-                                return god?.imageUrl || '/cards/gods/zeus.png';
-                            };
-
-                            return (
+                        {historyLoading ? (
+                            <div className={styles.noHistory}>
+                                <span>⏳</span>
+                                <span>Chargement...</span>
+                            </div>
+                        ) : matchHistory.length === 0 ? (
+                            <div className={styles.noHistory}>
+                                <span>🎮</span>
+                                <span>Aucune partie classée jouée</span>
+                            </div>
+                        ) : (
+                            matchHistory.map((match) => (
                                 <div key={match.id} className={`${styles.matchCard} ${match.result === 'victory' ? styles.matchWin : styles.matchLoss}`}>
-                                    {/* Dieux du joueur */}
-                                    <div className={styles.matchGods}>
-                                        {match.playerGods.map((godId, i) => (
-                                            <Image
-                                                key={i}
-                                                src={getGodIcon(godId)}
-                                                alt={godId}
-                                                width={36}
-                                                height={36}
-                                                className={styles.matchGodIcon}
-                                            />
-                                        ))}
-                                    </div>
+                                    <span className={styles.matchOpponent}>vs {match.opponent_name}</span>
 
-                                    {/* Résultat */}
                                     <div className={styles.matchResult}>
-                                        <span className={styles.matchType}>
-                                            {match.matchType === 'ranked' ? '⚔️ Classée' : match.matchType === 'friendly' ? '🤝 Amical' : '🔒 Privée'}
-                                        </span>
                                         <span className={`${styles.matchResultText} ${match.result === 'victory' ? styles.win : styles.loss}`}>
                                             {match.result === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}
                                         </span>
-                                        <span className={styles.matchTurns}>{match.turns} tours</span>
+                                        <span className={styles.matchTurns}>{formatMatchDate(match.created_at)}</span>
                                     </div>
 
-                                    {/* Dieux adversaire */}
-                                    <div className={styles.matchGods}>
-                                        {match.opponentGods.map((godId, i) => (
-                                            <Image
-                                                key={i}
-                                                src={getGodIcon(godId)}
-                                                alt={godId}
-                                                width={36}
-                                                height={36}
-                                                className={styles.matchGodIcon}
-                                            />
-                                        ))}
-                                    </div>
+                                    <span className={`${styles.matchFerveurChange} ${match.ferveur_change >= 0 ? styles.win : styles.loss}`}>
+                                        {match.ferveur_change >= 0 ? '+' : ''}{match.ferveur_change} 🔥
+                                    </span>
                                 </div>
-                            );
-                        })}
-                        {MOCK_MATCH_HISTORY.length === 0 && (
-                            <div className={styles.noHistory}>
-                                <span>🎮</span>
-                                <span>Aucune partie en ligne jouée</span>
-                            </div>
+                            ))
                         )}
                     </div>
                 </section>
