@@ -8,9 +8,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
     getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest,
     getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, MailboxReward,
-    markWelcomeSeen,
+    markWelcomeSeen, pingLastActive,
 } from '@/services/supabase-profile';
 import styles from './GlobalUI.module.css';
+
+// Bien en dessous de la fenêtre de 2 min utilisée par get_friends_list() pour dériver le
+// statut "En ligne" -- une requête ratée n'a donc pas le temps de faire passer quelqu'un
+// pour hors ligne avant le prochain essai.
+const PRESENCE_HEARTBEAT_MS = 60000;
 
 function formatRewardDate(iso: string): string {
     const days = Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
@@ -354,6 +359,16 @@ export default function GlobalUI() {
             setShowRulesModal(true);
         }
     }, [user, profile]);
+
+    // Heartbeat de présence : pingLastActive() existait déjà (pour get_friends_list(), qui
+    // dérive le statut "En ligne" de last_active_at) mais n'était jamais appelé nulle part --
+    // le statut en ligne des amis ne reflétait donc jamais rien de réel après la connexion.
+    useEffect(() => {
+        if (!user) return;
+        pingLastActive(user.id);
+        const interval = setInterval(() => pingLastActive(user.id), PRESENCE_HEARTBEAT_MS);
+        return () => clearInterval(interval);
+    }, [user]);
 
     const closeQuestsModal = () => {
         setShowQuestsModal(false);
