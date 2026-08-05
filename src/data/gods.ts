@@ -412,7 +412,7 @@ export const ALL_GODS: GodCard[] = [
     },
 
     // =====================
-    // CHEVALIER D'ATHÉNA (Serviteur - Lumière ☀️) - Duel + Histoire
+    // CHEVALIER D'ATHÉNA (Serviteur - Lumière ☀️) - Exclusif Histoire
     // =====================
     {
         id: 'athena_knight',
@@ -422,6 +422,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 16,
         imageUrl: '/cards/gods/card_athena_knight.png',
         flavorText: '"Pour la gloire d\'Athéna, nous ne fléchirons jamais!"',
+        hidden: true,  // Exclusif mode Histoire (intégration Duel possible plus tard)
         category: 'servant',
         affiliatedTo: 'athena',
         duelCost: 2,
