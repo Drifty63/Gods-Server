@@ -22,6 +22,7 @@ export interface DailyQuest {
     target: number;
     reward: number;
     claimed: boolean;
+    godId?: string; // présent uniquement pour la quête "jouez ce dieu" (id usegod_<godId>)
 }
 
 export interface DailyQuestsData {

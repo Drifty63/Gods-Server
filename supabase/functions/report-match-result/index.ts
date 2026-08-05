@@ -5,10 +5,11 @@ Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
     try {
-        const { gameId, token, didIWin } = await req.json();
+        const { gameId, token, didIWin, godsUsed } = await req.json();
         if (!gameId || !token || typeof didIWin !== 'boolean') {
             return jsonResponse({ error: 'gameId, token et didIWin (boolean) requis' }, 400);
         }
+        const myGodsUsed: string[] = Array.isArray(godsUsed) ? godsUsed.filter((g: unknown) => typeof g === 'string') : [];
 
         const admin = getAdminClient();
         const side = await resolveSide(admin, gameId, token);
@@ -33,18 +34,31 @@ Deno.serve(async (req: Request) => {
 
         const game = updated[0];
 
-        // Progression des quêtes journalières ("jouer une partie" / "gagner 3 parties") : une
-        // partie qui arrive ICI (et pas via le forfait de leave-game) s'est terminée normalement
-        // (PV à 0), donc compte pour les DEUX joueurs -- classée ou non, mais seulement en
-        // matchmaking aléatoire (is_private=false) : pas pour les parties privées / défis entre
-        // amis, sur demande explicite.
+        // Progression des quêtes journalières ("jouer une partie" / "gagner 3 parties" / "jouer
+        // CE dieu 3 fois") : une partie qui arrive ICI (et pas via le forfait de leave-game)
+        // s'est terminée normalement (PV à 0), donc compte pour les DEUX joueurs -- classée ou
+        // non, mais seulement en matchmaking aléatoire (is_private=false), pas pour les parties
+        // privées / défis entre amis, sur demande explicite.
+        //
+        // godsUsed (pour la quête "jouez ce dieu") ne vient QUE de la requête de CET appelant --
+        // à cause de la garde anti-doublon ci-dessus, seul le premier des deux clients à arriver
+        // ici exécute ce bloc, donc on ne connaît les dieux réellement joués que du côté de
+        // l'appelant. On ne l'attribue donc qu'à son propre camp (side) ; l'autre joueur garde
+        // sa progression générale ("jouer"/"gagner") mais pas le crédit spécifique au dieu pour
+        // cette partie -- limitation acceptée plutôt que de complexifier la garde anti-doublon.
         if (!game.is_private) {
             if (game.host_user_id) {
-                const { error } = await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
+                const { error } = await admin.rpc('bump_daily_quest_progress', {
+                    p_user_id: game.host_user_id, p_won: winnerSide === 'host',
+                    p_gods_used: side === 'host' ? myGodsUsed : [],
+                });
                 if (error) console.error('report-match-result: bump_daily_quest_progress (host) failed:', error.message, gameId, game.host_user_id);
             }
             if (game.guest_user_id) {
-                const { error } = await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+                const { error } = await admin.rpc('bump_daily_quest_progress', {
+                    p_user_id: game.guest_user_id, p_won: winnerSide === 'guest',
+                    p_gods_used: side === 'guest' ? myGodsUsed : [],
+                });
                 if (error) console.error('report-match-result: bump_daily_quest_progress (guest) failed:', error.message, gameId, game.guest_user_id);
             }
         }

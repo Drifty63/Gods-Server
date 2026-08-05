@@ -401,11 +401,11 @@ export function useMultiplayer() {
     // Signale la fin de partie (déclenchée localement dès que le moteur passe en 'finished') pour
     // que le résultat soit persisté (Ferveur/stats/historique) côté serveur. Les deux clients le
     // détectent indépendamment et appellent ceci -- l'Edge Function ne traite que le premier appel.
-    const reportMatchResult = useCallback(async (didIWin: boolean) => {
+    const reportMatchResult = useCallback(async (didIWin: boolean, godsUsed: string[] = []) => {
         if (!gameIdRef.current || !tokenRef.current) return;
         const supabase = getSupabaseClient();
         await supabase.functions.invoke('report-match-result', {
-            body: { gameId: gameIdRef.current, token: tokenRef.current, didIWin },
+            body: { gameId: gameIdRef.current, token: tokenRef.current, didIWin, godsUsed },
         });
     }, []);
 

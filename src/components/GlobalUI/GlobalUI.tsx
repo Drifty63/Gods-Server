@@ -10,6 +10,20 @@ import {
     getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, MailboxReward,
     markWelcomeSeen, pingLastActive,
 } from '@/services/supabase-profile';
+import { getGodById } from '@/data/gods';
+
+// La quête "usegod_<godId>" est générée dynamiquement côté serveur (un dieu possédé au
+// hasard) et ne connaît que son id de dieu -- le nom réel est résolu ici, côté client, plutôt
+// que de dupliquer les noms de dieux dans une fonction SQL.
+function getQuestDisplayName(quest: DailyQuest): string {
+    if (quest.godId) {
+        const god = getGodById(quest.godId);
+        // Les noms de dieux sont verbeux ("Poséidon, Dieu des océans") -- juste le prénom pour
+        // un titre de quête lisible.
+        if (god) return `Jouez ${god.name.split(',')[0]} ${quest.target} fois`;
+    }
+    return quest.name;
+}
 import styles from './GlobalUI.module.css';
 
 // Bien en dessous de la fenêtre de 2 min utilisée par get_friends_list() pour dériver le
@@ -589,7 +603,7 @@ export default function GlobalUI() {
                                 {dailyQuests.map((quest) => (
                                     <div key={quest.id} className={`${styles.questItem} ${quest.claimed ? styles.questCompleted : ''}`}>
                                         <div className={styles.questInfo}>
-                                            <span className={styles.questName}>{quest.name}</span>
+                                            <span className={styles.questName}>{getQuestDisplayName(quest)}</span>
                                             <div className={styles.questProgressContainer}>
                                                 <div className={styles.questProgressBar}>
                                                     <div

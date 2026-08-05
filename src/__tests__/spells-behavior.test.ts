@@ -53,6 +53,7 @@ function createPlayerState(
         fatigueCounter: 0,
         hasPlayedCard: false,
         hasDiscardedForEnergy: false,
+        godsCastThisMatch: [],
     };
 }
 
@@ -638,6 +639,53 @@ describe("Un dieu étourdi ne peut pas lancer de sort", () => {
         expect(enemy.currentHealth).toBe(enemyHealthBefore);
         expect(engine.getCurrentPlayer().energy).toBe(energyBefore);
         expect(engine.getCurrentPlayer().hasPlayedCard).toBe(false);
+    });
+});
+
+// =====================================================
+// TESTS DE SUIVI "DIEUX JOUÉS" (quête journalière usegod_<godId>)
+// =====================================================
+
+describe('godsCastThisMatch suit les dieux ayant lancé un sort', () => {
+    it('ajoute le dieu à godsCastThisMatch après un cast réussi, sans doublon', () => {
+        const engine = new GameEngine(createTestGameState(['poseidon', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+
+        expect(engine.getCurrentPlayer().godsCastThisMatch).toEqual([]);
+
+        addCardToHand(engine, 'poseidon_generator_1');
+        const enemy = getEnemyGod(engine);
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'poseidon_generator_1', targetGodId: enemy.card.id,
+        });
+
+        expect(engine.getCurrentPlayer().godsCastThisMatch).toEqual(['poseidon']);
+
+        // Un deuxième cast du MÊME dieu (tour suivant) ne doit pas dupliquer l'entrée.
+        engine.endTurn();
+        engine.endTurn(); // repasse au joueur 1
+        addCardToHand(engine, 'poseidon_generator_1');
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'poseidon_generator_1', targetGodId: enemy.card.id,
+        });
+
+        expect(engine.getCurrentPlayer().godsCastThisMatch).toEqual(['poseidon']);
+    });
+
+    it("n'ajoute PAS le dieu si le poison le tue avant que le sort ne parte", () => {
+        const engine = new GameEngine(createTestGameState(['poseidon', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+
+        const poseidon = engine.getCurrentPlayer().gods.find(g => g.card.id === 'poseidon')!;
+        poseidon.currentHealth = 2;
+        poseidon.statusEffects.push({ type: 'poison', stacks: 5 });
+
+        addCardToHand(engine, 'poseidon_generator_1');
+        const enemy = getEnemyGod(engine);
+        engine.executeAction({
+            type: 'play_card', playerId: 'player1', cardId: 'poseidon_generator_1', targetGodId: enemy.card.id,
+        });
+
+        expect(poseidon.isDead).toBe(true);
+        expect(engine.getCurrentPlayer().godsCastThisMatch).toEqual([]);
     });
 });
 

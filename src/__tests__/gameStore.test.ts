@@ -40,6 +40,7 @@ function createPlayerState(id: string, name: string, godIds: string[]): PlayerSt
         fatigueCounter: 0,
         hasPlayedCard: false,
         hasDiscardedForEnergy: false,
+        godsCastThisMatch: [],
     };
 }
 

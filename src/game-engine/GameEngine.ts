@@ -726,6 +726,12 @@ export class GameEngine {
             return { success: true, message: `${castingGod.card.name} meurt du poison avant de lancer son sort` };
         }
 
+        // Suivi pour la quête journalière "jouez ce dieu X fois" : dieux ayant réellement lancé
+        // un sort cette partie (le sort a survécu au poison ci-dessus).
+        if (!player.godsCastThisMatch.includes(castingGod.card.id)) {
+            player.godsCastThisMatch.push(castingGod.card.id);
+        }
+
         // Préparer les cibles
         const targetIds = action.targetGodIds || (action.targetGodId ? [action.targetGodId] : []);
         let targetIndex = 0;
@@ -1336,6 +1342,7 @@ export class GameEngine {
             fatigueCounter: 0,
             hasPlayedCard: false,
             hasDiscardedForEnergy: false,
+            godsCastThisMatch: [],
         });
 
         const isPlayer1First = firstPlayerId === player1Id;

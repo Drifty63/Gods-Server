@@ -110,7 +110,8 @@ export default function OnlineGamePage() {
     useEffect(() => {
         if (gameState?.status === 'finished' && !hasReportedResultRef.current) {
             hasReportedResultRef.current = true;
-            reportMatchResult(gameState.winnerId === playerId);
+            const myGodsCast = gameState.players.find(p => p.id === playerId)?.godsCastThisMatch ?? [];
+            reportMatchResult(gameState.winnerId === playerId, myGodsCast);
         }
     }, [gameState?.status, gameState?.winnerId, playerId, reportMatchResult]);
 

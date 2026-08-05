@@ -111,6 +111,7 @@ export interface PlayerState {
     hasPlayedCard: boolean;              // A joué une carte ce tour
     hasDiscardedForEnergy: boolean;      // A défaussé pour énergie ce tour
     afkTurns?: number;                   // Compteur de tours AFK (sans jouer de carte) - pour anti-AFK online
+    godsCastThisMatch: string[];         // Ids des dieux ayant lancé au moins un sort cette partie (quête "jouer ce dieu")
 }
 
 // Entrée du log de combat : permet à un joueur de vérifier après coup quelle carte a été jouée,
