@@ -186,7 +186,7 @@ export default function RulesPage() {
                         <div className={styles.statusCard}>
                             <span className={styles.statusIcon}>🛡️</span>
                             <strong>Bouclier</strong>
-                            <p>Permet de dépasser la limite de points de vie maximum</p>
+                            <p>Absorbe les dégâts avant qu'ils ne touchent les points de vie</p>
                         </div>
                         <div className={styles.statusCard}>
                             <span className={styles.statusIcon}>😤</span>

@@ -110,7 +110,7 @@ function HomeContent() {
               </p>
               <p className={styles.newsItem}>
                 <span className={styles.newsBullet}>-</span>
-                Présentation de l'extension <Link href="/news/death-glory" className={styles.newsLink}>Death & Glory</Link>.
+                Présentation de l'extension Death & Glory.
               </p>
               <p className={styles.newsItem}>
                 <span className={styles.newsBullet}>-</span>

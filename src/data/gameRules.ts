@@ -16,7 +16,7 @@
  */
 export const GAME_CONFIG = {
     /** Nombre de dieux par équipe */
-    GODS_PER_TEAM: 3,
+    GODS_PER_TEAM: 4,
 
     /** Taille maximale de la main */
     MAX_HAND_SIZE: 5,
@@ -117,29 +117,29 @@ export const STATUS_EFFECTS = {
         description: 'Avant que le dieu ne lance un sort, il subit des dégâts égaux aux marques de poison. Les dégâts ignorent le bouclier.',
         stackable: true
     },
+    regen: {
+        name: 'Régénération',
+        icon: '💚',
+        description: 'Soigne X PV en fin de tour. Retire le poison en cours.',
+        stackable: true
+    },
     shield: {
         name: 'Bouclier',
         icon: '🛡️',
         description: 'Absorbe X dégâts avant les PV. Se consomme lors des attaques.',
         stackable: true
     },
-    frozen: {
-        name: 'Gelé',
-        icon: '❄️',
-        description: 'Le dieu ne peut pas attaquer pendant X tours.',
-        stackable: false
-    },
-    stunned: {
+    stun: {
         name: 'Étourdi',
         icon: '💫',
-        description: 'Le dieu passe son prochain tour.',
+        description: 'Le dieu ne peut pas lancer de sort pendant la durée.',
         stackable: false
     },
-    lightning_mark: {
+    lightning: {
         name: 'Marque de Foudre',
         icon: '⚡',
-        description: 'Les prochains dégâts reçus sont doublés.',
-        stackable: false
+        description: '+2 dégâts par marque quand elles sont retirées.',
+        stackable: true
     },
     provocation: {
         name: 'Provocation',
@@ -147,22 +147,16 @@ export const STATUS_EFFECTS = {
         description: 'Force les ennemis à cibler ce dieu en priorité.',
         stackable: false
     },
-    burn: {
-        name: 'Brûlure',
-        icon: '🔥',
-        description: 'Inflige 1 dégât par tour pendant X tours.',
-        stackable: true
-    },
     weakness: {
         name: 'Faiblesse',
         icon: '📉',
         description: 'Ajoute une faiblesse temporaire à un élément.',
         stackable: false
     },
-    invincible: {
-        name: 'Invincible',
-        icon: '✨',
-        description: 'Immunisé aux dégâts pendant X tours.',
+    weakness_immunity: {
+        name: 'Immunité à la faiblesse',
+        icon: '🚫',
+        description: "Empêche l'ajout d'une nouvelle faiblesse pendant la durée.",
         stackable: false
     }
 } as const;
