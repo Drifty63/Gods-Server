@@ -704,6 +704,11 @@ export class GameEngine {
         const castingGod = player.gods.find(g => g.card.id === card.godId && !g.isDead);
         if (!castingGod) return { success: false, message: 'Le dieu de cette carte est mort' };
 
+        // Étourdissement : jusqu'ici ce n'était vérifié que côté UI (gameStore.canPlayCard) et
+        // IA (AIPlayer), jamais dans l'engine lui-même -- même faille que le poison. Un dieu
+        // étourdi ne peut tout simplement pas lancer de sort (voir /rules).
+        if (!canGodAct(castingGod)) return { success: false, message: `${castingGod.card.name} est étourdi et ne peut pas lancer de sort` };
+
         // Payer et gagner l'énergie (plafonnée)
         player.energy = Math.min(player.energy - card.energyCost + card.energyGain, MAX_ENERGY);
 

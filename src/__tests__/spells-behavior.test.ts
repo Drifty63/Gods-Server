@@ -612,6 +612,36 @@ describe('Le poison inflige des dégâts', () => {
 });
 
 // =====================================================
+// TESTS D'ÉTOURDISSEMENT (STUN)
+// =====================================================
+
+describe("Un dieu étourdi ne peut pas lancer de sort", () => {
+    it("playCard échoue et l'état n'est pas modifié si le dieu qui lance a le statut stun", () => {
+        const engine = new GameEngine(createTestGameState(['poseidon', 'zeus', 'hestia'], ['hades', 'ares', 'athena']));
+
+        const poseidon = engine.getCurrentPlayer().gods.find(g => g.card.id === 'poseidon')!;
+        poseidon.statusEffects.push({ type: 'stun', stacks: 1, duration: 2 });
+
+        addCardToHand(engine, 'poseidon_generator_1');
+        const enemy = getEnemyGod(engine);
+        const enemyHealthBefore = enemy.currentHealth;
+        const energyBefore = engine.getCurrentPlayer().energy;
+
+        const result = engine.executeAction({
+            type: 'play_card',
+            playerId: 'player1',
+            cardId: 'poseidon_generator_1',
+            targetGodId: enemy.card.id,
+        });
+
+        expect(result.success).toBe(false);
+        expect(enemy.currentHealth).toBe(enemyHealthBefore);
+        expect(engine.getCurrentPlayer().energy).toBe(energyBefore);
+        expect(engine.getCurrentPlayer().hasPlayedCard).toBe(false);
+    });
+});
+
+// =====================================================
 // TESTS DE FIN DE PARTIE
 // =====================================================
 
