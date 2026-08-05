@@ -40,16 +40,19 @@ Deno.serve(async (req: Request) => {
         // amis, sur demande explicite.
         if (!game.is_private) {
             if (game.host_user_id) {
-                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
+                const { error } = await admin.rpc('bump_daily_quest_progress', { p_user_id: game.host_user_id, p_won: winnerSide === 'host' });
+                if (error) console.error('report-match-result: bump_daily_quest_progress (host) failed:', error.message, gameId, game.host_user_id);
             }
             if (game.guest_user_id) {
-                await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+                const { error } = await admin.rpc('bump_daily_quest_progress', { p_user_id: game.guest_user_id, p_won: winnerSide === 'guest' });
+                if (error) console.error('report-match-result: bump_daily_quest_progress (guest) failed:', error.message, gameId, game.guest_user_id);
             }
         }
 
         if (game.is_ranked && game.host_user_id && game.guest_user_id) {
             const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
-            await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });
+            const { error } = await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });
+            if (error) console.error('report-match-result: apply_match_result failed:', error.message, gameId, winnerUserId);
         }
 
         return jsonResponse({ ok: true });

@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
 
         const bothSelected = !!game.host_gods && !!game.guest_gods;
         if (bothSelected) {
-            await admin
+            const { error: transitionErr } = await admin
                 .from('games')
                 .update({
                     status: 'rps',
@@ -37,10 +37,12 @@ Deno.serve(async (req: Request) => {
                     rps_winner: null,
                 })
                 .eq('id', gameId);
-            await admin
+            if (transitionErr) console.error('select-gods: rps transition (games) failed:', transitionErr.message, gameId);
+            const { error: resetErr } = await admin
                 .from('game_tokens')
                 .update({ rps_host_choice: null, rps_guest_choice: null })
                 .eq('game_id', gameId);
+            if (resetErr) console.error('select-gods: rps choice reset (game_tokens) failed:', resetErr.message, gameId);
         }
 
         return jsonResponse({ ok: true, bothSelected });

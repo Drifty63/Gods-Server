@@ -34,13 +34,15 @@ Deno.serve(async (req: Request) => {
             if (!game.is_private) {
                 const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
                 if (winnerUserId) {
-                    await admin.rpc('bump_daily_quest_progress', { p_user_id: winnerUserId, p_won: true });
+                    const { error: questErr } = await admin.rpc('bump_daily_quest_progress', { p_user_id: winnerUserId, p_won: true });
+                    if (questErr) console.error('leave-game: bump_daily_quest_progress failed:', questErr.message, gameId, winnerUserId);
                 }
             }
 
             if (game.is_ranked && game.host_user_id && game.guest_user_id) {
                 const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
-                await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });
+                const { error: matchErr } = await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });
+                if (matchErr) console.error('leave-game: apply_match_result failed:', matchErr.message, gameId, winnerUserId);
             }
         }
 

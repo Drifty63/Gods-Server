@@ -36,8 +36,10 @@ Deno.serve(async (req: Request) => {
         const choiceColumn = side === 'host' ? 'rps_host_choice' : 'rps_guest_choice';
         const chosenFlag = side === 'host' ? 'rps_host_chosen' : 'rps_guest_chosen';
 
-        await admin.from('game_tokens').update({ [choiceColumn]: choice }).eq('game_id', gameId);
-        await admin.from('games').update({ [chosenFlag]: true }).eq('id', gameId);
+        const { error: choiceErr } = await admin.from('game_tokens').update({ [choiceColumn]: choice }).eq('game_id', gameId);
+        if (choiceErr) console.error('rps-choice: game_tokens choice update failed:', choiceErr.message, gameId, side);
+        const { error: chosenErr } = await admin.from('games').update({ [chosenFlag]: true }).eq('id', gameId);
+        if (chosenErr) console.error('rps-choice: games chosen-flag update failed:', chosenErr.message, gameId, side);
 
         const { data: tokens } = await admin
             .from('game_tokens')
@@ -52,11 +54,12 @@ Deno.serve(async (req: Request) => {
                 // que le client puisse afficher la révélation "égalité, on recommence" — reset
                 // immédiat des choix côté serveur pour permettre un nouveau round tout de suite,
                 // le client gère lui-même le délai d'affichage de la bannière.
-                await admin
+                const { error: resetErr } = await admin
                     .from('game_tokens')
                     .update({ rps_host_choice: null, rps_guest_choice: null })
                     .eq('game_id', gameId);
-                await admin
+                if (resetErr) console.error('rps-choice: draw reset (game_tokens) failed:', resetErr.message, gameId);
+                const { error: drawErr } = await admin
                     .from('games')
                     .update({
                         rps_host_chosen: false,
@@ -68,9 +71,10 @@ Deno.serve(async (req: Request) => {
                         },
                     })
                     .eq('id', gameId);
+                if (drawErr) console.error('rps-choice: draw result (games) failed:', drawErr.message, gameId);
             } else {
                 const winner = result === 'host_wins' ? 'host' : 'guest';
-                await admin
+                const { error: winErr } = await admin
                     .from('games')
                     .update({
                         rps_result: {
@@ -82,6 +86,7 @@ Deno.serve(async (req: Request) => {
                         status: 'rps_deciding',
                     })
                     .eq('id', gameId);
+                if (winErr) console.error('rps-choice: winner result (games) failed:', winErr.message, gameId, winner);
             }
         }
 
