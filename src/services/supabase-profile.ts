@@ -67,6 +67,7 @@ export interface UserProfile {
     created_at: string;
     last_login_at: string;
     last_active_at: string;
+    has_seen_welcome: boolean;
     savedDecks: SavedDeck[]; // fetched from the saved_decks table, attached client-side
 }
 
@@ -369,6 +370,13 @@ export async function getMatchHistory(limit: number = 20): Promise<MatchHistoryE
 export async function pingLastActive(uid: string): Promise<void> {
     const supabase = getSupabaseClient();
     await supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', uid);
+}
+
+// Marque le modal de bienvenue comme vu, pour qu'il ne s'affiche plus jamais après la
+// première connexion.
+export async function markWelcomeSeen(uid: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    await supabase.from('profiles').update({ has_seen_welcome: true }).eq('id', uid);
 }
 
 // =====================================

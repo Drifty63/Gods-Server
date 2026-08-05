@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
     getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest,
     getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, MailboxReward,
+    markWelcomeSeen,
 } from '@/services/supabase-profile';
 import styles from './GlobalUI.module.css';
 
@@ -337,7 +338,22 @@ export default function GlobalUI() {
 
     const closeRulesModal = () => {
         setShowRulesModal(false);
+        // Si ce modal vient de s'ouvrir automatiquement pour un nouveau joueur (voir l'effet
+        // ci-dessous), on marque la bienvenue comme vue pour qu'il ne se rouvre plus jamais.
+        // No-op pour un joueur existant qui a ouvert les règles manuellement (déjà à true).
+        if (user && profile && !profile.has_seen_welcome) {
+            markWelcomeSeen(user.id).then(() => refreshProfile());
+        }
     };
+
+    // Modal de bienvenue : première fois qu'un nouveau joueur a un deck complet (juste après
+    // le choix du pack starter), on lui montre directement les règles au lieu de compter sur
+    // lui pour trouver le bouton "Règles" enfoui dans les options.
+    useEffect(() => {
+        if (user && profile && profile.gods_owned.length > 0 && !profile.has_seen_welcome) {
+            setShowRulesModal(true);
+        }
+    }, [user, profile]);
 
     const closeQuestsModal = () => {
         setShowQuestsModal(false);
