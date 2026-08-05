@@ -436,6 +436,22 @@
     transition: all 0.3s ease;
 }
 
+.navIconWrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.navBadge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: 2px solid var(--bg-dark, #0f0f1a);
+}
+
 .navIconImage {
     width: clamp(18px, 6vw, 24px);
     height: clamp(18px, 6vw, 24px);

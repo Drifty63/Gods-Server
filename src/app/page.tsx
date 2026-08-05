@@ -7,6 +7,7 @@ import styles from './page.module.css';
 import { ALL_GODS, getVisibleGods } from '@/data/gods';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
+import { getPendingRequests } from '@/services/supabase-profile';
 
 export default function Home() {
   return (
@@ -25,6 +26,17 @@ function HomeContent() {
   const userAmbroisie = profile?.ambroisie ?? 0;
   // Filtrer les dieux selon le statut créateur
   const visibleGods = useMemo(() => getVisibleGods(profile?.is_creator || false), [profile?.is_creator]);
+
+  // Demandes d'ami en attente : jusqu'ici, rien nulle part n'indiquait qu'une demande était
+  // arrivée -- il fallait aller sur /social par réflexe pour le découvrir. Petit point rouge
+  // sur l'icône Social le temps qu'on a une vraie notification.
+  const [hasPendingFriendRequests, setHasPendingFriendRequests] = useState(false);
+  useEffect(() => {
+    if (!profile) return;
+    getPendingRequests()
+      .then(requests => setHasPendingFriendRequests(requests.length > 0))
+      .catch(() => {});
+  }, [profile]);
 
   // Carrousel automatique des dieux (10 secondes)
   useEffect(() => {
@@ -214,7 +226,10 @@ function HomeContent() {
         </Link>
 
         <Link href="/social" className={styles.navItem}>
-          <span className={styles.navIcon}>💬</span>
+          <span className={styles.navIconWrapper}>
+            <span className={styles.navIcon}>💬</span>
+            {hasPendingFriendRequests && <span className={styles.navBadge} aria-label="Demandes d'ami en attente" />}
+          </span>
           <span className={styles.navLabel}>Social</span>
         </Link>
 
