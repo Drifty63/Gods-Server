@@ -395,7 +395,7 @@ export const ALL_GODS: GodCard[] = [
     },
 
     // =====================
-    // ULYSSE (Créature - Eau 💧) - Duel + Histoire
+    // ULYSSE (Créature - Eau 💧) - Exclusif Histoire
     // =====================
     {
         id: 'ulysses',
@@ -405,6 +405,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 20,
         imageUrl: '/cards/gods/card_ulysses.png',
         flavorText: '"Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies."',
+        hidden: true,  // Exclusif mode Histoire
         category: 'creature',
         affiliatedTo: 'hestia',
         duelCost: 3,
