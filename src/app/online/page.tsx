@@ -215,7 +215,7 @@ function OnlineContent() {
                                 <div className={styles.modeIcon}>🎮</div>
                                 <div className={styles.modeInfo}>
                                     <h3>Rejoindre une Partie Privée</h3>
-                                    <p>Entrez le code d'un ami pour le rejoindre</p>
+                                    <p>Entrez le code d&apos;un ami pour le rejoindre</p>
                                 </div>
                                 <span className={styles.modeArrow}>→</span>
                             </div>
@@ -240,7 +240,7 @@ function OnlineContent() {
                             <span className={styles.searchIcon}>⚔️</span>
                         </div>
 
-                        <h2>Recherche d'un adversaire...</h2>
+                        <h2>Recherche d&apos;un adversaire...</h2>
                         <p className={styles.searchTime}>{formatTime(searchTime)}</p>
 
                         {queueStatus && (
@@ -282,7 +282,7 @@ function OnlineContent() {
                             <div className={styles.waitingDots}>
                                 <span>.</span><span>.</span><span>.</span>
                             </div>
-                            <p>En attente d'un autre joueur...</p>
+                            <p>En attente d&apos;un autre joueur...</p>
                         </div>
 
                         <button className={styles.cancelButton} onClick={() => setMode('menu')}>

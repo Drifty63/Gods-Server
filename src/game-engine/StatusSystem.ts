@@ -3,10 +3,10 @@
  * Poison, régénération, bouclier, stun, provocation, foudre, faiblesse
  */
 
-import { GodState, PlayerState, GameState } from '@/types/cards';
+import { GodState, PlayerState, GameState, StatusEffect } from '@/types/cards';
 import { handleGodDeath } from './DamageSystem';
 
-export type StatusEffect = 'poison' | 'regen' | 'shield' | 'stun' | 'provocation' | 'lightning' | 'weakness' | 'weakness_immunity';
+export type { StatusEffect };
 
 export interface StatusEntry {
     type: StatusEffect;

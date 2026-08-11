@@ -34,6 +34,14 @@ import styles from './page.module.css';
 
 type BattlePhase = 'loading' | 'team_selection' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
 
+// Dialogue de fin de combat, converti depuis le format DialogueLine (voir handleBattleEnd)
+interface PostBattleDialogue {
+    speaker: string;
+    speakerName: string;
+    text: string;
+    portrait: string;
+}
+
 // Mapping des IDs de dieux vers leurs couleurs
 const GOD_COLORS: Record<string, string> = {
     zeus: '#ffd700',
@@ -67,7 +75,7 @@ function StoryBattleContent() {
     // Stocker la config de bataille localement pour la garder disponible après le combat
     const [battleConfig, setBattleConfig] = useState<typeof currentBattleConfig>(null);
 
-    const [postBattleDialogues, setPostBattleDialogues] = useState<any[]>([]);
+    const [postBattleDialogues, setPostBattleDialogues] = useState<PostBattleDialogue[]>([]);
     const [postBattleIndex, setPostBattleIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -506,7 +514,7 @@ function StoryBattleContent() {
                             🔄 Réessayer
                         </button>
                         <Link href="/story" className={styles.backButton}>
-                            ← Retour à l'histoire
+                            ← Retour à l&apos;histoire
                         </Link>
                     </div>
                 </div>
@@ -601,7 +609,7 @@ function StoryBattleContent() {
                             </button>
 
                             <button className={styles.backButton} onClick={handleQuit}>
-                                ← Retour à l'histoire
+                                ← Retour à l&apos;histoire
                             </button>
                         </div>
                     </div>
@@ -875,7 +883,7 @@ function StoryBattleContent() {
                         )}
 
                         <button onClick={handleContinue} className={styles.continueButton}>
-                            ▶ Continuer l'histoire
+                            ▶ Continuer l&apos;histoire
                         </button>
                     </div>
                 </div>
@@ -906,7 +914,7 @@ function StoryBattleContent() {
                         {/* Si c'est un combat où on peut continuer malgré la défaite (comme le prologue) */}
                         {canContinue ? (
                             <button onClick={handleContinue} className={styles.continueButton}>
-                                ▶ Continuer l'histoire
+                                ▶ Continuer l&apos;histoire
                             </button>
                         ) : (
                             <div className={styles.buttonGroup}>

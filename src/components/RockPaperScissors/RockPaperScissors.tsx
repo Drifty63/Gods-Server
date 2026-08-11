@@ -16,6 +16,10 @@ const CHOICES: { id: Choice; emoji: string; name: string }[] = [
     { id: 'scissors', emoji: '✂️', name: 'Ciseaux' },
 ];
 
+function pickRandomChoice(): Choice {
+    return CHOICES[Math.floor(Math.random() * CHOICES.length)].id;
+}
+
 function getWinner(player: Choice, ai: Choice): Result {
     if (player === ai) return 'draw';
     if (
@@ -39,7 +43,7 @@ export default function RockPaperScissors({ onComplete }: RockPaperScissorsProps
         setPlayerChoice(choice);
 
         // L'IA choisit aléatoirement
-        const aiPick = CHOICES[Math.floor(Math.random() * CHOICES.length)].id;
+        const aiPick = pickRandomChoice();
         setAiChoice(aiPick);
 
         // Lancer le décompte

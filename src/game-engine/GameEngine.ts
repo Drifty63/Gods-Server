@@ -18,7 +18,6 @@ import {
     GodState,
     SpellCard,
     GameAction,
-    StatusEffect,
     GodCard
 } from '@/types/cards';
 import type { Element } from '@/types/cards';
@@ -42,7 +41,7 @@ const generateUUID = () => {
         return window.crypto.randomUUID();
     }
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 };
@@ -1143,7 +1142,7 @@ export class GameEngine {
             case 'status':
                 for (const target of targets) {
                     if (effect.status) {
-                        addStatus(target, effect.status as any, effect.value || 1, effect.statusDuration);
+                        addStatus(target, effect.status, effect.value || 1, effect.statusDuration);
                     }
                 }
                 break;
@@ -1151,7 +1150,7 @@ export class GameEngine {
             case 'remove_status':
                 for (const target of targets) {
                     if (effect.status) {
-                        removeStatus(target, effect.status as any);
+                        removeStatus(target, effect.status);
                     }
                 }
                 break;

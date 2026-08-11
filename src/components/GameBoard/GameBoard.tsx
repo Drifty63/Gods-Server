@@ -9,6 +9,7 @@ import { DeckAndDiscard } from './components/DeckAndDiscard';
 import { SpellCardUI } from './components/SpellCardUI';
 import { CardFlight, CardFlightData } from './components/CardFlight';
 import { SpellCard, GodState } from '@/types/cards';
+import type { GameAction } from '@/hooks/useMultiplayer';
 import { getReadableSpellDescription } from '@/data/spellDescriptions';
 import styles from './GameBoard.module.css';
 
@@ -26,7 +27,7 @@ import CombatLogModal from '@/components/CombatLogModal/CombatLogModal';
 
 interface GameBoardProps {
     isOnlineMode?: boolean;
-    onAction?: (action: { type: string; payload?: any }) => void;
+    onAction?: (action: { type: GameAction['type']; payload?: Record<string, unknown> }) => void;
 }
 
 export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardProps) {
@@ -35,8 +36,6 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     // --- STORE BOUNDARIES ---
     const {
         gameState,
-        getCurrentPlayer,
-        getOpponent,
         isMyTurn,
         selectedCard,
         selectCard,
@@ -66,8 +65,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         optionalChoiceDescription,
         pendingOptionalEffect,
         confirmOptionalChoice,
-        cancelOptionalChoice,
-        
+
         isSelectingElement,
         setSelectedElement,
         
@@ -109,6 +107,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     const [isLogOpen, setIsLogOpen] = useState(false);
     const [hoveredCard, setHoveredCard] = useState<SpellCard | null>(null);
     const [cardFlight, setCardFlight] = useState<CardFlightData | null>(null);
+    const [playedCardPreview, setPlayedCardPreview] = useState<SpellCard | null>(null);
     const flightIdRef = useRef(0);
 
     // Anime une carte qui quitte la main et se pose sur le dieu qui la lance : capture les
@@ -124,6 +123,63 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             to: toEl.getBoundingClientRect(),
         });
     };
+
+    // --- IDENTITIES (calculées avant tout `return` anticipé : les hooks ci-dessous en dépendent
+    // et doivent s'exécuter au même ordre à chaque rendu, y compris quand gameState/localPlayer
+    // sont encore absents) ---
+    const localPlayer = gameState?.players.find(p => p.id === playerId);
+    const remoteOpponent = gameState?.players.find(p => p.id !== playerId);
+    const myTurn = isMyTurn();
+
+    // Track opponent's actions using discard pile size changes
+    useEffect(() => {
+        if (!remoteOpponent) return;
+
+        if (remoteOpponent.discard.length > previousDiscardCount) {
+            // La défausse adverse grandit dans 3 cas : l'adversaire JOUE une carte, l'adversaire
+            // la DÉFAUSSE pour gagner de l'énergie, OU un de NOS sorts (ex: Grande Vague, Colère
+            // de Poséidon) envoie des cartes de sa main/deck dans SA défausse — seul le premier
+            // cas doit être annoncé. hasPlayedCard seul ne suffit pas : il reste "true" tout le
+            // tour suivant une fois posé (remis à false seulement au DÉBUT du tour de son
+            // propriétaire, pas à la fin), donc si l'IA avait joué à son tour précédent, il
+            // restait vrai pendant tout notre tour et déclenchait à tort "ADVERSAIRE JOUE" quand
+            // un de nos sorts la faisait défausser. Il faut donc aussi vérifier que c'est
+            // effectivement SON tour en ce moment.
+            const isOpponentsTurn = gameState?.currentPlayerId === remoteOpponent.id;
+            if (!isOpponentsTurn || !remoteOpponent.hasPlayedCard) {
+                setPreviousDiscardCount(remoteOpponent.discard.length);
+                return;
+            }
+
+            // New card added to opponent's discard pile
+            const card = remoteOpponent.discard[remoteOpponent.discard.length - 1];
+            setLastOpponentCard(card);
+
+            // Anime la carte adverse depuis sa main (approximée par le conteneur, la carte
+            // individuelle a déjà disparu du DOM à ce stade) vers le dieu qui vient de la lancer.
+            const handEl = document.querySelector('[data-hand-area="opponent"]');
+            const casterEl = document.querySelector(`[data-god-key="opponent-${card.godId}"]`);
+            triggerCardFlight(card, handEl, casterEl);
+
+            // Clear the notification after 4 seconds
+            const timer = setTimeout(() => {
+                setLastOpponentCard(null);
+            }, 4000);
+
+            return () => clearTimeout(timer);
+        }
+        setPreviousDiscardCount(remoteOpponent.discard.length);
+    }, [remoteOpponent?.discard.length]);
+
+    // --- GAME ENGINE LOOP (Offline AI Trigger) ---
+    useEffect(() => {
+        if (!isOnlineMode && !myTurn && gameState?.status === 'playing') {
+            const timer = setTimeout(() => {
+                playAITurn();
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [myTurn, gameState?.status, isOnlineMode, playAITurn]);
 
 
     // Fin de partie : écran de victoire/défaite (auparavant un simple texte "Partie Terminée"
@@ -165,72 +221,13 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     }
 
     // --- IDENTITIES ---
-    // Distinguish between the LOCAL HUMAN and the OPPONENT
-    const localPlayer = gameState.players.find(p => p.id === playerId);
-    const remoteOpponent = gameState.players.find(p => p.id !== playerId);
-    
-    // Also know whose turn it is
-    const activePlayer = getCurrentPlayer();
-    
+    // Distinguish between the LOCAL HUMAN and the OPPONENT (calculées plus haut, avant les
+    // `return` anticipés ci-dessus, pour que les hooks gardent un ordre stable à chaque rendu)
     if (!localPlayer || !remoteOpponent) return null;
 
     // Use absolute references for UI layout
-    const player = localPlayer; 
+    const player = localPlayer;
     const opponent = remoteOpponent;
-
-    // Track opponent's actions using discard pile size changes
-    useEffect(() => {
-        if (!opponent) return;
-        
-        if (opponent.discard.length > previousDiscardCount) {
-            // La défausse adverse grandit dans 3 cas : l'adversaire JOUE une carte, l'adversaire
-            // la DÉFAUSSE pour gagner de l'énergie, OU un de NOS sorts (ex: Grande Vague, Colère
-            // de Poséidon) envoie des cartes de sa main/deck dans SA défausse — seul le premier
-            // cas doit être annoncé. hasPlayedCard seul ne suffit pas : il reste "true" tout le
-            // tour suivant une fois posé (remis à false seulement au DÉBUT du tour de son
-            // propriétaire, pas à la fin), donc si l'IA avait joué à son tour précédent, il
-            // restait vrai pendant tout notre tour et déclenchait à tort "ADVERSAIRE JOUE" quand
-            // un de nos sorts la faisait défausser. Il faut donc aussi vérifier que c'est
-            // effectivement SON tour en ce moment.
-            const isOpponentsTurn = gameState.currentPlayerId === opponent.id;
-            if (!isOpponentsTurn || !opponent.hasPlayedCard) {
-                setPreviousDiscardCount(opponent.discard.length);
-                return;
-            }
-
-            // New card added to opponent's discard pile
-            const card = opponent.discard[opponent.discard.length - 1];
-            setLastOpponentCard(card);
-
-            // Anime la carte adverse depuis sa main (approximée par le conteneur, la carte
-            // individuelle a déjà disparu du DOM à ce stade) vers le dieu qui vient de la lancer.
-            const handEl = document.querySelector('[data-hand-area="opponent"]');
-            const casterEl = document.querySelector(`[data-god-key="opponent-${card.godId}"]`);
-            triggerCardFlight(card, handEl, casterEl);
-
-            // Clear the notification after 4 seconds
-            const timer = setTimeout(() => {
-                setLastOpponentCard(null);
-            }, 4000);
-
-            return () => clearTimeout(timer);
-        }
-        setPreviousDiscardCount(opponent.discard.length);
-    }, [opponent?.discard.length]);
-
-    const myTurn = isMyTurn();
-
-    // --- GAME ENGINE LOOP (Offline AI Trigger) ---
-    useEffect(() => {
-        if (!isOnlineMode && !myTurn && gameState.status === 'playing') {
-            const timer = setTimeout(() => {
-                playAITurn();
-            }, 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [myTurn, gameState.status, isOnlineMode, playAITurn]);
-    
-    // --- GAME ENGINE LOOP (Offline AI Trigger) ---
 
     // --- ACTIONS ---
 
@@ -289,8 +286,6 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         if (choiceInProgress) return;
         state.selectCard(null);
     };
-
-    const [playedCardPreview, setPlayedCardPreview] = useState<SpellCard | null>(null);
 
     const handlePlayConfirmed = (lightningAction?: 'apply' | 'remove') => {
         if (!selectedCard) return;

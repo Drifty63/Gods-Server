@@ -110,7 +110,7 @@ function AscensionContent() {
                                 <li>❌ Pas de soin entre les combats</li>
                                 <li>📚 Le deck est conservé entre les combats</li>
                                 <li>🔄 Pas de dégâts de fatigue</li>
-                                <li>💀 Si tous vos dieux meurent, c'est terminé</li>
+                                <li>💀 Si tous vos dieux meurent, c&apos;est terminé</li>
                             </ul>
                         </div>
 
@@ -118,7 +118,7 @@ function AscensionContent() {
                             className={styles.startButton}
                             onClick={() => setView('select')}
                         >
-                            ⚔️ Commencer l'Ascension
+                            ⚔️ Commencer l&apos;Ascension
                         </button>
 
                         <div className={styles.comingSoonBadge}>

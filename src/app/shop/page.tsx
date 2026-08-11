@@ -457,14 +457,14 @@ export default function ShopPage() {
                     <h2 className={styles.sectionTitle}>✨ Cosmétiques</h2>
                     <div className={styles.comingSoon}>
                         <span className={styles.comingSoonIcon}>🚧</span>
-                        <p className={styles.comingSoonText}>Cette section n'est pas encore disponible.</p>
+                        <p className={styles.comingSoonText}>Cette section n&apos;est pas encore disponible.</p>
                         <p className={styles.comingSoonSubtext}>Les cosmétiques arrivent bientôt !</p>
                     </div>
                 </section>
 
                 {/* Section Ambroisie */}
                 <section id="section-ambroisie" className={styles.section}>
-                    <h2 className={styles.sectionTitle}>🍯 Acheter de l'Ambroisie</h2>
+                    <h2 className={styles.sectionTitle}>🍯 Acheter de l&apos;Ambroisie</h2>
                     <p className={styles.comingSoonSubtext} style={{ marginTop: '-8px', marginBottom: '16px' }}>
                         Le paiement par carte arrive bientôt. En attendant, gagnez de l&apos;ambroisie via les quêtes journalières !
                     </p>
@@ -576,7 +576,7 @@ export default function ShopPage() {
                         <h2 className={styles.modalTitle}>{selectedGod.name}</h2>
 
                         {selectedGod.flavorText && (
-                            <p className={styles.modalFlavorText}>"{selectedGod.flavorText}"</p>
+                            <p className={styles.modalFlavorText}>&ldquo;{selectedGod.flavorText}&rdquo;</p>
                         )}
 
                         <div className={styles.modalGodStats}>

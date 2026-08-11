@@ -12,7 +12,7 @@ export default function RulesPage() {
         <main className={styles.main}>
             <header className={styles.header}>
                 <Link href="/" className={styles.backButton}>
-                    ← Retour à l'accueil
+                    ← Retour à l&apos;accueil
                 </Link>
                 <h1 className={styles.title}>📖 Règles du Jeu</h1>
             </header>
@@ -47,7 +47,7 @@ export default function RulesPage() {
 
                     <h3>Composition par dieu :</h3>
                     <ul className={styles.list}>
-                        <li><strong>2 cartes Générateur</strong> - Produisent de l'énergie</li>
+                        <li><strong>2 cartes Générateur</strong> - Produisent de l&apos;énergie</li>
                         <li><strong>2 cartes Compétence</strong> - Attaques et effets offensifs</li>
                         <li><strong>1 carte Utilitaire</strong> - Effets spéciaux et support</li>
                     </ul>
@@ -89,14 +89,14 @@ export default function RulesPage() {
                         </div>
                     </div>
                     <div className={styles.highlight}>
-                        <strong>💥 Bonus de faiblesse :</strong> Frapper sur la faiblesse d'un dieu
+                        <strong>💥 Bonus de faiblesse :</strong> Frapper sur la faiblesse d&apos;un dieu
                         inflige <strong>des dégâts doublés !</strong>
                     </div>
                 </section>
 
                 {/* Énergie */}
                 <section className={styles.section}>
-                    <h2>⚡ Système d'Énergie</h2>
+                    <h2>⚡ Système d&apos;Énergie</h2>
                     <div className={styles.energyRules}>
                         <div className={styles.energyRule}>
                             <div className={styles.energyIcon}>🎮</div>
@@ -114,28 +114,28 @@ export default function RulesPage() {
                         </div>
                     </div>
 
-                    <h3>Générer de l'énergie :</h3>
+                    <h3>Générer de l&apos;énergie :</h3>
                     <ul className={styles.list}>
-                        <li><strong>Jouer une carte générateur</strong> - Gagne l'énergie indiquée</li>
+                        <li><strong>Jouer une carte générateur</strong> - Gagne l&apos;énergie indiquée</li>
                         <li><strong>Défausser une carte</strong> - Gagne +1 énergie</li>
                     </ul>
                 </section>
 
                 {/* Déroulement d'un tour */}
                 <section className={styles.section}>
-                    <h2>🔁 Déroulement d'un Tour</h2>
+                    <h2>🔁 Déroulement d&apos;un Tour</h2>
                     <div className={styles.turnSteps}>
                         <div className={styles.turnStep}>
                             <div className={styles.stepNumber}>1</div>
                             <div className={styles.stepContent}>
                                 <strong>Phase de Pioche</strong>
-                                <p>Piochez jusqu'à avoir 5 cartes en main (uniquement des cartes de vos dieux vivants)</p>
+                                <p>Piochez jusqu&apos;à avoir 5 cartes en main (uniquement des cartes de vos dieux vivants)</p>
                             </div>
                         </div>
                         <div className={styles.turnStep}>
                             <div className={styles.stepNumber}>2</div>
                             <div className={styles.stepContent}>
-                                <strong>Phase d'Action</strong>
+                                <strong>Phase d&apos;Action</strong>
                                 <p>Jouez une carte OU défaussez une carte pour gagner +1 énergie</p>
                             </div>
                         </div>
@@ -143,7 +143,7 @@ export default function RulesPage() {
                             <div className={styles.stepNumber}>3</div>
                             <div className={styles.stepContent}>
                                 <strong>Fin du Tour</strong>
-                                <p>Le tour passe à l'adversaire</p>
+                                <p>Le tour passe à l&apos;adversaire</p>
                             </div>
                         </div>
                     </div>
@@ -151,9 +151,9 @@ export default function RulesPage() {
 
                 {/* Mort d'un Dieu */}
                 <section className={styles.section}>
-                    <h2>💀 Mort d'un Dieu</h2>
+                    <h2>💀 Mort d&apos;un Dieu</h2>
                     <p>
-                        Lorsque les points de vie d'un dieu tombent à <strong>0 ou moins</strong>,
+                        Lorsque les points de vie d&apos;un dieu tombent à <strong>0 ou moins</strong>,
                         il est considéré comme mort. Toutes ses cartes (main, deck et défausse)
                         sont <strong>retirées du jeu</strong>.
                     </p>
@@ -186,7 +186,7 @@ export default function RulesPage() {
                         <div className={styles.statusCard}>
                             <span className={styles.statusIcon}>🛡️</span>
                             <strong>Bouclier</strong>
-                            <p>Absorbe les dégâts avant qu'ils ne touchent les points de vie</p>
+                            <p>Absorbe les dégâts avant qu&apos;ils ne touchent les points de vie</p>
                         </div>
                         <div className={styles.statusCard}>
                             <span className={styles.statusIcon}>😤</span>

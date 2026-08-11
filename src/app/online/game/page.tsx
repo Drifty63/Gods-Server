@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiplayer, GameStartData } from '@/hooks/useMultiplayer';
 import { useGameStore } from '@/store/gameStore';
+import type { GameState } from '@/types/cards';
 import { ALL_SPELLS } from '@/data/spells';
 import GameBoard from '@/components/GameBoard/GameBoard';
 import styles from './page.module.css';
@@ -91,7 +92,7 @@ export default function OnlineGamePage() {
             sendAction({ type: 'sync_initial_state', payload: {} });
             syncState(state as unknown as Record<string, unknown>);
         } else if (syncedState) {
-            useGameStore.getState().initWithState(syncedState as any, 'player2');
+            useGameStore.getState().initWithState(syncedState as unknown as GameState, 'player2');
             setIsInitialized(true);
         }
     }, [multiplayerData, isHost, isInitialized, initGame, sendAction, syncState, syncedState]);
@@ -99,7 +100,7 @@ export default function OnlineGamePage() {
     // Appliquer les mises à jour d'état reçues après l'initialisation.
     useEffect(() => {
         if (syncedState && isInitialized) {
-            useGameStore.getState().syncGameState(syncedState as any);
+            useGameStore.getState().syncGameState(syncedState as unknown as GameState);
         }
     }, [syncedState, isInitialized]);
 
@@ -131,7 +132,7 @@ export default function OnlineGamePage() {
             <div className={styles.disconnectedOverlay}>
                 <div className={styles.disconnectedModal}>
                     <h2>❌ Partie introuvable</h2>
-                    <p>La partie a expiré ou n'existe plus.</p>
+                    <p>La partie a expiré ou n&apos;existe plus.</p>
                     <p style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '1rem' }}>
                         Cela peut arriver si la déconnexion a duré trop longtemps.
                     </p>
@@ -153,7 +154,7 @@ export default function OnlineGamePage() {
                     <h2>😢 Adversaire déconnecté</h2>
                     <p>Votre adversaire a quitté la partie ou a été déconnecté.</p>
                     <p style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '1rem' }}>
-                        Attendez qu'il se reconnecte ou quittez la partie.
+                        Attendez qu&apos;il se reconnecte ou quittez la partie.
                     </p>
                     <button onClick={handleLeaveGame}>
                         Retour au lobby
@@ -192,8 +193,8 @@ export default function OnlineGamePage() {
 
             <GameBoard isOnlineMode onAction={(action) => {
                 sendAction({
-                    type: action.type as any,
-                    payload: action.payload as Record<string, unknown>
+                    type: action.type,
+                    payload: action.payload ?? {}
                 });
 
                 setTimeout(() => {

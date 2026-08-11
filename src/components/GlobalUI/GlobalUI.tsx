@@ -675,7 +675,7 @@ export default function GlobalUI() {
                                 <h3>🎯 But du Jeu</h3>
                                 <p>
                                     Le but de <strong>GODS</strong> est de <strong>vaincre tous les dieux adverses</strong> en
-                                    optimisant la gestion d'énergie et en exploitant les interactions élémentaires.
+                                    optimisant la gestion d&apos;énergie et en exploitant les interactions élémentaires.
                                 </p>
                             </div>
 
@@ -698,7 +698,7 @@ export default function GlobalUI() {
                                 </div>
                                 <p><strong>Composition par dieu :</strong></p>
                                 <ul className={styles.rulesList}>
-                                    <li>2 cartes Générateur - Produisent de l'énergie</li>
+                                    <li>2 cartes Générateur - Produisent de l&apos;énergie</li>
                                     <li>2 cartes Compétence - Attaques et effets offensifs</li>
                                     <li>1 carte Utilitaire - Effets spéciaux et support</li>
                                 </ul>
@@ -711,35 +711,35 @@ export default function GlobalUI() {
                                 <p className={styles.cycleText}>🔥 Feu → 💨 Air → 🌿 Terre → ⚡ Foudre → 💧 Eau → 🔥 Feu</p>
                                 <p><strong>Cycle Parallèle :</strong></p>
                                 <p className={styles.cycleText}>☀️ Lumière ⚔️ 💀 Ténèbres</p>
-                                <p className={styles.highlight}>💥 <strong>Bonus de faiblesse :</strong> Frapper sur la faiblesse d'un dieu inflige des dégâts doublés !</p>
+                                <p className={styles.highlight}>💥 <strong>Bonus de faiblesse :</strong> Frapper sur la faiblesse d&apos;un dieu inflige des dégâts doublés !</p>
                             </div>
 
                             {/* Système d'Énergie */}
                             <div className={styles.rulesSection}>
-                                <h3>⚡ Système d'Énergie</h3>
+                                <h3>⚡ Système d&apos;Énergie</h3>
                                 <ul className={styles.rulesList}>
                                     <li><strong>Premier joueur :</strong> Commence avec 0 énergie</li>
                                     <li><strong>Second joueur :</strong> Commence avec 1 énergie</li>
-                                    <li><strong>Jouer une carte générateur :</strong> Gagne l'énergie indiquée</li>
+                                    <li><strong>Jouer une carte générateur :</strong> Gagne l&apos;énergie indiquée</li>
                                     <li><strong>Défausser une carte :</strong> Gagne +1 énergie</li>
                                 </ul>
                             </div>
 
                             {/* Déroulement d'un Tour */}
                             <div className={styles.rulesSection}>
-                                <h3>🔁 Déroulement d'un Tour</h3>
+                                <h3>🔁 Déroulement d&apos;un Tour</h3>
                                 <ol className={styles.rulesList}>
-                                    <li><strong>Phase de Pioche :</strong> Piochez jusqu'à avoir 5 cartes en main</li>
-                                    <li><strong>Phase d'Action :</strong> Jouez une carte OU défaussez une carte (+1 énergie)</li>
-                                    <li><strong>Fin du Tour :</strong> Le tour passe à l'adversaire</li>
+                                    <li><strong>Phase de Pioche :</strong> Piochez jusqu&apos;à avoir 5 cartes en main</li>
+                                    <li><strong>Phase d&apos;Action :</strong> Jouez une carte OU défaussez une carte (+1 énergie)</li>
+                                    <li><strong>Fin du Tour :</strong> Le tour passe à l&apos;adversaire</li>
                                 </ol>
                             </div>
 
                             {/* Mort d'un Dieu */}
                             <div className={styles.rulesSection}>
-                                <h3>💀 Mort d'un Dieu</h3>
+                                <h3>💀 Mort d&apos;un Dieu</h3>
                                 <p>
-                                    Lorsque les PV d'un dieu tombent à 0 ou moins, il est mort.
+                                    Lorsque les PV d&apos;un dieu tombent à 0 ou moins, il est mort.
                                     Toutes ses cartes sont <strong>retirées du jeu</strong>.
                                 </p>
                             </div>

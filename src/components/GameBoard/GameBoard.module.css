@@ -417,6 +417,22 @@
 .impactDamage .impactNumber { color: #fecaca; }
 .impactHeal .impactNumber { color: #bbf7d0; }
 
+/* Secousse de la carte au moment de l'impact (dégâts uniquement, pas au soin) : contrairement
+ * à pulseTarget/pulseCaster ci-dessus qui boucleraient indéfiniment et flouteraient le texte en
+ * continu, celle-ci est un burst UNIQUE de 0.4s posé par HeroCard.tsx pendant la fenêtre de
+ * l'impact -- donc sans le problème de rendu sub-pixel permanent évoqué plus haut. */
+.heroCard.shaking {
+  animation: heroCardShake 0.4s ease-in-out;
+}
+
+@keyframes heroCardShake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-6px) rotate(-2deg); }
+  40% { transform: translateX(5px) rotate(1.5deg); }
+  60% { transform: translateX(-4px) rotate(-1deg); }
+  80% { transform: translateX(3px) rotate(0.5deg); }
+}
+
 @keyframes impactFlash {
   0% { opacity: 1; }
   70% { opacity: 0.8; }
@@ -611,12 +627,41 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
+/* Bandeau de type en haut de la carte (façon cadre Sort/Piège/Rituel de Yu-Gi-Oh) : couleur
+ * pilotée par --type-color (voir cardTypeStyles.ts), posée par SpellCardUI.tsx. Distinct de la
+ * bordure (couleur d'élément) pour que les deux informations restent lisibles côte à côte. */
 .spellCard::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-primary-glow), transparent);
-  opacity: 0.5;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: var(--type-color, var(--color-primary-glow));
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.spellTypeBadge {
+  position: absolute;
+  top: clamp(-6px, -2vw, -4px); right: clamp(-6px, -2vw, -4px);
+  width: clamp(18px, 6vw, 26px); height: clamp(18px, 6vw, 26px);
+  background: var(--type-color, #64748b);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.6rem, 2.4vw, 0.85rem);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--type-color, #64748b) 60%, transparent);
+  border: 2px solid #0f172a;
+  z-index: 3;
+}
+
+.spellTypeLabel {
+  font-size: clamp(0.48rem, 1.7vw, 0.6rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--type-color, #94a3b8);
+  text-align: center;
+  font-style: italic;
 }
 
 .spellCost {

@@ -2,6 +2,7 @@ import React from 'react';
 import { SpellCard } from '@/types/cards';
 import { getReadableSpellDescription } from '@/data/spellDescriptions';
 import { ELEMENT_COLORS } from '@/game-engine/ElementSystem';
+import { getCardTypeMeta } from '@/data/cardTypeStyles';
 import styles from '../GameBoard.module.css';
 
 interface SpellCardUIProps {
@@ -43,6 +44,8 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
         );
     }
 
+    const typeMeta = getCardTypeMeta(card.type);
+
     return (
         <div
             className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper} ${isSelected ? styles.wrapperSelected : ''} ${isDisabled ? styles.spellCardDisabled : ''}`}
@@ -54,20 +57,31 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
             <div className={`${styles.spellCard} ${isSelected ? styles.spellSelected : ''}`} style={{
                 padding: isMinimal ? '4px' : '8px',
                 '--element-color': ELEMENT_COLORS[card.element].primary,
+                '--type-color': typeMeta.color,
             } as React.CSSProperties}>
                 <div className={styles.spellCost}>{card.energyCost}</div>
+                {/* Badge de type façon "cadre" (Sort/Piège/Rituel à la Yu-Gi-Oh) : reconnaissable
+                 *  au premier coup d'œil, avant même de lire la description. Masqué en isMini
+                 *  (main adverse compacte) où la carte est trop petite pour un 2e badge lisible --
+                 *  le bandeau de couleur en haut du cadre (voir ::before) suffit à cette taille. */}
+                {!isMini && (
+                    <div className={styles.spellTypeBadge} title={typeMeta.label}>
+                        <span>{typeMeta.icon}</span>
+                    </div>
+                )}
                 {card.imageUrl && (
-                    <img 
-                        src={card.imageUrl} 
-                        alt={card.name} 
-                        className={styles.spellImage} 
-                        style={{ height: isMinimal ? '100%' : '100px', marginBottom: isMinimal ? '0' : '8px' }} 
+                    <img
+                        src={card.imageUrl}
+                        alt={card.name}
+                        className={styles.spellImage}
+                        style={{ height: isMinimal ? '100%' : '100px', marginBottom: isMinimal ? '0' : '8px' }}
                     />
                 )}
-                
+
                 {!isMinimal && (
                     <>
                         <div className={styles.spellTitle} style={{ marginTop: card.imageUrl ? '0' : '10px' }}>{card.name}</div>
+                        <div className={styles.spellTypeLabel}>{typeMeta.label}</div>
                         <div className={styles.spellDesc}>{getReadableSpellDescription(card)}</div>
                         {card.energyGain > 0 && (
                             <div style={{ textAlign: 'center', fontSize: '0.7rem', color: '#10b981', marginTop: '5px' }}>

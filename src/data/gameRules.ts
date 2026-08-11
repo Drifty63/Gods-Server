@@ -270,7 +270,7 @@ export const GODS_LIST = [
     { id: 'hades', name: 'Hadès', element: 'darkness', role: 'Boss/Story' }
 ] as const;
 
-export default {
+const gameRules = {
     GAME_CONFIG,
     ELEMENTS,
     CARD_TYPES,
@@ -282,3 +282,5 @@ export default {
     SPECIAL_MECHANICS,
     GODS_LIST
 };
+
+export default gameRules;

@@ -122,11 +122,11 @@ function HomeContent() {
               </p>
               <p className={styles.newsItem}>
                 <span className={styles.newsBullet}>-</span>
-                Présentation de l'extension Death & Glory.
+                Présentation de l&apos;extension Death & Glory.
               </p>
               <p className={styles.newsItem}>
                 <span className={styles.newsBullet}>-</span>
-                Patch 0.23 : Sortie de l'histoire de ZEUS
+                Patch 0.23 : Sortie de l&apos;histoire de ZEUS
               </p>
             </div>
           </section>

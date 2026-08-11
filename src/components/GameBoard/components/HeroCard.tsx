@@ -68,7 +68,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({ god, isTargeted, isCaster, g
 
     return (
         <div
-            className={`${styles.heroCard} ${god.isDead ? styles.dead : ''} ${isTargeted ? styles.targeted : ''} ${isCaster ? styles.caster : ''}`}
+            className={`${styles.heroCard} ${god.isDead ? styles.dead : ''} ${isTargeted ? styles.targeted : ''} ${isCaster ? styles.caster : ''} ${impact?.kind === 'damage' ? styles.shaking : ''}`}
             data-god-key={godKey}
             style={{ '--element-color': elementColor } as React.CSSProperties}
             onClick={onClick}

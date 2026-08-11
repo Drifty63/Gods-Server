@@ -322,7 +322,7 @@ function DuelContent() {
                             <span className={styles.searchIcon}>⚔️</span>
                         </div>
 
-                        <h2 className={styles.searchingTitle}>Recherche d'un adversaire...</h2>
+                        <h2 className={styles.searchingTitle}>Recherche d&apos;un adversaire...</h2>
                         <p className={styles.searchTime}>{formatTime(searchTime)}</p>
 
                         <div className={styles.teamPreview}>
@@ -353,7 +353,7 @@ function DuelContent() {
                         </button>
 
                         <div className={styles.tips}>
-                            <p>💡 Préparez votre stratégie pendant l'attente !</p>
+                            <p>💡 Préparez votre stratégie pendant l&apos;attente !</p>
                         </div>
                     </section>
                 )}

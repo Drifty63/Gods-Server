@@ -252,7 +252,7 @@ export default function DeckPage() {
 
                 {isDeckComplete && (
                     <div className={styles.deckComplete}>
-                        ✓ Deck complet ! Vous pouvez l'utiliser en partie.
+                        ✓ Deck complet ! Vous pouvez l&apos;utiliser en partie.
                     </div>
                 )}
             </div>
