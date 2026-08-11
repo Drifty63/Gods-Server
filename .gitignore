@@ -42,3 +42,9 @@ next-env.d.ts
 
 # Firebase Admin SDK credentials (NEVER commit this!)
 firebase-admin-key.json
+
+# Outils de dev : sorties générées, régénérables localement
+# graphify-out/ est le graphe de connaissances du code (`graphify update .`) : ~4,6 Mo
+# d'artefacts dérivés, avec des sauvegardes datées et un cache qui changent à chaque build.
+graphify-out/
+.playwright-cli/
