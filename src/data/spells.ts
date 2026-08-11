@@ -2,6 +2,7 @@
 // Mise à jour progressive avec les cartes fournies
 
 import { SpellCard } from '@/types/cards';
+import { UNIT_SPELLS } from './units';
 
 export const ALL_SPELLS: SpellCard[] = [
     // =====================================================
@@ -2511,6 +2512,9 @@ export const ALL_SPELLS: SpellCard[] = [
         description: '1🩸 → ALL⚔️ | +1🛡️ → ALL👥',
     },
 
+
+    // ── Sorts du bestiaire (5 par serviteur/créature, voir src/data/units/) ──
+    ...UNIT_SPELLS,
 ];
 
 // Helper pour obtenir les sorts d'un dieu

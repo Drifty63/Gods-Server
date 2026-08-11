@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { GameState, PlayerState, SpellCard, GodState, GodCard } from '@/types/cards';
+import type { GameInitOptions } from '@/types/cards';
 import { GameEngine } from '@/game-engine/GameEngine';
 import { AIPlayer } from '@/game-engine/AIPlayer';
 
@@ -67,7 +68,7 @@ interface GameStore {
         player2Deck: SpellCard[],
         isPlayer1First: boolean,
         soloMode?: boolean,
-        options?: { isOnlineGame?: boolean; maxTurns?: number; player1Name?: string; player2Name?: string }
+        options?: GameInitOptions
     ) => void;
 
     initWithState: (state: GameState, myPlayerId: string) => void;

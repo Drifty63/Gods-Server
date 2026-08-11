@@ -20,7 +20,7 @@ import {
     GameAction,
     GodCard
 } from '@/types/cards';
-import type { Element } from '@/types/cards';
+import type { Element, GameInitOptions } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
 import { dealDamage, healGod, handleGodDeath, addShield } from './DamageSystem';
 import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects, applyPoisonOnCast } from './StatusSystem';
@@ -706,7 +706,10 @@ export class GameEngine {
         // Étourdissement : jusqu'ici ce n'était vérifié que côté UI (gameStore.canPlayCard) et
         // IA (AIPlayer), jamais dans l'engine lui-même -- même faille que le poison. Un dieu
         // étourdi ne peut tout simplement pas lancer de sort (voir /rules).
-        if (!canGodAct(castingGod)) return { success: false, message: `${castingGod.card.name} est étourdi et ne peut pas lancer de sort` };
+        if (!canGodAct(castingGod)) {
+            const reason = castingGod.statusEffects.some(s => s.type === 'petrify') ? 'pétrifié' : 'étourdi';
+            return { success: false, message: `${castingGod.card.name} est ${reason} et ne peut pas lancer de sort` };
+        }
 
         // Payer et gagner l'énergie (plafonnée)
         player.energy = Math.min(player.energy - card.energyCost + card.energyGain, MAX_ENERGY);
@@ -1000,7 +1003,10 @@ export class GameEngine {
                 if (player.discard.length === 0) break; // Plus de cartes du tout
 
                 player.fatigueCounter++;
-                const fatigueDamage = player.fatigueCounter;
+                // Ascension : la défausse se recycle toujours, mais sans punir le joueur --
+                // le mode se joue sur plusieurs combats d'affilée sans soin, la fatigue
+                // cumulée le rendrait ininterrompablement mortel (cf. règles du mode).
+                const fatigueDamage = this.state.noFatigueDamage ? 0 : player.fatigueCounter;
 
                 // Recycler les cartes de dieux encore vivants
                 const aliveGodIds = new Set(player.gods.filter(g => !g.isDead).map(g => g.card.id));
@@ -1320,16 +1326,21 @@ export class GameEngine {
         player2Gods: GodCard[],
         player2Deck: SpellCard[],
         firstPlayerId: string,
-        options?: { isOnlineGame?: boolean; maxTurns?: number }
+        options?: GameInitOptions
     ): GameState {
         const createPlayerState = (
-            id: string, name: string, gods: GodCard[], deck: SpellCard[], isFirst: boolean
+            id: string, name: string, gods: GodCard[], deck: SpellCard[], isFirst: boolean,
+            /** Report d'état d'un combat précédent (Ascension). Seul le joueur 1 en reçoit. */
+            carry?: { health?: Record<string, number>; energy?: number }
         ): PlayerState => ({
             id,
             name,
             gods: gods.map(god => ({
                 card: god,
-                currentHealth: god.maxHealth,
+                // Un dieu mort à l'étage précédent n'est pas transmis du tout (l'appelant ne le
+                // met pas dans `gods`), donc on borne à 1 PV minimum : un report à 0 signifierait
+                // un dieu vivant-mort impossible à jouer.
+                currentHealth: Math.max(1, Math.min(carry?.health?.[god.id] ?? god.maxHealth, god.maxHealth)),
                 statusEffects: [],
                 isDead: false,
             })),
@@ -1337,7 +1348,7 @@ export class GameEngine {
             deck: shuffleArray([...deck]),
             discard: [],
             removedCards: [],
-            energy: isFirst ? 0 : 1,
+            energy: carry?.energy ?? (isFirst ? 0 : 1),
             fatigueCounter: 0,
             hasPlayedCard: false,
             hasDiscardedForEnergy: false,
@@ -1355,8 +1366,12 @@ export class GameEngine {
             turnNumber: 1,
             maxTurns,
             isOnlineGame: isOnline,
+            noFatigueDamage: options?.noFatigueDamage ?? false,
             players: [
-                createPlayerState(player1Id, player1Name, player1Gods, player1Deck, isPlayer1First),
+                createPlayerState(player1Id, player1Name, player1Gods, player1Deck, isPlayer1First, {
+                    health: options?.carryOverHealth,
+                    energy: options?.carryOverEnergy,
+                }),
                 createPlayerState(player2Id, player2Name, player2Gods, player2Deck, !isPlayer1First),
             ],
             log: [],

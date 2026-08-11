@@ -2,8 +2,17 @@
 // Mise à jour progressive avec les cartes fournies
 
 import { GodCard } from '@/types/cards';
+import { UNIT_CARDS } from './units';
 export type { GodCard as God } from '@/types/cards';
 
+/**
+ * Les 20 dieux du roster, plus le bestiaire (serviteurs & créatures) défini dans `./units`.
+ * Le roster est figé ; tout nouveau contenu passe par `src/data/units/`.
+ *
+ * Les helpers ci-dessous (getVisibleGods, getOwnedGods) filtrent sur `category === 'god'`, donc
+ * ces unités n'apparaissent ni en boutique ni dans la construction de deck : elles servent
+ * d'adversaires en Ascension et de cartes jouables en Duel.
+ */
 export const ALL_GODS: GodCard[] = [
     // =====================
     // DIEU 1: POSÉIDON (Eau 💧)
@@ -427,6 +436,9 @@ export const ALL_GODS: GodCard[] = [
         affiliatedTo: 'athena',
         duelCost: 2,
     },
+
+    // ── Bestiaire (2 serviteurs + 2 créatures par dieu du roster) ──
+    ...UNIT_CARDS,
 ];
 
 // Helper pour obtenir un dieu par son ID

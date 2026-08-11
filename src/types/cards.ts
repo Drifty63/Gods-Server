@@ -23,7 +23,9 @@ export type StatusEffect =
     | 'weakness'    // Faiblesse élémentaire temporaire
     | 'weakness_immunity' // Immunité aux faiblesses
     | 'regen'       // Régénération (soin par tour)
-    | 'untargetable'; // Inciblable (ne peut pas être ciblé)
+    | 'untargetable' // Inciblable (ne peut pas être ciblé)
+    | 'bleed'       // Saignement : dégâts en FIN DE TOUR, ignorent le bouclier
+    | 'petrify';    // Pétrification : ne peut ni agir ni être soigné
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi
@@ -131,6 +133,7 @@ export interface GameState {
     turnNumber: number;
     maxTurns?: number;              // Limite de tours (50 pour online, undefined sinon)
     isOnlineGame?: boolean;         // Mode online (limite de tours activée)
+    noFatigueDamage?: boolean;      // Ascension : recyclage de la défausse sans dégâts de fatigue
     players: [PlayerState, PlayerState];
     winnerId?: string;
     winReason?: 'elimination' | 'turn_limit' | 'surrender' | 'draw';  // Raison de la victoire (ou match nul)
@@ -162,4 +165,25 @@ export interface GameAction {
      * choix du joueur connu. Évite la double-exécution (auto + confirmation manuelle).
      */
     deferCustomEffect?: boolean;
+}
+
+/**
+ * Options d'initialisation d'une partie.
+ *
+ * Les champs `carryOver*` servent au mode Ascension, où l'on enchaîne des combats en
+ * conservant l'état du joueur d'un étage à l'autre. Ils ne falsifient PAS `maxHealth`
+ * (contrairement au contournement `enemyHealthOverride` du mode Histoire) : un dieu
+ * blessé reste affiché « 10/30 » et non « 10/10 ».
+ */
+export interface GameInitOptions {
+    isOnlineGame?: boolean;
+    maxTurns?: number;
+    player1Name?: string;
+    player2Name?: string;
+    /** PV de départ du joueur 1, par id de dieu. Absent = PV max. */
+    carryOverHealth?: Record<string, number>;
+    /** Énergie de départ du joueur 1. Absent = règle normale (0 si premier, 1 sinon). */
+    carryOverEnergy?: number;
+    /** Désactive les dégâts de fatigue au recyclage de la défausse. */
+    noFatigueDamage?: boolean;
 }

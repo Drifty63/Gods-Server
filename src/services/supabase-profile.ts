@@ -65,6 +65,8 @@ export interface UserProfile {
     daily_quests: DailyQuestsData | null;
     god_play_counts: Record<string, number>;
     ferveur: number;
+    /** Meilleur étage atteint en mode Ascension (écrit uniquement côté serveur). */
+    ascension_best_floor: number;
     created_at: string;
     last_login_at: string;
     last_active_at: string;
@@ -310,6 +312,21 @@ export async function claimQuestReward(questId: string): Promise<{ success: bool
 
 export async function claimAllQuestRewards(): Promise<{ success: boolean; totalReward: number }> {
     return invokeFn('claim-all-quest-rewards', {});
+}
+
+// =====================================
+// MODE ASCENSION
+// =====================================
+
+/**
+ * Clôture une ascension : le serveur met à jour le record d'étage et crédite l'ambroisie, en
+ * bornant celle-ci à ce que les étages franchis peuvent rapporter (voir report_ascension_run).
+ */
+export async function reportAscensionRun(
+    floorReached: number,
+    reward: number,
+): Promise<{ success: boolean; bestFloor: number; ambroisieGranted: number }> {
+    return invokeFn('report-ascension-run', { floorReached, reward });
 }
 
 // =====================================

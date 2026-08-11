@@ -4,7 +4,7 @@
  */
 
 import { GodState, PlayerState, GameState, StatusEffect } from '@/types/cards';
-import { handleGodDeath } from './DamageSystem';
+import { handleGodDeath, dealDamage } from './DamageSystem';
 
 export type { StatusEffect };
 
@@ -55,10 +55,19 @@ export function getStatusStacks(god: GodState, status: StatusEffect): number {
 }
 
 /**
- * Vérifier si un dieu peut agir (pas stun)
+ * Vérifier si un dieu peut agir (ni étourdi, ni pétrifié).
+ * La pétrification (Méduse) bloque l'action comme le stun, mais s'en distingue en
+ * empêchant AUSSI les soins (voir healGod) : on ne soigne pas de la pierre.
  */
 export function canGodAct(god: GodState): boolean {
-    return !god.isDead && !god.statusEffects.some(s => s.type === 'stun');
+    return !god.isDead && !god.statusEffects.some(s => s.type === 'stun' || s.type === 'petrify');
+}
+
+/**
+ * Un dieu pétrifié ne peut pas être soigné.
+ */
+export function isPetrified(god: GodState): boolean {
+    return god.statusEffects.some(s => s.type === 'petrify');
 }
 
 // ─────────────────────────────────────────────
@@ -77,11 +86,20 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
     for (const god of player.gods) {
         if (god.isDead) continue;
 
-        // 1. Régénération
+        // 1. Régénération (sans effet sur un dieu pétrifié : on ne soigne pas de la pierre)
         const regenEffect = god.statusEffects.find(s => s.type === 'regen');
-        if (regenEffect && regenEffect.stacks > 0) {
+        if (regenEffect && regenEffect.stacks > 0 && !isPetrified(god)) {
             const healAmount = regenEffect.stacks;
             god.currentHealth = Math.min(god.currentHealth + healAmount, god.card.maxHealth);
+        }
+
+        // 1bis. Saignement : dégâts en fin de tour qui IGNORENT le bouclier -- c'est ce qui le
+        // distingue du poison, lequel ne frappe qu'au moment où le dieu lance un sort (voir
+        // applyPoisonOnCast). Un dieu qui se terre derrière un bouclier saigne quand même.
+        const bleedEffect = god.statusEffects.find(s => s.type === 'bleed');
+        if (bleedEffect && bleedEffect.stacks > 0) {
+            dealDamage(god, bleedEffect.stacks, player, state, { ignoreShield: true });
+            if (god.isDead) continue;
         }
 
         // 2. Zombie Tick (Perséphone) - Inflige 1 dégât chaque tour

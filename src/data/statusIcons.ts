@@ -16,6 +16,8 @@ export const STATUS_ICONS: Record<StatusEffect, string> = {
     weakness_immunity: '💠',
     regen: '💚',
     untargetable: '👻',
+    bleed: '🩸',
+    petrify: '🗿',
 };
 
 export function getStatusIcon(status: StatusEffect): string {

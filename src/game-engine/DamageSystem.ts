@@ -97,6 +97,10 @@ export function dealDamage(
 export function healGod(target: GodState, amount: number): number {
     if (target.isDead || amount <= 0) return 0;
 
+    // Un dieu pétrifié (Méduse) ne peut pas être soigné : c'est ce qui distingue la
+    // pétrification du simple étourdissement, qui n'empêche que d'agir.
+    if (target.statusEffects.some(s => s.type === 'petrify')) return 0;
+
     // Retirer le poison
     const poisonIndex = target.statusEffects.findIndex(s => s.type === 'poison');
     if (poisonIndex !== -1) {

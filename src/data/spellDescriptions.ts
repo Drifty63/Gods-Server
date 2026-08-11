@@ -19,6 +19,8 @@ const STATUS_LABELS: Record<StatusEffect, string> = {
     weakness_immunity: 'Immunité aux faiblesses',
     regen: 'Régénération',
     untargetable: 'Inciblable',
+    bleed: 'Saignement',
+    petrify: 'Pétrification',
 };
 
 function targetSuffix(target: TargetType | undefined, count: number, kind: 'ennemi' | 'allié'): string {

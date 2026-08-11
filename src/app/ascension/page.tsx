@@ -1,23 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
+import GameBoard from '@/components/GameBoard/GameBoard';
+import { useGameStore } from '@/store/gameStore';
 import { getOwnedGods } from '@/data/gods';
+import { floorReward } from '@/data/ascension';
+import { reportAscensionRun } from '@/services/supabase-profile';
+import { useAscensionRun } from './useAscensionRun';
+import { AscensionMenu, TeamPicker, FloorCleared, RunOver } from './components/AscensionViews';
 import styles from './page.module.css';
-
-// Configuration du mode Ascension
-const ASCENSION_CONFIG = {
-    FLOORS: {
-        SERVANTS: { start: 1, end: 5, label: 'Serviteurs', color: '#22c55e' },
-        CREATURES: { start: 6, end: 10, label: 'Créatures', color: '#f59e0b' },
-        GODS: { start: 11, end: 15, label: 'Dieux', color: '#ef4444' },
-    },
-    TOTAL_FLOORS: 15,
-    NO_HEAL: true,
-    NO_FATIGUE_DAMAGE: true,
-};
 
 export default function AscensionPage() {
     return (
@@ -28,183 +22,120 @@ export default function AscensionPage() {
 }
 
 function AscensionContent() {
-    const { profile } = useAuth();
-    const [view, setView] = useState<'menu' | 'select' | 'climbing'>('menu');
-    const [selectedGods, setSelectedGods] = useState<string[]>([]);
-    const [currentFloor, setCurrentFloor] = useState(1);
-    const [bestFloor, setBestFloor] = useState(0); // À charger depuis le profil plus tard
+    const { profile, refreshProfile } = useAuth();
+    const gameState = useGameStore(s => s.gameState);
+    const run = useAscensionRun();
 
-    // Dieux possédés par le joueur (SEULEMENT les dieux, pas créatures/serviteurs)
+    const [picking, setPicking] = useState(false);
+    const [selected, setSelected] = useState<string[]>([]);
+    // Une ascension terminée ne doit être remontée qu'une fois au serveur, même si la phase
+    // repasse par un rendu supplémentaire.
+    const reportedRef = useRef(false);
+
+    const bestFloor = profile?.ascension_best_floor ?? 0;
+
     const ownedGods = getOwnedGods(
         profile?.gods_owned || [],
-        profile?.is_creator || false
+        profile?.is_creator || false,
     );
 
-    const handleSelectGod = (godId: string) => {
-        if (selectedGods.includes(godId)) {
-            setSelectedGods(selectedGods.filter(id => id !== godId));
-        } else if (selectedGods.length < 4) {
-            setSelectedGods([...selectedGods, godId]);
-        }
-    };
+    // Fin du combat en cours : le GameBoard ne montre jamais son propre écran de victoire ici,
+    // car dès que la partie passe à 'finished' on cesse de le rendre au profit des écrans
+    // d'ascension (entre-deux-étages, fin de run).
+    useEffect(() => {
+        if (run.phase !== 'fighting' || gameState?.status !== 'finished') return;
+        const won = gameState.winnerId === 'player1';
+        run.resolveFloor(won, won ? floorReward(run.currentFloor) : 0);
+        // On dépend des champs précis utilisés, pas de l'objet `run` : celui-ci est recréé à
+        // chaque rendu, donc l'inclure relancerait l'effet en boucle.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [gameState?.status, gameState?.winnerId, run.phase, run.currentFloor, run.resolveFloor]);
 
-    const handleStartAscension = () => {
-        if (selectedGods.length === 4) {
-            setCurrentFloor(1);
-            setView('climbing');
-            // TODO: Initialiser la partie avec les dieux sélectionnés
-        }
-    };
+    // Remontée du résultat au serveur (record + ambroisie) une fois l'ascension close.
+    useEffect(() => {
+        if (run.phase !== 'run_over' && run.phase !== 'victory') return;
+        if (reportedRef.current) return;
+        reportedRef.current = true;
 
-    const getFloorType = (floor: number) => {
-        if (floor <= 5) return ASCENSION_CONFIG.FLOORS.SERVANTS;
-        if (floor <= 10) return ASCENSION_CONFIG.FLOORS.CREATURES;
-        return ASCENSION_CONFIG.FLOORS.GODS;
-    };
+        const floorReached = run.phase === 'victory' ? run.currentFloor : Math.max(0, run.currentFloor - 1);
+        reportAscensionRun(floorReached, run.reward)
+            .then(() => refreshProfile())
+            .catch(err => console.error('Ascension : remontée du résultat échouée', err));
+    }, [run.phase, run.currentFloor, run.reward, refreshProfile]);
+
+    const toggleGod = useCallback((id: string) => {
+        setSelected(prev => prev.includes(id)
+            ? prev.filter(g => g !== id)
+            : (prev.length < 4 ? [...prev, id] : prev));
+    }, []);
+
+    const startRun = useCallback(() => {
+        reportedRef.current = false;
+        setPicking(false);
+        run.beginRun(selected);
+    }, [run, selected]);
+
+    const backToMenu = useCallback(() => {
+        run.abandonRun();
+        setPicking(false);
+        setSelected([]);
+    }, [run]);
+
+    // Le combat occupe tout l'écran : pas d'en-tête d'ascension par-dessus le plateau.
+    if (run.phase === 'fighting' && gameState?.status === 'playing') {
+        return <GameBoard />;
+    }
 
     return (
         <main className={styles.main}>
-            {/* Header */}
             <header className={styles.header}>
-                <Link href="/play" className={styles.backButton} aria-label="Retour">
-                    ← Retour
-                </Link>
+                <Link href="/play" className={styles.backButton} aria-label="Retour">← Retour</Link>
                 <h1 className={styles.title}>🏔️ Ascension</h1>
-                <div className={styles.bestFloor}>
-                    🏆 {bestFloor}
-                </div>
+                <div className={styles.bestFloor}>🏆 {bestFloor}</div>
             </header>
 
             <div className={styles.content}>
-                {/* Menu principal */}
-                {view === 'menu' && (
+                {run.phase === 'idle' && !picking && (
+                    <AscensionMenu bestFloor={bestFloor} onStart={() => setPicking(true)} />
+                )}
+
+                {run.phase === 'idle' && picking && (
+                    <TeamPicker
+                        ownedGods={ownedGods}
+                        selected={selected}
+                        onToggle={toggleGod}
+                        onConfirm={startRun}
+                        onBack={() => setPicking(false)}
+                    />
+                )}
+
+                {run.phase === 'floor_cleared' && (
+                    <FloorCleared
+                        floors={run.floors}
+                        clearedFloor={run.currentFloor}
+                        survivorHealth={run.survivorHealth}
+                        carriedEnergy={run.carriedEnergy}
+                        reward={run.reward}
+                        onClimb={run.climbNext}
+                        onQuit={backToMenu}
+                    />
+                )}
+
+                {(run.phase === 'run_over' || run.phase === 'victory') && (
+                    <RunOver
+                        isVictory={run.phase === 'victory'}
+                        floorReached={run.phase === 'victory' ? run.currentFloor : Math.max(0, run.currentFloor - 1)}
+                        reward={run.reward}
+                        onRestart={() => { backToMenu(); setPicking(true); }}
+                        onQuit={backToMenu}
+                    />
+                )}
+
+                {/* Le combat est terminé mais la phase n'a pas encore basculé : évite un écran vide. */}
+                {run.phase === 'fighting' && gameState?.status !== 'playing' && (
                     <section className={styles.menuSection}>
-                        <div className={styles.ascensionIcon}>🏔️</div>
-                        <h2 className={styles.menuTitle}>Mode Ascension</h2>
-                        <p className={styles.menuDesc}>
-                            Grimpez le plus haut possible sans récupérer vos points de vie !
-                        </p>
-
-                        {/* Aperçu des étages */}
-                        <div className={styles.floorsPreview}>
-                            <div className={styles.floorRange} style={{ borderColor: ASCENSION_CONFIG.FLOORS.SERVANTS.color }}>
-                                <span className={styles.floorIcon}>👤</span>
-                                <span>Étages 1-5</span>
-                                <span className={styles.floorLabel}>Serviteurs</span>
-                            </div>
-                            <div className={styles.floorRange} style={{ borderColor: ASCENSION_CONFIG.FLOORS.CREATURES.color }}>
-                                <span className={styles.floorIcon}>🐉</span>
-                                <span>Étages 6-10</span>
-                                <span className={styles.floorLabel}>Créatures</span>
-                            </div>
-                            <div className={styles.floorRange} style={{ borderColor: ASCENSION_CONFIG.FLOORS.GODS.color }}>
-                                <span className={styles.floorIcon}>⚡</span>
-                                <span>Étages 11-15</span>
-                                <span className={styles.floorLabel}>Dieux</span>
-                            </div>
-                        </div>
-
-                        <div className={styles.rulesBox}>
-                            <h3>📜 Règles</h3>
-                            <ul>
-                                <li>❌ Pas de soin entre les combats</li>
-                                <li>📚 Le deck est conservé entre les combats</li>
-                                <li>🔄 Pas de dégâts de fatigue</li>
-                                <li>💀 Si tous vos dieux meurent, c&apos;est terminé</li>
-                            </ul>
-                        </div>
-
-                        <button
-                            className={styles.startButton}
-                            onClick={() => setView('select')}
-                        >
-                            ⚔️ Commencer l&apos;Ascension
-                        </button>
-
-                        <div className={styles.comingSoonBadge}>
-                            🚧 Mode en développement - Bientôt disponible !
-                        </div>
-                    </section>
-                )}
-
-                {/* Sélection d'équipe */}
-                {view === 'select' && (
-                    <section className={styles.selectSection}>
-                        <h2>Choisissez votre équipe</h2>
-                        <p className={styles.selectHint}>
-                            Sélectionnez 4 dieux ({selectedGods.length}/4)
-                        </p>
-
-                        <div className={styles.godsGrid}>
-                            {ownedGods.map(god => (
-                                <div
-                                    key={god.id}
-                                    className={`${styles.godCard} ${selectedGods.includes(god.id) ? styles.selected : ''}`}
-                                    onClick={() => handleSelectGod(god.id)}
-                                >
-                                    <div
-                                        className={styles.godImage}
-                                        style={{ backgroundImage: `url(${god.imageUrl})` }}
-                                    />
-                                    <span className={styles.godName}>{god.name.split(',')[0]}</span>
-                                    {selectedGods.includes(god.id) && (
-                                        <div className={styles.selectedBadge}>
-                                            {selectedGods.indexOf(god.id) + 1}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className={styles.selectActions}>
-                            <button
-                                className={styles.backBtn}
-                                onClick={() => setView('menu')}
-                            >
-                                Retour
-                            </button>
-                            <button
-                                className={styles.confirmBtn}
-                                onClick={handleStartAscension}
-                                disabled={selectedGods.length !== 4}
-                            >
-                                Commencer ({selectedGods.length}/4)
-                            </button>
-                        </div>
-                    </section>
-                )}
-
-                {/* Vue de l'ascension (placeholder) */}
-                {view === 'climbing' && (
-                    <section className={styles.climbingSection}>
-                        <div className={styles.floorIndicator}>
-                            <span className={styles.currentFloor}>Étage {currentFloor}</span>
-                            <span className={styles.floorType} style={{ color: getFloorType(currentFloor).color }}>
-                                {getFloorType(currentFloor).label}
-                            </span>
-                        </div>
-
-                        <div className={styles.towerVisual}>
-                            {Array.from({ length: ASCENSION_CONFIG.TOTAL_FLOORS }, (_, i) => {
-                                const floor = ASCENSION_CONFIG.TOTAL_FLOORS - i;
-                                const floorType = getFloorType(floor);
-                                return (
-                                    <div
-                                        key={floor}
-                                        className={`${styles.towerFloor} ${floor === currentFloor ? styles.currentFloorMarker : ''} ${floor < currentFloor ? styles.clearedFloor : ''}`}
-                                        style={{ borderLeftColor: floorType.color }}
-                                    >
-                                        <span>{floor}</span>
-                                        {floor === currentFloor && <span className={styles.youAreHere}>← Vous</span>}
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        <div className={styles.comingSoonOverlay}>
-                            <p>🚧 Combats en cours de développement</p>
-                            <button onClick={() => setView('menu')}>Retour au menu</button>
-                        </div>
+                        <div className={styles.ascensionIcon}>⚔️</div>
+                        <p className={styles.menuDesc}>Résolution du combat…</p>
                     </section>
                 )}
             </div>
