@@ -2,19 +2,47 @@ import { describe, it, expect } from 'vitest';
 import { UNIT_CARDS, UNIT_SPELLS } from '@/data/units';
 import { unitPower, POWER_CEILING } from '@/data/units/power';
 import { HP_BANDS } from '@/data/units/builders';
+import { ALL_GODS } from '@/data/gods';
+import { ALL_SPELLS } from '@/data/spells';
+import type { GodCard } from '@/types/cards';
 
 /**
  * Garde-fou sur la règle de design : un dieu est plus fort qu'une créature, elle-même plus
  * forte qu'un serviteur.
  *
- * On compare des BUDGETS (PV + menace), pas des PV : une créature-mur de 26 PV qui tape
- * faiblement doit pouvoir exister sans être classée « plus forte » qu'une créature de 20 PV
- * qui frappe fort.
+ * La règle porte sur les PLAFONDS de chaque catégorie, pas sur chaque paire d'unités : une
+ * créature-mur peut légitimement avoir plus de PV qu'un dieu fragile (Hadès et Artémis sont à
+ * 20 PV, et Apollon plafonne à 1 dégât — leur puissance est dans le contrôle, pas dans la
+ * frappe). Exiger l'ordre paire à paire serait d'ailleurs impossible sans réécrire le roster.
+ *
+ * Ce qui doit rester vrai, en revanche : aucun serviteur ne dépasse la meilleure créature, et
+ * aucune créature ne dépasse le meilleur dieu — ni en PV, ni en dégâts.
  */
 
 const servants = () => UNIT_CARDS.filter(u => u.category === 'servant');
 const creatures = () => UNIT_CARDS.filter(u => u.category === 'creature');
 const power = (u: (typeof UNIT_CARDS)[number]) => unitPower(u, UNIT_SPELLS);
+
+/** Toutes les unités d'une catégorie, roster de base inclus (pas seulement le bestiaire). */
+const inCategory = (c: 'god' | 'creature' | 'servant') =>
+    ALL_GODS.filter(u => (u.category ?? 'god') === c);
+
+const maxHp = (units: GodCard[]) => Math.max(...units.map(u => u.maxHealth));
+
+/** Meilleur dégât d'une unité pour une portée donnée, toutes ses cartes confondues. */
+function maxDamage(units: GodCard[], scope: 'mono' | 'aoe'): number {
+    const ids = new Set(units.map(u => u.id));
+    let best = 0;
+    for (const spell of ALL_SPELLS) {
+        if (!ids.has(spell.godId)) continue;
+        for (const effect of spell.effects) {
+            if (effect.type !== 'damage') continue;
+            const isAoe = effect.target === 'all_enemies';
+            if (isAoe === (scope === 'aoe')) best = Math.max(best, effect.value ?? 0);
+        }
+    }
+    return best;
+}
 
 describe('Bestiaire — intégrité des unités', () => {
     it('chaque unité possède exactement 5 sorts', () => {
@@ -139,5 +167,43 @@ describe('Bestiaire — hiérarchie de puissance', () => {
         const weakestCreature = Math.min(...creatures().map(power));
         expect(strongestServant, `serviteur max ${strongestServant} vs créature min ${weakestCreature}`)
             .toBeLessThan(weakestCreature);
+    });
+});
+
+/**
+ * Ordre dieu > créature > serviteur sur les statistiques brutes, catégorie par catégorie.
+ *
+ * Ces bornes n'étaient vérifiées par rien : le bestiaire pouvait grossir jusqu'à produire un
+ * serviteur plus robuste que la meilleure créature, ou une créature frappant plus fort que
+ * n'importe quel dieu, sans qu'aucun test ne bronche.
+ */
+describe('Hiérarchie dieu > créature > serviteur (PV et dégâts)', () => {
+    it('ordonne les PV maximum des trois catégories', () => {
+        const s = maxHp(inCategory('servant'));
+        const c = maxHp(inCategory('creature'));
+        const g = maxHp(inCategory('god'));
+
+        expect(s, `serviteur le plus robuste ${s} PV vs créature ${c} PV`).toBeLessThan(c);
+        expect(c, `créature la plus robuste ${c} PV vs dieu ${g} PV`).toBeLessThan(g);
+    });
+
+    it('ordonne les dégâts mono-cible maximum des trois catégories', () => {
+        const s = maxDamage(inCategory('servant'), 'mono');
+        const c = maxDamage(inCategory('creature'), 'mono');
+        const g = maxDamage(inCategory('god'), 'mono');
+
+        expect(s, `serviteur frappe à ${s} vs créature ${c}`).toBeLessThan(c);
+        expect(c, `créature frappe à ${c} vs dieu ${g}`).toBeLessThan(g);
+    });
+
+    it('ne laisse aucune catégorie dépasser la suivante en dégâts de zone', () => {
+        const s = maxDamage(inCategory('servant'), 'aoe');
+        const c = maxDamage(inCategory('creature'), 'aoe');
+        const g = maxDamage(inCategory('god'), 'aoe');
+
+        // Non strict ici : l'ultime d'une créature peut égaler le Foudroiement de Zeus (3 de
+        // zone), ce qui reste cohérent puisque le dieu garde l'avantage sur tout le reste.
+        expect(s, `serviteur ${s} de zone vs créature ${c}`).toBeLessThan(c);
+        expect(c, `créature ${c} de zone vs dieu ${g}`).toBeLessThanOrEqual(g);
     });
 });
