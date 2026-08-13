@@ -53,7 +53,7 @@ const charon = kit(
 
 const cerbere = kit(
     creature({
-        id: 'cerbere', name: 'Cerbère', element: 'fire', hp: 25, god: 'hades',
+        id: 'cerbere', name: 'Cerbère', element: 'fire', hp: 25, god: 'hades', arch: 'tank',
         flavor: '"Trois gueules pour la même faim. On entre par moi, on ne sort jamais."',
     }),
     {

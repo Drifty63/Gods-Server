@@ -53,7 +53,7 @@ const nymphe = kit(
 
 const biche = kit(
     creature({
-        id: 'biche_cerynie', name: 'Biche de Cérynie', element: 'air', hp: 20, god: 'artemis',
+        id: 'biche_cerynie', name: 'Biche de Cérynie', element: 'air', hp: 20, god: 'artemis', arch: 'support',
         flavor: '"Cornes d\'or, sabots d\'airain. Le héros m\'a poursuivie une année entière."',
     }),
     {
@@ -73,7 +73,7 @@ const biche = kit(
 
 const ourse = kit(
     creature({
-        id: 'ourse_callisto', name: 'Ourse de Callisto', element: 'earth', hp: 26, god: 'artemis',
+        id: 'ourse_callisto', name: 'Ourse de Callisto', element: 'earth', hp: 26, god: 'artemis', arch: 'tank',
         flavor: '"J\'étais nymphe. On m\'a faite bête. Il me reste la force, et la rancune."',
     }),
     {

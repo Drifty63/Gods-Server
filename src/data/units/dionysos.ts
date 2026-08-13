@@ -72,7 +72,7 @@ const panthere = kit(
 
 const silene = kit(
     creature({
-        id: 'silene', name: 'Silène', element: 'earth', hp: 26, god: 'dionysos',
+        id: 'silene', name: 'Silène', element: 'earth', hp: 26, god: 'dionysos', arch: 'tank',
         flavor: '"J\'ai élevé un dieu et bu plus que lui. Tu crois vraiment me faire tomber ?"',
     }),
     {

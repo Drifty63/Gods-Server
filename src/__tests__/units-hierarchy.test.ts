@@ -171,6 +171,75 @@ describe('Bestiaire — hiérarchie de puissance', () => {
 });
 
 /**
+ * Ordre dieu > créature > serviteur À ARCHÉTYPE ÉGAL.
+ *
+ * C'est la lecture juste de la règle : on ne compare que ce qui est comparable. Apollon
+ * plafonne à 1 dégât sans être faible (c'est un dieu de contrôle), donc le confronter à une
+ * créature frappeuse ne prouve rien. En revanche, un serviteur glass cannon qui tape aussi fort
+ * que la meilleure créature glass cannon est une vraie anomalie — c'était le cas avant ce test
+ * (5 contre 5).
+ *
+ * Chaque archétype est jugé sur la statistique qui le définit.
+ */
+describe('Hiérarchie à archétype égal', () => {
+    /** Somme des soins d'une unité. Un soin de zone touche jusqu'à 4 alliés : compté ×3. */
+    function totalHeal(unit: GodCard): number {
+        let total = 0;
+        for (const spell of ALL_SPELLS.filter(s => s.godId === unit.id)) {
+            for (const e of spell.effects) {
+                if (e.type === 'heal') total += (e.value ?? 0) * (e.target === 'all_allies' ? 3 : 1);
+            }
+        }
+        return total;
+    }
+
+    const withArchetype = (c: 'god' | 'creature' | 'servant', a: string) =>
+        inCategory(c).filter(u => u.archetype === a);
+
+    /** Plafond d'un archétype dans une catégorie, en échouant si la case est vide. */
+    function ceiling(
+        archetype: 'glass_cannon' | 'tank' | 'support',
+        category: 'god' | 'creature' | 'servant',
+        metric: (u: GodCard) => number,
+    ): number {
+        const units = withArchetype(category, archetype);
+        // Sans cette garde, `Math.max()` d'un tableau vide vaut -Infinity et le test passerait
+        // sans rien vérifier le jour où un archétype disparaît d'une catégorie.
+        expect(units.length, `aucun ${archetype} chez les ${category}`).toBeGreaterThan(0);
+        return Math.max(...units.map(metric));
+    }
+
+    it('fait frapper les glass cannons plus fort à chaque palier', () => {
+        const metric = (u: GodCard) => maxDamage([u], 'mono');
+        const s = ceiling('glass_cannon', 'servant', metric);
+        const c = ceiling('glass_cannon', 'creature', metric);
+        const g = ceiling('glass_cannon', 'god', metric);
+
+        expect(s, `serviteur ${s} vs créature ${c}`).toBeLessThan(c);
+        expect(c, `créature ${c} vs dieu ${g}`).toBeLessThan(g);
+    });
+
+    it('rend les tanks plus robustes à chaque palier', () => {
+        const metric = (u: GodCard) => u.maxHealth;
+        const s = ceiling('tank', 'servant', metric);
+        const c = ceiling('tank', 'creature', metric);
+        const g = ceiling('tank', 'god', metric);
+
+        expect(s, `serviteur ${s} PV vs créature ${c} PV`).toBeLessThan(c);
+        expect(c, `créature ${c} PV vs dieu ${g} PV`).toBeLessThan(g);
+    });
+
+    it('rend les supports plus efficaces à chaque palier', () => {
+        const s = ceiling('support', 'servant', totalHeal);
+        const c = ceiling('support', 'creature', totalHeal);
+        const g = ceiling('support', 'god', totalHeal);
+
+        expect(s, `serviteur ${s} soins vs créature ${c}`).toBeLessThan(c);
+        expect(c, `créature ${c} soins vs dieu ${g}`).toBeLessThan(g);
+    });
+});
+
+/**
  * Ordre dieu > créature > serviteur sur les statistiques brutes, catégorie par catégorie.
  *
  * Ces bornes n'étaient vérifiées par rien : le bestiaire pouvait grossir jusqu'à produire un

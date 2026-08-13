@@ -33,7 +33,7 @@ const eros = kit(
 
 const charite = kit(
     servant({
-        id: 'charite', name: 'Charite', element: 'light', hp: 14, god: 'aphrodite',
+        id: 'charite', name: 'Charite', element: 'light', hp: 14, god: 'aphrodite', arch: 'support',
         flavor: '"La grâce n\'est pas une faiblesse. Elle recoud ce que la guerre déchire."',
     }),
     {

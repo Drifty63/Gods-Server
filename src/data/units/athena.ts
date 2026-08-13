@@ -14,7 +14,7 @@ import { servant, creature, kit, mergeKits, dmg, shield, draw, status, cleanse }
 
 const hoplite = kit(
     servant({
-        id: 'hoplite_athenes', name: 'Hoplite d\'Athènes', element: 'light', hp: 17, god: 'athena',
+        id: 'hoplite_athenes', name: 'Hoplite d\'Athènes', element: 'light', hp: 17, god: 'athena', arch: 'tank',
         flavor: '"La phalange ne recule pas. Le bouclier de mon voisin est ma vie."',
     }),
     {
@@ -74,7 +74,7 @@ const meduse = kit(
 
 const persee = kit(
     creature({
-        id: 'persee', name: 'Persée', element: 'light', hp: 23, god: 'athena',
+        id: 'persee', name: 'Persée', element: 'light', hp: 23, god: 'athena', arch: 'glass_cannon',
         flavor: '"Le bouclier d\'Athéna m\'a montré son reflet. Sa tête m\'a donné son pouvoir."',
     }),
     {

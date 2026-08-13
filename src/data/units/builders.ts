@@ -49,6 +49,8 @@ interface UnitInput {
     flavor: string;
     /** Unité réservée au mode Histoire / Ascension, invisible en Duel et en boutique. */
     hidden?: boolean;
+    /** Rôle de combat franc, s'il y en a un. Omis = polyvalent (voir GodCard.archetype). */
+    arch?: 'glass_cannon' | 'tank' | 'support';
 }
 
 function unit(kind: 'servant' | 'creature', u: UnitInput): GodCard {
@@ -68,6 +70,7 @@ function unit(kind: 'servant' | 'creature', u: UnitInput): GodCard {
         category: kind,
         duelCost: kind === 'servant' ? 2 : 3,
         affiliatedTo: u.god,
+        archetype: u.arch,
     };
 }
 

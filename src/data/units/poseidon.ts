@@ -13,7 +13,7 @@ import { servant, creature, kit, mergeKits, dmg, heal, shield, mill, status, cle
 
 const naiade = kit(
     servant({
-        id: 'naiade', name: 'Naïade des Sources', element: 'water', hp: 12, god: 'poseidon',
+        id: 'naiade', name: 'Naïade des Sources', element: 'water', hp: 12, god: 'poseidon', arch: 'support',
         flavor: '"Chaque source est ma sœur. Bois, et tes blessures s\'oublieront."',
     }),
     {
@@ -33,7 +33,7 @@ const naiade = kit(
 
 const triton = kit(
     servant({
-        id: 'triton', name: 'Triton, Héraut des Mers', element: 'water', hp: 16, god: 'poseidon',
+        id: 'triton', name: 'Triton, Héraut des Mers', element: 'water', hp: 16, god: 'poseidon', arch: 'tank',
         flavor: '"Ma conque décide : que la mer se couche, ou qu\'elle vous engloutisse."',
     }),
     {
@@ -73,7 +73,7 @@ const charybde = kit(
 
 const ceto = kit(
     creature({
-        id: 'ceto', name: 'Céto, Monstre Marin', element: 'water', hp: 26, god: 'poseidon',
+        id: 'ceto', name: 'Céto, Monstre Marin', element: 'water', hp: 26, god: 'poseidon', arch: 'tank',
         flavor: '"Mère des monstres, je dormais dans l\'abîme avant que vos temples n\'existent."',
     }),
     {

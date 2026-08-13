@@ -56,7 +56,7 @@ const etendard = kit(
 
 const minotaure = kit(
     creature({
-        id: 'minotaure', name: 'Minotaure', element: 'earth', hp: 25, god: 'ares',
+        id: 'minotaure', name: 'Minotaure', element: 'earth', hp: 25, god: 'ares', arch: 'tank',
         flavor: '"Le Labyrinthe n\'a jamais été ma prison. C\'était mon garde-manger."',
     }),
     {

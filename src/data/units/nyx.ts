@@ -72,7 +72,7 @@ const empousa = kit(
 
 const lamia = kit(
     creature({
-        id: 'lamia', name: 'Lamia', element: 'darkness', hp: 24, god: 'nyx',
+        id: 'lamia', name: 'Lamia', element: 'darkness', hp: 24, god: 'nyx', arch: 'glass_cannon',
         flavor: '"On m\'a pris mes enfants. Depuis, je prends ceux des autres."',
     }),
     {

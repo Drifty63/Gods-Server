@@ -51,6 +51,16 @@ export interface GodCard {
     flavorText: string;
     hidden?: boolean; // True si le dieu est caché (accessible uniquement aux créateurs)
     category?: 'god' | 'creature' | 'servant'; // Catégorie pour mode Duel (god par défaut)
+    /**
+     * Rôle de combat, quand l'unité en a un franc. Absent = polyvalent (ni frappeur, ni mur,
+     * ni soigneur marqué) : ces unités ne sont soumises qu'au budget de puissance global.
+     *
+     * Sert à comparer ce qui est comparable : la hiérarchie dieu > créature > serviteur
+     * s'applique À ARCHÉTYPE ÉGAL. Apollon plafonne à 1 dégât sans être « faible » — c'est un
+     * dieu de contrôle ; le confronter à une créature frappeuse n'aurait aucun sens. Voir le
+     * test units-hierarchy.
+     */
+    archetype?: 'glass_cannon' | 'tank' | 'support';
     duelCost?: number; // Coût en points pour le mode Duel (5 pour dieux, 3 pour créatures, 2 pour serviteurs)
     affiliatedTo?: string; // ID du dieu auquel la créature/serviteur est affilié (ex: 'ares')
 }

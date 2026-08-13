@@ -13,7 +13,7 @@ import { servant, creature, kit, mergeKits, dmg, heal, shield, status, cleanse }
 
 const vestale = kit(
     servant({
-        id: 'vestale', name: 'Vestale du Foyer', element: 'fire', hp: 13, god: 'hestia',
+        id: 'vestale', name: 'Vestale du Foyer', element: 'fire', hp: 13, god: 'hestia', arch: 'support',
         flavor: '"Tant que je veille, la flamme ne meurt pas. Et tant qu\'elle vit, vous vivez."',
     }),
     {
@@ -33,7 +33,7 @@ const vestale = kit(
 
 const gardien = kit(
     servant({
-        id: 'gardien_atre', name: 'Gardien de l\'Âtre', element: 'fire', hp: 16, god: 'hestia',
+        id: 'gardien_atre', name: 'Gardien de l\'Âtre', element: 'fire', hp: 16, god: 'hestia', arch: 'tank',
         flavor: '"Le foyer est derrière moi. Il faudra passer par mon corps."',
     }),
     {
@@ -73,7 +73,7 @@ const phenix = kit(
 
 const salamandre = kit(
     creature({
-        id: 'salamandre_braises', name: 'Salamandre des Braises', element: 'fire', hp: 23, god: 'hestia',
+        id: 'salamandre_braises', name: 'Salamandre des Braises', element: 'fire', hp: 23, god: 'hestia', arch: 'glass_cannon',
         flavor: '"Touche-moi. La marque restera longtemps après que j\'aurai disparu."',
     }),
     {

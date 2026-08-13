@@ -33,7 +33,7 @@ const dryade = kit(
 
 const moissonneur = kit(
     servant({
-        id: 'moissonneur_eleusis', name: 'Moissonneur d\'Éleusis', element: 'earth', hp: 16, god: 'demeter',
+        id: 'moissonneur_eleusis', name: 'Moissonneur d\'Éleusis', element: 'earth', hp: 16, god: 'demeter', arch: 'glass_cannon',
         flavor: '"Toute chose mûrit, et toute chose se fauche. C\'est le mystère."',
     }),
     {
@@ -53,7 +53,7 @@ const moissonneur = kit(
 
 const sanglier = kit(
     creature({
-        id: 'sanglier_calydon', name: 'Sanglier de Calydon', element: 'earth', hp: 25, god: 'demeter',
+        id: 'sanglier_calydon', name: 'Sanglier de Calydon', element: 'earth', hp: 25, god: 'demeter', arch: 'glass_cannon',
         flavor: '"Un royaume a oublié de rendre grâce. J\'ai été la réponse."',
     }),
     {
@@ -73,7 +73,7 @@ const sanglier = kit(
 
 const triptoleme = kit(
     creature({
-        id: 'triptoleme', name: 'Triptolème', element: 'earth', hp: 21, god: 'demeter',
+        id: 'triptoleme', name: 'Triptolème', element: 'earth', hp: 21, god: 'demeter', arch: 'support',
         flavor: '"La déesse m\'a confié le blé. Là où je passe, la terre se souvient de vivre."',
     }),
     {

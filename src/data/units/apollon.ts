@@ -53,7 +53,7 @@ const muse = kit(
 
 const orphee = kit(
     creature({
-        id: 'orphee', name: 'Orphée', element: 'air', hp: 20, god: 'apollon',
+        id: 'orphee', name: 'Orphée', element: 'air', hp: 20, god: 'apollon', arch: 'support',
         flavor: '"Ma lyre a endormi Cerbère et fait pleurer Hadès. Tu penses résister ?"',
     }),
     {
@@ -73,7 +73,7 @@ const orphee = kit(
 
 const python = kit(
     creature({
-        id: 'python_delphes', name: 'Python de Delphes', element: 'air', hp: 24, god: 'apollon',
+        id: 'python_delphes', name: 'Python de Delphes', element: 'air', hp: 24, god: 'apollon', arch: 'glass_cannon',
         flavor: '"Je gardais l\'oracle avant qu\'un dieu-enfant ne me le prenne. Mon venin, lui, est resté."',
     }),
     {

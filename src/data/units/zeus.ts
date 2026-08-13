@@ -34,7 +34,7 @@ const ganymede = kit(
 
 const courete = kit(
     servant({
-        id: 'courete', name: 'Courète du Berceau', element: 'lightning', hp: 16, god: 'zeus',
+        id: 'courete', name: 'Courète du Berceau', element: 'lightning', hp: 16, god: 'zeus', arch: 'tank',
         flavor: '"Frappez vos boucliers ! Que Cronos n\'entende jamais pleurer l\'enfant."',
     }),
     {
@@ -74,7 +74,7 @@ const aigle = kit(
 
 const pegase = kit(
     creature({
-        id: 'pegase', name: 'Pégase', element: 'air', hp: 23, god: 'zeus',
+        id: 'pegase', name: 'Pégase', element: 'air', hp: 23, god: 'zeus', arch: 'support',
         flavor: '"Né du sang de la Gorgone, je porte aujourd\'hui le tonnerre du maître de l\'Olympe."',
     }),
     {
