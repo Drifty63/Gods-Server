@@ -198,6 +198,23 @@ export default function RulesPage() {
                             <strong>Stun</strong>
                             <p>Le dieu ne peut pas lancer de sorts pendant la durée</p>
                         </div>
+                        <div className={styles.statusCard}>
+                            <span className={styles.statusIcon}>🩸</span>
+                            <strong>Saignement</strong>
+                            <p>
+                                Inflige ses dégâts en <strong>fin de tour</strong> et ignore le bouclier.
+                                Maximum 2 marques ; chaque point de soin en retire une.
+                            </p>
+                        </div>
+                        <div className={styles.statusCard}>
+                            <span className={styles.statusIcon}>🗿</span>
+                            <strong>Pétrification</strong>
+                            <p>
+                                Le prochain coup subi infligera <strong>+2 dégâts par marque</strong>.
+                                La marque attend ce coup sans jamais expirer : seuls des dégâts reçus
+                                ou un sort de purification la retirent.
+                            </p>
+                        </div>
                     </div>
                 </section>
 

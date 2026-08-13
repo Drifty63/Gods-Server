@@ -7,8 +7,9 @@ import { servant, creature, kit, mergeKits, dmg, shield, draw, status, cleanse }
  * le noir ce que les autres ignorent (pioche).
  *
  * Créatures : Méduse, dont le regard change la chair en pierre — elle porte le statut de
- * PÉTRIFICATION, qui empêche d'agir ET d'être soigné ; Persée, le héros qui la décapita avec
- * l'aide d'Athéna et se servit ensuite de sa tête comme d'une arme.
+ * PÉTRIFICATION, qui rend la cible cassante : le prochain coup qu'elle subit inflige +2 dégâts,
+ * et la marque attend ce coup sans jamais expirer ; Persée, le héros qui la décapita avec l'aide
+ * d'Athéna et se servit ensuite de sa tête comme d'une arme.
  */
 
 const hoplite = kit(
@@ -22,13 +23,11 @@ const hoplite = kit(
             { id: 'cadence', name: 'Cadence de Marche', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 2.', effects: [dmg(1), shield(2)] },
         ],
         competences: [
-            { id: 'estoc', name: 'Estoc d\'Hoplite', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'charge', name: 'Charge Ordonnée', cost: 3, desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
+            { id: 'estoc', name: 'Estoc d\'Hoplite', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'phalange', name: 'Mur de Phalange', desc: 'Bouclier 2 à tous les alliés et provocation sur soi.', effects: [shield(2, 'all_allies'), status('provocation', 1, 'self', 2)] },
         ],
         utility: {
-            id: 'phalange', name: 'Mur de Phalange', cost: 2,
-            desc: 'Bouclier 2 à tous les alliés et provocation sur soi.',
-            effects: [shield(2, 'all_allies'), status('provocation', 1, 'self', 2)],
+            id: 'charge', name: 'Charge Ordonnée', desc: 'Inflige 5 dégâts.', effects: [dmg(5)],
         },
     },
 );
@@ -44,13 +43,11 @@ const chouette = kit(
             { id: 'augure', name: 'Bon Augure', gain: 2, desc: '+2 énergie et 1 dégât.', effects: [dmg(1)] },
         ],
         competences: [
-            { id: 'serres', name: 'Serres Silencieuses', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'fondre', name: 'Fondre sur la Proie', cost: 2, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'serres', name: 'Serres Silencieuses', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'fondre', name: 'Fondre sur la Proie', desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
         ],
         utility: {
-            id: 'sagesse', name: 'Sagesse Partagée', cost: 2,
-            desc: 'Pioche 2 cartes et retire l\'étourdissement d\'un allié.',
-            effects: [draw(2), cleanse('stun')],
+            id: 'sagesse', name: 'Sagesse Partagée', desc: 'Pioche 2 cartes et retire l\'étourdissement d\'un allié.', effects: [draw(2), cleanse('stun')],
         },
     },
 );
@@ -66,13 +63,11 @@ const meduse = kit(
             { id: 'chevelure', name: 'Chevelure Grouillante', gain: 2, desc: '+2 énergie, 1 dégât et 1 poison.', effects: [dmg(1), status('poison', 1)] },
         ],
         competences: [
-            { id: 'regard', name: 'Regard Pétrifiant', cost: 3, desc: 'Pétrifie un ennemi 1 tour : il ne peut ni agir ni être soigné.', effects: [status('petrify', 1, 'enemy_god', 1)] },
-            { id: 'morsure', name: 'Morsure Venimeuse', cost: 1, desc: '2 dégâts et 3 poisons.', effects: [dmg(2), status('poison', 3, 'same')] },
+            { id: 'gorgone', name: 'Face de Gorgone', desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
+            { id: 'morsure', name: 'Morsure Venimeuse', desc: '2 dégâts et 3 poisons.', effects: [dmg(2), status('poison', 3, 'same')] },
         ],
         utility: {
-            id: 'gorgone', name: 'Face de Gorgone', cost: 2,
-            desc: 'Inflige 5 dégâts.',
-            effects: [dmg(5)],
+            id: 'regard', name: 'Regard Pétrifiant', desc: 'Pétrifie un ennemi : le prochain coup qu\'il subit infligera +2 dégâts.', effects: [status('petrify', 1, 'enemy_god')],
         },
     },
 );
@@ -88,13 +83,11 @@ const persee = kit(
             { id: 'casque', name: 'Casque d\'Invisibilité', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 3.', effects: [dmg(1), shield(3)] },
         ],
         competences: [
-            { id: 'harpe', name: 'Harpé d\'Adamant', cost: 2, desc: '4 dégâts et 1 saignement.', effects: [dmg(4), status('bleed', 1, 'same')] },
-            { id: 'decapitation', name: 'Décapitation', cost: 3, desc: 'Inflige 7 dégâts.', effects: [dmg(7)] },
+            { id: 'harpe', name: 'Harpé d\'Adamant', desc: '4 dégâts et 1 saignement.', effects: [dmg(4), status('bleed', 1, 'same')] },
+            { id: 'decapitation', name: 'Décapitation', desc: 'Inflige 7 dégâts.', effects: [dmg(7)] },
         ],
         utility: {
-            id: 'tete_gorgone', name: 'Tête de la Gorgone', cost: 3,
-            desc: 'Pétrifie un ennemi 1 tour.',
-            effects: [status('petrify', 1, 'enemy_god', 1)],
+            id: 'tete_gorgone', name: 'Tête de la Gorgone', desc: 'Pétrifie un ennemi : le prochain coup qu\'il subit infligera +2 dégâts.', effects: [status('petrify', 1, 'enemy_god')],
         },
     },
 );

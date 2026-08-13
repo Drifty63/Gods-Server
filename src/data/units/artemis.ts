@@ -22,13 +22,11 @@ const molosse = kit(
             { id: 'aboiement', name: 'Aboiement', gain: 2, desc: '+2 énergie, 1 dégât et 1 saignement.', effects: [dmg(1), status('bleed', 1)] },
         ],
         competences: [
-            { id: 'morsure', name: 'Morsure et Lâcher', cost: 1, desc: '2 dégâts et 2 saignements.', effects: [dmg(2), status('bleed', 2, 'same')] },
-            { id: 'croc', name: 'Croc Profond', cost: 2, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'morsure', name: 'Morsure et Lâcher', desc: '2 dégâts et 2 saignements.', effects: [dmg(2), status('bleed', 2, 'same')] },
+            { id: 'curee', name: 'Curée', desc: 'Se soigne de 3.', effects: [heal(3, 'self')] },
         ],
         utility: {
-            id: 'curee', name: 'Curée', cost: 1,
-            desc: 'Se soigne de 3.',
-            effects: [heal(3, 'self')],
+            id: 'croc', name: 'Croc Profond', desc: 'Inflige 4 dégâts.', effects: [dmg(4)],
         },
     },
 );
@@ -44,13 +42,11 @@ const nymphe = kit(
             { id: 'pistage', name: 'Pistage', gain: 2, desc: '+2 énergie, 1 dégât et pioche 1 carte.', effects: [dmg(1), draw(1)] },
         ],
         competences: [
-            { id: 'fleche', name: 'Flèche Précise', cost: 1, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
-            { id: 'volee', name: 'Volée de Flèches', cost: 2, desc: '2 dégâts à tous les ennemis.', effects: [dmg(2, 'all_enemies')] },
+            { id: 'fleche', name: 'Flèche Précise', desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'repli', name: 'Repli dans les Bois', desc: 'Bouclier 4 sur soi.', effects: [shield(4)] },
         ],
         utility: {
-            id: 'repli', name: 'Repli dans les Bois', cost: 1,
-            desc: 'Bouclier 4 sur soi.',
-            effects: [shield(4)],
+            id: 'volee', name: 'Volée de Flèches', desc: '2 dégâts à tous les ennemis.', effects: [dmg(2, 'all_enemies')],
         },
     },
 );
@@ -66,13 +62,11 @@ const biche = kit(
             { id: 'course', name: 'Course Insaisissable', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 3.', effects: [dmg(1), shield(3)] },
         ],
         competences: [
-            { id: 'cornes', name: 'Cornes d\'Or', cost: 2, desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
-            { id: 'ruade', name: 'Ruade', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'cornes', name: 'Cornes d\'Or', desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
+            { id: 'ruade', name: 'Ruade', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
         ],
         utility: {
-            id: 'clairiere', name: 'Clairière Sacrée', cost: 2,
-            desc: 'Soigne tous les alliés de 3.',
-            effects: [heal(3, 'all_allies')],
+            id: 'clairiere', name: 'Clairière Sacrée', desc: 'Soigne tous les alliés de 3.', effects: [heal(3, 'all_allies')],
         },
     },
 );
@@ -88,13 +82,11 @@ const ourse = kit(
             { id: 'fourrure', name: 'Fourrure Épaisse', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 3.', effects: [dmg(1), shield(3)] },
         ],
         competences: [
-            { id: 'coup_griffe', name: 'Coup de Griffes', cost: 2, desc: '3 dégâts et 2 saignements.', effects: [dmg(3), status('bleed', 2, 'same')] },
-            { id: 'etreinte', name: 'Étreinte de l\'Ourse', cost: 3, desc: 'Inflige 6 dégâts.', effects: [dmg(6)] },
+            { id: 'coup_griffe', name: 'Coup de Griffes', desc: '3 dégâts et 2 saignements.', effects: [dmg(3), status('bleed', 2, 'same')] },
+            { id: 'maternelle', name: 'Protection Maternelle', desc: 'Provocation sur soi 2 tours et bouclier 4.', effects: [status('provocation', 1, 'self', 2), shield(4)] },
         ],
         utility: {
-            id: 'maternelle', name: 'Protection Maternelle', cost: 2,
-            desc: 'Provocation sur soi 2 tours et bouclier 4.',
-            effects: [status('provocation', 1, 'self', 2), shield(4)],
+            id: 'etreinte', name: 'Étreinte de l\'Ourse', desc: 'Inflige 6 dégâts.', effects: [dmg(6)],
         },
     },
 );

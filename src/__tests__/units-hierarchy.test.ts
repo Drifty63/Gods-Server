@@ -31,6 +31,67 @@ describe('Bestiaire — intégrité des unités', () => {
         expect(new Set(spellIds).size, 'ids de sorts dupliqués').toBe(spellIds.length);
     });
 
+    /**
+     * Plafond de dégâts de ZONE, relevé sur les 20 dieux du roster : toutes leurs cartes de zone
+     * à 0 ou 1 énergie infligent 1 dégât (17 cartes, sans exception), et seul le coût 3 monte à 3
+     * (le Foudroiement de Zeus, son ultime).
+     *
+     * Une créature ou un serviteur ne doit jamais dépasser ce qu'un DIEU se permet au même prix.
+     * Sans ce garde-fou, deux créatures faisaient 3 dégâts de zone pour 1 énergie — soit jusqu'à
+     * 12 dégâts sur une équipe de 4, là où un dieu en fait 1.
+     */
+    const AOE_CEILING: Record<number, { servant: number; creature: number }> = {
+        0: { servant: 1, creature: 1 },
+        1: { servant: 1, creature: 1 },
+        3: { servant: 2, creature: 3 },
+    };
+
+    it('ne laisse aucune carte de zone dépasser le plafond du roster', () => {
+        for (const spell of UNIT_SPELLS) {
+            const unit = UNIT_CARDS.find(u => u.id === spell.godId);
+            if (!unit || unit.category === 'god') continue;
+            const ceiling = AOE_CEILING[spell.energyCost]?.[unit.category === 'servant' ? 'servant' : 'creature'];
+            if (ceiling === undefined) continue;
+
+            for (const effect of spell.effects) {
+                if (effect.type !== 'damage' || effect.target !== 'all_enemies') continue;
+                expect(
+                    effect.value ?? 0,
+                    `${spell.id} (${unit.category}, ${spell.energyCost}⚡) : ${effect.value} dégâts de zone > plafond ${ceiling}`,
+                ).toBeLessThanOrEqual(ceiling);
+            }
+        }
+    });
+
+    it('respecte la courbe de coûts 0/0/1/1/3 de tout le roster', () => {
+        for (const u of UNIT_CARDS) {
+            const costs = UNIT_SPELLS.filter(s => s.godId === u.id)
+                .map(s => s.energyCost)
+                .sort((a, b) => a - b);
+            expect(costs, `${u.id} : courbe de coûts ${costs.join(',')}`).toEqual([0, 0, 1, 1, 3]);
+        }
+    });
+
+    it('donne 2 générateurs, 2 compétences et 1 utilitaire à chaque unité', () => {
+        for (const u of UNIT_CARDS) {
+            const own = UNIT_SPELLS.filter(s => s.godId === u.id);
+            const count = (t: string) => own.filter(s => s.type === t).length;
+            expect(count('generator'), `${u.id} générateurs`).toBe(2);
+            expect(count('competence'), `${u.id} compétences`).toBe(2);
+            expect(count('utility'), `${u.id} utilitaires`).toBe(1);
+        }
+    });
+
+    it('ne fait produire de l\'énergie qu\'aux générateurs, jamais aux cartes payantes', () => {
+        for (const s of UNIT_SPELLS) {
+            if (s.type === 'generator') {
+                expect(s.energyGain, `${s.id} devrait produire de l'énergie`).toBeGreaterThan(0);
+            } else {
+                expect(s.energyGain, `${s.id} ne devrait pas produire d'énergie`).toBe(0);
+            }
+        }
+    });
+
     it('rattache chaque unité à un dieu et lui donne un coût de Duel', () => {
         for (const u of UNIT_CARDS) {
             expect(u.affiliatedTo, `${u.id} sans dieu de rattachement`).toBeTruthy();

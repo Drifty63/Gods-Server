@@ -752,6 +752,25 @@ export default function GlobalUI() {
                                     À chaque recyclage, tous vos dieux subissent des <strong>dégâts croissants</strong> (+1, +2, +3...).
                                 </p>
                             </div>
+
+                            {/* Saignement & Pétrification */}
+                            <div className={styles.rulesSection}>
+                                <h3>🩸 Saignement</h3>
+                                <p>
+                                    Inflige ses dégâts en <strong>fin de tour</strong> et <strong>ignore le bouclier</strong> —
+                                    contrairement au poison, qui ne frappe qu&apos;au moment où le dieu lance un sort.
+                                    Plafonné à 2 marques, et chaque point de soin en retire une.
+                                </p>
+                            </div>
+
+                            <div className={styles.rulesSection}>
+                                <h3>🗿 Pétrification</h3>
+                                <p>
+                                    Rend la cible cassante : le <strong>prochain coup qu&apos;elle subit inflige +2 dégâts</strong> par
+                                    marque. La marque attend ce coup et <strong>n&apos;expire jamais toute seule</strong> ; seuls des
+                                    dégâts reçus ou un sort de purification (Aphrodite) la retirent.
+                                </p>
+                            </div>
                         </div>
 
                         <div className={styles.rulesFooter}>

@@ -23,13 +23,11 @@ const ganymede = kit(
             { id: 'ambroisie', name: 'Part d\'Ambroisie', gain: 2, desc: '+2 énergie, 1 dégât et pioche 1 carte.', effects: [dmg(1), draw(1)] },
         ],
         competences: [
-            { id: 'rapt', name: 'Rapt de l\'Aigle', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'echanson', name: 'Service de l\'Olympe', cost: 2, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'rapt', name: 'Rapt de l\'Aigle', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'echanson', name: 'Service de l\'Olympe', desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
         ],
         utility: {
-            id: 'immortalite', name: 'Don d\'Immortalité', cost: 2,
-            desc: 'Régénération 2 sur un allié et retire son poison.',
-            effects: [status('regen', 2, 'ally_god', 3), cleanse('poison')],
+            id: 'immortalite', name: 'Don d\'Immortalité', desc: 'Régénération 2 sur un allié et retire son poison.', effects: [status('regen', 2, 'ally_god', 3), cleanse('poison')],
         },
     },
 );
@@ -45,13 +43,11 @@ const courete = kit(
             { id: 'danse', name: 'Danse Armée', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 2.', effects: [dmg(1), shield(2)] },
         ],
         competences: [
-            { id: 'lance', name: 'Lance Crétoise', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'vacarme', name: 'Vacarme Assourdissant', cost: 3, desc: 'Étourdit un ennemi 1 tour.', effects: [status('stun', 1, 'enemy_god', 1)] },
+            { id: 'lance', name: 'Lance Crétoise', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'garde', name: 'Garde du Berceau', desc: 'Provocation sur soi 2 tours et bouclier 3.', effects: [status('provocation', 1, 'self', 2), shield(3)] },
         ],
         utility: {
-            id: 'garde', name: 'Garde du Berceau', cost: 2,
-            desc: 'Provocation sur soi 2 tours et bouclier 3.',
-            effects: [status('provocation', 1, 'self', 2), shield(3)],
+            id: 'vacarme', name: 'Vacarme Assourdissant', desc: 'Étourdit un ennemi 1 tour.', effects: [status('stun', 1, 'enemy_god', 1)],
         },
     },
 );
@@ -67,13 +63,11 @@ const aigle = kit(
             { id: 'piquer', name: 'Piqué', gain: 2, desc: '+2 énergie et 2 dégâts.', effects: [dmg(2)] },
         ],
         competences: [
-            { id: 'supplice', name: 'Supplice de Prométhée', cost: 2, desc: '2 dégâts et 3 saignements.', effects: [dmg(2), status('bleed', 3, 'same')] },
-            { id: 'fonte', name: 'Fonte du Ciel', cost: 3, desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')] },
+            { id: 'supplice', name: 'Supplice de Prométhée', desc: '2 dégâts et 2 saignements.', effects: [dmg(2), status('bleed', 2, 'same')] },
+            { id: 'charognard', name: 'Festin du Charognard', desc: '3 dégâts à un ennemi et se soigne de 3.', effects: [dmg(3), heal(3, 'self')] },
         ],
         utility: {
-            id: 'charognard', name: 'Festin du Charognard', cost: 2,
-            desc: '3 dégâts à un ennemi et se soigne de 3.',
-            effects: [dmg(3), heal(3, 'self')],
+            id: 'fonte', name: 'Fonte du Ciel', desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')],
         },
     },
 );
@@ -89,13 +83,11 @@ const pegase = kit(
             { id: 'galop', name: 'Galop Céleste', gain: 2, desc: '+2 énergie, 1 dégât et pioche 1 carte.', effects: [dmg(1), draw(1)] },
         ],
         competences: [
-            { id: 'ruade', name: 'Ruade Ailée', cost: 1, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
-            { id: 'foudre', name: 'Foudre Portée', cost: 3, desc: 'Inflige 7 dégâts.', effects: [dmg(7)] },
+            { id: 'ruade', name: 'Ruade Ailée', desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'hippocrene', name: 'Source Hippocrène', desc: 'Soigne tous les alliés de 3.', effects: [heal(3, 'all_allies')] },
         ],
         utility: {
-            id: 'hippocrene', name: 'Source Hippocrène', cost: 2,
-            desc: 'Soigne tous les alliés de 3.',
-            effects: [heal(3, 'all_allies')],
+            id: 'foudre', name: 'Foudre Portée', desc: 'Inflige 7 dégâts.', effects: [dmg(7)],
         },
     },
 );

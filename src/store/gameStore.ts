@@ -1053,11 +1053,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
             // ce bloc, et cible toujours la défausse du joueur qui l'a joué — voir plus haut.)
             const hasFreeRecycle = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'free_recycle');
             const hasTempResurrect = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'temp_resurrect');
+            const hasReviveGod = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'revive_god');
             const hasVisionTartare = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'vision_tartare');
             const hasCascadeHeal = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
             const hasRetrieveDiscard = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'retrieve_discard');
 
-            if (hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal || hasRetrieveDiscard) {
+            if (hasFreeRecycle || hasTempResurrect || hasReviveGod || hasVisionTartare || hasCascadeHeal || hasRetrieveDiscard) {
                 // Pour ces sorts, on doit d'abord vérifier si on a besoin de cibles avant d'ouvrir le modal
                 const neededTargets = get().getRequiredTargetCount(cardToCheck);
                 if (neededTargets > 0 && selectedTargetGods.length < neededTargets) {
@@ -1073,7 +1074,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     cardId,
                     targetGodId,
                     targetGodIds,
-                    deferCustomEffect: hasFreeRecycle || hasTempResurrect || hasVisionTartare || hasCascadeHeal,
+                    deferCustomEffect: hasFreeRecycle || hasTempResurrect || hasReviveGod || hasVisionTartare || hasCascadeHeal,
                 });
 
                 if (playResult.success) {
@@ -1083,6 +1084,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         get().startPlayerSelection("Mélanger défausse et deck sans fatigue", "free_recycle");
                     } else if (hasTempResurrect) {
                         get().startDeadGodSelection("Invoquer un dieu allié mort en zombie (5 PV)", "temp_resurrect");
+                    } else if (hasReviveGod) {
+                        get().startDeadGodSelection("Ressusciter un dieu allié (8 PV)", "revive_god");
                     } else if (hasVisionTartare) {
                         get().startOptionalChoice("Pouvoir des ténèbres", "Défausser 2 cartes du deck pour +1 dégât par cible ?", "vision_tartare", targetGodIds || (targetGodId ? [targetGodId] : []));
                     } else if (hasCascadeHeal) {
@@ -1509,9 +1512,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const { engine, pendingZombieEffect, pendingEffectCardId } = get();
         if (!engine || !pendingZombieEffect) return;
 
-        if (pendingZombieEffect === 'temp_resurrect' && pendingEffectCardId) {
-            // Effet différé résolu ici avec le dieu choisi par le joueur (le handler centralisé
-            // temp_resurrect dans GameEngine.ts respecte désormais targetGodId).
+        // Effet différé résolu ici avec le dieu mort choisi par le joueur. Tout effet ouvrant
+        // cette modale doit être listé dans DEFERRED_CUSTOM_EFFECTS, sinon il s'exécuterait
+        // trop tôt (sans cible) ET une seconde fois ici.
+        if (pendingEffectCardId && (pendingZombieEffect === 'temp_resurrect' || pendingZombieEffect === 'revive_god')) {
             engine.resolveDeferredEffect(pendingEffectCardId, { targetGodId: godId });
         }
 

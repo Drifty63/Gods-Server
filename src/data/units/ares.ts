@@ -25,13 +25,11 @@ const berserker = kit(
             { id: 'cri', name: 'Cri de Guerre', gain: 2, desc: '+2 énergie et 2 dégâts.', effects: [dmg(2)] },
         ],
         competences: [
-            { id: 'hache', name: 'Hache Thrace', cost: 1, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
-            { id: 'taillade', name: 'Taillade Sauvage', cost: 2, desc: '3 dégâts et 1 saignement.', effects: [dmg(3), status('bleed', 1, 'same')] },
+            { id: 'hache', name: 'Hache Thrace', desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'taillade', name: 'Taillade Sauvage', desc: '3 dégâts et 1 saignement.', effects: [dmg(3), status('bleed', 1, 'same')] },
         ],
         utility: {
-            id: 'ivresse', name: 'Ivresse du Sang', cost: 2,
-            desc: 'Se soigne de 4.',
-            effects: [heal(4, 'self')],
+            id: 'ivresse', name: 'Ivresse du Sang', desc: 'Se soigne de 4.', effects: [heal(4, 'self')],
         },
     },
 );
@@ -47,13 +45,11 @@ const etendard = kit(
             { id: 'tambour', name: 'Tambour de Guerre', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 2.', effects: [dmg(1), shield(2)] },
         ],
         competences: [
-            { id: 'hampe', name: 'Coup de Hampe', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'avance', name: 'Avance au Pas', cost: 2, desc: '2 dégâts à tous les ennemis.', effects: [dmg(2, 'all_enemies')] },
+            { id: 'hampe', name: 'Coup de Hampe', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'avance', name: 'Avance au Pas', desc: '1 dégât à tous les ennemis et bouclier 2.', effects: [dmg(1, 'all_enemies'), shield(2)] },
         ],
         utility: {
-            id: 'serment', name: 'Serment au Dieu', cost: 2,
-            desc: 'Provocation sur soi 2 tours et soigne un allié de 3.',
-            effects: [status('provocation', 1, 'self', 2), heal(3)],
+            id: 'serment', name: 'Serment au Dieu', desc: 'Provocation sur soi 2 tours et soigne un allié de 3.', effects: [status('provocation', 1, 'self', 2), heal(3)],
         },
     },
 );
@@ -69,13 +65,11 @@ const minotaure = kit(
             { id: 'grattement', name: 'Sabot Gratteur', gain: 2, desc: '+2 énergie et 2 dégâts.', effects: [dmg(2)] },
         ],
         competences: [
-            { id: 'encornade', name: 'Encornade', cost: 2, desc: '3 dégâts et 3 saignements.', effects: [dmg(3), status('bleed', 3, 'same')] },
-            { id: 'pietinement', name: 'Piétinement', cost: 3, desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')] },
+            { id: 'encornade', name: 'Encornade', desc: '3 dégâts et 2 saignements.', effects: [dmg(3), status('bleed', 2, 'same')] },
+            { id: 'rage', name: 'Rage Bestiale', desc: 'Bouclier 5 sur soi.', effects: [shield(5)] },
         ],
         utility: {
-            id: 'rage', name: 'Rage Bestiale', cost: 1,
-            desc: 'Bouclier 5 sur soi.',
-            effects: [shield(5)],
+            id: 'pietinement', name: 'Piétinement', desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')],
         },
     },
 );
@@ -91,13 +85,11 @@ const chimere = kit(
             { id: 'queue', name: 'Queue de Serpent', gain: 2, desc: '+2 énergie, 1 dégât et 2 poisons.', effects: [dmg(1), status('poison', 2)] },
         ],
         competences: [
-            { id: 'souffle_feu', name: 'Souffle de Feu', cost: 3, desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')] },
-            { id: 'griffes', name: 'Griffes de Lion', cost: 2, desc: '4 dégâts et 1 saignement.', effects: [dmg(4), status('bleed', 1, 'same')] },
+            { id: 'composite', name: 'Chair Composite', desc: 'Régénération 2 sur soi et bouclier 3.', effects: [status('regen', 2, 'self', 3), shield(3)] },
+            { id: 'griffes', name: 'Griffes de Lion', desc: '4 dégâts et 1 saignement.', effects: [dmg(4), status('bleed', 1, 'same')] },
         ],
         utility: {
-            id: 'composite', name: 'Chair Composite', cost: 2,
-            desc: 'Régénération 2 sur soi et bouclier 3.',
-            effects: [status('regen', 2, 'self', 3), shield(3)],
+            id: 'souffle_feu', name: 'Souffle de Feu', desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')],
         },
     },
 );

@@ -114,6 +114,12 @@ export interface PlayerState {
     hasDiscardedForEnergy: boolean;      // A défaussé pour énergie ce tour
     afkTurns?: number;                   // Compteur de tours AFK (sans jouer de carte) - pour anti-AFK online
     godsCastThisMatch: string[];         // Ids des dieux ayant lancé au moins un sort cette partie (quête "jouer ce dieu")
+    /**
+     * Ascension : ce joueur recycle sa défausse sans subir les dégâts de fatigue. C'est une
+     * propriété du JOUEUR et non de la partie : seul le grimpeur en bénéficie (il enchaîne les
+     * combats sans se soigner), l'adversaire de chaque étage reste soumis à la fatigue normale.
+     */
+    noFatigueDamage?: boolean;
 }
 
 // Entrée du log de combat : permet à un joueur de vérifier après coup quelle carte a été jouée,
@@ -133,7 +139,6 @@ export interface GameState {
     turnNumber: number;
     maxTurns?: number;              // Limite de tours (50 pour online, undefined sinon)
     isOnlineGame?: boolean;         // Mode online (limite de tours activée)
-    noFatigueDamage?: boolean;      // Ascension : recyclage de la défausse sans dégâts de fatigue
     players: [PlayerState, PlayerState];
     winnerId?: string;
     winReason?: 'elimination' | 'turn_limit' | 'surrender' | 'draw';  // Raison de la victoire (ou match nul)

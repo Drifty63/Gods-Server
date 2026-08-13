@@ -14,12 +14,22 @@ export interface StatusEntry {
     duration?: number;
 }
 
+/**
+ * Plafond de cumul par statut. Le saignement est borné à 2 marques : au-delà, une cible focalisée
+ * mourait de saignement seul sans que l'adversaire puisse rien y faire, alors que le saignement
+ * est censé être une pression secondaire (voir /rules).
+ */
+const STATUS_STACK_CAPS: Partial<Record<StatusEffect, number>> = {
+    bleed: 2,
+};
+
 // ─────────────────────────────────────────────
 // Gestion des statuts
 // ─────────────────────────────────────────────
 
 /**
  * Ajouter un statut à un dieu. La régénération retire le poison.
+ * Les statuts listés dans STATUS_STACK_CAPS sont bornés (ex: saignement max 2).
  */
 export function addStatus(god: GodState, status: StatusEffect, stacks: number, duration?: number): void {
     if (god.isDead || stacks <= 0) return;
@@ -29,12 +39,23 @@ export function addStatus(god: GodState, status: StatusEffect, stacks: number, d
         removeStatus(god, 'poison');
     }
 
+    // La pétrification est une vulnérabilité qui attend le prochain coup : elle ne doit jamais
+    // expirer au fil des tours, seuls des dégâts reçus (ou un cleanse) la retirent.
+    const effectiveDuration = status === 'petrify' ? undefined : duration;
+
+    const cap = STATUS_STACK_CAPS[status];
     const existing = god.statusEffects.find(s => s.type === status);
     if (existing) {
-        existing.stacks += stacks;
-        if (duration !== undefined) existing.duration = duration;
+        existing.stacks = cap !== undefined
+            ? Math.min(existing.stacks + stacks, cap)
+            : existing.stacks + stacks;
+        if (effectiveDuration !== undefined) existing.duration = effectiveDuration;
     } else {
-        god.statusEffects.push({ type: status, stacks, duration });
+        god.statusEffects.push({
+            type: status,
+            stacks: cap !== undefined ? Math.min(stacks, cap) : stacks,
+            duration: effectiveDuration,
+        });
     }
 }
 
@@ -55,19 +76,13 @@ export function getStatusStacks(god: GodState, status: StatusEffect): number {
 }
 
 /**
- * Vérifier si un dieu peut agir (ni étourdi, ni pétrifié).
- * La pétrification (Méduse) bloque l'action comme le stun, mais s'en distingue en
- * empêchant AUSSI les soins (voir healGod) : on ne soigne pas de la pierre.
+ * Vérifier si un dieu peut agir (pas étourdi).
+ *
+ * La pétrification ne bloque PAS l'action : c'est une vulnérabilité (+2 dégâts au prochain coup
+ * reçu, voir PETRIFY_DAMAGE_BONUS dans DamageSystem), pas une immobilisation.
  */
 export function canGodAct(god: GodState): boolean {
-    return !god.isDead && !god.statusEffects.some(s => s.type === 'stun' || s.type === 'petrify');
-}
-
-/**
- * Un dieu pétrifié ne peut pas être soigné.
- */
-export function isPetrified(god: GodState): boolean {
-    return god.statusEffects.some(s => s.type === 'petrify');
+    return !god.isDead && !god.statusEffects.some(s => s.type === 'stun');
 }
 
 // ─────────────────────────────────────────────
@@ -86,9 +101,9 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
     for (const god of player.gods) {
         if (god.isDead) continue;
 
-        // 1. Régénération (sans effet sur un dieu pétrifié : on ne soigne pas de la pierre)
+        // 1. Régénération
         const regenEffect = god.statusEffects.find(s => s.type === 'regen');
-        if (regenEffect && regenEffect.stacks > 0 && !isPetrified(god)) {
+        if (regenEffect && regenEffect.stacks > 0) {
             const healAmount = regenEffect.stacks;
             god.currentHealth = Math.min(god.currentHealth + healAmount, god.card.maxHealth);
         }
@@ -98,7 +113,7 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
         // applyPoisonOnCast). Un dieu qui se terre derrière un bouclier saigne quand même.
         const bleedEffect = god.statusEffects.find(s => s.type === 'bleed');
         if (bleedEffect && bleedEffect.stacks > 0) {
-            dealDamage(god, bleedEffect.stacks, player, state, { ignoreShield: true });
+            dealDamage(god, bleedEffect.stacks, player, state, { ignoreShield: true, consumesPetrify: false });
             if (god.isDead) continue;
         }
 

@@ -79,6 +79,10 @@ export interface EffectContext {
 export const DEFERRED_CUSTOM_EFFECTS = new Set<string>([
     'free_recycle',
     'temp_resurrect',
+    // revive_god a besoin du dieu mort choisi par le joueur. Sans ce report, il s'exécutait dès
+    // la pose de la carte, alors que targetGodId était encore inconnu : le handler sortait
+    // immédiatement et la carte était consommée sans rien ressusciter.
+    'revive_god',
     'vision_tartare',
     'cascade_heal_choice',
     'distribute_heal_5',
@@ -1003,10 +1007,10 @@ export class GameEngine {
                 if (player.discard.length === 0) break; // Plus de cartes du tout
 
                 player.fatigueCounter++;
-                // Ascension : la défausse se recycle toujours, mais sans punir le joueur --
-                // le mode se joue sur plusieurs combats d'affilée sans soin, la fatigue
-                // cumulée le rendrait ininterrompablement mortel (cf. règles du mode).
-                const fatigueDamage = this.state.noFatigueDamage ? 0 : player.fatigueCounter;
+                // Ascension : la défausse se recycle toujours, mais sans punir LE GRIMPEUR --
+                // il enchaîne les combats sans se soigner, la fatigue cumulée le tuerait quoi
+                // qu'il fasse. L'adversaire de chaque étage, lui, subit la fatigue normale.
+                const fatigueDamage = player.noFatigueDamage ? 0 : player.fatigueCounter;
 
                 // Recycler les cartes de dieux encore vivants
                 const aliveGodIds = new Set(player.gods.filter(g => !g.isDead).map(g => g.card.id));
@@ -1331,7 +1335,7 @@ export class GameEngine {
         const createPlayerState = (
             id: string, name: string, gods: GodCard[], deck: SpellCard[], isFirst: boolean,
             /** Report d'état d'un combat précédent (Ascension). Seul le joueur 1 en reçoit. */
-            carry?: { health?: Record<string, number>; energy?: number }
+            carry?: { health?: Record<string, number>; energy?: number; noFatigue?: boolean }
         ): PlayerState => ({
             id,
             name,
@@ -1353,6 +1357,7 @@ export class GameEngine {
             hasPlayedCard: false,
             hasDiscardedForEnergy: false,
             godsCastThisMatch: [],
+            noFatigueDamage: carry?.noFatigue ?? false,
         });
 
         const isPlayer1First = firstPlayerId === player1Id;
@@ -1366,11 +1371,11 @@ export class GameEngine {
             turnNumber: 1,
             maxTurns,
             isOnlineGame: isOnline,
-            noFatigueDamage: options?.noFatigueDamage ?? false,
             players: [
                 createPlayerState(player1Id, player1Name, player1Gods, player1Deck, isPlayer1First, {
                     health: options?.carryOverHealth,
                     energy: options?.carryOverEnergy,
+                    noFatigue: options?.noFatigueDamage,
                 }),
                 createPlayerState(player2Id, player2Name, player2Gods, player2Deck, !isPlayer1First),
             ],

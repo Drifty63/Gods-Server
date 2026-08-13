@@ -22,13 +22,11 @@ const pythie = kit(
             { id: 'presage', name: 'Présage', gain: 2, desc: '+2 énergie et 1 dégât.', effects: [dmg(1)] },
         ],
         competences: [
-            { id: 'transe', name: 'Transe Sacrée', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'verite', name: 'Vérité Cruelle', cost: 2, desc: '2 dégâts et meule 2 cartes.', effects: [dmg(2), mill(2)] },
+            { id: 'transe', name: 'Transe Sacrée', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'oracle', name: 'Oracle', desc: 'Pioche 2 cartes.', effects: [draw(2)] },
         ],
         utility: {
-            id: 'oracle', name: 'Oracle', cost: 1,
-            desc: 'Pioche 2 cartes.',
-            effects: [draw(2)],
+            id: 'verite', name: 'Vérité Cruelle', desc: '2 dégâts et meule 2 cartes.', effects: [dmg(2), mill(2)],
         },
     },
 );
@@ -44,13 +42,11 @@ const muse = kit(
             { id: 'harmonie', name: 'Harmonie', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 2.', effects: [dmg(1), shield(2)] },
         ],
         competences: [
-            { id: 'verve', name: 'Verve Mordante', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'satire', name: 'Satire', cost: 2, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'verve', name: 'Verve Mordante', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'satire', name: 'Satire', desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
         ],
         utility: {
-            id: 'memoire', name: 'Mémoire Retrouvée', cost: 2,
-            desc: 'Soigne un allié de 4 et retire son étourdissement.',
-            effects: [heal(4), cleanse('stun')],
+            id: 'memoire', name: 'Mémoire Retrouvée', desc: 'Soigne un allié de 4 et retire son étourdissement.', effects: [heal(4), cleanse('stun')],
         },
     },
 );
@@ -66,13 +62,11 @@ const orphee = kit(
             { id: 'corde', name: 'Corde Tranchante', gain: 2, desc: '+2 énergie et 2 dégâts.', effects: [dmg(2)] },
         ],
         competences: [
-            { id: 'berceuse', name: 'Berceuse de la Lyre', cost: 3, desc: 'Étourdit un ennemi 1 tour.', effects: [status('stun', 1, 'enemy_god', 1)] },
-            { id: 'lamento', name: 'Lamento', cost: 2, desc: '2 dégâts à tous les ennemis.', effects: [dmg(2, 'all_enemies')] },
+            { id: 'descente', name: 'Descente aux Enfers', desc: 'Soigne tous les alliés de 3.', effects: [heal(3, 'all_allies')] },
+            { id: 'lamento', name: 'Lamento', desc: '1 dégât à tous les ennemis et 1 poison.', effects: [dmg(1, 'all_enemies'), status('poison', 1)] },
         ],
         utility: {
-            id: 'descente', name: 'Descente aux Enfers', cost: 2,
-            desc: 'Soigne tous les alliés de 3.',
-            effects: [heal(3, 'all_allies')],
+            id: 'berceuse', name: 'Berceuse de la Lyre', desc: 'Étourdit un ennemi 1 tour.', effects: [status('stun', 1, 'enemy_god', 1)],
         },
     },
 );
@@ -88,13 +82,11 @@ const python = kit(
             { id: 'ecailles', name: 'Écailles Antiques', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 3.', effects: [dmg(1), shield(3)] },
         ],
         competences: [
-            { id: 'venin', name: 'Venin de Delphes', cost: 2, desc: '2 dégâts et 3 poisons.', effects: [dmg(2), status('poison', 3, 'same')] },
-            { id: 'constriction', name: 'Constriction', cost: 3, desc: 'Inflige 6 dégâts.', effects: [dmg(6)] },
+            { id: 'venin', name: 'Venin de Delphes', desc: '2 dégâts et 3 poisons.', effects: [dmg(2), status('poison', 3, 'same')] },
+            { id: 'miasmes', name: 'Miasmes', desc: '1 poison à tous les ennemis.', effects: [status('poison', 1, 'all_enemies')] },
         ],
         utility: {
-            id: 'miasmes', name: 'Miasmes', cost: 2,
-            desc: '1 poison à tous les ennemis.',
-            effects: [status('poison', 1, 'all_enemies')],
+            id: 'constriction', name: 'Constriction', desc: 'Inflige 6 dégâts.', effects: [dmg(6)],
         },
     },
 );

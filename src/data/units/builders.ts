@@ -100,12 +100,24 @@ interface KitCard {
     name: string;
     /** Générateurs : énergie produite (≥1). Ignoré pour les autres types. */
     gain?: number;
-    /** Compétences/utilitaires : coût en énergie. Ignoré pour les générateurs (toujours 0). */
-    cost?: number;
     desc: string;
     /** Au moins un effet : une carte sans effet est refusée par les tests de structure. */
     effects: SpellEffect[];
 }
+
+/**
+ * Courbe de coûts imposée à TOUTE unité : 2 générateurs gratuits, 2 compétences à 1, 1
+ * utilitaire à 3 — le même gabarit que 17 des 20 dieux du roster.
+ *
+ * Le coût est déduit de la POSITION dans le kit et n'est pas paramétrable : les 48 unités du
+ * bestiaire avaient dérivé vers 9 courbes différentes (0,0,2,2,3 / 0,0,1,2,2 / …), ce qui
+ * rendait leur puissance incomparable d'une unité à l'autre. En le rendant positionnel, la
+ * dérive redevient impossible.
+ *
+ * Conséquence de conception : l'utilitaire est la carte CHÈRE de l'unité, donc c'est là que doit
+ * vivre son effet signature — pas dans une compétence.
+ */
+export const KIT_COSTS = { generator: 0, competence: 1, utility: 3 } as const;
 
 /**
  * Composition imposée d'un deck d'unité : 2 générateurs, 2 compétences, 1 utilitaire.
@@ -134,7 +146,7 @@ export function kit(card: GodCard, k: Kit): Bestiary {
             unit: card.id,
             element: card.element,
             type,
-            cost: type === 'generator' ? 0 : (c.cost ?? 0),
+            cost: KIT_COSTS[type],
             gain: type === 'generator' ? (c.gain ?? 1) : 0,
             desc: c.desc,
             effects: c.effects,

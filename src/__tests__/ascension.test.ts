@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { GameEngine } from '@/game-engine/GameEngine';
-import { addStatus, canGodAct, tickStatusEffects, isPetrified } from '@/game-engine/StatusSystem';
-import { healGod, addShield } from '@/game-engine/DamageSystem';
+import { addStatus, canGodAct, tickStatusEffects } from '@/game-engine/StatusSystem';
+import { healGod, addShield, dealDamage, PETRIFY_DAMAGE_BONUS } from '@/game-engine/DamageSystem';
 import { getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import {
@@ -32,12 +32,12 @@ describe('Saignement', () => {
     it('inflige ses dégâts en fin de tour', () => {
         const god = godState('zeus');
         const { player, state } = soloState(god);
-        addStatus(god, 'bleed', 3);
+        addStatus(god, 'bleed', 2);
         const before = god.currentHealth;
 
         tickStatusEffects(player, state);
 
-        expect(god.currentHealth).toBe(before - 3);
+        expect(god.currentHealth).toBe(before - 2);
     });
 
     it('ignore le bouclier, contrairement aux dégâts de sorts', () => {
@@ -58,46 +58,158 @@ describe('Saignement', () => {
         const god = godState('zeus');
         const { player, state } = soloState(god);
         god.currentHealth = 2;
-        addStatus(god, 'bleed', 5);
+        addStatus(god, 'bleed', 2);
 
+        tickStatusEffects(player, state);
         tickStatusEffects(player, state);
 
         expect(god.isDead).toBe(true);
     });
+
+    it('ne dépasse jamais 2 marques, même en empilant', () => {
+        const god = godState('zeus');
+        addStatus(god, 'bleed', 1);
+        addStatus(god, 'bleed', 1);
+        addStatus(god, 'bleed', 5);
+
+        expect(god.statusEffects.find(s => s.type === 'bleed')?.stacks).toBe(2);
+    });
+
+    it('applique le plafond dès la première pose', () => {
+        const god = godState('zeus');
+        addStatus(god, 'bleed', 9);
+        expect(god.statusEffects.find(s => s.type === 'bleed')?.stacks).toBe(2);
+    });
+
+    it('se soigne : chaque point de soin retire une marque', () => {
+        const god = godState('zeus');
+        god.currentHealth = 10;
+        addStatus(god, 'bleed', 2);
+
+        healGod(god, 1);
+        expect(god.statusEffects.find(s => s.type === 'bleed')?.stacks).toBe(1);
+
+        healGod(god, 1);
+        expect(god.statusEffects.find(s => s.type === 'bleed')).toBeUndefined();
+    });
 });
 
 describe('Pétrification', () => {
-    it('empêche le dieu d\'agir, comme l\'étourdissement', () => {
+    /** Dégâts bruts sans élément : pas de faiblesse en jeu, le calcul reste lisible. */
+    const hit = (god: GodState, raw: number) => {
+        const { player, state } = soloState(god);
+        return dealDamage(god, raw, player, state);
+    };
+
+    it('n\'empêche PAS d\'agir : c\'est une vulnérabilité, pas une immobilisation', () => {
         const god = godState('zeus');
+        addStatus(god, 'petrify', 1);
         expect(canGodAct(god)).toBe(true);
-        addStatus(god, 'petrify', 1, 1);
-        expect(canGodAct(god)).toBe(false);
-        expect(isPetrified(god)).toBe(true);
     });
 
-    it('empêche AUSSI les soins -- ce qui la distingue de l\'étourdissement', () => {
-        const petrified = godState('zeus');
-        petrified.currentHealth = 10;
-        addStatus(petrified, 'petrify', 1, 1);
-        expect(healGod(petrified, 8)).toBe(0);
-        expect(petrified.currentHealth).toBe(10);
-
-        const stunned = godState('zeus');
-        stunned.currentHealth = 10;
-        addStatus(stunned, 'stun', 1, 1);
-        expect(healGod(stunned, 8)).toBe(8);
+    it('n\'empêche pas les soins', () => {
+        const god = godState('zeus');
+        god.currentHealth = 10;
+        addStatus(god, 'petrify', 1);
+        expect(healGod(god, 5)).toBe(5);
     });
 
-    it('annule la régénération de fin de tour', () => {
+    it('ajoute +2 aux dégâts du prochain coup reçu', () => {
+        const god = godState('zeus');
+        addStatus(god, 'petrify', 1);
+
+        const result = hit(god, 4);
+
+        expect(result.petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
+        expect(result.healthLost).toBe(4 + PETRIFY_DAMAGE_BONUS);
+    });
+
+    it('est consommée par ce coup : le suivant est normal', () => {
+        const god = godState('zeus');
+        addStatus(god, 'petrify', 1);
+
+        hit(god, 4);
+        const second = hit(god, 4);
+
+        expect(second.petrifyBonus).toBe(0);
+        expect(second.healthLost).toBe(4);
+        expect(god.statusEffects.find(s => s.type === 'petrify')).toBeUndefined();
+    });
+
+    it('cumule +2 par marque', () => {
+        const god = godState('zeus');
+        addStatus(god, 'petrify', 2);
+        expect(hit(god, 3).healthLost).toBe(3 + 2 * PETRIFY_DAMAGE_BONUS);
+    });
+
+    it('ne s\'use pas au fil des tours tant qu\'aucun dégât n\'est reçu', () => {
         const god = godState('zeus');
         const { player, state } = soloState(god);
-        god.currentHealth = 10;
-        addStatus(god, 'regen', 3, 3);
-        addStatus(god, 'petrify', 1, 2);
+        // Même en demandant une durée, la pétrification doit persister : seuls des dégâts
+        // (ou un cleanse) la retirent.
+        addStatus(god, 'petrify', 1, 1);
+
+        tickStatusEffects(player, state);
+        tickStatusEffects(player, state);
+        tickStatusEffects(player, state);
+
+        expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
+        expect(hit(god, 1).petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
+    });
+
+    it('n\'est PAS consommée par le saignement : la marque attend une attaque', () => {
+        const god = godState('zeus');
+        const { player, state } = soloState(god);
+        addStatus(god, 'petrify', 1);
+        addStatus(god, 'bleed', 2);
+        const before = god.currentHealth;
 
         tickStatusEffects(player, state);
 
-        expect(god.currentHealth).toBe(10);
+        // Le saignement inflige ses 2 dégâts sans profiter du +2 ni gaspiller la marque.
+        expect(god.currentHealth).toBe(before - 2);
+        expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
+        // Elle reste donc disponible pour la vraie attaque.
+        expect(hit(god, 3).petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
+    });
+
+    it('n\'est PAS consommée par un coup que le bouclier absorbe entièrement', () => {
+        const god = godState('zeus');
+        addStatus(god, 'petrify', 1);
+        addShield(god, 10);
+        const before = god.currentHealth;
+
+        const blocked = hit(god, 4);
+
+        expect(blocked.petrifyBonus).toBe(0);
+        expect(god.currentHealth).toBe(before);
+        // Le bouclier n'absorbe que le coup lui-même, jamais le bonus non appliqué.
+        expect(god.statusEffects.find(s => s.type === 'shield')?.stacks).toBe(6);
+        expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
+    });
+
+    it('est consommée dès qu\'un coup traverse le bouclier', () => {
+        const god = godState('zeus');
+        addStatus(god, 'petrify', 1);
+        addShield(god, 2);
+
+        const through = hit(god, 4);
+
+        expect(through.petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
+        // 4 + 2 de bonus = 6, dont 2 absorbés par le bouclier.
+        expect(through.healthLost).toBe(4);
+        expect(god.statusEffects.find(s => s.type === 'petrify')).toBeUndefined();
+    });
+
+    it('est retirée par un cleanse (façon Aphrodite), qui ne garde que le bouclier', () => {
+        const god = godState('zeus');
+        addStatus(god, 'petrify', 2);
+        addShield(god, 4);
+
+        // Réplique de l'effet `cleanse` : tout saute sauf le bouclier.
+        god.statusEffects = god.statusEffects.filter(s => s.type === 'shield');
+
+        expect(hit(god, 3).petrifyBonus).toBe(0);
     });
 });
 
@@ -144,9 +256,18 @@ describe('Report d\'état entre étages (Ascension)', () => {
         expect(enemy.energy).toBe(1); // second joueur : règle normale
     });
 
-    it('désactive les dégâts de fatigue quand demandé', () => {
-        expect(start({}, 0, true).noFatigueDamage).toBe(true);
-        expect(start({}, 0, false).noFatigueDamage).toBe(false);
+    it('exempte le grimpeur de fatigue SANS en exempter l\'adversaire', () => {
+        const state = start({}, 0, true);
+        expect(state.players[0].noFatigueDamage).toBe(true);
+        // Le point clé : l'étage adverse reste soumis à la fatigue, sinon un combat contre
+        // 4 dieux pourrait durer indéfiniment sans qu'aucun camp ne s'épuise.
+        expect(state.players[1].noFatigueDamage).toBe(false);
+    });
+
+    it('laisse la fatigue active pour tout le monde hors Ascension', () => {
+        const state = start({}, 0, false);
+        expect(state.players[0].noFatigueDamage).toBe(false);
+        expect(state.players[1].noFatigueDamage).toBe(false);
     });
 });
 

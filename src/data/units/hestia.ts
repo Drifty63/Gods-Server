@@ -22,13 +22,11 @@ const vestale = kit(
             { id: 'veille', name: 'Veille du Foyer', gain: 2, desc: '+2 énergie, 1 dégât et soigne un allié de 2.', effects: [dmg(1), heal(2)] },
         ],
         competences: [
-            { id: 'braise', name: 'Braise Vive', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'flambee', name: 'Flambée', cost: 2, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'braise', name: 'Braise Vive', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'purification', name: 'Purification par le Feu', desc: 'Soigne un allié de 3 et retire poison et saignement.', effects: [heal(3), cleanse('poison'), cleanse('bleed')] },
         ],
         utility: {
-            id: 'purification', name: 'Purification par le Feu', cost: 1,
-            desc: 'Soigne un allié de 3 et retire poison et saignement.',
-            effects: [heal(3), cleanse('poison'), cleanse('bleed')],
+            id: 'flambee', name: 'Flambée', desc: 'Inflige 4 dégâts.', effects: [dmg(4)],
         },
     },
 );
@@ -44,13 +42,11 @@ const gardien = kit(
             { id: 'tisons', name: 'Tisons Remués', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 2.', effects: [dmg(1), shield(2)] },
         ],
         competences: [
-            { id: 'masse', name: 'Masse Chauffée', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'rempart', name: 'Coup de Rempart', cost: 2, desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
+            { id: 'masse', name: 'Masse Chauffée', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'rempart', name: 'Coup de Rempart', desc: 'Inflige 4 dégâts.', effects: [dmg(4)] },
         ],
         utility: {
-            id: 'devoir', name: 'Devoir du Gardien', cost: 2,
-            desc: 'Provocation sur soi 2 tours et bouclier 4.',
-            effects: [status('provocation', 1, 'self', 2), shield(4)],
+            id: 'devoir', name: 'Devoir du Gardien', desc: 'Provocation sur soi 2 tours et bouclier 4.', effects: [status('provocation', 1, 'self', 2), shield(4)],
         },
     },
 );
@@ -66,13 +62,11 @@ const phenix = kit(
             { id: 'serres', name: 'Serres Brûlantes', gain: 2, desc: '+2 énergie, 1 dégât et 1 poison.', effects: [dmg(1), status('poison', 1)] },
         ],
         competences: [
-            { id: 'cendres', name: 'Pluie de Cendres', cost: 3, desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')] },
-            { id: 'bucher', name: 'Bûcher', cost: 2, desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
+            { id: 'renaissance', name: 'Renaissance', desc: 'Régénération 3 sur soi et se soigne de 3.', effects: [status('regen', 3, 'self', 3), heal(3, 'self')] },
+            { id: 'bucher', name: 'Bûcher', desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
         ],
         utility: {
-            id: 'renaissance', name: 'Renaissance', cost: 2,
-            desc: 'Régénération 3 sur soi et se soigne de 3.',
-            effects: [status('regen', 3, 'self', 3), heal(3, 'self')],
+            id: 'cendres', name: 'Pluie de Cendres', desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')],
         },
     },
 );
@@ -88,13 +82,11 @@ const salamandre = kit(
             { id: 'peau', name: 'Peau de Lave', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 3.', effects: [dmg(1), shield(3)] },
         ],
         competences: [
-            { id: 'contact', name: 'Contact Brûlant', cost: 1, desc: '2 dégâts et 3 poisons.', effects: [dmg(2), status('poison', 3, 'same')] },
-            { id: 'embrasement', name: 'Embrasement', cost: 3, desc: 'Inflige 6 dégâts.', effects: [dmg(6)] },
+            { id: 'contact', name: 'Contact Brûlant', desc: '2 dégâts et 3 poisons.', effects: [dmg(2), status('poison', 3, 'same')] },
+            { id: 'fournaise', name: 'Fournaise', desc: '1 poison à tous les ennemis.', effects: [status('poison', 1, 'all_enemies')] },
         ],
         utility: {
-            id: 'fournaise', name: 'Fournaise', cost: 2,
-            desc: '1 poison à tous les ennemis.',
-            effects: [status('poison', 1, 'all_enemies')],
+            id: 'embrasement', name: 'Embrasement', desc: 'Inflige 6 dégâts.', effects: [dmg(6)],
         },
     },
 );

@@ -18,7 +18,12 @@ export interface DamageResult {
     healthLost: number;
     killed: boolean;
     wasWeak: boolean;
+    /** Dégâts supplémentaires apportés par la pétrification consommée sur ce coup. */
+    petrifyBonus: number;
 }
+
+/** Dégâts supplémentaires par marque de pétrification, consommés au premier coup reçu. */
+export const PETRIFY_DAMAGE_BONUS = 2;
 
 // ─────────────────────────────────────────────
 // Fonctions publiques
@@ -37,10 +42,16 @@ export function dealDamage(
         element?: Element;
         ignoreShield?: boolean;
         ignoreWeakness?: boolean;
+        /**
+         * Ce coup peut-il consommer la pétrification ? `false` pour les dégâts passifs
+         * (saignement) : la marque est une mise en place pour une ATTAQUE, il serait
+         * incompréhensible qu'un tick de fin de tour la gaspille.
+         */
+        consumesPetrify?: boolean;
     }
 ): DamageResult {
     if (target.isDead || rawDamage <= 0) {
-        return { rawDamage, finalDamage: 0, shieldAbsorbed: 0, healthLost: 0, killed: false, wasWeak: false };
+        return { rawDamage, finalDamage: 0, shieldAbsorbed: 0, healthLost: 0, killed: false, wasWeak: false, petrifyBonus: 0 };
     }
 
     // 1. Calculer les dégâts avec faiblesses élémentaires
@@ -58,21 +69,39 @@ export function dealDamage(
         wasWeak = result.isWeakness;
     }
 
+    // 1bis. Pétrification : la pierre encaisse mal. Chaque marque ajoute PETRIFY_DAMAGE_BONUS
+    // aux dégâts, puis le statut est ENTIÈREMENT consommé -- il ne s'use pas au fil des tours,
+    // seul un coup encaissé (ou un cleanse type Aphrodite) le retire. Appliqué après la faiblesse
+    // pour que le bonus soit un ajout fixe et non un montant doublé par la faiblesse.
+    //
+    // Deux garde-fous, pour que la marque ne soit jamais gaspillée à l'insu du joueur :
+    //  - les dégâts passifs (saignement) ne la consomment pas (`consumesPetrify: false`) ;
+    //  - un coup que le bouclier absorbe INTÉGRALEMENT ne la consomme pas non plus : le dieu
+    //    n'a rien encaissé, la marque continue d'attendre le coup qui passera vraiment.
+    const shieldEntry = options?.ignoreShield
+        ? undefined
+        : target.statusEffects.find(s => s.type === 'shield');
+    const fullyBlocked = (shieldEntry?.stacks ?? 0) >= finalDamage;
+
+    const petrifyIndex = target.statusEffects.findIndex(s => s.type === 'petrify');
+    let petrifyBonus = 0;
+    if (petrifyIndex !== -1 && options?.consumesPetrify !== false && !fullyBlocked) {
+        petrifyBonus = target.statusEffects[petrifyIndex].stacks * PETRIFY_DAMAGE_BONUS;
+        finalDamage += petrifyBonus;
+        target.statusEffects.splice(petrifyIndex, 1);
+    }
+
     // 2. Appliquer le bouclier
     let shieldAbsorbed = 0;
     let damageAfterShield = finalDamage;
 
-    if (!options?.ignoreShield) {
-        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-        if (shieldIndex !== -1) {
-            const shield = target.statusEffects[shieldIndex];
-            shieldAbsorbed = Math.min(shield.stacks, damageAfterShield);
-            shield.stacks -= shieldAbsorbed;
-            damageAfterShield -= shieldAbsorbed;
+    if (shieldEntry) {
+        shieldAbsorbed = Math.min(shieldEntry.stacks, damageAfterShield);
+        shieldEntry.stacks -= shieldAbsorbed;
+        damageAfterShield -= shieldAbsorbed;
 
-            if (shield.stacks <= 0) {
-                target.statusEffects.splice(shieldIndex, 1);
-            }
+        if (shieldEntry.stacks <= 0) {
+            target.statusEffects = target.statusEffects.filter(s => s !== shieldEntry);
         }
     }
 
@@ -88,26 +117,25 @@ export function dealDamage(
         handleGodDeath(owner, target, state);
     }
 
-    return { rawDamage, finalDamage, shieldAbsorbed, healthLost, killed, wasWeak };
+    return { rawDamage, finalDamage, shieldAbsorbed, healthLost, killed, wasWeak, petrifyBonus };
 }
 
 /**
- * Soigne une cible. Le soin retire le poison.
+ * Soigne une cible. Le soin referme les plaies : il retire le poison ET le saignement,
+ * à raison d'une marque par point de soin.
  */
 export function healGod(target: GodState, amount: number): number {
     if (target.isDead || amount <= 0) return 0;
 
-    // Un dieu pétrifié (Méduse) ne peut pas être soigné : c'est ce qui distingue la
-    // pétrification du simple étourdissement, qui n'empêche que d'agir.
-    if (target.statusEffects.some(s => s.type === 'petrify')) return 0;
-
-    // Retirer le poison
-    const poisonIndex = target.statusEffects.findIndex(s => s.type === 'poison');
-    if (poisonIndex !== -1) {
-        const poisonToRemove = Math.min(amount, target.statusEffects[poisonIndex].stacks);
-        target.statusEffects[poisonIndex].stacks -= poisonToRemove;
-        if (target.statusEffects[poisonIndex].stacks <= 0) {
-            target.statusEffects.splice(poisonIndex, 1);
+    // Retirer le poison et le saignement (soigner referme les plaies)
+    for (const cleansable of ['poison', 'bleed'] as const) {
+        const index = target.statusEffects.findIndex(s => s.type === cleansable);
+        if (index !== -1) {
+            const toRemove = Math.min(amount, target.statusEffects[index].stacks);
+            target.statusEffects[index].stacks -= toRemove;
+            if (target.statusEffects[index].stacks <= 0) {
+                target.statusEffects.splice(index, 1);
+            }
         }
     }
 

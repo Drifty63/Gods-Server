@@ -22,13 +22,11 @@ const dryade = kit(
             { id: 'ecorce', name: 'Écorce Protectrice', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 2.', effects: [dmg(1), shield(2)] },
         ],
         competences: [
-            { id: 'racines', name: 'Racines Étrangleuses', cost: 1, desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
-            { id: 'ronces', name: 'Ronces', cost: 2, desc: '2 dégâts et 1 saignement.', effects: [dmg(2), status('bleed', 1, 'same')] },
+            { id: 'racines', name: 'Racines Étrangleuses', desc: 'Inflige 3 dégâts.', effects: [dmg(3)] },
+            { id: 'ronces', name: 'Ronces', desc: '2 dégâts et 1 saignement.', effects: [dmg(2), status('bleed', 1, 'same')] },
         ],
         utility: {
-            id: 'repousse', name: 'Repousse', cost: 2,
-            desc: 'Régénération 2 sur un allié et retire son poison.',
-            effects: [status('regen', 2, 'ally_god', 3), cleanse('poison')],
+            id: 'repousse', name: 'Repousse', desc: 'Régénération 2 sur un allié et retire son poison.', effects: [status('regen', 2, 'ally_god', 3), cleanse('poison')],
         },
     },
 );
@@ -44,13 +42,11 @@ const moissonneur = kit(
             { id: 'glanage', name: 'Glanage', gain: 2, desc: '+2 énergie, 1 dégât et pioche 1 carte.', effects: [dmg(1), draw(1)] },
         ],
         competences: [
-            { id: 'faux', name: 'Coup de Faux', cost: 1, desc: '3 dégâts et 1 saignement.', effects: [dmg(3), status('bleed', 1, 'same')] },
-            { id: 'battage', name: 'Battage', cost: 2, desc: '2 dégâts et meule 2 cartes.', effects: [dmg(2), mill(2)] },
+            { id: 'faux', name: 'Coup de Faux', desc: '3 dégâts et 1 saignement.', effects: [dmg(3), status('bleed', 1, 'same')] },
+            { id: 'battage', name: 'Battage', desc: '2 dégâts et meule 2 cartes.', effects: [dmg(2), mill(2)] },
         ],
         utility: {
-            id: 'recolte', name: 'Grande Récolte', cost: 3,
-            desc: 'Inflige 5 dégâts.',
-            effects: [dmg(5)],
+            id: 'recolte', name: 'Grande Récolte', desc: 'Inflige 5 dégâts.', effects: [dmg(5)],
         },
     },
 );
@@ -66,13 +62,11 @@ const sanglier = kit(
             { id: 'soies', name: 'Soies Dures', gain: 2, desc: '+2 énergie, 1 dégât et bouclier 3.', effects: [dmg(1), shield(3)] },
         ],
         competences: [
-            { id: 'defenses', name: 'Défenses d\'Ivoire', cost: 2, desc: '3 dégâts et 3 saignements.', effects: [dmg(3), status('bleed', 3, 'same')] },
-            { id: 'ravage', name: 'Ravage des Champs', cost: 3, desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')] },
+            { id: 'defenses', name: 'Défenses d\'Ivoire', desc: '3 dégâts et 2 saignements.', effects: [dmg(3), status('bleed', 2, 'same')] },
+            { id: 'ravage', name: 'Ravage des Champs', desc: '1 dégât à tous les ennemis et 1 saignement.', effects: [dmg(1, 'all_enemies'), status('bleed', 1)] },
         ],
         utility: {
-            id: 'bourrade', name: 'Bourrade', cost: 3,
-            desc: 'Inflige 6 dégâts.',
-            effects: [dmg(6)],
+            id: 'bourrade', name: 'Bourrade', desc: 'Inflige 6 dégâts.', effects: [dmg(6)],
         },
     },
 );
@@ -88,13 +82,11 @@ const triptoleme = kit(
             { id: 'epi', name: 'Épi Tranchant', gain: 2, desc: '+2 énergie et 2 dégâts.', effects: [dmg(2)] },
         ],
         competences: [
-            { id: 'char', name: 'Char aux Dragons', cost: 2, desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
-            { id: 'moisson', name: 'Moisson Sacrée', cost: 3, desc: 'Inflige 6 dégâts.', effects: [dmg(6)] },
+            { id: 'char', name: 'Char aux Dragons', desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
+            { id: 'abondance', name: 'Abondance', desc: 'Soigne tous les alliés de 3.', effects: [heal(3, 'all_allies')] },
         ],
         utility: {
-            id: 'abondance', name: 'Abondance', cost: 2,
-            desc: 'Soigne tous les alliés de 3.',
-            effects: [heal(3, 'all_allies')],
+            id: 'moisson', name: 'Moisson Sacrée', desc: 'Inflige 6 dégâts.', effects: [dmg(6)],
         },
     },
 );
