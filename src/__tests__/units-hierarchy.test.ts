@@ -187,6 +187,17 @@ describe('Hiérarchie dieu > créature > serviteur (PV et dégâts)', () => {
         expect(c, `créature la plus robuste ${c} PV vs dieu ${g} PV`).toBeLessThan(g);
     });
 
+    it('ne laisse aucune créature être plus frêle que le meilleur serviteur', () => {
+        const toughestServant = maxHp(inCategory('servant'));
+        const frailestCreature = Math.min(...inCategory('creature').map(u => u.maxHealth));
+
+        // C'est ce contrôle qui manquait : la nuée d'araignées d'Arachné était classée
+        // « créature » à 12 PV, donc plus fragile que n'importe quel serviteur du jeu. Ces
+        // figurantes sont désormais des serviteurs, et l'araignée jouable une vraie créature.
+        expect(frailestCreature, `créature la plus frêle ${frailestCreature} PV vs serviteur ${toughestServant} PV`)
+            .toBeGreaterThan(toughestServant);
+    });
+
     it('ordonne les dégâts mono-cible maximum des trois catégories', () => {
         const s = maxDamage(inCategory('servant'), 'mono');
         const c = maxDamage(inCategory('creature'), 'mono');

@@ -361,21 +361,36 @@ export const ALL_GODS: GodCard[] = [
         affiliatedTo: 'athena',
     },
 
-    // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Duel + Histoire
+    // ─────────────────────────────────────────────────────────────────────────────
+    // LES ARAIGNÉES D'ARACHNÉ — deux rôles distincts, ne pas les confondre
+    //
+    // La NUÉE (araignées 2 et 3) n'existe que pour le combat d'Arachné du mode Histoire :
+    // des bestioles faibles dont l'intérêt est le nombre, pas la statistique. Ce sont donc
+    // des SERVITEURS, et leurs 12 PV sous la bande habituelle sont voulus.
+    //
+    // L'araignée 1, elle, est la seule jouable hors Histoire (Duel, Ascension) : à ce titre
+    // c'est une CRÉATURE à part entière, avec les PV et le coût de Duel correspondants.
+    //
+    // Ces rôles étaient exactement inversés : l'unité visible était un serviteur de 14 PV
+    // tandis que les deux figurantes de la nuée étaient classées créatures à 12 PV — soit
+    // des « créatures » plus faibles que n'importe quel serviteur du jeu.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Créature jouable : Duel + Ascension + Histoire
     {
         id: 'giant_spider_1',
         name: 'Araignée Géante',
         element: 'darkness',
         weakness: 'light',
-        maxHealth: 14,
+        maxHealth: 21,
         imageUrl: '/cards/gods/giant_spider_1.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
-        category: 'servant',
+        category: 'creature',
         affiliatedTo: 'arachne',
-        duelCost: 2,
+        duelCost: 3,
     },
 
-    // ARAIGNÉE GÉANTE 2 (Ténèbres 💀) - Exclusif Histoire
+    // ARAIGNÉE GÉANTE 2 (Ténèbres 💀) - Nuée, exclusif Histoire
     {
         id: 'giant_spider_2',
         name: 'Araignée Géante',
@@ -385,11 +400,12 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/giant_spider_2.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         hidden: true,  // Exclusif mode Histoire
-        category: 'creature',
+        category: 'servant',
         affiliatedTo: 'arachne',
+        duelCost: 2,
     },
 
-    // ARAIGNÉE GÉANTE 3 (Ténèbres 💀) - Exclusif Histoire
+    // ARAIGNÉE GÉANTE 3 (Ténèbres 💀) - Nuée, exclusif Histoire
     {
         id: 'giant_spider_3',
         name: 'Araignée Géante',
@@ -399,8 +415,9 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/giant_spider_3.png',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         hidden: true,  // Exclusif mode Histoire
-        category: 'creature',
+        category: 'servant',
         affiliatedTo: 'arachne',
+        duelCost: 2,
     },
 
     // =====================
