@@ -74,7 +74,11 @@ const aigle = kit(
 
 const pegase = kit(
     creature({
-        id: 'pegase', name: 'Pégase', element: 'air', hp: 23, god: 'zeus', arch: 'support',
+        // Volontairement SANS archétype : Pégase cumule le meilleur soin de sa catégorie
+        // (Source Hippocrène) et ses meilleurs dégâts (Foudre Portée, 7). C'est un hybride,
+        // pas un soigneur — l'étiqueter « support » en aurait fait un soigneur qui frappe
+        // aussi fort que Persée, le glass cannon des créatures.
+        id: 'pegase', name: 'Pégase', element: 'air', hp: 23, god: 'zeus',
         flavor: '"Né du sang de la Gorgone, je porte aujourd\'hui le tonnerre du maître de l\'Olympe."',
     }),
     {

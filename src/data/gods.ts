@@ -380,7 +380,7 @@ export const ALL_GODS: GodCard[] = [
     //
     // La NUÉE (araignées 2 et 3) n'existe que pour le combat d'Arachné du mode Histoire :
     // des bestioles faibles dont l'intérêt est le nombre, pas la statistique. Ce sont donc
-    // des SERVITEURS, et leurs 12 PV sous la bande habituelle sont voulus.
+    // des SERVITEURS, dans le bas de leur bande de PV (12, pour une bande 10-18).
     //
     // L'araignée 1, elle, est la seule jouable hors Histoire (Duel, Ascension) : à ce titre
     // c'est une CRÉATURE à part entière, avec les PV et le coût de Duel correspondants.

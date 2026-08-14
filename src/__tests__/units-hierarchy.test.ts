@@ -29,19 +29,59 @@ const inCategory = (c: 'god' | 'creature' | 'servant') =>
 
 const maxHp = (units: GodCard[]) => Math.max(...units.map(u => u.maxHealth));
 
-/** Meilleur dégât d'une unité pour une portée donnée, toutes ses cartes confondues. */
+/**
+ * ANGLE MORT ASSUMÉ de toutes les mesures de ce fichier : seuls les effets *déclarés*
+ * (`damage`, `heal`) sont visibles. Les effets `custom` ne portent pas de valeur lisible, et
+ * la moitié des sorts de dieux en utilisent (ex: `tsunami_damage`, `cascade_heal_choice`)
+ * contre aucun des 240 sorts du bestiaire.
+ *
+ * Conséquence : le plafond des DIEUX est systématiquement sous-estimé. L'erreur va donc dans
+ * le sens prudent — un dépassement réel du bestiaire sera toujours détecté ; en revanche un
+ * échec de ces tests peut être un faux positif dû à un dieu dont la puissance vit dans un
+ * effet custom. À vérifier avant de « corriger » les données.
+ */
+
+/** Cibles adverses. Le reste (soi-même, alliés) n'est pas de l'offensive. */
+const OFFENSIVE_TARGETS = new Set(['enemy_god', 'all_enemies', 'any_god', 'same', undefined]);
+
+/** Sorts indexés par propriétaire : évite de reparcourir ALL_SPELLS pour chacune des 68 unités. */
+const SPELLS_BY_OWNER = ALL_SPELLS.reduce((map, spell) => {
+    const owned = map.get(spell.godId);
+    if (owned) owned.push(spell); else map.set(spell.godId, [spell]);
+    return map;
+}, new Map<string, typeof ALL_SPELLS>());
+
+const spellsOf = (unitId: string) => SPELLS_BY_OWNER.get(unitId) ?? [];
+
+/**
+ * Meilleur dégât OFFENSIF d'une unité pour une portée donnée.
+ *
+ * Les dégâts que l'unité s'inflige à elle-même sont exclus : « Dernier recours » d'Arès se
+ * coûte 5 PV (`target: 'self'`), ce qui gonflait à tort son score de frappeur.
+ */
 function maxDamage(units: GodCard[], scope: 'mono' | 'aoe'): number {
-    const ids = new Set(units.map(u => u.id));
     let best = 0;
-    for (const spell of ALL_SPELLS) {
-        if (!ids.has(spell.godId)) continue;
-        for (const effect of spell.effects) {
-            if (effect.type !== 'damage') continue;
-            const isAoe = effect.target === 'all_enemies';
-            if (isAoe === (scope === 'aoe')) best = Math.max(best, effect.value ?? 0);
+    for (const unit of units) {
+        for (const spell of spellsOf(unit.id)) {
+            for (const effect of spell.effects) {
+                if (effect.type !== 'damage') continue;
+                if (!OFFENSIVE_TARGETS.has(effect.target)) continue;
+                const isAoe = effect.target === 'all_enemies';
+                if (isAoe === (scope === 'aoe')) best = Math.max(best, effect.value ?? 0);
+            }
         }
     }
     return best;
+}
+
+/**
+ * Refuse une mesure vide. `maxDamage`/`Math.max` renvoient 0 ou -Infinity quand rien ne
+ * correspond, ce qui ferait passer une comparaison sans rien vérifier le jour où une
+ * catégorie se vide.
+ */
+function measured(value: number, label: string): number {
+    expect(Number.isFinite(value) && value > 0, `mesure vide pour ${label}`).toBe(true);
+    return value;
 }
 
 describe('Bestiaire — intégrité des unités', () => {
@@ -182,12 +222,23 @@ describe('Bestiaire — hiérarchie de puissance', () => {
  * Chaque archétype est jugé sur la statistique qui le définit.
  */
 describe('Hiérarchie à archétype égal', () => {
-    /** Somme des soins d'une unité. Un soin de zone touche jusqu'à 4 alliés : compté ×3. */
+    /**
+     * Somme des soins d'une unité : soin direct ET régénération, celle-ci comptée sur toute sa
+     * durée (elle rend `stacks` PV par tour). Un soin de zone touche jusqu'à 4 alliés : ×3.
+     *
+     * Ne voit toujours pas les soins portés par un effet `custom` — c'est le cas de Sélène
+     * (cascade, résurrection) et d'une partie de Déméter, qui sont donc sous-évaluées. Voir
+     * l'avertissement en tête de fichier.
+     */
     function totalHeal(unit: GodCard): number {
         let total = 0;
-        for (const spell of ALL_SPELLS.filter(s => s.godId === unit.id)) {
+        for (const spell of spellsOf(unit.id)) {
             for (const e of spell.effects) {
-                if (e.type === 'heal') total += (e.value ?? 0) * (e.target === 'all_allies' ? 3 : 1);
+                const spread = e.target === 'all_allies' ? 3 : 1;
+                if (e.type === 'heal') total += (e.value ?? 0) * spread;
+                if (e.type === 'status' && e.status === 'regen') {
+                    total += (e.value ?? 0) * (e.statusDuration ?? 1) * spread;
+                }
             }
         }
         return total;
@@ -203,10 +254,10 @@ describe('Hiérarchie à archétype égal', () => {
         metric: (u: GodCard) => number,
     ): number {
         const units = withArchetype(category, archetype);
-        // Sans cette garde, `Math.max()` d'un tableau vide vaut -Infinity et le test passerait
-        // sans rien vérifier le jour où un archétype disparaît d'une catégorie.
+        // Deux façons de mesurer du vide, toutes deux fatales au test : plus aucune unité de cet
+        // archétype, ou des unités dont la statistique mesurée est nulle (voir `measured`).
         expect(units.length, `aucun ${archetype} chez les ${category}`).toBeGreaterThan(0);
-        return Math.max(...units.map(metric));
+        return measured(Math.max(...units.map(metric)), `${archetype} ${category}`);
     }
 
     it('fait frapper les glass cannons plus fort à chaque palier', () => {
@@ -236,6 +287,24 @@ describe('Hiérarchie à archétype égal', () => {
 
         expect(s, `serviteur ${s} soins vs créature ${c}`).toBeLessThan(c);
         expect(c, `créature ${c} soins vs dieu ${g}`).toBeLessThan(g);
+    });
+
+    /**
+     * L'étiquette doit vouloir dire quelque chose DANS son propre palier : sans ce contrôle, un
+     * tank n'est jugé que sur ses PV et ses dégâts ne sont bornés par rien. L'Hoplite (tank)
+     * égalait ainsi les meilleurs serviteurs glass cannon, et Pégase (support) frappait aussi
+     * fort que Persée, le glass cannon de sa catégorie.
+     */
+    it('laisse le glass cannon frapper plus fort que les autres rôles de son palier', () => {
+        for (const category of ['servant', 'creature', 'god'] as const) {
+            const glass = ceiling('glass_cannon', category, u => maxDamage([u], 'mono'));
+
+            for (const other of ['tank', 'support'] as const) {
+                const rival = ceiling(other, category, u => maxDamage([u], 'mono'));
+                expect(rival, `${other} ${category} frappe à ${rival}, le glass cannon à ${glass}`)
+                    .toBeLessThan(glass);
+            }
+        }
     });
 });
 
@@ -268,18 +337,18 @@ describe('Hiérarchie dieu > créature > serviteur (PV et dégâts)', () => {
     });
 
     it('ordonne les dégâts mono-cible maximum des trois catégories', () => {
-        const s = maxDamage(inCategory('servant'), 'mono');
-        const c = maxDamage(inCategory('creature'), 'mono');
-        const g = maxDamage(inCategory('god'), 'mono');
+        const s = measured(maxDamage(inCategory('servant'), 'mono'), 'dégâts serviteurs');
+        const c = measured(maxDamage(inCategory('creature'), 'mono'), 'dégâts créatures');
+        const g = measured(maxDamage(inCategory('god'), 'mono'), 'dégâts dieux');
 
         expect(s, `serviteur frappe à ${s} vs créature ${c}`).toBeLessThan(c);
         expect(c, `créature frappe à ${c} vs dieu ${g}`).toBeLessThan(g);
     });
 
     it('ne laisse aucune catégorie dépasser la suivante en dégâts de zone', () => {
-        const s = maxDamage(inCategory('servant'), 'aoe');
-        const c = maxDamage(inCategory('creature'), 'aoe');
-        const g = maxDamage(inCategory('god'), 'aoe');
+        const s = measured(maxDamage(inCategory('servant'), 'aoe'), 'zone serviteurs');
+        const c = measured(maxDamage(inCategory('creature'), 'aoe'), 'zone créatures');
+        const g = measured(maxDamage(inCategory('god'), 'aoe'), 'zone dieux');
 
         // Non strict ici : l'ultime d'une créature peut égaler le Foudroiement de Zeus (3 de
         // zone), ce qui reste cohérent puisque le dieu garde l'avantage sur tout le reste.

@@ -27,7 +27,9 @@ const hoplite = kit(
             { id: 'phalange', name: 'Mur de Phalange', desc: 'Bouclier 2 à tous les alliés et provocation sur soi.', effects: [shield(2, 'all_allies'), status('provocation', 1, 'self', 2)] },
         ],
         utility: {
-            id: 'charge', name: 'Charge Ordonnée', desc: 'Inflige 5 dégâts.', effects: [dmg(5)],
+            // 4 et non 5 : l'Hoplite est un tank, il ne doit pas égaler les serviteurs
+            // glass cannon (Soldats d'Arès, Moissonneur) sur leur propre terrain.
+            id: 'charge', name: 'Charge Ordonnée', desc: 'Inflige 4 dégâts et bouclier 2.', effects: [dmg(4), shield(2)],
         },
     },
 );
