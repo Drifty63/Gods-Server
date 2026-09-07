@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
+import { toast } from '@/lib/toast';
 import styles from './page.module.css';
 
 export default function OnlinePage() {
@@ -87,7 +88,7 @@ function OnlineContent() {
 
     const handleJoinQueue = (ranked: boolean = true) => {
         if (!playerName.trim()) {
-            alert('Veuillez entrer un nom de joueur');
+            toast.error('Entrez un pseudonyme avant de rejoindre une partie');
             return;
         }
         localStorage.setItem('playerName', playerName);
@@ -103,7 +104,7 @@ function OnlineContent() {
 
     const handleCreatePrivate = () => {
         if (!playerName.trim()) {
-            alert('Veuillez entrer un nom de joueur');
+            toast.error('Entrez un pseudonyme avant de créer une partie');
             return;
         }
         localStorage.setItem('playerName', playerName);
@@ -114,7 +115,7 @@ function OnlineContent() {
 
     const handleJoinPrivate = () => {
         if (!playerName.trim() || !privateCode.trim()) {
-            alert('Veuillez remplir tous les champs');
+            toast.error(!playerName.trim() ? 'Entrez un pseudonyme' : 'Entrez le code de la partie');
             return;
         }
         localStorage.setItem('playerName', playerName);
@@ -269,9 +270,16 @@ function OnlineContent() {
                             <div className={styles.gameCode}>{currentGame.gameId}</div>
                             <button
                                 className={styles.copyButton}
-                                onClick={() => {
-                                    navigator.clipboard.writeText(currentGame.gameId);
-                                    alert('Code copié !');
+                                onClick={async () => {
+                                    // `writeText` échoue en contexte non sécurisé ou si le
+                                    // navigateur refuse le presse-papiers : mieux vaut le dire
+                                    // que d'annoncer une copie qui n'a pas eu lieu.
+                                    try {
+                                        await navigator.clipboard.writeText(currentGame.gameId);
+                                        toast.success('Code copié dans le presse-papiers');
+                                    } catch {
+                                        toast.error(`Copie impossible — code : ${currentGame.gameId}`, 8000);
+                                    }
                                 }}
                             >
                                 📋 Copier le code

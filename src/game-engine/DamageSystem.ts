@@ -186,6 +186,10 @@ export function handleGodDeath(owner: PlayerState, god: GodState, state: GameSta
         state.status = 'finished';
         // Le gagnant est l'autre joueur
         state.winnerId = state.players.find(p => p.id !== owner.id)?.id;
+        // `winReason` est déclaré dans GameState et documenté dans gameRules (WIN_CONDITIONS)
+        // mais n'était renseigné NULLE PART : l'écran de fin ne pouvait donc pas distinguer une
+        // élimination d'une victoire aux points ou d'un abandon.
+        state.winReason = 'elimination';
     }
 }
 

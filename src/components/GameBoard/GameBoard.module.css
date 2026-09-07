@@ -445,6 +445,179 @@
   100% { transform: translateY(-22px) scale(1); opacity: 0; }
 }
 
+/* --- IMPACT TEINTÉ PAR L'ÉLÉMENT DU SORT ---
+ * HeroCard.tsx fournit --impact-color (couleur du sort reçu, pas de la cible). Un éclair de
+ * Zeus éclate désormais en jaune et un tsunami en bleu, là où tous les dégâts partageaient le
+ * même rouge générique quel que soit l'élément.
+ *
+ * Surcharge volontaire de la règle .impactDamage définie plus haut : celle-ci sert de repli
+ * pour les navigateurs sans color-mix() (Safari < 16.2), qui ignoreront simplement ce bloc et
+ * garderont le rouge d'origine plutôt que de perdre l'effet.
+ */
+.impactDamage {
+  background: radial-gradient(circle,
+      color-mix(in srgb, var(--impact-color, #ef4444) 60%, transparent),
+      color-mix(in srgb, var(--impact-color, #ef4444) 8%, transparent) 70%);
+}
+
+/* --- COUP CRITIQUE (faiblesse élémentaire ×2) ---
+ * La règle la plus structurante du jeu ne se voyait pas : un 6 doublé en 12 s'affichait comme
+ * n'importe quel autre nombre. L'impact critique dure plus longtemps, pulse, et s'annonce.
+ */
+.impactCritical {
+  animation: impactFlashCritical 0.9s ease-out forwards;
+  box-shadow: inset 0 0 40px var(--impact-color, #ef4444);
+}
+
+.impactCritical .impactNumber {
+  font-size: clamp(1.5rem, 11vw, 2.3rem);
+  color: #fff;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.95),
+    0 0 18px var(--impact-color, #ef4444),
+    0 0 34px var(--impact-color, #ef4444);
+  animation: impactNumberCritical 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.criticalLabel {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+
+  padding: 2px 8px;
+  white-space: nowrap;
+
+  font-family: var(--font-logo);
+  font-size: clamp(0.5rem, 2.6vw, 0.66rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #fff;
+
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid var(--impact-color, #ef4444);
+  border-radius: 999px;
+  box-shadow: 0 0 14px var(--impact-color, #ef4444);
+
+  animation: criticalLabelPop 0.9s ease-out forwards;
+}
+
+@keyframes impactFlashCritical {
+  0% { opacity: 0; transform: scale(1.25); }
+  12% { opacity: 1; transform: scale(1); }
+  70% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+@keyframes impactNumberCritical {
+  0% { transform: translateY(8px) scale(0.5) rotate(-6deg); opacity: 0; }
+  22% { transform: translateY(0) scale(1.4) rotate(3deg); opacity: 1; }
+  45% { transform: translateY(-4px) scale(1.15) rotate(0deg); }
+  100% { transform: translateY(-30px) scale(1.05); opacity: 0; }
+}
+
+@keyframes criticalLabelPop {
+  0% { transform: translateX(-50%) scale(0.4); opacity: 0; }
+  20% { transform: translateX(-50%) scale(1.12); opacity: 1; }
+  32% { transform: translateX(-50%) scale(1); }
+  78% { opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 0; }
+}
+
+/* --- SECOUSSE DE L'ÉCRAN ---
+ * Appliquée au plateau entier (pas à la carte touchée, qui a déjà .shaking) : c'est ce qui
+ * donne du poids à un coup. Deux intensités seulement — un critique ou une mort secouent
+ * franchement, un coup ordinaire à peine ; sinon l'effet devient épuisant sur une partie longue.
+ * `translateZ(0)` force la composition GPU pour éviter que le texte ne tremble en sub-pixel.
+ */
+.shakeLight {
+  animation: screenShakeLight 0.3s ease-in-out;
+}
+
+.shakeHeavy {
+  animation: screenShakeHeavy 0.52s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes screenShakeLight {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-3px, 1px, 0); }
+  50% { transform: translate3d(2px, -2px, 0); }
+  75% { transform: translate3d(-1px, 2px, 0); }
+}
+
+@keyframes screenShakeHeavy {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  10% { transform: translate3d(-9px, 3px, 0) rotate(-0.35deg); }
+  22% { transform: translate3d(8px, -5px, 0) rotate(0.3deg); }
+  36% { transform: translate3d(-7px, 4px, 0) rotate(-0.22deg); }
+  50% { transform: translate3d(6px, -3px, 0) rotate(0.16deg); }
+  66% { transform: translate3d(-4px, 2px, 0); }
+  82% { transform: translate3d(2px, -1px, 0); }
+}
+
+/* --- BANNIÈRE DE CHANGEMENT DE TOUR ---
+ * Rien n'annonçait la reprise de la main : on pouvait fixer l'écran sans savoir si l'adversaire
+ * réfléchissait encore. La bannière traverse l'écran puis disparaît, sans bloquer le jeu.
+ */
+.turnBanner {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  z-index: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+
+  pointer-events: none;
+  transform: translateY(-50%);
+  animation: turnBannerSweep 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.turnBannerMine {
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(212, 175, 55, 0.28) 18%,
+      rgba(212, 175, 55, 0.42) 50%,
+      rgba(212, 175, 55, 0.28) 82%,
+      transparent);
+  border-top: 1px solid rgba(245, 215, 110, 0.6);
+  border-bottom: 1px solid rgba(245, 215, 110, 0.6);
+}
+
+.turnBannerTheirs {
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(239, 68, 68, 0.22) 18%,
+      rgba(239, 68, 68, 0.34) 50%,
+      rgba(239, 68, 68, 0.22) 82%,
+      transparent);
+  border-top: 1px solid rgba(239, 68, 68, 0.5);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.turnBannerText {
+  font-family: var(--font-logo);
+  font-size: clamp(1.1rem, 6.5vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 26px currentColor;
+}
+
+.turnBannerMine .turnBannerText { color: var(--gold-light, #f5d76e); }
+.turnBannerTheirs .turnBannerText { color: #fca5a5; }
+
+@keyframes turnBannerSweep {
+  0% { opacity: 0; transform: translateY(-50%) scaleX(0.75); }
+  14% { opacity: 1; transform: translateY(-50%) scaleX(1); }
+  72% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-50%) scaleX(1.04); }
+}
+
 /* Réticule affiché sur un dieu déjà retenu comme cible (persiste tant qu'il l'est, y compris
  * en attente d'une cible supplémentaire pour les sorts multi-cibles) : rend le choix explicite
  * au-delà du simple contour rouge de .targeted, qui pouvait passer inaperçu. */
@@ -1231,3 +1404,174 @@
 .resultButtonPrimary:hover,
 .resultButtonSecondary:hover { filter: brightness(1.1); }
 .detailDescription { font-size: clamp(0.6rem, 2.2vw, 0.72rem); color: #fff; line-height: 1.4; margin-top: 3px; }
+
+/* --- APERÇU PLEIN ÉCRAN D'UNE CARTE (appui long) ---
+ * Sur mobile, toucher une carte la SÉLECTIONNE : il n'existait aucun moyen de lire un effet
+ * en entier avant de s'engager. L'appui long (voir useLongPress) ouvre cet aperçu, qui se
+ * ferme au moindre contact — on ne veut pas ajouter une étape de plus en pleine partie.
+ */
+.inspectOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2500;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+
+  background: rgba(4, 5, 14, 0.9);
+  backdrop-filter: blur(8px);
+  animation: inspectFadeIn 0.18s ease-out;
+}
+
+.inspectCard {
+  display: flex;
+  flex-direction: column;
+  width: min(340px, 86vw);
+  max-height: 78dvh;
+  overflow: hidden;
+
+  background: var(--bg-card, rgba(22, 33, 62, 0.95));
+  border: 2px solid var(--gold-divine, #d4af37);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 175, 55, 0.25);
+
+  animation: inspectZoomIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inspectImage {
+  width: 100%;
+  /* La carte doit rester lisible en entier : on ne rogne pas l'illustration. */
+  object-fit: contain;
+  max-height: 46dvh;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.inspectInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  overflow-y: auto;
+}
+
+.inspectName {
+  font-family: var(--font-logo);
+  font-size: 1.05rem;
+  color: var(--gold-light, #f5d76e);
+}
+
+.inspectDesc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.inspectStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.inspectHint {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+@keyframes inspectFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes inspectZoomIn {
+  from { opacity: 0; transform: scale(0.88) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* --- ÉCRAN DE FIN : mise en scène ---
+ * Le panneau de résultat existait déjà ; ce qui manquait, c'est ce qui l'entoure. Des rayons
+ * lents derrière lui transforment un encart centré en véritable écran de conclusion.
+ */
+.resultRays {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  animation: resultRaysSpin 24s linear infinite;
+}
+
+.resultRaysVictory {
+  background: conic-gradient(from 0deg at 50% 50%,
+      transparent 0deg, rgba(245, 215, 110, 0.16) 12deg, transparent 24deg,
+      transparent 60deg, rgba(245, 215, 110, 0.12) 72deg, transparent 84deg,
+      transparent 120deg, rgba(245, 215, 110, 0.16) 132deg, transparent 144deg,
+      transparent 180deg, rgba(245, 215, 110, 0.12) 192deg, transparent 204deg,
+      transparent 240deg, rgba(245, 215, 110, 0.16) 252deg, transparent 264deg,
+      transparent 300deg, rgba(245, 215, 110, 0.12) 312deg, transparent 324deg);
+  mask-image: radial-gradient(circle at 50% 50%, black 10%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 10%, transparent 72%);
+}
+
+.resultRaysDefeat {
+  background: radial-gradient(circle at 50% 50%, rgba(120, 20, 30, 0.28), transparent 62%);
+  /* Pas de rotation pour la défaite : l'immobilité pèse davantage que le mouvement. */
+  animation: none;
+}
+
+@keyframes resultRaysSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Récapitulatif chiffré du combat, sous le titre. */
+.resultStats {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.resultStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 72px;
+  padding: 10px 12px;
+
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  /* Entrée décalée par rapport au panneau : le regard lit le titre, puis les chiffres. */
+  animation: resultStatIn 0.45s ease-out backwards;
+}
+
+.resultStat:nth-child(1) { animation-delay: 0.25s; }
+.resultStat:nth-child(2) { animation-delay: 0.35s; }
+.resultStat:nth-child(3) { animation-delay: 0.45s; }
+
+.resultStatValue {
+  font-family: var(--font-logo);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.resultStatLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+
+@keyframes resultStatIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

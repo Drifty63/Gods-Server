@@ -8,6 +8,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { ALL_GODS, getDuelCards } from '@/data/gods';
 import type { GodCard } from '@/types/cards';
+import { toast } from '@/lib/toast';
+import { haptic } from '@/lib/haptics';
+import { playSfx } from '@/lib/sfx';
 import styles from './page.module.css';
 
 // Configuration du mode Duel
@@ -106,18 +109,30 @@ function DuelContent() {
 
         if (selectedCards.includes(cardId)) {
             setSelectedCards(selectedCards.filter(id => id !== cardId));
+            haptic('tap');
+            playSfx('tap');
         } else if (selectedCards.length < DUEL_CONFIG.MAX_CHARACTERS && budgetRemaining >= cost) {
             setSelectedCards([...selectedCards, cardId]);
+            haptic('select');
+            playSfx('select');
+        } else {
+            // Refus silencieux auparavant : le joueur cliquait sans comprendre pourquoi rien ne
+            // se passait. On explique lequel des deux plafonds bloque.
+            toast.error(
+                selectedCards.length >= DUEL_CONFIG.MAX_CHARACTERS
+                    ? `Équipe complète (${DUEL_CONFIG.MAX_CHARACTERS} cartes maximum)`
+                    : `Budget insuffisant : ${cost} pts requis, ${budgetRemaining} restants`,
+            );
         }
     };
 
     const handleStartSearch = () => {
         if (!profile?.username) {
-            alert('Vous devez être connecté pour jouer en Duel');
+            toast.error('Vous devez être connecté pour jouer en Duel');
             return;
         }
         if (selectedCards.length < 2) {
-            alert('Sélectionnez au moins 2 cartes');
+            toast.error('Sélectionnez au moins 2 cartes pour partir au combat');
             return;
         }
         setView('searching');
@@ -147,7 +162,23 @@ function DuelContent() {
             <div
                 key={card.id}
                 className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${!canSelect && !isSelected ? styles.disabled : ''}`}
-                onClick={() => canSelect && handleSelectCard(card.id)}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
+                aria-label={`${card.name}, ${cost} points${isSelected ? ', sélectionné' : ''}`}
+                // Cette carte joue ses propres sons (sélection / retrait / refus) : on désactive
+                // le clic générique de la couche globale pour ne pas les superposer.
+                data-no-sound
+                // Toujours transmis au gestionnaire, même quand la carte est indisponible : c'est
+                // lui qui explique le refus (budget ou équipe pleine) au lieu de laisser le clic
+                // se perdre sans aucun retour.
+                onClick={() => handleSelectCard(card.id)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectCard(card.id);
+                    }
+                }}
             >
                 <div
                     className={styles.godImage}

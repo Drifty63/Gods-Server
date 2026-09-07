@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import { ArenaArea } from './components/ArenaArea';
@@ -8,9 +8,15 @@ import { HandArea } from './components/HandArea';
 import { DeckAndDiscard } from './components/DeckAndDiscard';
 import { SpellCardUI } from './components/SpellCardUI';
 import { CardFlight, CardFlightData } from './components/CardFlight';
-import { SpellCard, GodState } from '@/types/cards';
+// `Element` est aliasé : le type du jeu masquerait sinon l'interface DOM `Element`, dont ce
+// fichier a besoin pour les mesures de position (getBoundingClientRect) de l'animation de vol.
+import { SpellCard, GodState, type Element as GameElement } from '@/types/cards';
+import type { ImpactReport } from './components/HeroCard';
 import type { GameAction } from '@/hooks/useMultiplayer';
 import { getReadableSpellDescription } from '@/data/spellDescriptions';
+import { playSfx } from '@/lib/sfx';
+import { haptic } from '@/lib/haptics';
+import { useWakeLock } from '@/lib/useWakeLock';
 import styles from './GameBoard.module.css';
 
 // Modals pour effets spéciaux
@@ -28,6 +34,37 @@ import CombatLogModal from '@/components/CombatLogModal/CombatLogModal';
 interface GameBoardProps {
     isOnlineMode?: boolean;
     onAction?: (action: { type: GameAction['type']; payload?: Record<string, unknown> }) => void;
+}
+
+/**
+ * Phrase de conclusion adaptée à la MANIÈRE dont la partie s'est terminée.
+ *
+ * `winReason` est porté par GameState depuis l'origine mais n'était renseigné nulle part (il
+ * l'est désormais par le moteur et par l'abandon) : gagner par élimination, aux points ou par
+ * forfait donnait donc exactement le même texte.
+ */
+function resultSubtitle(
+    reason: import('@/types/cards').GameState['winReason'],
+    isVictory: boolean,
+    isDraw: boolean,
+): string {
+    if (isDraw) return "Ni l'un ni l'autre n'a plié : les dieux vous renvoient dos à dos.";
+
+    switch (reason) {
+        case 'turn_limit':
+            return isVictory
+                ? 'Le temps a manqué à votre adversaire : vous l\'emportez aux points.'
+                : 'La limite de tours est atteinte — votre adversaire tenait le meilleur score.';
+        case 'surrender':
+            return isVictory
+                ? 'Votre adversaire a renoncé au combat.'
+                : 'Vous avez quitté le champ de bataille.';
+        case 'elimination':
+        default:
+            return isVictory
+                ? 'Vous avez triomphé sur le champ de bataille.'
+                : 'Vos dieux sont tombés au combat.';
+    }
 }
 
 export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardProps) {
@@ -99,6 +136,10 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         cancelGodSelection,
     } = useGameStore();
 
+    // L'écran ne doit pas s'éteindre pendant un tour adverse, qui peut durer une minute sans la
+    // moindre interaction du joueur.
+    useWakeLock(gameState?.status === 'playing');
+
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [lastOpponentCard, setLastOpponentCard] = useState<SpellCard | null>(null);
     const [previousDiscardCount, setPreviousDiscardCount] = useState<number>(0);
@@ -106,9 +147,42 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     const [zoomedDiscardCard, setZoomedDiscardCard] = useState<SpellCard | null>(null);
     const [isLogOpen, setIsLogOpen] = useState(false);
     const [hoveredCard, setHoveredCard] = useState<SpellCard | null>(null);
+    /** Carte examinée en plein écran via un appui long (n'engage aucune action de jeu). */
+    const [inspectedCard, setInspectedCard] = useState<SpellCard | null>(null);
     const [cardFlight, setCardFlight] = useState<CardFlightData | null>(null);
     const [playedCardPreview, setPlayedCardPreview] = useState<SpellCard | null>(null);
     const flightIdRef = useRef(0);
+
+    /**
+     * Élément du sort en train de se résoudre. Transmis aux cartes de dieu pour teinter l'impact
+     * et repérer le coup critique (faiblesse ×2) : sans cette information, une carte touchée ne
+     * peut pas savoir de quel élément vient le coup qu'elle encaisse.
+     */
+    const [castElement, setCastElement] = useState<GameElement | null>(null);
+    /** Intensité de la secousse d'écran, retombée à 'none' après l'animation. */
+    const [screenShake, setScreenShake] = useState<'none' | 'light' | 'heavy'>('none');
+    /** Bannière plein écran annoncant le changement de tour. */
+    const [turnBanner, setTurnBanner] = useState<'mine' | 'theirs' | null>(null);
+    const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    /**
+     * Secousse de l'écran entier au moment d'un impact — le retour « poids du coup » qui manque
+     * le plus à un jeu de cartes muet. Réservée aux coups qui comptent : un critique ou une mort
+     * secouent fort, un coup ordinaire à peine, un soin pas du tout.
+     */
+    const handleImpact = useCallback((report: ImpactReport) => {
+        if (report.kind !== 'damage') return;
+
+        const heavy = report.isCritical || report.killed;
+        setScreenShake(heavy ? 'heavy' : 'light');
+
+        if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+        shakeTimerRef.current = setTimeout(() => setScreenShake('none'), heavy ? 520 : 300);
+    }, []);
+
+    useEffect(() => () => {
+        if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+    }, []);
 
     // Anime une carte qui quitte la main et se pose sur le dieu qui la lance : capture les
     // positions DOM avant/après (technique FLIP), voir CardFlight.tsx.
@@ -154,6 +228,10 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             // New card added to opponent's discard pile
             const card = remoteOpponent.discard[remoteOpponent.discard.length - 1];
             setLastOpponentCard(card);
+            // L'élément du sort adverse doit être connu AVANT que les PV ne changent, sinon les
+            // cartes touchées ne peuvent plus teinter l'impact ni détecter le critique.
+            setCastElement(card.element);
+            playSfx('cardPlay');
 
             // Anime la carte adverse depuis sa main (approximée par le conteneur, la carte
             // individuelle a déjà disparu du DOM à ce stade) vers le dieu qui vient de la lancer.
@@ -164,6 +242,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             // Clear the notification after 4 seconds
             const timer = setTimeout(() => {
                 setLastOpponentCard(null);
+                setCastElement(null);
             }, 4000);
 
             return () => clearTimeout(timer);
@@ -181,19 +260,96 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         }
     }, [myTurn, gameState?.status, isOnlineMode, playAITurn]);
 
+    // --- BANNIÈRE DE CHANGEMENT DE TOUR ---
+    // Rien n'annonçait la reprise de la main : sur mobile, on pouvait fixer l'écran plusieurs
+    // secondes sans savoir si l'adversaire réfléchissait encore. La bannière (+ son + vibration)
+    // lève l'ambiguïté sans que le joueur ait à chercher le petit texte central.
+    //
+    // On s'ABONNE au store plutôt que de comparer `myTurn` d'un rendu à l'autre : le changement
+    // de tour est un événement du moteur (il peut venir de l'IA, du réseau ou du joueur), pas
+    // une valeur dérivée du rendu. L'abonnement capte la transition exacte, une seule fois.
+    const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+        const unsubscribe = useGameStore.subscribe((state, prev) => {
+            const now = state.gameState;
+            const before = prev.gameState;
+            if (!now || !before || now.status !== 'playing') return;
+            if (now.currentPlayerId === before.currentPlayerId) return;
+
+            const nowMine = now.currentPlayerId === state.playerId;
+            setTurnBanner(nowMine ? 'mine' : 'theirs');
+            if (nowMine) {
+                playSfx('turnStart');
+                haptic('select');
+            }
+
+            if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+            bannerTimerRef.current = setTimeout(() => setTurnBanner(null), 1400);
+        });
+
+        return () => {
+            unsubscribe();
+            if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+        };
+    }, []);
+
+    // --- FIN DE PARTIE : fanfare ou glas ---
+    const resultAnnouncedRef = useRef(false);
+    useEffect(() => {
+        if (gameState?.status !== 'finished' || resultAnnouncedRef.current) return;
+        resultAnnouncedRef.current = true;
+
+        const victory = gameState.winnerId === playerId;
+        playSfx(victory ? 'victory' : 'defeat');
+        haptic(victory ? 'victory' : 'error');
+    }, [gameState?.status, gameState?.winnerId, playerId]);
+
 
     // Fin de partie : écran de victoire/défaite (auparavant un simple texte "Partie Terminée"
     // sans suite possible, ce qui donnait l'impression que le jeu plantait à la fin d'un match).
     if (gameState && gameState.status === 'finished') {
         const isVictory = gameState.winnerId === playerId;
+        // Match nul : winnerId absent après une limite de tours à égalité de PV (mode en ligne).
+        // Ce cas existait dans le moteur mais l'écran annonçait « DÉFAITE » au deux joueurs.
+        const isDraw = !gameState.winnerId;
+
+        // Récapitulatif du combat : un écran de fin qui n'affiche qu'un titre ne donne aucune
+        // matière à comprendre ce qui s'est joué.
+        const me = gameState.players.find(p => p.id === playerId);
+        const foe = gameState.players.find(p => p.id !== playerId);
+        const survivors = me?.gods.filter(g => !g.isDead).length ?? 0;
+        const slain = foe?.gods.filter(g => g.isDead).length ?? 0;
+
         return (
             <div className={styles.gameBoard} style={{ alignItems: 'center', justifyContent: 'center' }}>
+                {/* Rayons divins derrière le panneau : donne à la victoire une vraie présence
+                    cinématique plutôt qu'une simple carte posée au centre. */}
+                <div className={`${styles.resultRays} ${isVictory ? styles.resultRaysVictory : styles.resultRaysDefeat}`} aria-hidden="true" />
+
                 <div className={`${styles.resultScreen} ${isVictory ? styles.resultVictory : styles.resultDefeat}`}>
-                    <div className={styles.resultIcon}>{isVictory ? '🏆' : '💀'}</div>
-                    <h1 className={styles.resultTitle}>{isVictory ? 'VICTOIRE !' : 'DÉFAITE...'}</h1>
+                    <div className={styles.resultIcon}>{isDraw ? '⚖️' : isVictory ? '🏆' : '💀'}</div>
+                    <h1 className={styles.resultTitle}>
+                        {isDraw ? 'MATCH NUL' : isVictory ? 'VICTOIRE !' : 'DÉFAITE...'}
+                    </h1>
                     <p className={styles.resultSubtitle}>
-                        {isVictory ? 'Vous avez triomphé sur le champ de bataille.' : 'Vos dieux sont tombés au combat.'}
+                        {resultSubtitle(gameState.winReason, isVictory, isDraw)}
                     </p>
+
+                    <div className={styles.resultStats}>
+                        <div className={styles.resultStat}>
+                            <span className={styles.resultStatValue}>{gameState.turnNumber}</span>
+                            <span className={styles.resultStatLabel}>Tours</span>
+                        </div>
+                        <div className={styles.resultStat}>
+                            <span className={styles.resultStatValue}>{survivors}</span>
+                            <span className={styles.resultStatLabel}>Survivants</span>
+                        </div>
+                        <div className={styles.resultStat}>
+                            <span className={styles.resultStatValue}>{slain}</span>
+                            <span className={styles.resultStatLabel}>Terrassés</span>
+                        </div>
+                    </div>
+
                     {!isOnlineMode && (
                         <div className={styles.resultActions}>
                             <button className={styles.resultButtonPrimary} onClick={() => { window.location.href = '/game'; }}>
@@ -251,7 +407,10 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         // Toujours sélectionnable, même si injouable (énergie insuffisante...) : sélectionner
         // une carte ne fait qu'ouvrir son détail, c'est aussi ce qui donne accès au bouton
         // "Défausser" — bloquer la sélection empêchait de défausser une carte trop chère.
-        selectCard(selectedCard?.id === card.id ? null : card);
+        const isDeselecting = selectedCard?.id === card.id;
+        selectCard(isDeselecting ? null : card);
+        playSfx(isDeselecting ? 'tap' : 'select');
+        haptic('tap');
         setErrorMsg(null);
     };
 
@@ -259,6 +418,10 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         if (!myTurn || !isSelectingTarget) return;
 
         toggleTargetGod(god);
+        // Retour immédiat au doigt : le ciblage se fait souvent sans quitter la cible des yeux,
+        // le son confirme la prise en compte sans avoir à vérifier le réticule.
+        playSfx('select');
+        haptic('select');
     };
 
     // Cliquer n'importe où en dehors de la main / du panneau de détail / d'un bouton désélectionne
@@ -304,11 +467,18 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         const handEl = document.querySelector(`[data-hand-card-id="${cardBeingPlayed.id}"]`);
         const casterEl = document.querySelector(`[data-god-key="player-${cardBeingPlayed.godId}"]`);
 
+        // Posé AVANT la résolution : les cartes touchées lisent cet élément au moment où leurs
+        // PV changent, donc il doit déjà être à jour quand playCard() applique les dégâts.
+        setCastElement(cardBeingPlayed.element);
+
         const result = playCard(cardBeingPlayed.id, undefined, targetIds, lightningAction);
 
         if (!result.success) {
             // Échec réel (ex: plus assez d'énergie entre-temps) : rien n'a été joué.
             setErrorMsg(result.message);
+            setCastElement(null);
+            haptic('error');
+            playSfx('error');
             return;
         }
 
@@ -324,7 +494,12 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         // Succès réel : la carte a bien été jouée — elle vole de la main jusqu'au dieu qui la lance.
         triggerCardFlight(cardBeingPlayed, handEl, casterEl);
         setPlayedCardPreview(cardBeingPlayed);
-        setTimeout(() => setPlayedCardPreview(null), 2000);
+        playSfx('cardPlay');
+        haptic('select');
+        setTimeout(() => {
+            setPlayedCardPreview(null);
+            setCastElement(null);
+        }, 2000);
         setErrorMsg(null);
         selectCard(null);
         if (onAction) {
@@ -354,7 +529,10 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     const maxSelectableTargets = selectedCard ? getMaxSelectableTargets(selectedCard) : requiredTargets;
 
     return (
-        <div className={styles.gameBoard} onClick={handleBoardBackgroundClick}>
+        <div
+            className={`${styles.gameBoard} ${screenShake === 'heavy' ? styles.shakeHeavy : ''} ${screenShake === 'light' ? styles.shakeLight : ''}`}
+            onClick={handleBoardBackgroundClick}
+        >
             {/* BACKGROUND EFFECTS */}
             <div className={styles.terrainTexture} />
             <div className={styles.bgParticles} />
@@ -362,6 +540,19 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
             {/* CARTE JOUÉE : vol animé de la main jusqu'au dieu qui la lance */}
             <CardFlight flight={cardFlight} onComplete={() => setCardFlight(null)} />
+
+            {/* BANNIÈRE DE TOUR : annonce sans ambiguïté à qui la main revient */}
+            {turnBanner && (
+                <div
+                    className={`${styles.turnBanner} ${turnBanner === 'mine' ? styles.turnBannerMine : styles.turnBannerTheirs}`}
+                    role="status"
+                    aria-live="polite"
+                >
+                    <span className={styles.turnBannerText}>
+                        {turnBanner === 'mine' ? 'À VOUS DE JOUER' : "TOUR DE L'ADVERSAIRE"}
+                    </span>
+                </div>
+            )}
 
             {/* ERROR TOAST */}
             {errorMsg && (
@@ -505,6 +696,8 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                 onTargetGod={handleGodTarget}
                 playerCasterGodId={playerCasterGodId}
                 opponentCasterGodId={opponentCasterGodId}
+                incomingElement={castElement}
+                onImpact={handleImpact}
                 myTurn={myTurn}
                 turnNumber={gameState.turnNumber}
                 onOpenLog={() => setIsLogOpen(true)}
@@ -527,7 +720,33 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                 onSelectCard={handleCardClick}
                 onHoverCard={setHoveredCard}
                 isCardPlayable={(card) => myTurn && canPlayCard(card)}
+                onInspectCard={setInspectedCard}
             />
+
+            {/* APERÇU PLEIN ÉCRAN (appui long) : examiner une carte sans l'engager. Sur mobile,
+                toucher une carte la sélectionne, il n'existait donc aucun moyen de lire
+                tranquillement un effet avant de décider. */}
+            {inspectedCard && (
+                <div
+                    className={styles.inspectOverlay}
+                    onClick={() => setInspectedCard(null)}
+                    role="dialog"
+                    aria-label={`Aperçu de ${inspectedCard.name}`}
+                >
+                    <div className={styles.inspectCard} onClick={(e) => e.stopPropagation()}>
+                        <img src={inspectedCard.imageUrl} alt="" className={styles.inspectImage} draggable={false} />
+                        <div className={styles.inspectInfo}>
+                            <h3 className={styles.inspectName}>{inspectedCard.name}</h3>
+                            <p className={styles.inspectDesc}>{getReadableSpellDescription(inspectedCard)}</p>
+                            <div className={styles.inspectStats}>
+                                <span>⚡ Coût : {inspectedCard.energyCost}</span>
+                                {inspectedCard.energyGain > 0 && <span>🔋 Gain : +{inspectedCard.energyGain}</span>}
+                            </div>
+                        </div>
+                    </div>
+                    <span className={styles.inspectHint}>Touchez pour fermer</span>
+                </div>
+            )}
 
             {/* ACTION UI (Play or Target) */}
             {selectedCard && !isSelectingTarget && (

@@ -11,6 +11,9 @@ import {
     markWelcomeSeen, pingLastActive,
 } from '@/services/supabase-profile';
 import { getGodById } from '@/data/gods';
+import { useSettings } from '@/lib/settings';
+import { hapticsSupported, haptic } from '@/lib/haptics';
+import { playSfx } from '@/lib/sfx';
 
 // La quête "usegod_<godId>" est générée dynamiquement côté serveur (un dieu possédé au
 // hasard) et ne connaît que son id de dieu -- le nom réel est résolu ici, côté client, plutôt
@@ -60,15 +63,29 @@ export default function GlobalUI() {
     // Chrono de réinitialisation des quêtes (temps jusqu'à minuit)
     const [timeUntilReset, setTimeUntilReset] = useState('');
 
-    // Audio states
-    const [menuVolume, setMenuVolume] = useState(0.3);
-    const [battleVolume, setBattleVolume] = useState(0.3);
-    const [isMuted, setIsMuted] = useState(false);
+    // Audio — piloté par le store de préférences (src/lib/settings.ts), source unique partagée
+    // avec le moteur de SFX et l'haptique. Auparavant chaque réglage vivait dans un useState
+    // local recopié à la main dans localStorage, donc invisible pour le reste du jeu.
+    const {
+        musicVolume, battleVolume, sfxVolume, muted, hapticsEnabled, reduceMotion,
+        setMusicVolume, setBattleVolume, setSfxVolume, toggleMuted, setHaptics, setReduceMotion,
+    } = useSettings();
+
     const menuAudioRef = useRef<HTMLAudioElement | null>(null);
     const battleAudioRef = useRef<HTMLAudioElement | null>(null);
     const [hasInteracted, setHasInteracted] = useState(false);
 
     const isHomePage = pathname === '/';
+
+    /**
+     * Sommes-nous sur un écran de combat ? Le test portait uniquement sur '/game', donc les
+     * combats en ligne, d'histoire et d'ascension gardaient la musique de MENU : trois modes
+     * sur quatre n'avaient jamais leur ambiance sonore.
+     */
+    const isInGame = pathname === '/game'
+        || pathname === '/online/game'
+        || pathname === '/story/battle'
+        || pathname === '/ascension';
 
     // Calculer le temps restant jusqu'à minuit
     const calculateTimeUntilMidnight = () => {
@@ -221,105 +238,84 @@ export default function GlobalUI() {
 
     const hasClaimableMailboxRewards = mailboxRewards.some(r => !r.claimed);
 
-    // Charger les volumes depuis localStorage au montage
-    useEffect(() => {
-        const savedMenuVolume = localStorage.getItem('menuVolume');
-        const savedBattleVolume = localStorage.getItem('battleVolume');
-        const savedMuted = localStorage.getItem('isMuted');
-
-        if (savedMenuVolume) setMenuVolume(parseFloat(savedMenuVolume));
-        if (savedBattleVolume) setBattleVolume(parseFloat(savedBattleVolume));
-        if (savedMuted) setIsMuted(savedMuted === 'true');
-    }, []);
-
-    // Initialiser les pistes audio
+    // Initialiser les pistes audio.
+    // (Le chargement des volumes n'est plus nécessaire ici : le store `useSettings` est
+    // persisté et récupère même les anciennes clés localStorage — voir son `merge`.)
     useEffect(() => {
         menuAudioRef.current = new Audio('/audio/menu_theme.mp3');
         menuAudioRef.current.loop = true;
-        menuAudioRef.current.volume = menuVolume;
+        // `preload="none"` : les deux pistes pèsent plusieurs Mo et bloquaient la bande passante
+        // du premier écran alors qu'aucune ne peut démarrer avant un geste utilisateur.
+        menuAudioRef.current.preload = 'none';
 
         battleAudioRef.current = new Audio('/audio/battle_theme.mp3');
         battleAudioRef.current.loop = true;
-        battleAudioRef.current.volume = battleVolume;
+        battleAudioRef.current.preload = 'none';
 
+        const menu = menuAudioRef.current;
+        const battle = battleAudioRef.current;
         return () => {
-            if (menuAudioRef.current) {
-                menuAudioRef.current.pause();
-                menuAudioRef.current = null;
-            }
-            if (battleAudioRef.current) {
-                battleAudioRef.current.pause();
-                battleAudioRef.current = null;
-            }
+            menu.pause();
+            battle.pause();
+            menuAudioRef.current = null;
+            battleAudioRef.current = null;
         };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []);
 
-    // Écouter la première interaction utilisateur pour débloquer l'audio
+    // Écouter la première interaction utilisateur pour débloquer l'audio.
+    // `pointerdown` plutôt que `click` : sur mobile, il se déclenche dès le contact du doigt,
+    // ce qui gagne la fenêtre d'autorisation même si le doigt glisse ensuite (pas de clic émis).
     useEffect(() => {
-        const handleInteraction = () => {
-            if (!hasInteracted) {
-                setHasInteracted(true);
-                // Démarrer la musique menu si on n'est pas mute
-                if (menuAudioRef.current && !isMuted) {
-                    menuAudioRef.current.play().catch(console.log);
-                }
-            }
-        };
+        if (hasInteracted) return;
 
-        if (!hasInteracted) {
-            document.addEventListener('click', handleInteraction);
-            document.addEventListener('keydown', handleInteraction);
-        }
+        const handleInteraction = () => setHasInteracted(true);
+        document.addEventListener('pointerdown', handleInteraction, { once: true });
+        document.addEventListener('keydown', handleInteraction, { once: true });
 
         return () => {
-            document.removeEventListener('click', handleInteraction);
+            document.removeEventListener('pointerdown', handleInteraction);
             document.removeEventListener('keydown', handleInteraction);
         };
-    }, [hasInteracted, isMuted]);
+    }, [hasInteracted]);
 
-    // Appliquer le mute/unmute
+    // Appliquer volume et sourdine aux deux pistes.
     useEffect(() => {
         if (menuAudioRef.current) {
-            menuAudioRef.current.muted = isMuted;
+            menuAudioRef.current.volume = musicVolume;
+            menuAudioRef.current.muted = muted;
         }
-        if (battleAudioRef.current) {
-            battleAudioRef.current.muted = isMuted;
-        }
-        localStorage.setItem('isMuted', String(isMuted));
-    }, [isMuted]);
-
-    // Appliquer le volume du menu
-    useEffect(() => {
-        if (menuAudioRef.current) {
-            menuAudioRef.current.volume = menuVolume;
-        }
-        localStorage.setItem('menuVolume', String(menuVolume));
-    }, [menuVolume]);
-
-    // Appliquer le volume du combat
-    useEffect(() => {
         if (battleAudioRef.current) {
             battleAudioRef.current.volume = battleVolume;
+            battleAudioRef.current.muted = muted;
         }
-        localStorage.setItem('battleVolume', String(battleVolume));
-    }, [battleVolume]);
+    }, [musicVolume, battleVolume, muted]);
 
-    // Gérer la transition menu/combat selon la page
-    const isInGame = pathname === '/game';
-
+    /**
+     * Aiguillage menu / combat.
+     *
+     * La piste de combat existait dans `public/audio/` et son volume était réglable dans les
+     * options, mais AUCUN code ne l'a jamais lancée : l'ancien effet se contentait de mettre
+     * la musique de menu en pause en entrant en partie. Les combats se déroulaient donc dans
+     * un silence complet, réglage de « Musique Combat » à l'appui.
+     */
     useEffect(() => {
-        if (isInGame) {
-            // On est en combat : arrêter la musique du menu
-            if (menuAudioRef.current) {
-                menuAudioRef.current.pause();
-            }
-        } else {
-            // On n'est pas en combat : reprendre la musique du menu si pas mute
-            if (menuAudioRef.current && hasInteracted && !isMuted) {
-                menuAudioRef.current.play().catch(console.log);
-            }
+        const menu = menuAudioRef.current;
+        const battle = battleAudioRef.current;
+        if (!menu || !battle) return;
+
+        // Rien ne peut démarrer avant le premier geste : les navigateurs rejettent play().
+        if (!hasInteracted || muted) {
+            menu.pause();
+            battle.pause();
+            return;
         }
-    }, [isInGame, hasInteracted, isMuted]);
+
+        const [toPlay, toStop] = isInGame ? [battle, menu] : [menu, battle];
+        toStop.pause();
+        // `play()` renvoie une promesse rejetée si le navigateur refuse encore : sans catch,
+        // cela remonte en « unhandled rejection » dans la console à chaque navigation.
+        void toPlay.play().catch(() => undefined);
+    }, [isInGame, hasInteracted, muted]);
 
     const handleOptionsClick = () => {
         setShowOptionsModal(true);
@@ -388,14 +384,11 @@ export default function GlobalUI() {
         setShowQuestsModal(false);
     };
 
+    // La reprise de la lecture est gérée par l'effet d'aiguillage menu/combat, qui réagit à
+    // `muted` : inutile (et fragile) de relancer la piste à la main ici.
     const toggleMute = () => {
-        const newMuted = !isMuted;
-        setIsMuted(newMuted);
-
-        // Si on unmute, relancer la musique menu si on a interagi
-        if (!newMuted && menuAudioRef.current && hasInteracted) {
-            menuAudioRef.current.play().catch(console.log);
-        }
+        haptic('tap');
+        toggleMuted();
     };
 
     return (
@@ -432,45 +425,48 @@ export default function GlobalUI() {
                                     <span>🔊</span> Audio
                                 </h3>
 
-                                {/* Bouton Mute global */}
+                                {/* Sourdine générale : coupe musique, effets sonores ET vibrations */}
                                 <div className={styles.muteToggle}>
-                                    <span>Musique Global</span>
+                                    <span>Son général</span>
                                     <button
-                                        className={`${styles.toggleButton} ${!isMuted ? styles.toggleActive : ''}`}
+                                        className={`${styles.toggleButton} ${!muted ? styles.toggleActive : ''}`}
                                         onClick={toggleMute}
+                                        aria-pressed={!muted}
                                     >
-                                        {isMuted ? '🔇 Désactivée' : '🔊 Activée'}
+                                        {muted ? '🔇 Coupé' : '🔊 Activé'}
                                     </button>
                                 </div>
 
                                 {/* Volume Menu */}
                                 <div className={styles.volumeControl}>
-                                    <label className={styles.volumeLabel}>
+                                    <label className={styles.volumeLabel} htmlFor="opt-music-volume">
                                         <span className={styles.volumeIcon}>🎵</span>
                                         Musique Menu
                                     </label>
                                     <div className={styles.volumeSliderContainer}>
                                         <input
+                                            id="opt-music-volume"
                                             type="range"
                                             min="0"
                                             max="1"
                                             step="0.01"
-                                            value={menuVolume}
-                                            onChange={(e) => setMenuVolume(parseFloat(e.target.value))}
+                                            value={musicVolume}
+                                            onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
                                             className={styles.volumeSlider}
                                         />
-                                        <span className={styles.volumeValue}>{Math.round(menuVolume * 100)}%</span>
+                                        <span className={styles.volumeValue}>{Math.round(musicVolume * 100)}%</span>
                                     </div>
                                 </div>
 
                                 {/* Volume Combat */}
                                 <div className={styles.volumeControl}>
-                                    <label className={styles.volumeLabel}>
+                                    <label className={styles.volumeLabel} htmlFor="opt-battle-volume">
                                         <span className={styles.volumeIcon}>⚔️</span>
                                         Musique Combat
                                     </label>
                                     <div className={styles.volumeSliderContainer}>
                                         <input
+                                            id="opt-battle-volume"
                                             type="range"
                                             min="0"
                                             max="1"
@@ -481,6 +477,71 @@ export default function GlobalUI() {
                                         />
                                         <span className={styles.volumeValue}>{Math.round(battleVolume * 100)}%</span>
                                     </div>
+                                </div>
+
+                                {/* Effets sonores : joue un échantillon au relâchement du curseur,
+                                    sinon on règle un volume à l'aveugle sans rien entendre. */}
+                                <div className={styles.volumeControl}>
+                                    <label className={styles.volumeLabel} htmlFor="opt-sfx-volume">
+                                        <span className={styles.volumeIcon}>🔔</span>
+                                        Effets sonores
+                                    </label>
+                                    <div className={styles.volumeSliderContainer}>
+                                        <input
+                                            id="opt-sfx-volume"
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.01"
+                                            value={sfxVolume}
+                                            onChange={(e) => setSfxVolume(parseFloat(e.target.value))}
+                                            onPointerUp={() => playSfx('select')}
+                                            onKeyUp={() => playSfx('select')}
+                                            className={styles.volumeSlider}
+                                        />
+                                        <span className={styles.volumeValue}>{Math.round(sfxVolume * 100)}%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section Confort de jeu */}
+                            <div className={styles.optionsSection}>
+                                <h3 className={styles.optionsSectionTitle}>
+                                    <span>📱</span> Confort de jeu
+                                </h3>
+
+                                {/* Vibrations : masquées sur les appareils qui n'en sont pas capables
+                                    (desktop, iOS Safari) plutôt que d'exposer un interrupteur inerte. */}
+                                {hapticsSupported() && (
+                                    <div className={styles.muteToggle}>
+                                        <span>Vibrations</span>
+                                        <button
+                                            className={`${styles.toggleButton} ${hapticsEnabled ? styles.toggleActive : ''}`}
+                                            onClick={() => {
+                                                setHaptics(!hapticsEnabled);
+                                                // Vibre à l'activation : un aperçu immédiat de ce
+                                                // que le réglage change concrètement.
+                                                if (!hapticsEnabled) haptic('success');
+                                            }}
+                                            aria-pressed={hapticsEnabled}
+                                        >
+                                            {hapticsEnabled ? '📳 Activées' : '📴 Désactivées'}
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className={styles.muteToggle}>
+                                    <span>Animations réduites</span>
+                                    <button
+                                        className={`${styles.toggleButton} ${reduceMotion === 'on' ? styles.toggleActive : ''}`}
+                                        onClick={() => {
+                                            haptic('tap');
+                                            setReduceMotion(reduceMotion === 'on' ? 'off' : 'on');
+                                        }}
+                                        aria-pressed={reduceMotion === 'on'}
+                                    >
+                                        {reduceMotion === 'on' ? '🐢 Réduites' : '✨ Complètes'}
+                                    </button>
                                 </div>
                             </div>
 

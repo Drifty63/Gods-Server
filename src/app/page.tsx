@@ -1,13 +1,17 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
-import { ALL_GODS, getVisibleGods } from '@/data/gods';
+import { getVisibleGods } from '@/data/gods';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPendingRequests } from '@/services/supabase-profile';
+import { ELEMENT_SYMBOLS, ELEMENT_NAMES, ELEMENT_COLORS } from '@/game-engine/ElementSystem';
+import { useSwipe } from '@/lib/useSwipe';
+import { haptic } from '@/lib/haptics';
+import { playSfx } from '@/lib/sfx';
 
 export default function Home() {
   return (
@@ -51,9 +55,13 @@ function HomeContent() {
     return () => clearInterval(interval);
   }, [visibleGods.length]);
 
-  const currentGod = visibleGods[currentGodIndex];
-
-
+  /**
+   * Index borné à la liste courante. `visibleGods` rétrécit quand le profil se charge et révèle
+   * que le joueur n'est PAS créateur (20 dieux → 12) : un index resté au-delà rendait
+   * `currentGod` indéfini, et la page plantait à la première lecture de `currentGod.element`.
+   */
+  const safeIndex = visibleGods.length > 0 ? currentGodIndex % visibleGods.length : 0;
+  const currentGod = visibleGods[safeIndex];
 
   const handleOptionsClick = () => {
     // Déclencher l'événement pour ouvrir le modal global
@@ -70,23 +78,33 @@ function HomeContent() {
     window.dispatchEvent(new Event('open-quests'));
   };
 
-  // Navigation vers le dieu précédent
-  const prevGod = () => {
+  /**
+   * Déplacement dans le carrousel, mutualisé entre les flèches, les points et le balayage.
+   * `goTo` accepte un index absolu ou un pas relatif, pour n'avoir qu'un seul endroit qui gère
+   * la transition et le retour sensoriel.
+   */
+  const goToGod = useCallback((next: number) => {
     setIsTransitioning(true);
+    haptic('tap');
+    playSfx('tap');
     setTimeout(() => {
-      setCurrentGodIndex((prev) => (prev - 1 + visibleGods.length) % visibleGods.length);
+      setCurrentGodIndex(((next % visibleGods.length) + visibleGods.length) % visibleGods.length);
       setIsTransitioning(false);
     }, 300);
-  };
+  }, [visibleGods.length]);
 
-  // Navigation vers le dieu suivant
-  const nextGod = () => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentGodIndex((prev) => (prev + 1) % visibleGods.length);
-      setIsTransitioning(false);
-    }, 300);
-  };
+  // Navigation vers le dieu précédent / suivant (à partir de l'index BORNÉ, pour rester
+  // cohérent avec la carte réellement affichée).
+  const prevGod = () => goToGod(safeIndex - 1);
+  const nextGod = () => goToGod(safeIndex + 1);
+
+  // Balayage horizontal : le geste attendu au pouce, là où seules deux petites flèches et
+  // vingt points minuscules permettaient de parcourir le roster.
+  const swipeHandlers = useSwipe(nextGod, prevGod);
+
+  // Garde placée APRÈS tous les hooks : un `return` anticipé plus haut changerait le nombre de
+  // hooks exécutés d'un rendu à l'autre, ce que React interdit.
+  if (!currentGod) return null;
 
   return (
     <main className={styles.main}>
@@ -139,7 +157,10 @@ function HomeContent() {
               ‹
             </button>
 
-            <div className={`${styles.godCardWrapper} ${isTransitioning ? styles.transitioning : ''}`}>
+            <div
+              className={`${styles.godCardWrapper} ${isTransitioning ? styles.transitioning : ''}`}
+              {...swipeHandlers}
+            >
               <div className={styles.godCard}>
                 <div className={styles.godCardInner}>
                   <Image
@@ -151,21 +172,34 @@ function HomeContent() {
                   />
                 </div>
               </div>
-              <div className={styles.godCardIndicators}>
-                {visibleGods.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`${styles.indicator} ${index === currentGodIndex ? styles.activeIndicator : ''}`}
-                    onClick={() => {
-                      setIsTransitioning(true);
-                      setTimeout(() => {
-                        setCurrentGodIndex(index);
-                        setIsTransitioning(false);
-                      }, 300);
-                    }}
-                    aria-label={`Voir ${visibleGods[index].name}`}
+
+              {/* Identité du dieu affiché : le carrousel ne montrait qu'une illustration, sans
+                  jamais nommer le dieu ni révéler son élément — l'information la plus utile
+                  pour un nouveau joueur qui découvre le roster. */}
+              <div
+                className={styles.godCardCaption}
+                style={{ '--god-color': ELEMENT_COLORS[currentGod.element].primary } as React.CSSProperties}
+              >
+                <span className={styles.godCardName}>{currentGod.name.split(',')[0]}</span>
+                <span className={styles.godCardElement}>
+                  {ELEMENT_SYMBOLS[currentGod.element]} {ELEMENT_NAMES[currentGod.element]}
+                  <span className={styles.godCardHp}>· {currentGod.maxHealth} PV</span>
+                </span>
+              </div>
+
+              {/* Compteur plutôt qu'une rangée de 20 points : au-delà d'une poignée d'éléments,
+                  les points deviennent illisibles ET intouchables au pouce. La barre de
+                  progression conserve le repère « où suis-je dans le roster ». */}
+              <div className={styles.godCardProgress}>
+                <div className={styles.godCardProgressTrack}>
+                  <div
+                    className={styles.godCardProgressFill}
+                    style={{ width: `${((currentGodIndex + 1) / visibleGods.length) * 100}%` }}
                   />
-                ))}
+                </div>
+                <span className={styles.godCardCounter}>
+                  {currentGodIndex + 1} / {visibleGods.length}
+                </span>
               </div>
             </div>
 

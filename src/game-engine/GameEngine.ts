@@ -1310,6 +1310,10 @@ export class GameEngine {
         if (p1Health > p2Health) this.state.winnerId = p1.id;
         else if (p2Health > p1Health) this.state.winnerId = p2.id;
         else this.state.winnerId = undefined; // Égalité
+
+        // Distingue une victoire aux points d'un vrai match nul, que l'écran de fin ne pouvait
+        // jusqu'ici pas différencier (les deux joueurs voyaient « DÉFAITE » en cas d'égalité).
+        this.state.winReason = this.state.winnerId ? 'turn_limit' : 'draw';
     }
 
     // ─── Gestion de la mort (privée) ───
