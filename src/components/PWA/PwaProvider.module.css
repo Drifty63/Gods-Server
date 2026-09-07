@@ -1,0 +1,124 @@
+/* Bannière d'invitation à installer — voir PwaProvider.tsx */
+
+.banner {
+    position: fixed;
+    left: 50%;
+    /* Au-dessus de la barre de gestes iOS/Android, jamais collée au bord. */
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    transform: translateX(-50%);
+    z-index: var(--z-modal, 1000);
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(460px, calc(100vw - 24px));
+    padding: 12px 14px;
+
+    background: rgba(16, 18, 34, 0.96);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-xl, 0 16px 48px rgba(0, 0, 0, 0.6));
+
+    animation: slideUp 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: var(--gold-light, #f5d76e);
+}
+
+.subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.75));
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.install,
+.later {
+    /* 44px : cible tactile minimale recommandée, sinon on rate le bouton au pouce. */
+    min-height: 34px;
+    padding: 8px 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: var(--radius-md, 8px);
+    white-space: nowrap;
+}
+
+.install {
+    color: var(--obsidian, #1a1a2e);
+    background: linear-gradient(135deg, var(--gold-light, #f5d76e), var(--gold-divine, #d4af37));
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.3);
+}
+
+.install:active {
+    transform: translateY(1px);
+}
+
+.later {
+    color: var(--text-muted, rgba(255, 255, 255, 0.45));
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .banner {
+        animation: none;
+    }
+}
+
+/* Écrans étroits : la bannière passe en colonne pour garder des cibles tactiles confortables. */
+@media (max-width: 400px) {
+    .banner {
+        flex-wrap: wrap;
+    }
+
+    .actions {
+        flex-direction: row;
+        width: 100%;
+    }
+
+    .install,
+    .later {
+        flex: 1;
+        min-height: 40px;
+    }
+}

@@ -1,0 +1,121 @@
+/* Pile de toasts — voir Toaster.tsx */
+
+.container {
+    position: fixed;
+    /* Sous l'encoche / la barre d'état sur mobile, sinon collé en haut sur desktop. */
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-toast, 2000);
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+
+    width: min(440px, calc(100vw - 24px));
+    /* Le conteneur ne doit jamais intercepter un clic destiné au plateau. */
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    text-align: left;
+    color: var(--text-primary, #fff);
+
+    background: rgba(16, 18, 34, 0.94);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left-width: 4px;
+    border-radius: var(--radius-md, 8px);
+    box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.5));
+
+    animation: toastIn 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.icon {
+    flex-shrink: 0;
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.message {
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+}
+
+.progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background: currentColor;
+    opacity: 0.45;
+    transform-origin: left center;
+    animation-name: toastProgress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+.info {
+    border-left-color: var(--info, #4a90e2);
+    color: #cfe2ff;
+}
+
+.success {
+    border-left-color: var(--success, #06d6a0);
+    color: #b6f5e2;
+}
+
+.error {
+    border-left-color: var(--error, #ef233c);
+    color: #ffc9d0;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(-14px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastProgress {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* Un joueur qui a demandé moins d'animations garde l'information, sans le mouvement. */
+@media (prefers-reduced-motion: reduce) {
+    .toast {
+        animation: none;
+    }
+
+    .progress {
+        animation: none;
+        opacity: 0.2;
+    }
+}

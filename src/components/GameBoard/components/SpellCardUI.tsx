@@ -3,6 +3,8 @@ import { SpellCard } from '@/types/cards';
 import { getReadableSpellDescription } from '@/data/spellDescriptions';
 import { ELEMENT_COLORS } from '@/game-engine/ElementSystem';
 import { getCardTypeMeta } from '@/data/cardTypeStyles';
+import { useLongPress } from '@/lib/useLongPress';
+import { haptic } from '@/lib/haptics';
 import styles from '../GameBoard.module.css';
 
 interface SpellCardUIProps {
@@ -18,17 +20,32 @@ interface SpellCardUIProps {
      *  grisée, mais toujours cliquable pour que le joueur comprenne pourquoi via le message
      *  d'erreur, plutôt que de découvrir l'échec seulement après avoir ciblé et confirmé. */
     isDisabled?: boolean;
+    /** Appui long : ouvre l'aperçu plein écran de la carte, sans la sélectionner. */
+    onLongPress?: () => void;
 }
 
 export const SpellCardUI: React.FC<SpellCardUIProps> = ({
-    card, isSelected, onClick, onMouseEnter, onMouseLeave, isHidden, isMini, isMinimal, isDisabled
+    card, isSelected, onClick, onMouseEnter, onMouseLeave, isHidden, isMini, isMinimal, isDisabled, onLongPress
 }) => {
+    // Déclaré avant tout `return` conditionnel : l'ordre des hooks doit rester stable, y compris
+    // pour la variante « carte cachée » qui sort plus haut.
+    const longPress = useLongPress(
+        () => {
+            if (!onLongPress) return;
+            haptic('select'); // confirme au doigt que l'appui a bien été retenu
+            onLongPress();
+        },
+        onClick,
+    );
+    // Sans gestionnaire d'appui long, on garde le clic natif (souris, clavier, tests).
+    const pressHandlers = onLongPress ? longPress : { onClick };
+
     if (isHidden) {
         return (
             <div
                 className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper}`}
                 data-hand-card-id={card.id}
-                onClick={onClick}
+                {...pressHandlers}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
             >
@@ -50,7 +67,7 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
         <div
             className={`${isMini ? styles.spellCardWrapperOpponent : styles.spellCardWrapper} ${isSelected ? styles.wrapperSelected : ''} ${isDisabled ? styles.spellCardDisabled : ''}`}
             data-hand-card-id={card.id}
-            onClick={onClick}
+            {...pressHandlers}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
@@ -74,6 +91,11 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
                         src={card.imageUrl}
                         alt={card.name}
                         className={styles.spellImage}
+                        loading="lazy"
+                        decoding="async"
+                        // Empêche le glisser-déposer natif de l'image, qui « décollait » la carte
+                        // du plateau au moindre mouvement de souris pendant la sélection.
+                        draggable={false}
                         style={{ height: isMinimal ? '100%' : '100px', marginBottom: isMinimal ? '0' : '8px' }}
                     />
                 )}

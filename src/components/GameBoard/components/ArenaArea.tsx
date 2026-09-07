@@ -1,6 +1,6 @@
 import React from 'react';
-import { PlayerState, GodState } from '@/types/cards';
-import { HeroCard } from './HeroCard';
+import { PlayerState, GodState, Element } from '@/types/cards';
+import { HeroCard, ImpactReport } from './HeroCard';
 import { EnergyOrb } from './EnergyOrb';
 import styles from '../GameBoard.module.css';
 
@@ -13,6 +13,10 @@ interface ArenaAreaProps {
     opponentCasterGodId?: string | null;
     /** godId de VOTRE dieu en train de lancer un sort (carte sélectionnée/jouée par vous). */
     playerCasterGodId?: string | null;
+    /** Élément du sort en cours de résolution, pour teinter les impacts et détecter les critiques. */
+    incomingElement?: Element | null;
+    /** Remonté par les cartes touchées, pour que le plateau secoue l'écran à la hauteur du coup. */
+    onImpact?: (report: ImpactReport) => void;
     myTurn: boolean;
     turnNumber: number;
     onEndTurn: () => void;
@@ -26,6 +30,8 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
     onTargetGod,
     opponentCasterGodId,
     playerCasterGodId,
+    incomingElement,
+    onImpact,
     myTurn,
     turnNumber,
     onEndTurn,
@@ -42,6 +48,8 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
                         isTargeted={selectedTargetGods.some(t => t.card.id === god.card.id)}
                         isCaster={!!opponentCasterGodId && god.card.id === opponentCasterGodId}
                         godKey={`opponent-${god.card.id}`}
+                        incomingElement={incomingElement}
+                        onImpact={onImpact}
                         onClick={() => onTargetGod(god)}
                     />
                 ))}
@@ -70,6 +78,8 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
                         isTargeted={selectedTargetGods.some(t => t.card.id === god.card.id)}
                         isCaster={!!playerCasterGodId && god.card.id === playerCasterGodId}
                         godKey={`player-${god.card.id}`}
+                        incomingElement={incomingElement}
+                        onImpact={onImpact}
                         onClick={() => onTargetGod(god)}
                     />
                 ))}

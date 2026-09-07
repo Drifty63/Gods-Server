@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>GODS — Hors ligne</title>
+    <link rel="icon" href="/icons/favicon-32.png" />
+    <style>
+        /* Page volontairement autonome : elle doit s'afficher sans réseau, donc aucun CSS
+           externe, aucune police distante — uniquement des polices système. */
+        :root {
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 32px calc(24px + env(safe-area-inset-right)) 32px calc(24px + env(safe-area-inset-left));
+            text-align: center;
+
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #fff;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #2a1a4a 100%);
+        }
+
+        img {
+            width: 96px;
+            height: 96px;
+            filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.45));
+            animation: pulse 2.6s ease-in-out infinite;
+        }
+
+        h1 {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
+            letter-spacing: 0.04em;
+            background: linear-gradient(135deg, #f5d76e, #d4af37, #cd7f32);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            max-width: 34ch;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        button {
+            margin-top: 8px;
+            padding: 14px 32px;
+            min-height: 48px;
+
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #1a1a2e;
+
+            background: linear-gradient(135deg, #f5d76e, #d4af37, #cd7f32);
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.35);
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.75;
+                transform: scale(0.96);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            img {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <img src="/icons/icon-192.png" alt="" />
+    <h1>L'Olympe est hors de portée</h1>
+    <p>
+        Vous n'êtes plus connecté au réseau. Les modes en ligne et la sauvegarde de votre
+        progression reprendront dès le retour de la connexion.
+    </p>
+    <button type="button" onclick="location.reload()">Réessayer</button>
+</body>
+
+</html>

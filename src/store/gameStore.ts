@@ -92,7 +92,6 @@ interface GameStore {
      * "il faut lancer le sort deux fois").
      */
     playCard: (cardId: string, targetGodId?: string, targetGodIds?: string[], lightningAction?: 'apply' | 'remove') => { success: boolean; message: string; pending?: boolean };
-    playCardWithChoice: (cardId: string, targetGodId?: string, targetGodIds?: string[], choice?: boolean) => { success: boolean; message: string };
     discardForEnergy: (cardId: string) => { success: boolean; message: string };
     endTurn: (ignoreZombieCheck?: boolean) => { success: boolean; message: string };
     resetGame: () => void;
@@ -835,8 +834,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const state = engine.getState();
         state.status = 'finished';
         state.winnerId = state.players.find(p => p.id !== playerId)?.id; // L'autre gagne
+        state.winReason = 'surrender';
 
-        set({ gameState: { ...state } });
+        // Copie PROFONDE, comme partout ailleurs dans ce store : un simple `{ ...state }` garde
+        // les mêmes références de joueurs/dieux, donc React ne voit aucun changement dans les
+        // sous-objets et l'écran de fin pouvait rester sur l'état précédent.
+        set({ gameState: cloneGameState(state) });
     },
 
     setLightningAction: (action) => {
@@ -1623,125 +1626,4 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
     },
 
-    playCardWithChoice: (cardId: string, targetGodId?: string, targetGodIds?: string[], choice?: boolean) => {
-        const { engine, playerId, selectedTargetGods } = get();
-        if (!engine) return { success: false, message: 'Partie non initialisée' };
-
-        const player = engine.getState().players.find(p => p.id === playerId);
-        if (!player) return { success: false, message: 'Joueur introuvable' };
-
-        const card = player.hand.find(c => c.id === cardId);
-        if (!card) return { success: false, message: 'Carte introuvable' };
-
-        // Identifier l'effet optionnel
-        const visionTartare = card.effects.find(e => e.type === 'custom' && e.customEffectId === 'vision_tartare');
-        const mareeBasse = card.effects.find(e => e.type === 'custom' && e.customEffectId === 'cascade_heal_choice');
-
-        // === VISION DU TARTARE ===
-        if (visionTartare) {
-            // Si choix accepté (Oui), vérifier qu'on peut payer le coût (2 cartes deck)
-            if (choice) {
-                if (player.deck.length < 2) {
-                    return { success: false, message: 'Pas assez de cartes dans le deck (2 requises)' };
-                }
-                // Défausser 2 cartes
-                for (let i = 0; i < 2; i++) {
-                    const c = player.deck.shift()!;
-                    player.discard.push(c);
-                }
-            }
-        }
-
-        // === MARÉE BASSE ===
-        // Le choix (direction) s'applique lors de la résolution, pas de coût préalable
-
-        // Jouer la carte via le moteur (coût mana + effet de base)
-        const finalTargetGodIds = targetGodIds || (selectedTargetGods.length > 0 ? selectedTargetGods.map(g => g.card.id) : undefined);
-        const finalTargetGodId = targetGodId || (selectedTargetGods.length > 0 ? selectedTargetGods[0].card.id : undefined);
-
-        const result = engine.executeAction({
-            type: 'play_card',
-            playerId,
-            cardId,
-            targetGodId: finalTargetGodId,
-            targetGodIds: finalTargetGodIds,
-        });
-
-        if (!result.success) return result;
-
-        // APPLIQUER LES EFFETS BONUS/CHOIX MANUELLEMENT
-        // Car le moteur ne gère pas ces effets custom
-
-        if (visionTartare) {
-            // Vision du Tartare : 1 dégât de base + 1 bonus si choice=true = 1 ou 2 dégâts par cible
-            const damagePerTarget = choice ? 2 : 1;
-            const opponent = engine.getState().players.find(p => p.id !== playerId);
-
-            if (opponent && finalTargetGodIds && finalTargetGodIds.length > 0) {
-                for (const tid of finalTargetGodIds) {
-                    const target = opponent.gods.find(g => g.card.id === tid && !g.isDead);
-                    if (target) {
-                        // Gestion du bouclier
-                        let remainingDamage = damagePerTarget;
-                        const shieldIndex = target.statusEffects.findIndex(s => s.type === 'shield');
-                        if (shieldIndex !== -1) {
-                            const shieldStacks = target.statusEffects[shieldIndex].stacks;
-                            const absorbedDamage = Math.min(shieldStacks, remainingDamage);
-                            target.statusEffects[shieldIndex].stacks -= absorbedDamage;
-                            remainingDamage -= absorbedDamage;
-                            if (target.statusEffects[shieldIndex].stacks <= 0) {
-                                target.statusEffects.splice(shieldIndex, 1);
-                            }
-                        }
-                        // Appliquer les dégâts restants
-                        if (remainingDamage > 0) {
-                            target.currentHealth = Math.max(0, target.currentHealth - remainingDamage);
-                            if (target.currentHealth === 0) {
-                                // Utiliser killGod pour gérer proprement la mort
-                                engine.killGod(opponent.id, target.card.id);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (mareeBasse) {
-            // Marée basse n'a pas d'effet de base dans le moteur (probablement défini comme "no-op" ou heal 0)
-            // On applique tout le soin ici selon la direction
-            const aliveAllies = player.gods.filter(g => !g.isDead);
-            const healAmounts = [3, 2, 1];
-
-            if (choice) { // Ouest (G->D)
-                for (let i = 0; i < aliveAllies.length && i < healAmounts.length; i++) {
-                    const god = aliveAllies[i];
-                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
-                    god.statusEffects = god.statusEffects.filter(s => s.type !== 'poison');
-                }
-            } else { // Est (D->G)
-                const reversedAllies = [...aliveAllies].reverse();
-                for (let i = 0; i < reversedAllies.length && i < healAmounts.length; i++) {
-                    const god = reversedAllies[i];
-                    god.currentHealth = Math.min(god.currentHealth + healAmounts[i], god.card.maxHealth);
-                    god.statusEffects = god.statusEffects.filter(s => s.type !== 'poison');
-                }
-            }
-        }
-
-        // Mettre à jour l'état
-        set({
-            gameState: cloneGameState(engine.getState()),
-            selectedCard: null,
-            selectedTargetGod: null,
-            selectedTargetGods: [],
-            requiredTargets: 0,
-            isSelectingTarget: false,
-        });
-
-        // Finir le tour 
-        // (Le délai permet de voir l'animation, mais l'utilisateur veut que ça change)
-        setTimeout(() => get().endTurn(), 1500);
-
-        return { success: true, message: 'Carte jouée' };
-    },
 }));

@@ -165,7 +165,9 @@
 html,
 body {
   max-width: 100vw;
-  min-height: 100vh;
+  /* 100dvh suit la barre d'adresse mobile qui se rétracte au scroll ; 100vh la ferait
+     déborder de la hauteur de cette barre et créerait un scroll vertical parasite. */
+  min-height: 100dvh;
   overflow-x: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-olympus);
@@ -173,6 +175,98 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================
+   DURCISSEMENT MOBILE
+   ================================ */
+html {
+  /* Empêche iOS de regrossir le texte en paysage, ce qui cassait l'alignement du plateau. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Coupe le « rubber band » : tirer vers le bas en plein combat ne doit pas décoller la page
+     ni déclencher un pull-to-refresh qui perdrait la partie en cours. */
+  overscroll-behavior-y: none;
+  /* Le flash gris d'Android/iOS au toucher trahit immédiatement le site web ; on gère nous-mêmes
+     le retour visuel via :active. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Le plateau et les cartes ne doivent jamais être sélectionnables : un appui long dessus
+   ouvrait le menu « copier / partager » du système au lieu de zoomer la carte. */
+button,
+[role='button'],
+[data-no-select] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Cible tactile confortable : en dessous de 44px, un pouce rate le bouton une fois sur trois
+   (référence Apple HIG / Material). */
+button,
+[role='button'] {
+  min-height: 44px;
+  touch-action: manipulation;
+  /* `manipulation` supprime aussi le délai de 300 ms hérité du double-tap-zoom. */
+}
+
+/* Exception : les petites icônes déjà denses (fermeture de modale, flèches de carrousel)
+   déclarent leur propre taille. */
+button[data-compact] {
+  min-height: 0;
+}
+
+/* ================================
+   ACCESSIBILITÉ
+   ================================ */
+/* Anneau de focus visible AU CLAVIER uniquement : indispensable pour naviguer sans souris,
+   invisible pour un joueur au doigt ou à la souris (contrairement à :focus, qui laissait un
+   contour disgracieux après chaque clic). */
+:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Passer sous le contenu pour les lecteurs d'écran sans l'afficher visuellement. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ================================
+   RÉDUCTION DES ANIMATIONS
+   ================================ */
+/* Respecte le réglage système. `data-reduce-motion` permet en plus au joueur de forcer ce mode
+   depuis les options du jeu, indépendamment de son OS (voir src/lib/settings.ts). */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-reduce-motion='true'] *,
+html[data-reduce-motion='true'] *::before,
+html[data-reduce-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }
 
 /* ================================
