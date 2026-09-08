@@ -48,6 +48,15 @@
   background-repeat: no-repeat, no-repeat, no-repeat;
   color: var(--color-text-main);
   font-family: var(--font-ui);
+
+  /* Marges système (encoche, barre de gestes). Centralisées ici parce que TOUT le gabarit
+   * vertical en dépend : sans elles, les éléments ancrés en haut se glissent sous la main
+   * adverse sur un iPhone à encoche, alors que tout paraît correct sur Android (pas d'encoche
+   * = inset à 0) et en paysage (encoche sur le côté, donc inset haut à 0 aussi). */
+  --safe-top: max(4px, env(safe-area-inset-top, 0px));
+  --safe-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+  /* Hauteur réellement occupée par une main (cartes de 140px + éventail en rotation). */
+  --hand-opponent-h: clamp(144px, 19dvh, 164px);
 }
 
 /* Grain très discret par-dessus l'illustration (bruit fractal SVG généré localement, aucune
@@ -118,8 +127,9 @@
  */
 .arenaContainer {
   position: absolute;
-  top: clamp(56px, 13dvh, 96px); /* Sous la main adverse + indicateur de tour */
-  bottom: clamp(120px, 24dvh, 180px); /* Au-dessus de la main du joueur */
+  /* Encoche comprise, sinon la rangée de dieux adverses remonte sous la main adverse. */
+  top: calc(var(--safe-top) + clamp(52px, 13dvh, 92px)); /* Sous la main adverse */
+  bottom: calc(var(--safe-bottom) + clamp(116px, 24dvh, 176px)); /* Au-dessus de la main */
   left: 0; right: 0;
   z-index: 10;
   display: flex;
@@ -134,7 +144,7 @@
    * donc le centre géométrique de ce conteneur n'est PAS le centre de l'écran — les deux rangées
    * de dieux paraissaient poussées vers le haut. On compense en poussant le contenu vers le bas
    * de la moitié de cet écart, pour qu'il retombe sur le vrai centre vertical de l'écran. */
-  padding-top: calc(4px + (clamp(120px, 24dvh, 180px) - clamp(56px, 13dvh, 96px)) / 2);
+  padding-top: calc(4px + ((var(--safe-bottom) + clamp(116px, 24dvh, 176px)) - (var(--safe-top) + clamp(52px, 13dvh, 92px))) / 2);
   box-sizing: border-box;
 }
 
@@ -707,8 +717,12 @@
 /* Dos de carte : fond "espace" (nébuleuse + étoiles, généré en pur CSS, aucune image externe)
  * avec le nom du jeu écrit dedans dans sa typographie de titre (Cinzel Decorative, dégradé or —
  * même traitement que le logo affiché ailleurs dans l'app via .title-divine). */
+/* Dos de carte (effet Nyx, main adverse).
+ * La largeur reprend EXACTEMENT celle de .spellCard : si un dos avait un gabarit différent,
+ * sa seule taille suffirait à trahir quelles cartes sont cachées, et une carte retournée
+ * dans votre main débordait la rangée (elle était figée à 140px par un style inline). */
 .spellCardBack {
-  width: clamp(38px, 12vw, 56px);
+  width: clamp(76px, 25vw, 112px);
   aspect-ratio: 0.72;
   position: relative;
   overflow: hidden;
@@ -723,6 +737,12 @@
   align-items: center;
   justify-content: center;
   font-size: 1rem;
+}
+
+/* Sélection d'une carte cachée : même mise en avant que .spellSelected, sans rien révéler. */
+.spellCardBackSelected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
 }
 
 .spellCardBack::before {
@@ -1092,11 +1112,19 @@
  * une seule ligne compacte (~26px), il tient dans l'espace libre restant même sur les écrans
  * courts, contrairement à l'ancienne version empilée verticalement (~87px). */
 .deckAndDiscardOpponent {
-  top: clamp(148px, 19dvh, 168px);
+  /* CORRECTIF iPhone : la main adverse démarre à --safe-top, donc sur un appareil à
+   * encoche (~50px) elle descend jusqu'à ~190px et cette barre, fixée à 148px, passait
+   * DERRIÈRE elle (z-index 15 < 20) — énergie, deck et défausse adverses devenaient
+   * invisibles en portrait. On l'ancre désormais à la fin réelle de la main. */
+  top: calc(var(--safe-top) + var(--hand-opponent-h));
+  /* Au-dessus de la main : garde-fou pour qu'aucun futur décalage ne la ravale. */
+  z-index: 21;
 }
 
 .deckAndDiscardPlayer {
-  bottom: clamp(120px, 24dvh, 180px);
+  /* Même correction en miroir : la main du joueur est décalée par la barre de gestes. */
+  bottom: calc(var(--safe-bottom) + clamp(120px, 24dvh, 180px));
+  z-index: 21;
 }
 
 /* Très petits écrans (iPhone SE et similaires, <=375px) : resserre encore un peu la grille de

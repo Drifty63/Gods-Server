@@ -71,6 +71,16 @@ function unit(kind: 'servant' | 'creature', u: UnitInput): GodCard {
         duelCost: kind === 'servant' ? 2 : 3,
         affiliatedTo: u.god,
         archetype: u.arch,
+        /**
+         * TOUT ce bestiaire est marqué « brouillon » : portraits, images de sorts et effets ont
+         * été produits automatiquement, sans reprise manuelle. La règle de contenu de la v1.0
+         * est qu'une unité ne sort que si elle a été réellement dessinée et validée.
+         *
+         * Le code et les tests d'équilibrage restent en place : ces unités sont la base de
+         * travail des créatures à venir (Cyclopes, Cerbère, Harpies...). Il suffira de retirer
+         * ce drapeau, unité par unité, à mesure qu'elles seront reprises.
+         */
+        draft: true,
     };
 }
 

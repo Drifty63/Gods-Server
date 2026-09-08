@@ -101,8 +101,10 @@ function pick<T>(pool: readonly T[], count: number, rng: () => number): T[] {
  */
 export function enemyPools(): Record<UnitTier, GodCard[]> {
     return {
-        servant: ALL_GODS.filter(g => g.category === 'servant'),
-        creature: ALL_GODS.filter(g => g.category === 'creature'),
+        // `draft` exclut en revanche le bestiaire encore à l'état de brouillon : contrairement à
+        // `hidden`, il signifie « pas prêt à être montré », donc pas davantage comme adversaire.
+        servant: ALL_GODS.filter(g => g.category === 'servant' && !g.draft),
+        creature: ALL_GODS.filter(g => g.category === 'creature' && !g.draft),
         // Seuls les 12 dieux jouables : les dieux cachés du roster ne sont pas équilibrés
         // comme adversaires d'un mode chronométré par les PV.
         god: ALL_GODS.filter(g => (!g.category || g.category === 'god') && !g.hidden),

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMostPlayedGod, getMatchHistory, type MatchHistoryEntry } from '@/services/supabase-profile';
+import { getMostPlayedGod, getMatchHistory, isUsernameTaken, type MatchHistoryEntry } from '@/services/supabase-profile';
+import { toast } from '@/lib/toast';
 import { ALL_GODS } from '@/data/gods';
 import { getRankByFerveur, getRankProgress } from '@/data/ranks';
 import styles from './page.module.css';
@@ -25,6 +26,10 @@ export default function ProfilePage() {
     const router = useRouter();
     const { user, profile, loading, profileLoading, signOut, updateProfile, refreshProfile } = useAuth();
     const [showAvatarModal, setShowAvatarModal] = useState(false);
+    const [showNameModal, setShowNameModal] = useState(false);
+    const [draftName, setDraftName] = useState('');
+    const [savingName, setSavingName] = useState(false);
+    const [nameError, setNameError] = useState<string | null>(null);
     const [matchHistory, setMatchHistory] = useState<MatchHistoryEntry[]>([]);
     const [historyLoading, setHistoryLoading] = useState(true);
 
@@ -53,6 +58,38 @@ export default function ProfilePage() {
     const handleSignOut = async () => {
         await signOut();
         router.push('/');
+    };
+
+    /**
+     * Changement de pseudo. C'est le nom vu par TOUS les autres joueurs (classement, liste
+     * d'amis, historique de matchs, adversaire en partie), donc il doit rester unique : la
+     * base porte un index unique insensible à la casse, et on interroge d'abord
+     * `is_username_taken` pour prévenir avant l'échec plutôt qu'après.
+     */
+    const handleUsernameSave = async () => {
+        const next = draftName.trim();
+        setNameError(null);
+
+        if (next === profile?.username) { setShowNameModal(false); return; }
+        // Mêmes bornes qu'à l'inscription : un pseudo trop court est illisible dans un
+        // classement, trop long il déborde des cartes de joueur.
+        if (next.length < 3) { setNameError('3 caractères minimum.'); return; }
+        if (next.length > 20) { setNameError('20 caractères maximum.'); return; }
+
+        setSavingName(true);
+        try {
+            if (await isUsernameTaken(next)) {
+                setNameError('Ce pseudo est déjà pris.');
+                return;
+            }
+            await updateProfile(next, profile!.avatar);
+            toast.success('Pseudo mis à jour');
+            setShowNameModal(false);
+        } catch (err) {
+            setNameError(err instanceof Error ? err.message : 'Impossible de changer le pseudo.');
+        } finally {
+            setSavingName(false);
+        }
     };
 
     const handleAvatarChange = async (newAvatar: string) => {
@@ -145,7 +182,21 @@ export default function ProfilePage() {
                     </div>
                     <div className={styles.profileInfo}>
                         <div className={styles.profileHeader}>
-                            <h2 className={styles.username}>{profile.username}</h2>
+                            {/* Le pseudo devient modifiable : c'est le nom que voient tous les
+                                autres joueurs (classement, amis, historique), et rien ne
+                                permettait de le changer après l'inscription. */}
+                            <button
+                                className={styles.usernameButton}
+                                onClick={() => {
+                                    setDraftName(profile.username);
+                                    setNameError(null);
+                                    setShowNameModal(true);
+                                }}
+                                aria-label={`Modifier le pseudo, actuellement ${profile.username}`}
+                            >
+                                <h2 className={styles.username}>{profile.username}</h2>
+                                <span className={styles.usernameEditIcon} aria-hidden="true">✏️</span>
+                            </button>
                             <div className={styles.rankBadge} style={{ background: userRank.gradient }}>
                                 <span className={styles.rankIcon}>{userRank.icon}</span>
                                 <span className={styles.rankName}>{userRank.name}</span>
@@ -259,6 +310,47 @@ export default function ProfilePage() {
             </div >
 
             {/* Modal Changer d'avatar */}
+            {
+                showNameModal && (
+                    <div className={styles.modalOverlay} onClick={() => setShowNameModal(false)}>
+                        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                            <button className={styles.modalClose} onClick={() => setShowNameModal(false)}>✕</button>
+                            <h2 className={styles.modalTitle}>✏️ Changer de pseudo</h2>
+                            <p className={styles.modalHint}>
+                                Ce nom vous identifie auprès des autres joueurs : classement, liste d&apos;amis
+                                et historique de parties.
+                            </p>
+
+                            <input
+                                type="text"
+                                className={styles.nameInput}
+                                value={draftName}
+                                onChange={(e) => { setDraftName(e.target.value); setNameError(null); }}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleUsernameSave(); }}
+                                placeholder="Votre pseudo"
+                                maxLength={20}
+                                autoFocus
+                                aria-label="Nouveau pseudo"
+                            />
+
+                            <div className={styles.nameMeta}>
+                                <span className={nameError ? styles.nameErrorText : styles.nameCounter}>
+                                    {nameError ?? `${draftName.trim().length}/20 caractères`}
+                                </span>
+                            </div>
+
+                            <button
+                                className={styles.nameSaveButton}
+                                onClick={handleUsernameSave}
+                                disabled={savingName || draftName.trim() === profile.username}
+                            >
+                                {savingName ? '⏳ Vérification…' : '✓ Enregistrer'}
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
+
             {
                 showAvatarModal && (
                     <div className={styles.modalOverlay} onClick={() => setShowAvatarModal(false)}>

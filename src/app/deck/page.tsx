@@ -1,487 +1,325 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
-import { getOwnedGods, getVisibleGods, God } from '@/data/gods';
-import { getSpellsForGod, SpellCard } from '@/data/mock_spells';
+import { getVisibleGods, getReleasedUnits, ownsCard, getOwnerGodId, getGodById } from '@/data/gods';
+import { getSpellsByGodId } from '@/data/spells';
+import { getReadableSpellDescription } from '@/data/spellDescriptions';
+import { getCardTypeMeta } from '@/data/cardTypeStyles';
+import { ELEMENT_SYMBOLS, ELEMENT_NAMES, ELEMENT_COLORS } from '@/game-engine/ElementSystem';
+import type { GodCard, SpellCard } from '@/types/cards';
 import { useAuth } from '@/contexts/AuthContext';
-import { saveDecks, SavedDeck } from '@/services/supabase-profile';
+import { RequireAuth } from '@/components/Auth/RequireAuth';
+import { haptic } from '@/lib/haptics';
 
-// Nombre max de decks
-const MAX_DECKS = 5;
+/** Familles de la collection, dans l'ordre d'affichage. */
+type Family = 'god' | 'creature' | 'servant';
 
-// Mapping des éléments vers leurs symboles emoji
-const ELEMENT_SYMBOLS: Record<string, string> = {
-    fire: '🔥',
-    air: '💨',
-    earth: '🌿',
-    lightning: '⚡',
-    water: '💧',
-    light: '☀️',
-    darkness: '💀',
+const FAMILY_META: Record<Family, { label: string; plural: string; icon: string }> = {
+    god: { label: 'Dieu', plural: 'Dieux', icon: '⚡' },
+    creature: { label: 'Créature', plural: 'Créatures', icon: '🐉' },
+    servant: { label: 'Serviteur', plural: 'Serviteurs', icon: '🛡️' },
 };
 
-// Fonction pour obtenir le symbole d'un élément
-const getElementSymbol = (element: string): string => {
-    return ELEMENT_SYMBOLS[element] || element;
-};
-
-// Type pour la carte sélectionnée dans le modal
-interface SelectedCard {
-    type: 'god' | 'spell';
-    imageUrl: string;
-    name: string;
-    spell?: SpellCard;
-    god?: God;
+export default function CollectionPage() {
+    return (
+        <RequireAuth>
+            <CollectionContent />
+        </RequireAuth>
+    );
 }
 
-// Créer un deck vide
-const createEmptyDeck = (index: number): SavedDeck => ({
-    id: `deck_${index}`,
-    name: `Deck ${index + 1}`,
-    godIds: [],
-});
+function CollectionContent() {
+    const { profile } = useAuth();
 
-export default function DeckPage() {
-    const { user, profile, refreshProfile } = useAuth();
-
-    // États pour les decks
-    const [decks, setDecks] = useState<SavedDeck[]>([]);
-    const [currentDeckIndex, setCurrentDeckIndex] = useState(0);
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    // États pour la bibliothèque
-    const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
-    const [isSeason1Open, setIsSeason1Open] = useState(true);
-    const [showGodPickerModal, setShowGodPickerModal] = useState(false);
-    const [showBuyModal, setShowBuyModal] = useState<{ god: God } | null>(null);
-
-    // Dieux possédés et visibles
-    const godsOwned = profile?.gods_owned ?? [];
+    const godsOwned = useMemo(() => profile?.gods_owned ?? [], [profile?.gods_owned]);
     const isCreator = profile?.is_creator || false;
-    const availableGods = useMemo(() => getOwnedGods(godsOwned, isCreator), [godsOwned, isCreator]);
-    const visibleGods = useMemo(() => getVisibleGods(isCreator), [isCreator]);
 
-    // Charger les decks depuis le profil
-    useEffect(() => {
-        if (profile?.savedDecks && profile.savedDecks.length > 0) {
-            setDecks(profile.savedDecks);
-        } else {
-            // Créer des decks vides par défaut
-            const defaultDecks = Array.from({ length: MAX_DECKS }, (_, i) => createEmptyDeck(i));
-            setDecks(defaultDecks);
-        }
-    }, [profile?.savedDecks]);
+    // ── Collection ───────────────────────────────────────────────
+    const [family, setFamily] = useState<Family | 'all'>('all');
+    const [inspected, setInspected] = useState<GodCard | null>(null);
+    const [zoomedSpell, setZoomedSpell] = useState<SpellCard | null>(null);
 
-    const currentDeck = decks[currentDeckIndex] || createEmptyDeck(0);
-
-    // Navigation entre les decks
-    const nextDeck = () => {
-        setCurrentDeckIndex((prev) => (prev + 1) % decks.length);
-    };
-
-    const prevDeck = () => {
-        setCurrentDeckIndex((prev) => (prev - 1 + decks.length) % decks.length);
-    };
-
-    // Modifier le nom du deck
-    const handleNameChange = (newName: string) => {
-        const updatedDecks = [...decks];
-        updatedDecks[currentDeckIndex] = {
-            ...updatedDecks[currentDeckIndex],
-            name: newName,
+    const catalogue = useMemo(() => {
+        const { creatures, servants } = getReleasedUnits();
+        return {
+            god: getVisibleGods(isCreator),
+            creature: creatures,
+            servant: servants,
         };
-        setDecks(updatedDecks);
-    };
+    }, [isCreator]);
 
-    // Ajouter/retirer un dieu du deck
-    const toggleGodInDeck = (godId: string) => {
-        const updatedDecks = [...decks];
-        const currentGodIds = [...(updatedDecks[currentDeckIndex].godIds || [])];
+    /**
+     * Une créature ou un serviteur n'a pas de prix : il est acquis avec le dieu auquel il est
+     * rattaché (voir `ownsCard`). Acheter Arès débloque ses Soldats et le Dragon de Thèbes.
+     */
+    const owns = useCallback(
+        (card: GodCard) => ownsCard(card, godsOwned, isCreator),
+        [godsOwned, isCreator],
+    );
 
-        if (currentGodIds.includes(godId)) {
-            // Retirer le dieu
-            updatedDecks[currentDeckIndex] = {
-                ...updatedDecks[currentDeckIndex],
-                godIds: currentGodIds.filter((id) => id !== godId),
-            };
-        } else if (currentGodIds.length < 4) {
-            // Ajouter le dieu (max 4)
-            updatedDecks[currentDeckIndex] = {
-                ...updatedDecks[currentDeckIndex],
-                godIds: [...currentGodIds, godId],
-            };
-        }
-
-        setDecks(updatedDecks);
-    };
-
-    // Sauvegarder les decks dans Firebase
-    const handleSave = useCallback(async () => {
-        if (!user) return;
-
-        setIsSaving(true);
-        setSaveMessage(null);
-
-        try {
-            await saveDecks(decks);
-            await refreshProfile();
-            setSaveMessage({ type: 'success', text: 'Decks sauvegardés !' });
-        } catch (error) {
-            console.error('Erreur sauvegarde decks:', error);
-            setSaveMessage({ type: 'error', text: 'Erreur lors de la sauvegarde' });
-        } finally {
-            setIsSaving(false);
-        }
-    }, [user, decks, refreshProfile]);
-
-    // Vérifier si le deck actuel est complet (4 dieux)
-    const isDeckComplete = currentDeck.godIds.length === 4;
-
-    // Obtenir les infos d'un dieu
-    const getGod = (godId: string) => availableGods.find((g) => g.id === godId);
-
-    // Ouvrir le modal avec une carte de dieu
-    const openGodCard = (god: God) => {
-        setSelectedCard({
-            type: 'god',
-            imageUrl: god.carouselImage || god.imageUrl,
-            name: god.name,
-            god: god
-        });
-    };
-
-    // Ouvrir le modal avec une carte de sort
-    const openSpellCard = (spell: SpellCard) => {
-        setSelectedCard({
-            type: 'spell',
-            imageUrl: spell.imageUrl,
-            name: spell.name,
-            spell: spell
-        });
-    };
-
-    // Fermer le modal
-    const closeCardModal = () => {
-        setSelectedCard(null);
-    };
+    const shownFamilies: Family[] = family === 'all' ? ['god', 'creature', 'servant'] : [family];
+    const allCards = [...catalogue.god, ...catalogue.creature, ...catalogue.servant];
+    const ownedCount = allCards.filter(owns).length;
 
     return (
         <main className={styles.main}>
-            {/* Header */}
             <header className={styles.pageHeader}>
                 <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
                     <span aria-hidden="true">‹</span>
                 </Link>
-                <h1 className={styles.title}>Mes Decks</h1>
+                <h1 className={styles.title}>Collection</h1>
+                <span className={styles.headerCount}>{ownedCount}/{allCards.length}</span>
             </header>
 
-            {/* ============================================
-                SECTION 1: CRÉATION DE DECKS
-                ============================================ */}
-
-            {/* Sélecteur de deck */}
-            <div className={styles.deckSelector}>
-                <button className={styles.navArrow} onClick={prevDeck}>
-                    ‹
-                </button>
-
-                <div className={styles.deckInfo}>
-                    <span className={styles.deckLabel}>
-                        Deck {currentDeckIndex + 1} / {decks.length}
-                    </span>
-                    <input
-                        type="text"
-                        value={currentDeck.name}
-                        onChange={(e) => handleNameChange(e.target.value)}
-                        className={styles.deckNameInput}
-                        placeholder="Nom du deck..."
-                    />
-                    <span className={styles.deckCount}>
-                        {currentDeck.godIds.length}/4 dieux
-                    </span>
-                </div>
-
-                <button className={styles.navArrow} onClick={nextDeck}>
-                    ›
-                </button>
-            </div>
-
-            {/* Deck actuel - Composition */}
-            <div className={styles.currentDeck}>
-                <h2 className={styles.sectionTitle}>Composition du Deck</h2>
-                <div className={styles.deckSlots}>
-                    {[0, 1, 2, 3].map((slotIndex) => {
-                        const godId = currentDeck.godIds[slotIndex];
-                        const god = godId ? getGod(godId) : null;
-
-                        return (
-                            <div
-                                key={slotIndex}
-                                className={`${styles.deckSlot} ${god ? styles.filled : styles.empty}`}
-                                onClick={() => {
-                                    if (godId) {
-                                        toggleGodInDeck(godId);
-                                    } else if (currentDeck.godIds.length < 4) {
-                                        setShowGodPickerModal(true);
-                                    }
-                                }}
-                            >
-                                {god ? (
-                                    <>
-                                        <Image
-                                            src={god.imageUrl}
-                                            alt={god.name}
-                                            width={70}
-                                            height={70}
-                                            className={styles.slotImage}
-                                        />
-                                        <span className={styles.slotName}>{god.name.split(',')[0]}</span>
-                                        <button className={styles.removeButton}>✕</button>
-                                    </>
-                                ) : (
-                                    <span className={styles.emptySlot}>+ Dieu</span>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {isDeckComplete && (
-                    <div className={styles.deckComplete}>
-                        ✓ Deck complet ! Vous pouvez l&apos;utiliser en partie.
-                    </div>
-                )}
-            </div>
-
-            {/* Modal de sélection de dieux */}
-            {showGodPickerModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowGodPickerModal(false)}>
-                    <div className={styles.godPickerModal} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.modalClose} onClick={() => setShowGodPickerModal(false)}>✕</button>
-                        <h2 className={styles.modalTitle}>Ajouter un Dieu</h2>
-                        <p className={styles.modalSubtitle}>{availableGods.length} dieux disponibles</p>
-                        <div className={styles.modalGodsGrid}>
-                            {availableGods.map((god) => {
-                                const isInDeck = currentDeck.godIds.includes(god.id);
-                                const canAdd = !isInDeck && currentDeck.godIds.length < 4;
-
-                                return (
-                                    <div
-                                        key={god.id}
-                                        className={`${styles.modalGodCard} ${isInDeck ? styles.inDeck : ''} ${!canAdd && !isInDeck ? styles.disabled : ''}`}
-                                        onClick={() => {
-                                            if (canAdd) {
-                                                toggleGodInDeck(god.id);
-                                                setShowGodPickerModal(false);
-                                            } else if (isInDeck) {
-                                                toggleGodInDeck(god.id);
-                                            }
-                                        }}
-                                    >
-                                        {isInDeck && <div className={styles.inDeckBadge}>✓</div>}
-                                        <Image
-                                            src={god.imageUrl}
-                                            alt={god.name}
-                                            width={70}
-                                            height={70}
-                                            className={styles.modalGodImage}
-                                        />
-                                        <span className={styles.modalGodName}>{god.name.split(',')[0]}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Bouton de sauvegarde */}
-            <div className={styles.actions}>
-                {saveMessage && (
-                    <div className={`${styles.saveMessage} ${saveMessage.type === 'success' ? styles.success : styles.error}`}>
-                        {saveMessage.text}
-                    </div>
-                )}
+            <div className={styles.filters}>
                 <button
-                    className={styles.saveButton}
-                    onClick={handleSave}
-                    disabled={isSaving}
+                    className={`${styles.filterChip} ${family === 'all' ? styles.filterActive : ''}`}
+                    onClick={() => setFamily('all')}
                 >
-                    {isSaving ? '⏳ Sauvegarde...' : '💾 Sauvegarder les decks'}
+                    Tout
                 </button>
-            </div>
-
-            {/* ============================================
-                SECTION 2: BIBLIOTHÈQUE DES DIEUX ET SORTS
-                ============================================ */}
-
-            <div className={styles.libraryContainer}>
-                <h2 className={styles.libraryTitle}>📚 Bibliothèque</h2>
-
-                {/* Saison 1 : Set de base - Volet déroulant */}
-                <div className={styles.seasonAccordion}>
+                {(['god', 'creature', 'servant'] as Family[]).map(f => (
                     <button
-                        className={`${styles.seasonHeader} ${isSeason1Open ? styles.seasonHeaderOpen : ''}`}
-                        onClick={() => setIsSeason1Open(!isSeason1Open)}
+                        key={f}
+                        className={`${styles.filterChip} ${family === f ? styles.filterActive : ''}`}
+                        onClick={() => setFamily(f)}
                     >
-                        <span className={styles.seasonIcon}>⭐</span>
-                        <span className={styles.seasonTitle}>Saison 1 : Set de base</span>
-                        <span className={styles.seasonCount}>{godsOwned.length} / {visibleGods.length} dieux</span>
-                        <span className={styles.seasonArrow}>{isSeason1Open ? '▼' : '▶'}</span>
+                        {FAMILY_META[f].icon} {FAMILY_META[f].plural}
+                        <span className={styles.filterCount}>{catalogue[f].length}</span>
                     </button>
-
-                    {isSeason1Open && (
-                        <div className={styles.seasonContent}>
-
-                            {visibleGods.map((god) => {
-                                const spells = getSpellsForGod(god);
-                                const isOwned = godsOwned.includes(god.id);
-                                return (
-                                    <div key={god.id} className={`${styles.godRow} ${!isOwned ? styles.notOwned : ''}`}>
-                                        <div className={styles.godHeader}>
-                                            <span className={styles.godNameBig}>{god.name}</span>
-                                            <span className={styles.godElement}>{getElementSymbol(god.element)}</span>
-                                        </div>
-
-                                        <div className={styles.cardsCarousel}>
-                                            {/* 1. Carte du Dieu */}
-                                            <div
-                                                className={`${styles.cardWrapper} ${styles.godCardEntry}`}
-                                                onClick={() => {
-                                                    if (isOwned) {
-                                                        openGodCard(god);
-                                                    } else {
-                                                        setShowBuyModal({ god });
-                                                    }
-                                                }}
-                                            >
-                                                <Image
-                                                    src={god.carouselImage || god.imageUrl}
-                                                    alt={god.name}
-                                                    fill
-                                                    className={styles.godCardImage}
-                                                    sizes="(max-width: 768px) 100vw, 300px"
-                                                    priority={false}
-                                                />
-                                            </div>
-
-                                            {/* 2. Les 5 Cartes de Sorts */}
-                                            {spells.map((spell) => {
-                                                const isFullArt = spell.imageUrl.includes('/cards/spells/');
-
-                                                return (
-                                                    <div
-                                                        key={spell.id}
-                                                        className={`${styles.cardWrapper} ${styles.spellCardEntry}`}
-                                                        onClick={() => openSpellCard(spell)}
-                                                    >
-                                                        {isFullArt ? (
-                                                            <Image
-                                                                src={spell.imageUrl}
-                                                                alt={spell.name}
-                                                                fill
-                                                                className={styles.godCardImage}
-                                                                sizes="160px"
-                                                            />
-                                                        ) : (
-                                                            <>
-                                                                <div className={styles.spellImageContainer}>
-                                                                    <Image
-                                                                        src={spell.imageUrl}
-                                                                        alt={spell.name}
-                                                                        fill
-                                                                        className={styles.godCardImage}
-                                                                        sizes="160px"
-                                                                    />
-                                                                    <div className={styles.spellCost}>{spell.energyCost}</div>
-                                                                </div>
-                                                                <div className={styles.spellContent}>
-                                                                    <div className={styles.spellName}>{spell.name}</div>
-                                                                    <div className={styles.spellType}>{spell.type}</div>
-                                                                    <div className={styles.spellDescription}>
-                                                                        {spell.description}
-                                                                    </div>
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+                ))}
             </div>
 
-            {/* Modal pour afficher la carte en grand */}
-            {selectedCard && (
-                <div className={styles.cardModalOverlay} onClick={closeCardModal}>
-                    <div className={styles.cardModalContent} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.cardModalClose} onClick={closeCardModal}>✕</button>
-                        <div className={styles.cardModalImageWrapper}>
-                            <Image
-                                src={selectedCard.imageUrl}
-                                alt={selectedCard.name}
-                                fill
-                                className={styles.cardModalImage}
-                                sizes="(max-width: 768px) 90vw, 400px"
-                                priority
+            {shownFamilies.map(f => (
+                <section key={f} className={styles.familySection}>
+                    <h2 className={styles.familyTitle}>
+                        <span aria-hidden="true">{FAMILY_META[f].icon}</span>
+                        {FAMILY_META[f].plural}
+                        <span className={styles.familyCount}>
+                            {catalogue[f].filter(owns).length}/{catalogue[f].length}
+                        </span>
+                    </h2>
+
+                    <div className={styles.grid}>
+                        {catalogue[f].map(card => (
+                            <CollectionTile
+                                key={card.id}
+                                card={card}
+                                owned={owns(card)}
+                                onInspect={() => { haptic('select'); setInspected(card); }}
                             />
-                        </div>
-                        <div className={styles.cardModalInfo}>
-                            <h3 className={styles.cardModalName}>{selectedCard.name}</h3>
-                            {selectedCard.type === 'spell' && selectedCard.spell && (
-                                <>
-                                    <span className={styles.cardModalType}>{selectedCard.spell.type}</span>
-                                    <p className={styles.cardModalDescription}>{selectedCard.spell.description}</p>
-                                    <div className={styles.cardModalStats}>
-                                        <span className={styles.cardModalCost}>⚡ {selectedCard.spell.energyCost}</span>
-                                    </div>
-                                </>
-                            )}
-                            {selectedCard.type === 'god' && selectedCard.god && (
-                                <span className={styles.cardModalElement}>{getElementSymbol(selectedCard.god.element)}</span>
-                            )}
-                        </div>
+                        ))}
                     </div>
-                </div>
+                </section>
+            ))}
+
+            {inspected && (
+                <InspectModal
+                    card={inspected}
+                    owned={owns(inspected)}
+                    onClose={() => { setInspected(null); setZoomedSpell(null); }}
+                    onZoomSpell={setZoomedSpell}
+                />
             )}
 
-            {/* Modal pour acheter un dieu non possédé */}
-            {showBuyModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowBuyModal(null)}>
-                    <div className={styles.buyModal} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.modalClose} onClick={() => setShowBuyModal(null)}>✕</button>
-                        <div className={styles.buyModalContent}>
-                            <Image
-                                src={showBuyModal.god.imageUrl}
-                                alt={showBuyModal.god.name}
-                                width={100}
-                                height={100}
-                                className={styles.buyModalImage}
-                            />
-                            <h3 className={styles.buyModalTitle}>{showBuyModal.god.name}</h3>
-                            <p className={styles.buyModalText}>
-                                Vous ne possédez pas encore ce dieu.
-                            </p>
-                            <Link
-                                href="/shop#section-dieux"
-                                className={styles.buyModalButton}
-                                onClick={() => setShowBuyModal(null)}
-                            >
-                                🛒 Aller à la boutique
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+            {zoomedSpell && (
+                <SpellZoom spell={zoomedSpell} onClose={() => setZoomedSpell(null)} />
             )}
         </main>
+    );
+}
+
+/** Vignette d'une unité dans la grille. */
+function CollectionTile({ card, owned, onInspect }: { card: GodCard; owned: boolean; onInspect: () => void }) {
+    const color = ELEMENT_COLORS[card.element].primary;
+
+    return (
+        <button
+            className={`${styles.tile} ${owned ? '' : styles.tileLocked}`}
+            style={{ '--card-color': color } as React.CSSProperties}
+            onClick={onInspect}
+            aria-label={`${card.name}${owned ? '' : ' (non possédé)'}`}
+        >
+            <span className={styles.tileImageWrap}>
+                <Image
+                    src={card.imageUrl}
+                    alt=""
+                    fill
+                    sizes="(max-width: 600px) 45vw, 200px"
+                    className={styles.tileImage}
+                />
+                {!owned && <span className={styles.tileLock} aria-hidden="true">🔒</span>}
+            </span>
+            <span className={styles.tileFooter}>
+                <span className={styles.tileName}>{card.name.split(',')[0]}</span>
+                <span className={styles.tileMeta}>
+                    {ELEMENT_SYMBOLS[card.element]} {card.maxHealth} PV
+                </span>
+            </span>
+        </button>
+    );
+}
+
+/**
+ * Fiche détaillée : portrait, caractéristiques, et les 5 cartes de sort de l'unité.
+ *
+ * Les sorts viennent de `spells.ts`, la donnée RÉELLE du jeu. L'ancienne page lisait
+ * `mock_spells.ts`, un jeu de cartes factices dont les valeurs ne correspondaient pas à ce qui
+ * se passe en partie (le Trident y était une compétence à 1 énergie, alors que c'est un
+ * générateur gratuit) : la collection annonçait donc des effets qui n'existaient pas.
+ */
+function InspectModal({ card, owned, onClose, onZoomSpell }: {
+    card: GodCard;
+    owned: boolean;
+    onClose: () => void;
+    onZoomSpell: (s: SpellCard) => void;
+}) {
+    const spells = useMemo(() => getSpellsByGodId(card.id), [card.id]);
+    const color = ELEMENT_COLORS[card.element].primary;
+    const family = (card.category ?? 'god') as Family;
+
+    // Une unité s'obtient avec son dieu : on nomme lequel, sinon un joueur qui voit un cadenas
+    // n'a aucun moyen de savoir quoi acheter pour le lever.
+    const ownerGod = family === 'god' ? null : getGodById(getOwnerGodId(card) ?? '');
+
+    return (
+        <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-label={card.name}>
+            <div
+                className={styles.inspectPanel}
+                style={{ '--card-color': color } as React.CSSProperties}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button className={styles.modalClose} onClick={onClose} aria-label="Fermer">✕</button>
+
+                <div className={styles.inspectHero}>
+                    <div className={styles.inspectPortrait}>
+                        <Image
+                            src={card.carouselImage || card.imageUrl}
+                            alt=""
+                            fill
+                            sizes="(max-width: 600px) 90vw, 320px"
+                            className={styles.inspectPortraitImg}
+                        />
+                    </div>
+
+                    <div className={styles.inspectIdentity}>
+                        <span className={styles.inspectFamily}>
+                            {FAMILY_META[family].icon} {FAMILY_META[family].label}
+                        </span>
+                        <h2 className={styles.inspectName}>{card.name}</h2>
+
+                        <div className={styles.statRow}>
+                            <span className={styles.stat} title="Élément">
+                                {ELEMENT_SYMBOLS[card.element]} {ELEMENT_NAMES[card.element]}
+                            </span>
+                            <span className={styles.stat} title="Points de vie">❤️ {card.maxHealth} PV</span>
+                            <span className={styles.stat} title="Faiblesse élémentaire : dégâts doublés">
+                                💥 Faible à {ELEMENT_SYMBOLS[card.weakness]} {ELEMENT_NAMES[card.weakness]}
+                            </span>
+                        </div>
+
+                        {ownerGod && (
+                            <span className={styles.unlockNote}>
+                                {owned ? '✓ Obtenu avec' : '🔒 Débloqué par'} {ownerGod.name.split(',')[0]}
+                            </span>
+                        )}
+
+                        {!owned && (
+                            <Link href="/shop#section-dieux" className={styles.buyLink} onClick={onClose}>
+                                {ownerGod
+                                    ? `Obtenir ${ownerGod.name.split(',')[0]} en boutique`
+                                    : 'Non possédé — voir en boutique'}
+                            </Link>
+                        )}
+                    </div>
+                </div>
+
+                {card.flavorText && <p className={styles.flavor}>{card.flavorText}</p>}
+
+                <h3 className={styles.spellsTitle}>
+                    Cartes de {card.name.split(',')[0]}
+                    <span className={styles.spellsCount}>{spells.length}</span>
+                </h3>
+
+                {spells.length === 0 ? (
+                    <p className={styles.emptyNote}>Aucune carte de sort n&apos;est encore associée à cette unité.</p>
+                ) : (
+                    <div className={styles.spellList}>
+                        {spells.map(spell => {
+                            const meta = getCardTypeMeta(spell.type);
+                            return (
+                                <button
+                                    key={spell.id}
+                                    className={styles.spellRow}
+                                    style={{ '--type-color': meta.color } as React.CSSProperties}
+                                    onClick={() => { haptic('tap'); onZoomSpell(spell); }}
+                                    aria-label={`Agrandir ${spell.name}`}
+                                >
+                                    <span className={styles.spellThumb}>
+                                        <Image
+                                            src={spell.imageUrl}
+                                            alt=""
+                                            fill
+                                            sizes="96px"
+                                            className={styles.spellThumbImg}
+                                        />
+                                    </span>
+                                    <span className={styles.spellInfo}>
+                                        <span className={styles.spellHead}>
+                                            <span className={styles.spellName}>{spell.name}</span>
+                                            <span className={styles.spellCost} title="Coût en énergie">
+                                                ⚡{spell.energyCost}
+                                            </span>
+                                        </span>
+                                        <span className={styles.spellType}>
+                                            {meta.icon} {meta.label}
+                                            {spell.energyGain > 0 && (
+                                                <span className={styles.spellGain}>+{spell.energyGain} énergie</span>
+                                            )}
+                                        </span>
+                                        {/* Description RECONSTRUITE depuis les effets réels du moteur, et non
+                                            le texte compact en emoji de spells.ts, qui est un aide-mémoire de
+                                            conception illisible pour un joueur. */}
+                                        <span className={styles.spellDesc}>{getReadableSpellDescription(spell)}</span>
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+/** Agrandissement plein écran de l'illustration d'un sort. */
+function SpellZoom({ spell, onClose }: { spell: SpellCard; onClose: () => void }) {
+    const meta = getCardTypeMeta(spell.type);
+    return (
+        <div className={styles.zoomOverlay} onClick={onClose} role="dialog" aria-label={spell.name}>
+            <div className={styles.zoomCard} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.zoomImageWrap}>
+                    <Image
+                        src={spell.imageUrl}
+                        alt=""
+                        fill
+                        sizes="(max-width: 600px) 92vw, 420px"
+                        className={styles.zoomImage}
+                    />
+                </div>
+                <div className={styles.zoomInfo}>
+                    <h3 className={styles.zoomName}>{spell.name}</h3>
+                    <p className={styles.zoomType}>
+                        {meta.icon} {meta.label} · ⚡{spell.energyCost}
+                        {spell.energyGain > 0 && ` · +${spell.energyGain} énergie`}
+                    </p>
+                    <p className={styles.zoomDesc}>{getReadableSpellDescription(spell)}</p>
+                </div>
+            </div>
+            <span className={styles.zoomHint}>Touchez pour fermer</span>
+        </div>
     );
 }
