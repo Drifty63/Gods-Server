@@ -763,7 +763,14 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                             handlePlayConfirmed();
                         }
                     }}>
-                        {requiredTargets > 0 ? `CIBLER (${requiredTargets})` : `LANCER SORT`}
+                        {/* CORRECTIF Nyx : le libellé trahissait la carte cachée. « CIBLER (2) »
+                            révélait qu'elle vise deux ennemis, et « LANCER SORT » qu'elle n'a
+                            aucune cible — de quoi deviner le sort avant même de le jouer, alors
+                            que l'effet de Nyx consiste précisément à le cacher. Un libellé neutre
+                            tant que la carte n'est pas retournée. */}
+                        {selectedCard.isHiddenFromOwner
+                            ? `JOUER À L'AVEUGLE`
+                            : requiredTargets > 0 ? `CIBLER (${requiredTargets})` : `LANCER SORT`}
                     </button>
                 </div>
             )}
@@ -772,7 +779,9 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             {isSelectingTarget && requiredTargets > 0 && selectedTargetGods.length === maxSelectableTargets && (
                 <div style={{ position: 'absolute', bottom: '160px', left: '50%', transform: 'translateX(-50%)', zIndex: 500 }}>
                     <button className={styles.btnPremium} onClick={() => handlePlayConfirmed()}>
-                        CONFIRMER {selectedCard?.name}
+                        {/* Même précaution : afficher le nom ici laisserait annuler le ciblage
+                            en repartant avec l'identité de la carte cachée. */}
+                        {selectedCard?.isHiddenFromOwner ? 'CONFIRMER' : `CONFIRMER ${selectedCard?.name ?? ''}`}
                     </button>
                 </div>
             )}

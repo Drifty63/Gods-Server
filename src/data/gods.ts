@@ -445,7 +445,8 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 20,
         imageUrl: '/cards/gods/card_ulysses.png',
         flavorText: '"Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies."',
-        hidden: true,  // Exclusif mode Histoire
+        // Validé pour la v1.0 (illustration et sorts repris à la main) : jouable en Duel et
+        // opposable en Ascension, plus seulement réservé au mode Histoire.
         category: 'creature',
         affiliatedTo: 'hestia',
         duelCost: 3,
@@ -463,7 +464,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/card_athena_knight.png',
         archetype: 'tank',
         flavorText: '"Pour la gloire d\'Athéna, nous ne fléchirons jamais!"',
-        hidden: true,  // Exclusif mode Histoire (intégration Duel possible plus tard)
+        // Intégration au Duel effectuée : serviteur validé pour la v1.0.
         category: 'servant',
         affiliatedTo: 'athena',
         duelCost: 2,
@@ -507,6 +508,61 @@ export function getOwnedGods(godsOwned: string[], isCreator: boolean = false): G
     return onlyGods.filter(god => godsOwned.includes(god.id));
 }
 
+/**
+ * Créatures et serviteurs livrés avec le jeu : validés à la main (pas de `draft`) et non
+ * réservés au mode Histoire (pas de `hidden`).
+ *
+ * Source unique partagée par le mode Duel et la Collection, pour qu'un ajout d'unité
+ * apparaisse partout d'un coup.
+ */
+export function getReleasedUnits(): { creatures: GodCard[]; servants: GodCard[] } {
+    return {
+        creatures: ALL_GODS.filter(g => g.category === 'creature' && !g.hidden && !g.draft),
+        servants: ALL_GODS.filter(g => g.category === 'servant' && !g.hidden && !g.draft),
+    };
+}
+
+/**
+ * Dieu dont dépend une unité, en remontant la chaîne d'affiliation.
+ *
+ * Une unité peut être rattachée à une AUTRE unité plutôt qu'à un dieu : les Araignées Géantes
+ * sont la progéniture d'Arachné, elle-même liée à Athéna. Sans cette remontée, elles
+ * n'appartiendraient à personne et resteraient à jamais inaccessibles.
+ *
+ * La boucle est bornée par `seen` : une affiliation circulaire introduite par erreur
+ * bloquerait sinon le rendu.
+ */
+export function getOwnerGodId(card: GodCard): string | undefined {
+    let current: GodCard | undefined = card;
+    const seen = new Set<string>();
+
+    while (current && current.affiliatedTo && !seen.has(current.id)) {
+        seen.add(current.id);
+        const parent: GodCard | undefined = ALL_GODS.find(g => g.id === current!.affiliatedTo);
+        if (!parent) return current.affiliatedTo; // affilié à un id inconnu : on le renvoie tel quel
+        if (!parent.category || parent.category === 'god') return parent.id;
+        current = parent;
+    }
+    return undefined;
+}
+
+/**
+ * Le joueur possède-t-il cette carte ?
+ *
+ * Un dieu s'achète en boutique. Une créature ou un serviteur ne s'achète PAS : il est acquis
+ * en même temps que le dieu auquel il est rattaché — acheter Arès donne ses Soldats et le
+ * Dragon de Thèbes. Rien à stocker en base : la possession se déduit de `gods_owned`, donc
+ * aucune migration ni modification des fonctions d'achat n'est nécessaire.
+ */
+export function ownsCard(card: GodCard, godsOwned: string[], isCreator: boolean = false): boolean {
+    if (isCreator) return true;
+    if (!card.category || card.category === 'god') return godsOwned.includes(card.id);
+
+    const ownerGod = getOwnerGodId(card);
+    // Unité sans dieu de rattachement : personne ne peut l'obtenir, on ne l'accorde donc pas.
+    return ownerGod ? godsOwned.includes(ownerGod) : false;
+}
+
 // Helper pour obtenir toutes les cartes disponibles pour le mode Duel
 // Inclut: Dieux + Créatures + Serviteurs (possédés ou créateur)
 export function getDuelCards(godsOwned: string[], isCreator: boolean = false): {
@@ -517,14 +573,17 @@ export function getDuelCards(godsOwned: string[], isCreator: boolean = false): {
     if (isCreator) {
         return {
             gods: ALL_GODS.filter(g => !g.hidden && (!g.category || g.category === 'god')),
-            creatures: ALL_GODS.filter(g => !g.hidden && g.category === 'creature'),
-            servants: ALL_GODS.filter(g => !g.hidden && g.category === 'servant'),
+            creatures: ALL_GODS.filter(g => !g.hidden && !g.draft && g.category === 'creature'),
+            servants: ALL_GODS.filter(g => !g.hidden && !g.draft && g.category === 'servant'),
         };
     }
 
+    const released = getReleasedUnits();
     return {
         gods: ALL_GODS.filter(g => (!g.category || g.category === 'god') && godsOwned.includes(g.id)),
-        creatures: ALL_GODS.filter(g => g.category === 'creature' && !g.hidden && godsOwned.includes(g.id)),
-        servants: ALL_GODS.filter(g => g.category === 'servant' && !g.hidden && godsOwned.includes(g.id)),
+        // Une créature ou un serviteur suit le sort de son dieu : acheter Arès débloque ses
+        // Soldats et le Dragon de Thèbes, sans achat ni stockage supplémentaire.
+        creatures: released.creatures.filter(c => ownsCard(c, godsOwned, false)),
+        servants: released.servants.filter(s => ownsCard(s, godsOwned, false)),
     };
 }

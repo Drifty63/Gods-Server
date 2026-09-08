@@ -8,12 +8,6 @@ import { getSupabaseClient } from './supabase-realtime';
 // TYPES
 // =====================================
 
-export interface SavedDeck {
-    id: string; // "deck_<slotIndex>" -- kept for UI compatibility, mapped to slot_index at the DB boundary
-    name: string;
-    godIds: string[];
-}
-
 export interface DailyQuest {
     id: string;
     name: string;
@@ -71,7 +65,6 @@ export interface UserProfile {
     last_login_at: string;
     last_active_at: string;
     has_seen_welcome: boolean;
-    savedDecks: SavedDeck[]; // fetched from the saved_decks table, attached client-side
 }
 
 export interface LeaderboardEntry {
@@ -220,20 +213,19 @@ export async function logout(): Promise<void> {
 
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     const supabase = getSupabaseClient();
-    const [{ data: profile, error: profileErr }, { data: decks }] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', uid).single(),
-        supabase.from('saved_decks').select('slot_index, name, god_ids').eq('user_id', uid).order('slot_index'),
-    ]);
+    // La table `saved_decks` n'est plus interrogée : la composition d'équipe se fait désormais
+    // au moment de lancer une partie, dans chaque écran de sélection. Cela retire une requête
+    // à CHAQUE chargement de profil. La table et son RPC restent en base, intacts, au cas où
+    // les decks enregistrés reviendraient.
+    const { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', uid)
+        .single();
 
     if (profileErr || !profile) return null;
 
-    const savedDecks: SavedDeck[] = (decks ?? []).map((d) => ({
-        id: `deck_${d.slot_index}`,
-        name: d.name,
-        godIds: d.god_ids,
-    }));
-
-    return { ...profile, savedDecks } as UserProfile;
+    return profile as UserProfile;
 }
 
 export async function updateUsername(uid: string, newUsername: string): Promise<void> {
@@ -278,21 +270,6 @@ export async function purchaseCoffret(
     coffretId: string
 ): Promise<{ success: boolean; message: string; godsAdded?: string[] }> {
     return invokeFn('purchase-coffret', { coffretId });
-}
-
-// =====================================
-// DECKS SAUVEGARDÉS
-// =====================================
-
-export async function saveDecks(decks: SavedDeck[]): Promise<void> {
-    const supabase = getSupabaseClient();
-    const payload = decks.map((deck, index) => ({
-        slot_index: Number(deck.id.replace('deck_', '')) || index,
-        name: deck.name,
-        god_ids: deck.godIds,
-    }));
-    const { error } = await supabase.rpc('replace_saved_decks', { p_decks: payload });
-    if (error) throw error;
 }
 
 // =====================================

@@ -2,16 +2,20 @@
 /* Style : Grimoire antique avec bordures dorées */
 
 .main {
-    min-height: 100vh;
+    min-height: 100dvh;
     background:
+        /* Voile sombre nettement appuyé : l'illustration du savant est très détaillée et
+           contrastée, du texte de règles posé dessus sans ce filtre serait illisible. */
         linear-gradient(180deg,
-            rgba(10, 10, 26, 0.9) 0%,
-            rgba(26, 26, 58, 0.85) 50%,
-            rgba(10, 10, 26, 0.9) 100%),
-        url('/assets/rules_background.png');
+            rgba(8, 10, 24, 0.88) 0%,
+            rgba(12, 16, 38, 0.92) 45%,
+            rgba(8, 10, 24, 0.95) 100%),
+        url('/backgrounds/rules_bg.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    /* `fixed` provoque des saccades au défilement sur iOS (la couche de fond est recomposée
+       à chaque frame) : on fige l'image sur la page plutôt que sur la fenêtre. */
+    background-attachment: scroll;
 }
 
 /* ================================

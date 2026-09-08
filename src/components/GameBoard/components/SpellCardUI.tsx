@@ -49,12 +49,14 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
             >
-                <div className={styles.spellCardBack} style={{
-                    width: isMini ? '100px' : '140px',
-                    height: isMini ? '140px' : '190px',
-                    border: isSelected ? '2px solid #f59e0b' : undefined,
-                    boxShadow: isSelected ? '0 0 30px rgba(245, 158, 11, 0.6)' : undefined
-                }}>
+                {/* CORRECTIF Nyx : les dimensions étaient forcées en style inline (140x190 en
+                  * main, 100x140 côté adverse), ce qui écrasait la taille responsive du CSS.
+                  * Une carte retournée devenait 50 % plus large que ses voisines et faisait
+                  * déborder la main. Pire, cet écart RÉVÉLAIT à lui seul quelles cartes sont
+                  * cachées. Le dos reprend donc exactement le gabarit d'une carte normale. */}
+                <div
+                    className={`${styles.spellCardBack} ${isSelected ? styles.spellCardBackSelected : ''}`}
+                >
                     <span className={styles.spellCardBackTitle}>GODS</span>
                 </div>
             </div>

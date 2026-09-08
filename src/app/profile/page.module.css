@@ -905,3 +905,94 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+/* ================================
+   ÉDITION DU PSEUDO
+   ================================
+   Le pseudo est le nom vu par les autres joueurs (classement, amis, historique) : il devient
+   modifiable depuis la fiche de profil, là où rien ne le permettait après l'inscription. */
+
+.usernameButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 0;
+    padding: 2px 0;
+    background: none;
+    border: none;
+    text-align: left;
+}
+
+.usernameButton:hover .usernameEditIcon,
+.usernameButton:active .usernameEditIcon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.usernameEditIcon {
+    font-size: 0.75rem;
+    opacity: 0.45;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.modalHint {
+    margin-bottom: 16px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+}
+
+.nameInput {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    text-align: center;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 10px;
+}
+
+.nameInput:focus {
+    outline: none;
+    border-color: var(--gold-divine);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+}
+
+.nameMeta {
+    display: flex;
+    justify-content: center;
+    min-height: 20px;
+    margin: 8px 0 14px;
+}
+
+.nameCounter {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.nameErrorText {
+    font-size: 0.76rem;
+    color: #fca5a5;
+    text-align: center;
+}
+
+.nameSaveButton {
+    width: 100%;
+    padding: 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #f5d76e, #d4af37, #cd7f32);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.nameSaveButton:disabled {
+    opacity: 0.45;
+    box-shadow: none;
+}

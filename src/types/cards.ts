@@ -63,6 +63,16 @@ export interface GodCard {
     archetype?: 'glass_cannon' | 'tank' | 'support';
     duelCost?: number; // Coût en points pour le mode Duel (5 pour dieux, 3 pour créatures, 2 pour serviteurs)
     affiliatedTo?: string; // ID du dieu auquel la créature/serviteur est affilié (ex: 'ares')
+    /**
+     * Contenu de TRAVAIL, pas encore validé pour la sortie : illustration, images de compétences
+     * ou effets générés automatiquement et jamais repris à la main.
+     *
+     * À distinguer de `hidden`, qui masque une carte au JOUEUR tout en la laissant utilisable
+     * comme adversaire (l'Ascension oppose volontiers des unités cachées). `draft` est plus
+     * fort : la carte n'est ni jouable, ni opposable, ni affichée — elle n'existe que dans le
+     * code, en attendant d'être reprise manuellement. Voir la règle de contenu de la v1.0.
+     */
+    draft?: boolean;
 }
 
 // Effet d'un sort
