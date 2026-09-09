@@ -37,11 +37,13 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false, gods
     /**
      * L'ADVERSAIRE, lui, peut aligner n'importe quelle carte publiée.
      *
-     * Le restreindre aux cartes possédées rendrait le mode injouable : les deux équipes ne
-     * peuvent pas partager une même carte (les ids servent de clé de ciblage), donc un joueur
-     * avec un simple pack starter — 4 dieux — n'aurait plus rien à donner à l'IA après avoir
-     * composé la sienne. C'est aussi ce que fait déjà l'Ascension : on affronte des unités
-     * qu'on ne possède pas.
+     * Le restreindre aux cartes possédées appauvrirait beaucoup le mode : un joueur avec un
+     * simple pack starter n'opposerait jamais que ses propres 4 dieux. C'est aussi ce que fait
+     * déjà l'Ascension : on affronte des unités qu'on ne possède pas.
+     *
+     * Les MATCHS MIROIR sont autorisés — un même dieu peut figurer dans les deux équipes. Ils
+     * existaient déjà en ligne (chaque joueur choisit sans voir l'autre) et en Ascension aux
+     * étages 13-15 ; seul l'Entraînement les interdisait.
      */
     const aiRoster = useMemo(() => getDuelCards([], true), []);
 
@@ -57,13 +59,13 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false, gods
         if (phase === 'player') {
             if (playerTeam.includes(godId)) {
                 setPlayerTeam(playerTeam.filter(id => id !== godId));
-            } else if (playerTeam.length < maxTeamSize && !aiTeam.includes(godId)) {
+            } else if (playerTeam.length < maxTeamSize) {
                 setPlayerTeam([...playerTeam, godId]);
             }
         } else {
             if (aiTeam.includes(godId)) {
                 setAiTeam(aiTeam.filter(id => id !== godId));
-            } else if (aiTeam.length < maxTeamSize && !playerTeam.includes(godId)) {
+            } else if (aiTeam.length < maxTeamSize) {
                 setAiTeam([...aiTeam, godId]);
             }
         }
@@ -76,9 +78,7 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false, gods
     };
 
     const handleRandomAiTeam = () => {
-        const availableGods = allCards
-            .filter(g => !playerTeam.includes(g.id))
-            .map(g => g.id);
+        const availableGods = allCards.map(g => g.id);
 
         const shuffled = [...availableGods].sort(() => Math.random() - 0.5);
         setAiTeam(shuffled.slice(0, maxTeamSize));
@@ -94,20 +94,17 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false, gods
         const isSelected = phase === 'player'
             ? playerTeam.includes(god.id)
             : aiTeam.includes(god.id);
-        const isDisabled = phase === 'player'
-            ? aiTeam.includes(god.id)
-            : playerTeam.includes(god.id);
         const colors = ELEMENT_COLORS[god.element];
 
         return (
             <div
                 key={god.id}
-                className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${isDisabled ? styles.disabled : ''}`}
+                className={`${styles.godCard} ${isSelected ? styles.selected : ''}`}
                 style={{
                     '--element-color': colors.primary,
                     '--element-gradient': colors.gradient,
                 } as React.CSSProperties}
-                onClick={() => !isDisabled && handleGodClick(god.id)}
+                onClick={() => handleGodClick(god.id)}
             >
                 <div className={styles.godHeader}>
                     <span className={styles.godElement} title={ELEMENT_NAMES[god.element]}>
@@ -139,7 +136,6 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false, gods
                     </span>
                 </div>
                 {isSelected && <div className={styles.selectedOverlay}>✓</div>}
-                {isDisabled && <div className={styles.disabledOverlay}>🚫</div>}
             </div>
         );
     };

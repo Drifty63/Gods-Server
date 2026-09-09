@@ -79,6 +79,8 @@ interface GameStore {
     setPlayerId: (id: string) => void;
     selectCard: (card: SpellCard | null) => void;
     startTargetSelection: () => void;  // Activer le mode ciblage
+    /** Abandonne le ciblage en cours, en GARDANT la carte sélectionnée. */
+    cancelTargetSelection: () => void;
     selectTargetGod: (god: GodState | null) => void;
     addTargetGod: (god: GodState) => void;  // Ajouter une cible à la liste
     toggleTargetGod: (god: GodState) => void;  // Ajouter ou retirer une cible
@@ -100,6 +102,8 @@ interface GameStore {
     finishTurnAfterResolution: () => void;
     /** Chrono de tour écoulé (modes compétitifs) : passe la main et compte le dépassement. */
     timeoutTurn: () => { success: boolean; message: string };
+    /** Didacticiel uniquement : vide la pioche pour montrer la fatigue en action. */
+    scriptTutorialFatigue: () => void;
 
     // Getters
     getCurrentPlayer: () => PlayerState | null;
@@ -231,6 +235,32 @@ const ALL_MODALS_CLOSED = {
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
+    /**
+     * Mise en scène de la FATIGUE, réservée au didacticiel.
+     *
+     * La fatigue est une règle qu'on ne rencontre qu'en fin de partie longue : l'expliquer dans
+     * une bulle de texte ne marque personne. On force donc le recyclage sous les yeux du joueur,
+     * en vidant sa pioche dans sa corbeille puis en repiochant — `drawToHandLimit` applique alors
+     * le bloc de fatigue existant du moteur (compteur, remélange, dégâts à tous les dieux).
+     *
+     * Aucune règle n'est réécrite ici : on ne fait que provoquer une situation normale.
+     */
+    scriptTutorialFatigue: () => {
+        const { engine } = get();
+        if (!engine) return;
+
+        const state = engine.getState();
+        const me = state.players[0];
+        if (state.status !== 'playing') return;
+
+        // Il faut une place en main, sinon la boucle de pioche ne s'exécute pas du tout.
+        if (me.hand.length >= 5) me.discard.push(...me.hand.splice(0, 1));
+        me.discard.push(...me.deck.splice(0));
+        engine.drawToHandLimit(me);
+
+        set({ gameState: cloneGameState(engine.getState()) });
+    },
+
     /**
      * Termine le tour après qu'un sort a été ENTIÈREMENT résolu, choix du joueur compris.
      *
@@ -454,6 +484,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (requiredTargets > 0) {
             set({ isSelectingTarget: true });
         }
+    },
+
+    /**
+     * Revenir en arrière après avoir touché « CIBLER ».
+     *
+     * La carte reste sélectionnée : on retombe simplement sur son panneau, sans perdre son
+     * choix. Il n'existait auparavant AUCUNE sortie du mode ciblage — tous les boutons
+     * disparaissaient et un clic dans le vide était ignoré, la seule échappatoire (non
+     * signalée) étant de recliquer une carte de la main.
+     */
+    cancelTargetSelection: () => {
+        set({
+            isSelectingTarget: false,
+            selectedTargetGod: null,
+            selectedTargetGods: [],
+        });
     },
 
     selectTargetGod: (god) => {

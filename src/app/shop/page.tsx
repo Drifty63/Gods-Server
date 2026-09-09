@@ -575,8 +575,9 @@ export default function ShopPage() {
 
                         <h2 className={styles.modalTitle}>{selectedGod.name}</h2>
 
+                        {/* Pas d'enrobage de guillemets : les textes portent déjà les leurs. */}
                         {selectedGod.flavorText && (
-                            <p className={styles.modalFlavorText}>&ldquo;{selectedGod.flavorText}&rdquo;</p>
+                            <p className={styles.modalFlavorText}>{selectedGod.flavorText}</p>
                         )}
 
                         <div className={styles.modalGodStats}>

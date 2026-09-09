@@ -1,27 +1,47 @@
 /* GODS - Page des Règles Divine */
 /* Style : Grimoire antique avec bordures dorées */
 
+/**
+ * Fond de page : image portée par un CALQUE FIXE, pas par la boîte du <main>.
+ *
+ * C'est le point décisif. `background-size` se calcule contre l'élément, et ce <main> contient
+ * toute la page — environ 3500 px de haut sur téléphone. Les deux réglages possibles échouaient
+ * donc pour la même raison :
+ *   - `cover` mettait l'image à l'échelle de la HAUTEUR (facteur ~4,6) : on n'en voyait plus que
+ *     6 % de la largeur, soit un bout de table, l'érudit hors champ ;
+ *   - `contain` la mettait à l'échelle de la LARGEUR : un bandeau de 390×218 px collé en haut,
+ *     un visage de 12 px, puis 3000 px de noir. C'est le « pire qu'avant » signalé.
+ *
+ * Un calque `position: fixed` ramène la zone de référence à la FENÊTRE : `cover` y donne
+ * 1512×844, sans aucun rognage vertical. Et contrairement à `background-attachment: fixed`, un
+ * calque composité normal ne provoque pas de repaint par frame — donc pas de saccade iOS sur
+ * une page longue.
+ *
+ * `36% center` cale le cadrage sur l'érudit, dont le visage est à 36 % de la largeur de l'image
+ * (1376×768) : `center` le faisait sortir par la gauche. Même logique que la Collection, qui
+ * utilise déjà `22% center` parce que son sujet fort est à gauche.
+ */
 .main {
+    position: relative;
+    isolation: isolate;
     min-height: 100dvh;
+    background-color: #080a18;
+}
+
+.main::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
     background:
         /* Voile allégé en haut, appuyé en bas : l'érudit doit rester visible derrière l'en-tête,
            tandis que le corps de page — long et dense en texte — a besoin d'un fond calme. */
         linear-gradient(180deg,
             rgba(8, 10, 24, 0.55) 0%,
-            rgba(10, 13, 32, 0.82) 30%,
+            rgba(10, 13, 32, 0.82) 45%,
             rgba(8, 10, 24, 0.94) 100%),
-        url('/backgrounds/rules_bg.jpg');
-    /* `contain` plutôt que `cover` : l'image est panoramique (1400×~800) alors que la page est
-       en portrait. En `cover`, le navigateur zoomait dedans au point de ne garder qu'un bout de
-       table — l'érudit sortait du champ. Ici la scène tient en entier en haut de page, le
-       dégradé prenant le relais en dessous. */
-    background-size: contain;
-    background-position: top center;
-    background-repeat: no-repeat;
-    background-color: #080a18;
-    /* `fixed` provoque des saccades au défilement sur iOS (la couche de fond est recomposée
-       à chaque frame) : on fige l'image sur la page plutôt que sur la fenêtre. */
-    background-attachment: scroll;
+        url('/backgrounds/rules_bg.jpg') 36% center / cover no-repeat;
 }
 
 /* ================================
@@ -75,6 +95,9 @@
    CONTENT
    ================================ */
 .content {
+    /* Au-dessus du calque de fond fixe (voir .main::before). */
+    position: relative;
+    z-index: 1;
     max-width: 950px;
     margin: 0 auto;
     padding: 40px 20px;

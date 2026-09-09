@@ -37,6 +37,23 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
     onEndTurn,
     onOpenLog,
 }) => {
+    /**
+     * Ids présents dans les DEUX camps (match miroir).
+     *
+     * Le surlignage de cible comparait les `card.id`, ce qui allumait les deux copies d'un même
+     * dieu — le joueur ne pouvait plus savoir laquelle serait touchée. Pour ces ids-là on compare
+     * donc l'OBJET d'état, seul discriminant fiable ; partout ailleurs on garde la comparaison
+     * par id, insensible à un éventuel remplacement de l'objet d'état (resynchronisation en ligne).
+     */
+    const mirroredIds = new Set(
+        opponent.gods
+            .filter(o => player.gods.some(p => p.card.id === o.card.id))
+            .map(o => o.card.id)
+    );
+    const isTargeted = (god: GodState) => selectedTargetGods.some(
+        t => mirroredIds.has(god.card.id) ? t === god : t.card.id === god.card.id
+    );
+
     return (
         <div className={styles.arenaContainer}>
             {/* ENEMY ROW */}
@@ -45,7 +62,7 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
                     <HeroCard
                         key={`opp-${god.card.id}`}
                         god={god}
-                        isTargeted={selectedTargetGods.some(t => t.card.id === god.card.id)}
+                        isTargeted={isTargeted(god)}
                         isCaster={!!opponentCasterGodId && god.card.id === opponentCasterGodId}
                         godKey={`opponent-${god.card.id}`}
                         incomingElement={incomingElement}
@@ -97,7 +114,7 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
                     <HeroCard
                         key={`ply-${god.card.id}`}
                         god={god}
-                        isTargeted={selectedTargetGods.some(t => t.card.id === god.card.id)}
+                        isTargeted={isTargeted(god)}
                         isCaster={!!playerCasterGodId && god.card.id === playerCasterGodId}
                         godKey={`player-${god.card.id}`}
                         incomingElement={incomingElement}

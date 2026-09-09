@@ -17,7 +17,7 @@ interface HandAreaProps {
 
 export const HandArea: React.FC<HandAreaProps> = ({ hand, selectedCard, onSelectCard, onHoverCard, isCardPlayable, onInspectCard }) => {
     return (
-        <div className={styles.handArea} data-tutorial="hand">
+        <div className={styles.handArea} data-hand-area="player" data-tutorial="hand">
             {hand.map((card, idx) => (
                 <SpellCardUI
                     key={`${card.id}-${idx}`}

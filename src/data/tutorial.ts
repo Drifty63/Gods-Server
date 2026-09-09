@@ -3,10 +3,10 @@ import type { GameState } from '@/types/cards';
 /**
  * Scénario du didacticiel.
  *
- * Chaque étape affiche un message, éclaire éventuellement un élément de l'interface, et attend
- * une condition pour passer à la suivante. Le tout est décrit ICI, en données : le composant
- * d'affichage ne connaît aucune étape en particulier, ce qui permet de réécrire la leçon sans
- * toucher au plateau de jeu.
+ * Chaque étape affiche un message, éclaire éventuellement un ou plusieurs éléments de
+ * l'interface, et attend une condition pour passer à la suivante. Le tout est décrit ICI, en
+ * données : le composant d'affichage ne connaît aucune étape en particulier, ce qui permet de
+ * réécrire la leçon sans toucher au plateau de jeu.
  *
  * Le combat est volontairement déséquilibré en faveur du joueur (Zeus, 25 PV, contre un unique
  * Soldat d'Arès de 16 PV faible à la Foudre) : on apprend mal en perdant, et il ne doit y avoir
@@ -20,6 +20,8 @@ export type SpotlightTarget =
     | 'player-discard'
     | 'opponent-stats'
     | 'hand'
+    /** Rangée de boutons du panneau de carte (CIBLER / CONFIRMER / DÉFAUSSER). */
+    | 'card-actions'
     | 'end-turn'
     | 'combat-log'
     | 'enemy-gods'
@@ -32,8 +34,14 @@ export interface TutorialStep {
     title: string;
     /** Corps du message. Une idée par étape : deux, et plus personne ne lit. */
     text: string;
-    /** Élément éclairé pendant l'étape. */
-    spotlight: SpotlightTarget;
+    /**
+     * Élément(s) éclairé(s) pendant l'étape.
+     *
+     * Une étape d'action DOIT éclairer tout ce que le geste demandé exige de toucher. Le voile
+     * ne bloque plus rien (voir TutorialOverlay), mais un joueur guidé cherche son geste dans la
+     * zone éclairée : l'y montrer en entier est ce qui rend l'étape franchissable.
+     */
+    spotlight: SpotlightTarget | SpotlightTarget[];
     /**
      * Condition de passage.
      * - `next` : le joueur clique sur « Suivant » (étape explicative).
@@ -41,8 +49,20 @@ export interface TutorialStep {
      *   guidage d'une simple visite guidée.
      */
     advance: 'next' | ((state: GameState) => boolean);
-    /** Empêche toute action de jeu tant que l'étape n'est pas franchie (étapes explicatives). */
+    /**
+     * Gèle le plateau tant que l'étape n'est pas franchie (étapes explicatives).
+     *
+     * À n'utiliser QUE lorsque le joueur n'a rien à faire : sur une étape d'action, ce drapeau
+     * rendrait le geste demandé impossible.
+     */
     blocking?: boolean;
+    /** Remplace « À vous de jouer » sur une étape d'action où le joueur n'agit pas lui-même. */
+    waitingLabel?: string;
+    /**
+     * Mise en scène jouée à l'entrée de l'étape (voir /tutorial/page.tsx). Certaines règles se
+     * comprennent bien mieux en les VOYANT se produire qu'en les lisant.
+     */
+    script?: 'fatigue';
 }
 
 const me = (s: GameState) => s.players[0];
@@ -66,9 +86,17 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         blocking: true,
     },
     {
+        id: 'god-anatomy',
+        title: 'Lire une carte de dieu',
+        text: "La COULEUR du cadre d'un dieu indique son élément : doré pour la Lumière, bleu pour l'Eau, violet pour les Ténèbres… C'est l'élément de ses propres attaques.",
+        spotlight: 'player-gods',
+        advance: 'next',
+        blocking: true,
+    },
+    {
         id: 'weakness',
         title: 'La faiblesse élémentaire',
-        text: "L'icône en haut à gauche de chaque dieu indique l'élément qui lui fait le PLUS mal. Frapper cette faiblesse inflige des dégâts DOUBLÉS. C'est la règle la plus importante du jeu.",
+        text: "L'icône en haut à gauche indique, elle, l'élément qui lui fait le PLUS mal. Frapper cette faiblesse inflige des dégâts DOUBLÉS : c'est la règle la plus importante du jeu.",
         spotlight: 'enemy-gods',
         advance: 'next',
         blocking: true,
@@ -92,8 +120,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'play-generator',
         title: 'À vous de jouer',
-        text: "Touchez une carte de votre main, puis « CIBLER » ou « LANCER LE SORT ». Les cartes GÉNÉRATEUR sont gratuites et vous rapportent de l'énergie : commencez par l'une d'elles.",
-        spotlight: 'hand',
+        text: "Touchez une carte GÉNÉRATEUR de votre main — elles sont gratuites et rapportent de l'énergie. Puis « CIBLER », touchez un dieu ennemi en haut, et confirmez.",
+        // Les trois zones que le geste exige : la main, les boutons du panneau, et la rangée
+        // ennemie. Éclairer la seule main laissait le joueur sans indication sur l'étape
+        // suivante de son propre geste.
+        spotlight: ['hand', 'card-actions', 'enemy-gods'],
         // On attend que le joueur ait réellement joué : aucun bouton « Suivant » ici.
         advance: (s) => me(s).hasPlayedCard || foe(s).gods.some(g => g.currentHealth < g.card.maxHealth),
     },
@@ -104,12 +135,13 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         spotlight: null,
         advance: (s) => s.currentPlayerId === me(s).id && !me(s).hasPlayedCard,
         blocking: true,
+        waitingLabel: "L'adversaire joue…",
     },
     {
         id: 'discard',
         title: "Défausser pour de l'énergie",
         text: "Au lieu de jouer, vous pouvez défausser une carte pour gagner 1 énergie. Sélectionnez une carte puis touchez « DÉFAUSSER ». C'est ainsi qu'on finance les sorts les plus chers.",
-        spotlight: 'hand',
+        spotlight: ['hand', 'card-actions'],
         advance: (s) => me(s).hasDiscardedForEnergy,
     },
     {
@@ -130,8 +162,10 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'fatigue',
         title: 'La fatigue',
-        text: "Quand votre pioche est vide, la corbeille est remélangée pour la reformer — et tous vos dieux encaissent des dégâts croissants. Une partie qui s'éternise vous use.",
-        spotlight: 'player-deck',
+        text: "Regardez : votre pioche vient de se vider. La corbeille est remélangée pour la reformer, et TOUS vos dieux encaissent des dégâts — de plus en plus lourds à chaque recyclage. Une partie qui s'éternise vous use.",
+        spotlight: ['player-deck', 'player-gods'],
+        // Mise en scène plutôt qu'explication : la fatigue se produit sous les yeux du joueur.
+        script: 'fatigue',
         advance: 'next',
         blocking: true,
     },
@@ -139,7 +173,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         id: 'finish',
         title: 'À vous de conclure',
         text: "Vous savez l'essentiel. Achevez ce soldat pour terminer l'entraînement — visez sa faiblesse pour aller plus vite.",
-        spotlight: 'enemy-gods',
+        spotlight: ['hand', 'card-actions', 'enemy-gods'],
         advance: (s) => s.status === 'finished',
     },
 ];

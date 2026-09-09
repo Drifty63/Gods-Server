@@ -31,7 +31,13 @@ const STATUS_STACK_CAPS: Partial<Record<StatusEffect, number>> = {
  * Ajouter un statut à un dieu. La régénération retire le poison.
  * Les statuts listés dans STATUS_STACK_CAPS sont bornés (ex: saignement max 2).
  */
-export function addStatus(god: GodState, status: StatusEffect, stacks: number, duration?: number): void {
+export function addStatus(
+    god: GodState,
+    status: StatusEffect,
+    stacks: number,
+    duration?: number,
+    appliedTurn?: number,
+): void {
     if (god.isDead || stacks <= 0) return;
 
     // La régénération retire le poison
@@ -49,12 +55,17 @@ export function addStatus(god: GodState, status: StatusEffect, stacks: number, d
         existing.stacks = cap !== undefined
             ? Math.min(existing.stacks + stacks, cap)
             : existing.stacks + stacks;
-        if (effectiveDuration !== undefined) existing.duration = effectiveDuration;
+        if (effectiveDuration !== undefined) {
+            existing.duration = effectiveDuration;
+            // Reposer un statut le redate : sa nouvelle durée doit être comptée en entier.
+            existing.appliedTurn = appliedTurn;
+        }
     } else {
         god.statusEffects.push({
             type: status,
             stacks: cap !== undefined ? Math.min(stacks, cap) : stacks,
             duration: effectiveDuration,
+            appliedTurn,
         });
     }
 }
@@ -127,11 +138,22 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
 
         // 3. Décrémenter les durées
         god.statusEffects = god.statusEffects.filter(effect => {
-            if (effect.duration !== undefined) {
-                effect.duration--;
-                return effect.duration > 0;
+            if (effect.duration === undefined) return true;
+
+            // Un statut n'est JAMAIS décrémenté le demi-tour où il a été posé.
+            //
+            // Ce tick n'a lieu qu'à la fin du tour du camp qui PORTE le statut. Un sort lancé
+            // sur soi ou un allié était donc décrémenté quelques instants après sa pose, avant
+            // que l'adversaire ait pu jouer : une durée de 1 ne protégeait de rien, une durée
+            // de 2 ne valait qu'un tour. Les statuts posés sur l'ennemi (stun) ne connaissent
+            // pas ce problème — ils sont posés pendant le tour de l'autre camp — et ce garde
+            // les laisse strictement inchangés.
+            if (effect.appliedTurn !== undefined && effect.appliedTurn === state.turnSequence) {
+                return true;
             }
-            return true;
+
+            effect.duration--;
+            return effect.duration > 0;
         });
     }
 }

@@ -1362,6 +1362,20 @@
 .detailType { font-size: clamp(0.55rem, 2vw, 0.65rem); color: #94a3b8; font-weight: bold; }
 
 /* --- ÉCRAN DE FIN DE PARTIE (victoire/défaite) --- */
+/**
+ * Écrans pleine page (victoire, défaite, chargement).
+ *
+ * `.gameBoard` est en `display: block` : les `alignItems`/`justifyContent` posés en style inline
+ * étaient parfaitement valides mais SANS AUCUN EFFET, et le panneau — `position: static`, sans
+ * `margin: auto` — se collait donc au coin supérieur gauche. Il faut un vrai conteneur flex.
+ */
+.gameBoardCentered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px);
+}
+
 .resultScreen {
   display: flex;
   flex-direction: column;
@@ -1790,4 +1804,64 @@
 
 @media (prefers-reduced-motion: reduce) {
   .turnTimerUrgent { animation: none; }
+}
+
+/**
+ * Retour en arrière pendant le ciblage. Volontairement discret face au bouton de confirmation :
+ * c'est une porte de sortie, pas l'action principale.
+ */
+.btnCancel {
+    flex: 1;
+    min-height: 44px;
+    padding: 10px 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+}
+
+.btnCancel:active {
+    transform: translateY(1px);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Confirmation impossible tant que le compte de cibles n'y est pas : le bouton reste visible
+   (il disparaissait entièrement) mais annonce clairement qu'il attend encore quelque chose. */
+.btnAction:disabled {
+    opacity: 0.45;
+    filter: grayscale(60%);
+    cursor: default;
+}
+
+/**
+ * Message d'erreur. Passe AU-DESSUS du voile du didacticiel (z-index 4000), sous lequel il
+ * s'affichait assombri à 78 %, et s'efface au toucher comme au bout de ERROR_TOAST_MS.
+ */
+.errorToast {
+    position: fixed;
+    top: calc(var(--safe-top, 8px) + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4500;
+    max-width: min(420px, calc(100vw - 32px));
+    padding: 11px 18px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    text-align: center;
+    color: #fff;
+    background: rgba(190, 40, 40, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    animation: errorToastIn 0.2s ease-out;
+}
+
+@keyframes errorToastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }

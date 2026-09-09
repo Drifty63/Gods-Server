@@ -173,7 +173,7 @@ export const STATUS_EFFECTS = {
     weakness_immunity: {
         name: 'Immunité à la faiblesse',
         icon: '🚫',
-        description: "Empêche l'ajout d'une nouvelle faiblesse pendant la durée.",
+        description: "Le dieu n'a plus AUCUNE faiblesse élémentaire pendant la durée : les dégâts de son élément faible ne sont plus doublés.",
         stackable: false
     }
 } as const;

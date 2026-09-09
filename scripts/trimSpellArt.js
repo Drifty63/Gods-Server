@@ -32,7 +32,19 @@ const NEAR_WHITE = 236;
  * Zone de Vide, peinte sur une feuille laissée nue). Un test d'uniformité les manquerait
  * entièrement, alors qu'un seuil sur la densité de dessin les traverse sans broncher.
  */
-const PANEL_RATIO = 0.35;
+const PANEL_RATIO = 0.6;
+/**
+ * CE QUE CE SCRIPT NE DÉTECTE PAS : les filets sombres fins cuits dans l'illustration.
+ *
+ * L'analyse travaille sur un rééchantillonnage en 200×200 (voir SAMPLE), où un liseré de 5 px
+ * dans une image de 1000 px est moyenné avec ses voisins et disparaît purement et simplement.
+ * Mesuré : le cadre noir de Fertilisation, pourtant continu sur ses quatre côtés et à 97 % de
+ * pixels noirs en pleine résolution, ne pesait plus que 31 % une fois sous-échantillonné.
+ *
+ * Ces cas se traitent à la main, après mesure en pleine résolution (Zone de Vide, Sécheresse et
+ * Fertilisation l'ont été). Le vrai correctif est en amont : SPELL_IMAGE_PROMPTS.md interdit
+ * déjà tout cadre et toute bordure à la génération.
+ */
 /** En dessous, on ne touche pas : le gain ne vaut pas le risque de mordre sur le dessin. */
 const MIN_BAND_RATIO = 0.008;
 /** Garde-fou : jamais plus de 15 % d'un côté, sinon c'est qu'on a mal détecté. */
@@ -52,7 +64,7 @@ async function measure(file) {
     const { width, channels } = info;
 
     /** Densité de pixels dessinés (non-blancs) sur une ligne ou une colonne. */
-    const drawn = (get) => {
+    const band = (get) => {
         let n = 0;
         for (let i = 0; i < SAMPLE; i++) {
             const o = get(i) * channels;
@@ -63,8 +75,8 @@ async function measure(file) {
     };
 
     const rows = [], cols = [];
-    for (let y = 0; y < SAMPLE; y++) rows.push(drawn(i => y * width + i));
-    for (let x = 0; x < SAMPLE; x++) cols.push(drawn(i => i * width + x));
+    for (let y = 0; y < SAMPLE; y++) rows.push(band(i => y * width + i));
+    for (let x = 0; x < SAMPLE; x++) cols.push(band(i => i * width + x));
 
     const firstIn = (a) => a.findIndex(v => v >= PANEL_RATIO);
     const lastIn = (a) => a.length - 1 - [...a].reverse().findIndex(v => v >= PANEL_RATIO);
@@ -123,12 +135,13 @@ async function run() {
         const sx = meta.width / SAMPLE;
         const sy = meta.height / SAMPLE;
 
-        // Marge d'un pixel en moins de chaque côté : mieux vaut laisser un filet résiduel
-        // que mordre sur l'illustration.
-        const left = Math.max(0, Math.round(a.m.left * sx) - 1);
-        const top = Math.max(0, Math.round(a.m.top * sy) - 1);
-        const right = Math.max(0, Math.round(a.m.right * sx) - 1);
-        const bottom = Math.max(0, Math.round(a.m.bottom * sy) - 1);
+        // Pas de marge de sécurité : combinée au rééchantillonnage en 200×200, qui floute déjà
+        // les transitions, elle laissait un filet de plusieurs pixels réels sur chaque bord —
+        // filet parfaitement visible au zoom, où l'illustration est affichée en `contain`.
+        const left = Math.max(0, Math.round(a.m.left * sx));
+        const top = Math.max(0, Math.round(a.m.top * sy));
+        const right = Math.max(0, Math.round(a.m.right * sx));
+        const bottom = Math.max(0, Math.round(a.m.bottom * sy));
         const w = meta.width - left - right;
         const h = meta.height - top - bottom;
 

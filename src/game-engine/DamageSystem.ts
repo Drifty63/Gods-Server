@@ -58,7 +58,16 @@ export function dealDamage(
     let finalDamage = rawDamage;
     let wasWeak = false;
 
-    if (options?.element && !options?.ignoreWeakness) {
+    // Immunité à la faiblesse (Hestia, « Fumée cendrée » et « Foyer protecteur ») : pendant la
+    // durée du statut, le dieu n'a plus de faiblesse élémentaire du tout — c'est exactement ce
+    // que les deux cartes annoncent (« Retire la faiblesse d'un allié pendant 1 tour »).
+    // Ce statut n'était lu NULLE PART dans le calcul des dégâts : les deux sorts ne faisaient
+    // rien, indépendamment du bug de durée corrigé par ailleurs.
+    const weaknessImmune = target.statusEffects.some(
+        s => s.type === 'weakness_immunity' && s.stacks > 0
+    );
+
+    if (options?.element && !options?.ignoreWeakness && !weaknessImmune) {
         const result = calculateDamageWithDualWeakness(
             rawDamage,
             options.element,

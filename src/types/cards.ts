@@ -110,6 +110,16 @@ export interface GodState {
         type: StatusEffect;
         stacks: number;       // Nombre de marques (poison, foudre, etc.)
         duration?: number;    // Tours restants pour les effets temporaires
+        /**
+         * Demi-tour (`GameState.turnSequence`) pendant lequel le statut a été posé.
+         *
+         * Sert à ne PAS décrémenter la durée le tour même de la pose. Sans cela, un statut posé
+         * sur son propre camp perdait un tour avant d'avoir servi : les durées ne sont
+         * décrémentées qu'à la fin du tour de leur porteur, or un sort lancé sur soi est posé
+         * pendant ce tour-là. Les statuts offensifs, posés pendant le tour de l'ADVERSAIRE du
+         * porteur, ne sont pas concernés — d'où l'asymétrie que ce champ corrige.
+         */
+        appliedTurn?: number;
     }[];
     isDead: boolean;
     temporaryWeakness?: Element; // Faiblesse temporaire appliquée par Artémis
@@ -163,6 +173,17 @@ export interface GameState {
     currentPlayerId: string;
     turnNumber: number;
     maxTurns?: number;              // Limite de tours (50 pour online, undefined sinon)
+    /**
+     * Compteur de DEMI-tours : incrémenté à chaque fin de tour, quel que soit le joueur.
+     *
+     * `turnNumber` ne convient pas pour dater un statut : il ne s'incrémente qu'au retour sur
+     * players[0], donc une fois par ronde complète. Un stun posé sur l'adversaire porterait
+     * alors la même date que le tour où il est décrémenté, et gagnerait un tour gratuit.
+     *
+     * Optionnel : une partie en ligne déjà engagée n'a pas le champ, et `undefined` ne peut
+     * égaler aucune date de pose — le comportement y reste celui d'avant le correctif.
+     */
+    turnSequence?: number;
     isOnlineGame?: boolean;         // Mode online (limite de tours activée)
     players: [PlayerState, PlayerState];
     winnerId?: string;

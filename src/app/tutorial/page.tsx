@@ -28,7 +28,7 @@ type Phase = 'intro' | 'playing' | 'done';
 
 export default function TutorialPage() {
     const router = useRouter();
-    const { initGame, resetGame } = useGameStore();
+    const { initGame, resetGame, scriptTutorialFatigue } = useGameStore();
 
     const [phase, setPhase] = useState<Phase>('intro');
     const [stepIndex, setStepIndex] = useState(0);
@@ -72,6 +72,28 @@ export default function TutorialPage() {
         resetGame();
         router.push('/play');
     }, [resetGame, router]);
+
+    /**
+     * Mises en scène : certaines règles se comprennent bien mieux en les VOYANT se produire.
+     *
+     * La fatigue, notamment, ne se rencontre qu'en fin de partie longue — un joueur qui découvre
+     * le jeu ne la verrait jamais pendant la leçon. On la provoque donc à l'entrée de l'étape.
+     * La garde par ref est indispensable : l'effet se rejoue à chaque rendu de l'étape, et sans
+     * elle la pioche serait recyclée en boucle.
+     */
+    const scriptedSteps = useRef(new Set<string>());
+    useEffect(() => {
+        if (phase !== 'playing' || !step?.script) return;
+        if (scriptedSteps.current.has(step.id)) return;
+        scriptedSteps.current.add(step.id);
+
+        // Différé d'un tick : muter l'état du jeu pendant le corps de l'effet déclencherait un
+        // rendu en cascade (react-hooks/set-state-in-effect).
+        const id = setTimeout(() => {
+            if (step.script === 'fatigue') scriptTutorialFatigue();
+        }, 0);
+        return () => clearTimeout(id);
+    }, [phase, step, scriptTutorialFatigue]);
 
     /**
      * Avance dès que la condition de l'étape est remplie.

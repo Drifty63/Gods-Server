@@ -18,6 +18,9 @@ import { getReadableSpellDescription } from '@/data/spellDescriptions';
 import { playSfx } from '@/lib/sfx';
 import { haptic } from '@/lib/haptics';
 import { useWakeLock } from '@/lib/useWakeLock';
+
+/** Durée d'affichage d'un message d'erreur. Assez pour être lu, assez court pour ne pas gêner. */
+const ERROR_TOAST_MS = 4000;
 import styles from './GameBoard.module.css';
 
 // Modals pour effets spéciaux
@@ -90,6 +93,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         requiredTargets,
         getMaxSelectableTargets,
         startTargetSelection,
+        cancelTargetSelection,
         playerId,
         playAITurn,
         canPlayCard,
@@ -146,6 +150,25 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     useWakeLock(gameState?.status === 'playing');
 
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    /**
+     * Affiche un message d'erreur qui s'efface tout seul.
+     *
+     * Trois des quatre émissions n'avaient AUCUN effacement : le bandeau rouge restait à l'écran
+     * jusqu'à la fin de la partie, y compris pendant les tours adverses. Le minuteur est gardé en
+     * ref pour être remplacé à chaque nouveau message et annulé au démontage.
+     */
+    const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const showError = useCallback((message: string) => {
+        setErrorMsg(message);
+        if (errorTimer.current) clearTimeout(errorTimer.current);
+        errorTimer.current = setTimeout(() => setErrorMsg(null), ERROR_TOAST_MS);
+    }, []);
+    const dismissError = useCallback(() => {
+        if (errorTimer.current) clearTimeout(errorTimer.current);
+        setErrorMsg(null);
+    }, []);
+    useEffect(() => () => { if (errorTimer.current) clearTimeout(errorTimer.current); }, []);
     const [lastOpponentCard, setLastOpponentCard] = useState<SpellCard | null>(null);
     const [previousDiscardCount, setPreviousDiscardCount] = useState<number>(0);
     const [viewingDiscard, setViewingDiscard] = useState<SpellCard[] | null>(null);
@@ -188,11 +211,10 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
         playSfx('error');
         haptic('error');
-        setErrorMsg('Temps écoulé — votre tour est passé.');
-        setTimeout(() => setErrorMsg(null), 3000);
+        showError('Temps écoulé — votre tour est passé.');
 
         onAction?.({ type: 'end_turn' });
-    }, [onAction]);
+    }, [onAction, showError]);
 
     const handleImpact = useCallback((report: ImpactReport) => {
         if (report.kind !== 'damage') return;
@@ -345,7 +367,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         const slain = foe?.gods.filter(g => g.isDead).length ?? 0;
 
         return (
-            <div className={styles.gameBoard} style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <div className={`${styles.gameBoard} ${styles.gameBoardCentered}`}>
                 {/* Rayons divins derrière le panneau : donne à la victoire une vraie présence
                     cinématique plutôt qu'une simple carte posée au centre. */}
                 <div className={`${styles.resultRays} ${isVictory ? styles.resultRaysVictory : styles.resultRaysDefeat}`} aria-hidden="true" />
@@ -392,7 +414,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     // Safety checks
     if (!gameState || gameState.status !== 'playing') {
         return (
-            <div className={styles.gameBoard} style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <div className={`${styles.gameBoard} ${styles.gameBoardCentered}`}>
                 <div style={{ fontSize: '2rem', textTransform: 'uppercase' }}>
                     Chargement de L&apos;Olympe...
                 </div>
@@ -417,8 +439,8 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     const getUnplayableReason = (card: SpellCard): string | null => {
         if (!myTurn) return "Ce n'est pas votre tour.";
         if (!player) return "Ce n'est pas votre tour.";
-        if (player.hasPlayedCard) return 'Vous avez déjà joué une carte ce tour.';
-        if (player.hasDiscardedForEnergy) return 'Vous avez déjà défaussé une carte ce tour.';
+        if (player.hasPlayedCard) return 'Vous avez déjà joué une carte ce tour — terminez votre tour.';
+        if (player.hasDiscardedForEnergy) return 'Vous avez déjà défaussé une carte ce tour — défaussez-en une autre ou terminez votre tour.';
         if (player.energy < card.energyCost) return `Pas assez d'énergie (${player.energy}/${card.energyCost} ⚡).`;
         const god = player.gods.find(g => g.card.id === card.godId);
         if (!god || god.isDead) return 'Ce dieu est mort.';
@@ -435,7 +457,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         selectCard(isDeselecting ? null : card);
         playSfx(isDeselecting ? 'tap' : 'select');
         haptic('tap');
-        setErrorMsg(null);
+        dismissError();
     };
 
     const handleGodTarget = (god: GodState) => {
@@ -488,7 +510,12 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
         // Capturées AVANT playCard() : une fois la carte réellement jouée, son élément DOM en
         // main disparaît dès le prochain rendu.
-        const handEl = document.querySelector(`[data-hand-card-id="${cardBeingPlayed.id}"]`);
+        // Recherche scopée à VOTRE main : la main adverse est rendue plus haut dans le DOM avec
+        // les mêmes `data-hand-card-id`, et dans un match miroir les deux camps ont les mêmes
+        // ids de cartes — l'animation serait partie du bord adverse.
+        const handEl = document.querySelector(
+            `[data-hand-area="player"] [data-hand-card-id="${cardBeingPlayed.id}"]`
+        );
         const casterEl = document.querySelector(`[data-god-key="player-${cardBeingPlayed.godId}"]`);
 
         // Posé AVANT la résolution : les cartes touchées lisent cet élément au moment où leurs
@@ -499,7 +526,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
         if (!result.success) {
             // Échec réel (ex: plus assez d'énergie entre-temps) : rien n'a été joué.
-            setErrorMsg(result.message);
+            showError(result.message);
             setCastElement(null);
             haptic('error');
             playSfx('error');
@@ -511,7 +538,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             // foudre...) : la carte n'est PAS encore jouée. Ne pas effacer la sélection ni
             // afficher l'aperçu "sort lancé" — un second appel à playCard() suivra une fois le
             // choix fait, avec selectedCard/selectedTargetGods toujours intacts.
-            setErrorMsg(null);
+            dismissError();
             return;
         }
 
@@ -524,7 +551,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             setPlayedCardPreview(null);
             setCastElement(null);
         }, 2000);
-        setErrorMsg(null);
+        dismissError();
         selectCard(null);
         if (onAction) {
             onAction({ type: 'play_card', payload: { cardId: cardBeingPlayed.id, targetGodIds: targetIds } });
@@ -537,7 +564,11 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
         // Assume playCard with a special flag or dedicated discard action
         // For now, I'll use playCard and handle it in the store if it supports it,
         // OR add it to the interaction list.
-        discardForEnergy(selectedCard.id);
+        const result = discardForEnergy(selectedCard.id);
+        if (!result.success) {
+            showError(result.message);
+            return;
+        }
         selectCard(null);
     };
 
@@ -602,7 +633,12 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
 
             {/* ERROR TOAST */}
             {errorMsg && (
-                <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', background: '#ef4444', color: 'white', padding: '10px 20px', borderRadius: '8px', zIndex: 1000}}>
+                <div
+                    className={styles.errorToast}
+                    role="status"
+                    aria-live="polite"
+                    onClick={dismissError}
+                >
                     {errorMsg}
                 </div>
             )}
@@ -642,21 +678,26 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                     isSelectingTarget && requiredTargets > 0 && selectedTargetGods.length === maxSelectableTargets;
 
                 const actionButton = selectedCard && myTurn && (
-                    readyToConfirm ? (
+                    isSelectingTarget ? (
+                        // En ciblage, le bouton reste TOUJOURS affiché, désactivé tant que le
+                        // compte n'y est pas : la rangée se vidait entièrement auparavant, ce qui
+                        // donnait un panneau muet et un plateau sans issue apparente.
                         <button
                             className={styles.btnAction}
+                            disabled={!readyToConfirm}
                             onClick={(e) => { e.stopPropagation(); handlePlayConfirmed(); }}
                         >
-                            ✓ CONFIRMER
+                            {readyToConfirm
+                                ? '✓ CONFIRMER'
+                                : `✓ CONFIRMER (${selectedTargetGods.length}/${maxSelectableTargets})`}
                         </button>
-                    ) : !isSelectingTarget ? (
+                    ) : (
                         <button
                             className={styles.btnAction}
-                            data-tutorial="play-card"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 const reason = getUnplayableReason(selectedCard);
-                                if (reason) { setErrorMsg(reason); return; }
+                                if (reason) { showError(reason); return; }
                                 if (requiredTargets > 0) startTargetSelection();
                                 else handlePlayConfirmed();
                             }}
@@ -667,7 +708,17 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                                 ? `🎲 JOUER À L'AVEUGLE`
                                 : requiredTargets > 0 ? `🎯 CIBLER (${requiredTargets})` : `⚔️ LANCER LE SORT`}
                         </button>
-                    ) : null
+                    )
+                );
+
+                // Retour en arrière : toucher « CIBLER » n'engageait à rien de réversible.
+                const cancelButton = selectedCard && myTurn && isSelectingTarget && (
+                    <button
+                        className={styles.btnCancel}
+                        onClick={(e) => { e.stopPropagation(); cancelTargetSelection(); }}
+                    >
+                        ✕ ANNULER
+                    </button>
                 );
 
                 const discardButton = selectedCard && myTurn && !isSelectingTarget && (
@@ -680,7 +731,8 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                 );
 
                 const actionRow = (actionButton || discardButton) && (
-                    <div className={styles.detailActions}>
+                    <div className={styles.detailActions} data-tutorial="card-actions">
+                        {cancelButton}
                         {actionButton}
                         {discardButton}
                     </div>
@@ -799,7 +851,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                     if (myTurn) {
                         const result = endTurn();
                         if (!result.success) {
-                            setErrorMsg(result.message);
+                            showError(result.message);
                         } else if (onAction) {
                             onAction({ type: 'end_turn' });
                         }

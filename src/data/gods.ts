@@ -25,7 +25,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 25,
         imageUrl: '/cards/gods/poseidon.png',
         carouselImage: '/cards/gods/poseidon.jpg',
-        flavorText: '"Elle est douce, la terre, aux vœux des naufragés, dont Poséidon en mer, sous l\'assaut de la vague et du vent, a brisé le solide navire."',
+        flavorText: "« Vos routes m'appartiennent. C'est moi qui décide de la marée. » — Noie la pioche adverse et appauvrit chaque tour : on ne le bat pas, on s'épuise contre lui.",
     },
 
     // =====================
@@ -40,7 +40,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/zeus.png',
         archetype: 'glass_cannon',
         carouselImage: '/cards/gods/zeus.jpg',
-        flavorText: '"Si Zeus voulait écouter les vœux des hommes, tous périraient, car ils demandent beaucoup de choses qui sont nuisibles à leurs semblables."',
+        flavorText: "« Je n'avertis jamais deux fois. » — Marque ses cibles, puis fait tout détoner d'un coup. Frappe très fort, encaisse très mal.",
     },
 
     // =====================
@@ -54,7 +54,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 26,
         imageUrl: '/cards/gods/nyx.png',
         carouselImage: '/cards/gods/nyx.jpg',
-        flavorText: '"Je suis la mère de toutes les terreurs ! La mère des Parques elles-mêmes ! D\'Hécate ! De la vieillesse ! De la Douleur ! Du Sommeil ! De la Mort ! Et de toutes les malédictions !"',
+        flavorText: "« Regarde bien ta main. Es-tu certain de savoir ce que tu tiens ? » — Glisse des cartes aveugles chez l'adversaire et transforme son tour en pari.",
     },
 
     // =====================
@@ -68,7 +68,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 24,
         imageUrl: '/cards/gods/hestia.png',
         carouselImage: '/cards/gods/hestia.jpg',
-        flavorText: '"Hestia qui partout, dans toutes les hautes maisons, celles des dieux immortels, celles des hommes qui vont sur terre, as trouvé ton lieu à jamais, ton honneur est de toujours, ta part est belle et honorable."',
+        flavorText: "« Tant que le foyer brûle, personne ne tombe. » — Soigne, ravive, efface les faiblesses : elle ne gagne pas les échanges, elle les fait durer.",
     },
 
     // =====================
@@ -83,7 +83,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/athena.png',
         archetype: 'tank',
         carouselImage: '/cards/gods/athena.jpg',
-        flavorText: '"Homère nomme Athéna, la conseillère aux multiples ressources. Que signifie donner conseil ? Cela veut dire : préméditer quelque chose, y pourvoir d\'avance et par là faire qu\'elle réussisse."',
+        flavorText: "« Frappe-moi. C'est exactement ce que je veux. » — Le plus gros réservoir de points de vie du jeu ; sa provocation dicte à l'adversaire ce qu'il a le droit de viser.",
     },
 
     // =====================
@@ -98,7 +98,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/demeter.png',
         archetype: 'support',
         carouselImage: '/cards/gods/demeter.jpg',
-        flavorText: '"Va, Perséphone, va la voir, ta mère aux voiles noirs. Que ton coeur soit sage dans ta poitrine, serein ton esprit. Ne te laisse pas aller à une tristesse trop grande."',
+        flavorText: "« Ce que l'on coupe, je le fais repousser. » — Soins répartis et renforts : elle rend l'échange de dégâts intenable pour l'adversaire.",
     },
 
     // =====================
@@ -112,7 +112,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 22,
         imageUrl: '/cards/gods/dionysos.png',
         carouselImage: '/cards/gods/dionysos.jpg',
-        flavorText: '"À la figure de Prométhée, qui fut la figure emblématique de la Modernité est en train de se substituer celle de Dionysos. Dieu chtonien, c\'est à dire dieu de cette terre-ci, dieu autochtone..."',
+        flavorText: "« Bois donc. Tu verras, tout devient beaucoup plus simple. » — Empoisonne et désorganise : chaque sort lancé en face finit par coûter cher.",
     },
 
     // =====================
@@ -127,7 +127,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/hades.png',
         archetype: 'glass_cannon',
         carouselImage: '/cards/gods/hades.jpg',
-        flavorText: '"Et, sous la terre, le seigneur des morts, Hadès, soudain prend peur. De peur, il saute sur son trône et crie : Poséidon, l\'Ébranleur du sol, ne va-t-il pas faire éclater la terre dans les airs..."',
+        flavorText: "« Tout ce qui meurt finit par m'appartenir. » — Peu de points de vie, mais il se soigne de ce qu'il détruit : le laisser conclure un échange, c'est le relancer.",
     },
 
     // =====================
@@ -141,7 +141,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 22,
         imageUrl: '/cards/gods/apollon.png',
         carouselImage: '/cards/gods/apollon.jpg',
-        flavorText: '"Aux plus savants auteurs comme aux plus grands guerriers, Apollon ne promet qu\'un nom et des lauriers."',
+        flavorText: "« Je vois la flèche arriver avant même de l'avoir tirée. » — Assèche l'énergie adverse et étourdit : en face, on a les cartes, jamais le tour pour les jouer.",
     },
 
     // =====================
@@ -156,7 +156,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/ares.png',
         archetype: 'glass_cannon',
         carouselImage: '/cards/gods/ares.jpg',
-        flavorText: '"Ne viens pas, tête à l\'évent, gémir ici à mes pieds. Tu m\'es le plus odieux de tous les Immortels qui habitent l\'Olympe, Ton plaisir toujours, c\'est la querelle, la guerre, et les combats."',
+        flavorText: "« La douleur ? C'est le prix, et je le paie d'avance. » — Ses sorts les plus violents lui coûtent ses propres points de vie : une réserve à dépenser comme des munitions.",
     },
 
     // =====================
@@ -171,7 +171,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/artemis.png',
         archetype: 'glass_cannon',
         carouselImage: '/cards/gods/artemis.jpg',
-        flavorText: '"Roses blanches, tombez! vous insultez nos dieux, Tombez, fantômes blancs, de votre ciel qui brûle; La sainte de l\'abîme est plus sainte à mes yeux!"',
+        flavorText: "« Je ne rate pas. Je choisis simplement où ça fait le plus mal. » — Impose des faiblesses puis frappe plusieurs cibles à la fois : la reine du doublement de dégâts.",
     },
 
     // =====================
@@ -186,7 +186,7 @@ export const ALL_GODS: GodCard[] = [
         imageUrl: '/cards/gods/aphrodite.png',
         archetype: 'support',
         carouselImage: '/cards/gods/aphrodite.jpg',
-        flavorText: '"Aucun spectacle de la nature, ni les flammes occidentales, ni la tempête dans les palmiers... ne semblent dignes d\'étonnement à ceux qui ont vu dans leur bras la transfiguration de la femme."',
+        flavorText: "« Personne ne se bat vraiment contre moi. » — Purifie son camp, charme et fige celui d'en face : la partie se joue à son rythme, pas au vôtre.",
     },
 
     // =====================================================

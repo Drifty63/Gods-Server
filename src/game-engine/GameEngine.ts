@@ -383,14 +383,14 @@ registerEffect('shuffle_all_hand_draw_blind', (ctx) => {
 registerEffect('remove_weakness_1_turn', (ctx) => {
     for (const target of ctx.targets) {
         if (ctx.player.gods.includes(target) && !target.isDead) {
-            addStatus(target, 'weakness_immunity', 1, 1);
+            addStatus(target, 'weakness_immunity', 1, 1, ctx.engine.getState().turnSequence);
         }
     }
 });
 
 registerEffect('remove_all_weakness_3_turns', (ctx) => {
     for (const god of ctx.player.gods) {
-        if (!god.isDead) addStatus(god, 'weakness_immunity', 1, 3);
+        if (!god.isDead) addStatus(god, 'weakness_immunity', 1, 3, ctx.engine.getState().turnSequence);
     }
 });
 
@@ -541,7 +541,13 @@ registerEffect('shuffle_god_cards', (ctx) => {
     const targetGodId = ctx.targetGodId;
     if (!targetGodId) return;
 
-    const targetPlayer = [...ctx.engine.getState().players].find(p => p.gods.some(g => g.card.id === targetGodId));
+    // Chercher chez l'ADVERSAIRE d'abord, chez soi ensuite.
+    //
+    // Un balayage de `state.players` renvoyait toujours players[0] : dans un match miroir, les
+    // deux camps possèdent le même id de dieu et le sort se retournait contre son lanceur.
+    // « Vent de Face » est un sort offensif — en cas d'ambiguïté, la cible est l'ennemi.
+    const owns = (p: PlayerState) => p.gods.some(g => g.card.id === targetGodId);
+    const targetPlayer = owns(ctx.opponent) ? ctx.opponent : owns(ctx.player) ? ctx.player : undefined;
     if (!targetPlayer) return;
 
     const cardsToShuffle = targetPlayer.hand.filter(c => c.godId === targetGodId);
@@ -1000,6 +1006,10 @@ export class GameEngine {
         // Tick des effets de statut (regen, poison, durées)
         tickStatusEffects(previousPlayer, this.state);
 
+        // Le demi-tour s'achève : tout statut posé APRÈS ce point appartiendra au tour suivant.
+        // L'incrément vient après le tick, qui doit encore voir le tour où les statuts ont été posés.
+        this.state.turnSequence = (this.state.turnSequence ?? 0) + 1;
+
         // Vérifier si la partie est terminée après les effets
         if (this.state.status !== 'playing') {
             return { success: true, message: 'La partie est terminée' };
@@ -1189,7 +1199,7 @@ export class GameEngine {
             case 'status':
                 for (const target of targets) {
                     if (effect.status) {
-                        addStatus(target, effect.status, effect.value || 1, effect.statusDuration);
+                        addStatus(target, effect.status, effect.value || 1, effect.statusDuration, this.state.turnSequence);
                     }
                 }
                 break;
@@ -1411,6 +1421,8 @@ export class GameEngine {
             status: 'playing',
             currentPlayerId: firstPlayerId,
             turnNumber: 1,
+            // Compteur de demi-tours, utilisé pour dater la pose d'un statut (voir StatusSystem).
+            turnSequence: 0,
             maxTurns,
             isOnlineGame: isOnline,
             players: [
