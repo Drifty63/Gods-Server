@@ -1,0 +1,162 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useGameStore } from '@/store/gameStore';
+import GameBoard from '@/components/GameBoard/GameBoard';
+import TutorialOverlay from '@/components/Tutorial/TutorialOverlay';
+import { TUTORIAL_STEPS, TUTORIAL_OUTRO, TUTORIAL_DONE_KEY } from '@/data/tutorial';
+import { getGodById } from '@/data/gods';
+import { createDeck } from '@/data/spells';
+import { playSfx } from '@/lib/sfx';
+import { haptic } from '@/lib/haptics';
+import styles from './page.module.css';
+
+/**
+ * Combat d'entraînement scripté.
+ *
+ * Zeus (Foudre, 25 PV) contre un unique Soldat d'Arès (Terre, 16 PV). Ce n'est pas un hasard :
+ * la Terre est faible à la Foudre, donc le joueur découvrira le coup critique ×2 dès son premier
+ * sort, sans qu'on ait à le lui faire chercher. Un seul adversaire, peu de PV : la leçon ne peut
+ * pas se solder par une défaite.
+ */
+const PLAYER_GODS = ['zeus'];
+const ENEMY_GODS = ['soldier_ares_1'];
+
+type Phase = 'intro' | 'playing' | 'done';
+
+export default function TutorialPage() {
+    const router = useRouter();
+    const { initGame, resetGame } = useGameStore();
+
+    const [phase, setPhase] = useState<Phase>('intro');
+    const [stepIndex, setStepIndex] = useState(0);
+
+    const step = TUTORIAL_STEPS[stepIndex];
+    const isLast = stepIndex >= TUTORIAL_STEPS.length - 1;
+
+    const playerGods = useMemo(
+        () => PLAYER_GODS.map(id => getGodById(id)!).filter(Boolean),
+        [],
+    );
+    const enemyGods = useMemo(
+        () => ENEMY_GODS.map(id => getGodById(id)!).filter(Boolean),
+        [],
+    );
+
+    const start = useCallback(() => {
+        initGame(
+            playerGods, createDeck(PLAYER_GODS),
+            enemyGods, createDeck(ENEMY_GODS),
+            true,   // le joueur commence : on n'apprend pas en subissant
+            true,   // adversaire tenu par l'IA
+        );
+        setStepIndex(0);
+        setPhase('playing');
+    }, [initGame, playerGods, enemyGods]);
+
+    // Nettoyage : sans ça, la partie du didacticiel resterait dans le store et s'afficherait
+    // en ouvrant un autre mode.
+    useEffect(() => () => resetGame(), [resetGame]);
+
+    const finish = useCallback(() => {
+        try { window.localStorage.setItem(TUTORIAL_DONE_KEY, '1'); } catch { /* navigation privée */ }
+        setPhase('done');
+        playSfx('victory');
+        haptic('victory');
+    }, []);
+
+    const skip = useCallback(() => {
+        try { window.localStorage.setItem(TUTORIAL_DONE_KEY, '1'); } catch { /* navigation privée */ }
+        resetGame();
+        router.push('/play');
+    }, [resetGame, router]);
+
+    /**
+     * Avance dès que la condition de l'étape est remplie.
+     *
+     * On s'ABONNE au store plutôt que de surveiller `gameState` à chaque rendu : la condition
+     * porte sur une transition de la partie (une carte jouée, un tour passé), pas sur une valeur
+     * dérivée du rendu, et l'abonnement la capte exactement une fois.
+     */
+    // Synchronisée dans un effet DÉCLARÉ AVANT celui qui la lit : React exécute les effets
+    // dans l'ordre de déclaration au sein d'un même commit, donc la ref est à jour quand
+    // l'abonnement la consulte. L'écrire pendant le rendu est interdit (rendu concurrent).
+    const stepRef = useRef(step);
+    useEffect(() => { stepRef.current = step; });
+
+    useEffect(() => {
+        if (phase !== 'playing') return;
+
+        const check = (state: ReturnType<typeof useGameStore.getState>) => {
+            if (!state.gameState) return;
+
+            // Le combat est allé à son terme : la leçon s'achève, quelle qu'en soit l'issue.
+            if (state.gameState.status === 'finished') { finish(); return; }
+
+            const current = stepRef.current;
+            if (!current || typeof current.advance !== 'function') return;
+            if (current.advance(state.gameState)) {
+                setStepIndex(i => Math.min(i + 1, TUTORIAL_STEPS.length - 1));
+            }
+        };
+
+        check(useGameStore.getState());
+        return useGameStore.subscribe(check);
+    }, [phase, stepIndex, finish]);
+
+    if (phase === 'intro') {
+        return (
+            <main className={styles.main}>
+                <div className={styles.card}>
+                    <span className={styles.icon}>🎓</span>
+                    <h1 className={styles.title}>Didacticiel</h1>
+                    <p className={styles.lead}>
+                        Un combat guidé pour apprendre les règles et l&apos;interface : l&apos;énergie,
+                        les cartes, le ciblage, les faiblesses élémentaires et la fin de tour.
+                    </p>
+                    <p className={styles.meta}>Environ 3 minutes · Aucun risque de défaite</p>
+
+                    <button className={styles.primary} onClick={start}>Commencer</button>
+                    <Link href="/play" className={styles.secondary}>Retour aux modes de jeu</Link>
+                </div>
+            </main>
+        );
+    }
+
+    if (phase === 'done') {
+        return (
+            <main className={styles.main}>
+                <div className={styles.card}>
+                    <span className={styles.icon}>🏆</span>
+                    <h1 className={styles.title}>{TUTORIAL_OUTRO.title}</h1>
+                    <p className={styles.lead}>{TUTORIAL_OUTRO.text}</p>
+
+                    <Link href="/rules" className={styles.primary}>📖 Consulter les règles</Link>
+                    <Link href="/play" className={styles.secondary}>Choisir un mode de jeu</Link>
+                    <button className={styles.ghost} onClick={start}>Refaire le didacticiel</button>
+                </div>
+            </main>
+        );
+    }
+
+    return (
+        <>
+            <GameBoard />
+            {step && (
+                <TutorialOverlay
+                    step={step}
+                    index={stepIndex}
+                    total={TUTORIAL_STEPS.length}
+                    // Bouton « Suivant » réservé aux étapes explicatives : sur une étape d'action,
+                    // il permettrait de sauter le geste qu'on veut justement faire apprendre.
+                    onNext={step.advance === 'next'
+                        ? () => { if (!isLast) setStepIndex(i => i + 1); else finish(); }
+                        : undefined}
+                    onSkip={skip}
+                />
+            )}
+        </>
+    );
+}

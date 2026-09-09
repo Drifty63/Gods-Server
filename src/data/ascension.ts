@@ -18,27 +18,34 @@ export type UnitTier = 'servant' | 'creature' | 'god';
 /**
  * Composition par étage : [serviteurs, créatures, dieux].
  *
- * La progression n'est pas linéaire : on alterne des étages « larges mais faibles » (4 serviteurs)
- * et des étages « courts mais durs » (1 créature + 1 dieu), pour que le joueur ne puisse pas
- * s'installer dans une seule stratégie. Les trois derniers étages sont volontairement brutaux :
- * quatre dieux d'affilée, sans reprendre de PV.
+ * Trois paliers NETS, dans cet ordre : serviteurs, puis créatures, puis dieux. C'est exactement
+ * ce que l'écran d'accueil du mode annonce au joueur (« Étages 1-5 Serviteurs / 6-12 Créatures /
+ * 13-15 Dieux »), et c'est ce qui rend la montée lisible : on sait toujours à quoi s'attendre.
+ *
+ * La version précédente était un dégradé continu qui contredisait cette promesse sur deux
+ * paliers sur trois : un dieu surgissait dès l'étage 6, l'étage 5 annoncé « Serviteurs » ne
+ * contenait que des créatures, et les étages 9 à 12 — annoncés « Créatures » — étaient déjà
+ * majoritairement peuplés de dieux.
  */
 const FLOOR_COMPOSITION: readonly (readonly [number, number, number])[] = [
-    [4, 0, 0], // 1  — échauffement : la nuée
-    [3, 1, 0], // 2  — première créature
-    [2, 2, 0], // 3
-    [1, 3, 0], // 4
-    [0, 4, 0], // 5  — palier créatures
-    [2, 1, 1], // 6  — premier dieu, encadré de bêtes
-    [1, 2, 1], // 7
-    [0, 3, 1], // 8
-    [1, 1, 2], // 9
-    [0, 2, 2], // 10
-    [1, 0, 3], // 11
-    [0, 1, 3], // 12
-    [0, 0, 4], // 13 — les trois derniers étages : quatre dieux d'affilée
-    [0, 0, 4], // 14
-    [0, 0, 4], // 15 — sommet
+    // Palier 1 — serviteurs (étages 1 à 5)
+    [4, 0, 0],
+    [4, 0, 0],
+    [4, 0, 0],
+    [4, 0, 0],
+    [4, 0, 0],
+    // Palier 2 — créatures (étages 6 à 12)
+    [0, 4, 0],
+    [0, 4, 0],
+    [0, 4, 0],
+    [0, 4, 0],
+    [0, 4, 0],
+    [0, 4, 0],
+    [0, 4, 0],
+    // Palier 3 — dieux (étages 13 à 15), sans reprendre de PV
+    [0, 0, 4],
+    [0, 0, 4],
+    [0, 0, 4],
 ] as const;
 
 /**

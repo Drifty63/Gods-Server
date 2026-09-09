@@ -27,8 +27,25 @@ export const GAME_CONFIG = {
     /** Énergie maximale */
     MAX_ENERGY: 10,
 
-    /** Nombre de tours maximal avant match nul */
-    MAX_TURNS: 40,
+    /**
+     * Nombre de tours maximal en partie compétitive, avant départage aux PV.
+     *
+     * Cette constante annonçait 40 alors que le moteur appliquait 50 en dur, et elle n'était
+     * importée nulle part : la règle documentée contredisait la règle jouée. Elle est désormais
+     * la source unique, lue par GameEngine.createInitialState.
+     */
+    MAX_TURNS: 50,
+
+    /**
+     * Temps imparti pour jouer son tour, en modes compétitifs uniquement (En ligne et Duel).
+     *
+     * Sans limite, une partie pouvait s'éterniser : rien n'obligeait un joueur à agir, et
+     * certaines stratégies défensives n'avaient aucune raison de conclure.
+     */
+    TURN_TIME_LIMIT_MS: 60_000,
+
+    /** Dépassements CONSÉCUTIFS du chrono avant défaite. */
+    MAX_TURN_TIMEOUTS: 3,
 
     /** Nombre de cartes dans le deck initial par dieu */
     CARDS_PER_GOD: 5,

@@ -1,0 +1,159 @@
+/* Guidage pas à pas du didacticiel — voir TutorialOverlay.tsx */
+
+.root {
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    /* Le conteneur ne capte rien : seules les bandes de voile bloquent, laissant la zone
+       éclairée pleinement cliquable. */
+    pointer-events: none;
+}
+
+/* Bande de voile. Quatre d'entre elles encerclent la zone mise en avant. */
+.shade {
+    position: fixed;
+    background: rgba(4, 5, 14, 0.78);
+    pointer-events: auto;
+    transition: all 0.25s ease;
+}
+
+/* Contour lumineux de la zone éclairée : purement décoratif, il ne doit pas gêner le clic. */
+.halo {
+    position: fixed;
+    pointer-events: none;
+    border: 2px solid var(--gold-light, #f5d76e);
+    border-radius: 12px;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25), 0 0 28px rgba(212, 175, 55, 0.45);
+    animation: haloPulse 1.8s ease-in-out infinite;
+    transition: all 0.25s ease;
+}
+
+.bubble {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(440px, calc(100vw - 24px));
+    padding: 16px 18px;
+
+    background: linear-gradient(165deg, rgba(20, 22, 44, 0.98), rgba(9, 10, 24, 0.99));
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+
+    animation: bubbleIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* La bulle se place à l'opposé de l'élément éclairé, pour ne jamais le recouvrir. */
+.bubbleBottom {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+.bubbleTop {
+    top: calc(env(safe-area-inset-top, 0px) + 16px);
+}
+
+.progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.progressText {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.skip {
+    min-height: 0;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+}
+
+.skip:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.title {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    color: var(--gold-light, #f5d76e);
+}
+
+.text {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.next {
+    align-self: flex-end;
+    margin-top: 4px;
+    min-height: 44px;
+    padding: 11px 26px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #f5d76e, #d4af37);
+    border-radius: 10px;
+    box-shadow: 0 0 18px rgba(212, 175, 55, 0.3);
+}
+
+.next:active {
+    transform: translateY(1px);
+}
+
+/* Étape d'action : on n'offre AUCUN bouton, sinon le joueur avancerait sans faire le geste. */
+.waiting {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 0;
+    font-size: 0.78rem;
+    font-style: italic;
+    color: var(--gold-divine, #d4af37);
+}
+
+.waitingDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: waitPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes haloPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.22), 0 0 24px rgba(212, 175, 55, 0.4); }
+    50% { box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.35), 0 0 38px rgba(212, 175, 55, 0.6); }
+}
+
+@keyframes waitPulse {
+    0%, 100% { opacity: 0.35; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bubbleIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .halo, .waitingDot, .bubble { animation: none; }
+}

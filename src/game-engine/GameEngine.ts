@@ -24,6 +24,7 @@ import type { Element, GameInitOptions } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
 import { dealDamage, healGod, handleGodDeath, addShield } from './DamageSystem';
 import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects, applyPoisonOnCast } from './StatusSystem';
+import { GAME_CONFIG } from '@/data/gameRules';
 
 // ─────────────────────────────────────────────
 // Constantes
@@ -687,6 +688,8 @@ export class GameEngine {
                 return this.zombieAttack(action);
             case 'cast_copied_spell':
                 return this.castCopiedSpell(action);
+            case 'timeout_turn':
+                return this.timeoutTurn();
             default:
                 return { success: false, message: 'Action inconnue' };
         }
@@ -719,6 +722,8 @@ export class GameEngine {
         player.energy = Math.min(player.energy - card.energyCost + card.energyGain, MAX_ENERGY);
 
         player.hasPlayedCard = true;
+        // Le joueur agit : la série de dépassements du chrono repart de zéro.
+        player.afkTurns = 0;
 
         // Poison : le dieu subit ses dégâts de poison juste avant de lancer son sort, et ça
         // peut le tuer avant que le sort ne s'applique. Remplace l'ancien tick de poison en fin
@@ -884,6 +889,7 @@ export class GameEngine {
         player.hand.splice(cardIndex, 1);
         cleanBlindCard(card);
         player.discard.push(card);
+        player.afkTurns = 0;
 
         if (!player.hasDiscardedForEnergy) {
             player.energy = Math.min(player.energy + 1, MAX_ENERGY);
@@ -951,6 +957,37 @@ export class GameEngine {
         }
 
         return { success: true, message: `Sort copié lancé: ${result.message}` };
+    }
+
+    // ─── Chrono de tour dépassé ──────────
+
+    /**
+     * Le joueur courant n'a rien fait dans le temps imparti (modes compétitifs).
+     *
+     * Fin de tour automatique, et compteur de dépassements CONSÉCUTIFS incrémenté : au-delà de
+     * `MAX_TURN_TIMEOUTS`, la partie est perdue. Cette tolérance est volontaire — une coupure
+     * réseau d'une minute ne doit pas coûter la partie, mais un joueur qui laisse filer trois
+     * tours d'affilée bloque son adversaire et doit céder la place.
+     *
+     * Le compteur est remis à zéro dès que le joueur agit (voir `playCard` et
+     * `discardForEnergy`) : seuls des dépassements en série comptent.
+     */
+    private timeoutTurn(): { success: boolean; message: string } {
+        if (this.state.status !== 'playing') return { success: false, message: 'La partie est terminée' };
+
+        const player = this.getCurrentPlayer();
+        player.afkTurns = (player.afkTurns ?? 0) + 1;
+
+        if (player.afkTurns >= GAME_CONFIG.MAX_TURN_TIMEOUTS) {
+            this.state.status = 'finished';
+            this.state.winnerId = this.state.players.find(p => p.id !== player.id)?.id;
+            this.state.winReason = 'timeout';
+            logAction(this.state, player, `a laissé filer ${player.afkTurns} tours : partie perdue`);
+            return { success: true, message: 'Trop de tours écoulés sans agir' };
+        }
+
+        logAction(this.state, player, `n'a pas joué à temps (${player.afkTurns}/${GAME_CONFIG.MAX_TURN_TIMEOUTS})`);
+        return this.endTurn();
     }
 
     // ─── Fin de tour ─────────────────────
@@ -1361,12 +1398,13 @@ export class GameEngine {
             hasPlayedCard: false,
             hasDiscardedForEnergy: false,
             godsCastThisMatch: [],
+            afkTurns: 0,
             noFatigueDamage: carry?.noFatigue ?? false,
         });
 
         const isPlayer1First = firstPlayerId === player1Id;
         const isOnline = options?.isOnlineGame ?? false;
-        const maxTurns = options?.maxTurns ?? (isOnline ? 50 : undefined);
+        const maxTurns = options?.maxTurns ?? (isOnline ? GAME_CONFIG.MAX_TURNS : undefined);
 
         const state: GameState = {
             id: generateUUID(),

@@ -117,7 +117,22 @@ function PlayContent() {
                     <span className={styles.sectionIcon}>📚</span> Autres
                 </h2>
                 <div className={styles.modesGrid}>
-                    {/* Mode Tutoriel */}
+                    {/* Didacticiel : placé AVANT les règles, car c'est le point d'entrée qu'on
+                        veut voir en premier quand on découvre le jeu. Un mur de texte ne remplace
+                        pas une partie guidée. */}
+                    <Link href="/tutorial" className={`${styles.modeCard} ${styles.featured}`}>
+                        <div className={styles.modeIconWrapper}>
+                            <span className={styles.modeIcon}>🎓</span>
+                        </div>
+                        <div className={styles.modeInfo}>
+                            <h2 className={styles.modeTitle}>Didacticiel</h2>
+                            <p className={styles.modeDescription}>
+                                Combat guidé • Apprenez en jouant
+                            </p>
+                        </div>
+                        <div className={styles.modeArrow}>›</div>
+                    </Link>
+
                     <Link href="/rules" className={styles.modeCard}>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>📚</span>

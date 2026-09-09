@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPendingRequests } from '@/services/supabase-profile';
+import { TUTORIAL_DONE_KEY } from '@/data/tutorial';
 
 export default function Home() {
   return (
@@ -26,6 +27,27 @@ function HomeContent() {
   // arrivée -- il fallait aller sur /social par réflexe pour le découvrir. Petit point rouge
   // sur l'icône Social le temps qu'on a une vraie notification.
   const [hasPendingFriendRequests, setHasPendingFriendRequests] = useState(false);
+
+  /**
+   * Didacticiel déjà terminé ?
+   *
+   * `useSyncExternalStore` plutôt qu'un effet qui poserait l'état : c'est l'outil prévu pour
+   * lire une source extérieure à React sans casser le rendu serveur. Le troisième argument
+   * fournit la valeur utilisée côté serveur (`localStorage` n'y existe pas), ce qui évite
+   * toute divergence à l'hydratation.
+   */
+  const tutorialDone = useSyncExternalStore(
+    // La valeur ne change pas pendant la vie de la page : rien à quoi s'abonner.
+    () => () => { },
+    () => {
+      try {
+        return window.localStorage.getItem(TUTORIAL_DONE_KEY) === '1';
+      } catch {
+        return false; // navigation privée ou stockage bloqué
+      }
+    },
+    () => false,
+  );
   useEffect(() => {
     if (!profile) return;
     getPendingRequests()
@@ -112,6 +134,29 @@ function HomeContent() {
           </h1>
           <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
         </div>
+
+        {/*
+          Didacticiel, sous les actualités.
+          Depuis l'accueil, un nouveau joueur n'avait aucun accès à quoi que ce soit de
+          pédagogique : il fallait passer par Options → Règles, ou descendre dans la section
+          « Autres » du menu Jouer. La carte se met en avant tant que le didacticiel n'a pas
+          été terminé, puis s'efface discrètement.
+        */}
+        <Link
+          href="/tutorial"
+          className={`${styles.tutorialCard} ${tutorialDone ? styles.tutorialCardDone : ''}`}
+        >
+          <span className={styles.tutorialIcon}>🎓</span>
+          <span className={styles.tutorialText}>
+            <span className={styles.tutorialTitle}>
+              {tutorialDone ? 'Revoir le didacticiel' : 'Nouveau ? Commencez ici'}
+            </span>
+            <span className={styles.tutorialSubtitle}>
+              Combat guidé pour apprendre les règles et l&apos;interface
+            </span>
+          </span>
+          <span className={styles.tutorialArrow}>›</span>
+        </Link>
 
         {/* Section Actualités */}
         <section className={styles.newsSection}>

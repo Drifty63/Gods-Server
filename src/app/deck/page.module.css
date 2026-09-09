@@ -5,14 +5,19 @@
     padding-bottom: calc(40px + env(safe-area-inset-bottom));
     /* Voile sombre appuyé par-dessus la salle au trésor : l'illustration est très lumineuse
        (or, torches), des vignettes de cartes posées dessus sans filtre seraient noyées. */
+    /* Voile allégé : l'illustration de la salle au trésor disparaissait derrière un filtre
+       trop opaque sur téléphone. Assez sombre pour que les vignettes restent lisibles, assez
+       clair pour qu'on voie la porte et l'or. */
     background:
         linear-gradient(180deg,
-            rgba(8, 8, 20, 0.86) 0%,
-            rgba(12, 10, 24, 0.9) 40%,
-            rgba(6, 6, 16, 0.95) 100%),
+            rgba(8, 8, 20, 0.68) 0%,
+            rgba(12, 10, 24, 0.76) 40%,
+            rgba(6, 6, 16, 0.88) 100%),
         url('/backgrounds/collection_bg.jpg');
     background-size: cover;
-    background-position: center;
+    /* Cadrage décalé vers la GAUCHE : le sujet fort (la porte du coffre) est à gauche de
+       l'image, et un cadrage centré le poussait hors champ en portrait. */
+    background-position: 22% center;
     /* `scroll` et non `fixed` : le fond fixe provoque des saccades au défilement sur iOS. */
     background-attachment: scroll;
     color: var(--text-primary);

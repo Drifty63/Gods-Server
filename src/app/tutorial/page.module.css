@@ -1,0 +1,92 @@
+/* Écrans d'entrée et de conclusion du didacticiel */
+
+.main {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+    background: linear-gradient(160deg, #0a0a1a 0%, #141432 55%, #0a0a1a 100%);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: min(440px, 100%);
+    padding: 30px 24px;
+    text-align: center;
+
+    background: rgba(16, 18, 38, 0.9);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.icon {
+    font-size: 3rem;
+    filter: drop-shadow(0 0 22px rgba(212, 175, 55, 0.4));
+}
+
+.title {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.3rem, 6vw, 1.7rem);
+    color: var(--gold-divine, #d4af37);
+}
+
+.lead {
+    margin: 0;
+    max-width: 36ch;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.meta {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.primary,
+.secondary,
+.ghost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 13px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 10px;
+}
+
+.primary {
+    margin-top: 8px;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #f5d76e, #d4af37, #cd7f32);
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.3);
+}
+
+.secondary {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ghost {
+    min-height: 40px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    background: transparent;
+}
+
+.ghost:hover {
+    color: rgba(255, 255, 255, 0.85);
+}

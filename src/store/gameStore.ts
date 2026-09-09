@@ -96,6 +96,10 @@ interface GameStore {
     endTurn: (ignoreZombieCheck?: boolean) => { success: boolean; message: string };
     resetGame: () => void;
     playAITurn: () => void;
+    /** Finit le tour une fois un sort à choix entièrement résolu (solo uniquement). */
+    finishTurnAfterResolution: () => void;
+    /** Chrono de tour écoulé (modes compétitifs) : passe la main et compte le dépassement. */
+    timeoutTurn: () => { success: boolean; message: string };
 
     // Getters
     getCurrentPlayer: () => PlayerState | null;
@@ -172,6 +176,9 @@ const cloneGameState = (state: GameState): GameState => {
     return JSON.parse(JSON.stringify(state));
 };
 
+/** Laisse le joueur voir le résultat de son sort avant que la main ne passe. */
+const TURN_END_DELAY_MS = 700;
+
 // État "toutes les modales fermées". Une seule modale de choix doit jamais être active à la
 // fois : chaque startXxx() ci-dessous applique ce patch AVANT d'ouvrir la sienne, pour garantir
 // qu'ouvrir une nouvelle modale ferme systématiquement toute modale précédente encore active
@@ -224,6 +231,66 @@ const ALL_MODALS_CLOSED = {
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
+    /**
+     * Termine le tour après qu'un sort a été ENTIÈREMENT résolu, choix du joueur compris.
+     *
+     * `playCard` gère déjà le cas des sorts immédiats, mais il refusait de finir le tour tant
+     * qu'une modale était ouverte — à juste titre, l'effet n'était pas encore appliqué. Restait
+     * qu'une fois la modale confirmée, PLUS RIEN ne reprenait le relais : seule la distribution
+     * de soin de Déméter le faisait. Tous les autres sorts à choix (Repos mérité d'Hestia,
+     * Prophétie de Nyx, Bourrasque de Zéphyr, Brûlure Rémanente de Perséphone…) laissaient le
+     * joueur devant un plateau où plus aucune action n'était possible, sans lui dire qu'il
+     * devait cliquer lui-même sur la fin de tour.
+     *
+     * Réservé au SOLO : en ligne, la fin de tour doit passer par le gestionnaire du GameBoard,
+     * qui pousse l'état à l'adversaire. La déclencher ici désynchroniserait les deux clients.
+     */
+    finishTurnAfterResolution: () => {
+        const { engine, isSoloMode, playerId } = get();
+        if (!engine || !isSoloMode) return;
+
+        setTimeout(() => {
+            const state = engine.getState();
+            const me = state.players.find(p => p.id === playerId);
+            // `hasPlayedCard` retombe à false avec Hermès (Rejoue une action) : le joueur garde
+            // alors la main, il ne faut surtout pas lui couper son tour.
+            if (state.currentPlayerId === playerId && state.status === 'playing' && me?.hasPlayedCard) {
+                get().endTurn();
+            }
+        }, TURN_END_DELAY_MS);
+    },
+
+    /**
+     * Le joueur n'a pas agi dans le temps imparti.
+     *
+     * Délégué au moteur, qui tient le compteur de dépassements consécutifs et conclut la
+     * partie au troisième. On ne fait ici que rafraîchir l'état et nettoyer la sélection en
+     * cours, qui n'a plus lieu d'être une fois la main passée.
+     */
+    timeoutTurn: () => {
+        const { engine, playerId } = get();
+        if (!engine) return { success: false, message: 'Partie non initialisée' };
+
+        const state = engine.getState();
+        // Le tour a pu changer entre le dernier tick du chrono et cet appel.
+        if (state.currentPlayerId !== playerId || state.status !== 'playing') {
+            return { success: false, message: "Ce n'est plus votre tour" };
+        }
+
+        const result = engine.executeAction({ type: 'timeout_turn', playerId });
+        if (result.success) {
+            set({
+                gameState: cloneGameState(engine.getState()),
+                selectedCard: null,
+                selectedTargetGod: null,
+                selectedTargetGods: [],
+                requiredTargets: 0,
+                isSelectingTarget: false,
+            });
+        }
+        return result;
+    },
+
     // État initial
     gameState: null,
     engine: null,
@@ -620,6 +687,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingCardSelectionEffect: null,
             pendingEffectCardId: null,
         });
+
+        // Le sort est résolu : plus aucune action n'est possible ce tour.
+        get().finishTurnAfterResolution();
     },
 
     cancelCardSelection: () => {
@@ -694,13 +764,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingEffectCardId: null,
         });
 
-        // En mode solo, finir le tour automatiquement après la confirmation
-        const { isSoloMode } = get();
-        if (isSoloMode) {
-            setTimeout(() => {
-                get().endTurn();
-            }, 500);
-        }
+        get().finishTurnAfterResolution();
     },
 
     cancelHealDistribution: () => {
@@ -773,6 +837,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingEnemyCardEffect: null,
             pendingEffectCardId: null,
         });
+
+        get().finishTurnAfterResolution();
     },
 
     cancelEnemyCardSelection: () => {
@@ -1447,6 +1513,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingOptionalTargetGodIds: [],
             pendingEffectCardId: null,
         });
+
+        get().finishTurnAfterResolution();
     },
 
     cancelOptionalChoice: () => {
@@ -1490,6 +1558,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingPlayerEffect: null,
             pendingEffectCardId: null,
         });
+
+        get().finishTurnAfterResolution();
     },
 
     cancelPlayerSelection: () => {
@@ -1530,6 +1600,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingZombieEffect: null,
             pendingEffectCardId: null,
         });
+
+        get().finishTurnAfterResolution();
     },
 
     cancelDeadGodSelection: () => {
@@ -1614,6 +1686,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             godSelectionTargetType: null,
             pendingEffectCardId: null,
         });
+
+        get().finishTurnAfterResolution();
     },
 
     cancelGodSelection: () => {

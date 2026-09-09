@@ -12,6 +12,7 @@ export const DeckAndDiscard: React.FC<DeckAndDiscardProps> = ({ player, isOppone
     return (
         <div
             className={`${styles.deckAndDiscard} ${isOpponent ? styles.deckAndDiscardOpponent : styles.deckAndDiscardPlayer}`}
+            data-tutorial={isOpponent ? 'opponent-stats' : 'player-energy'}
         >
             {/* Une seule ligne compacte (icône + nombre) : le format vertical précédent (~87px
              * de haut) n'avait pas la place de tenir dans l'espace libre entre la main et le
@@ -22,12 +23,13 @@ export const DeckAndDiscard: React.FC<DeckAndDiscardProps> = ({ player, isOppone
                 {player.energy}/10
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#c7d2fe', fontWeight: 'bold', whiteSpace: 'nowrap' }} title="Deck">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#c7d2fe', fontWeight: 'bold', whiteSpace: 'nowrap' }} title="Deck" data-tutorial={isOpponent ? undefined : 'player-deck'}>
                 🎴{player.deck.length}
             </div>
 
             <div
                 style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#94a3b8', fontWeight: 'bold', whiteSpace: 'nowrap', cursor: onClickDiscard ? 'pointer' : 'default' }}
+                data-tutorial={isOpponent ? undefined : 'player-discard'}
                 title="Défausse"
                 onClick={onClickDiscard}
             >
