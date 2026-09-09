@@ -811,9 +811,14 @@
   filter: brightness(1.15);
 }
 
+/* La hauteur était figée à 100px dans un cadre pourtant fluide (clamp(76px,25vw,112px) × 0.72,
+ * soit 55 à 81px de haut) : sur un téléphone étroit, l'image dépassait la carte, l'overflow la
+ * coupait, et le titre comme la description se retrouvaient poussés hors du cadre.
+ * En proportion, elle occupe toujours la même part de la carte quelle que soit la largeur. */
 .spellImage {
   width: 100%;
-  height: 100px;
+  height: 58%;
+  flex-shrink: 0;
   object-fit: cover;
   border-radius: 6px;
   margin-bottom: 8px;
@@ -921,61 +926,69 @@
 /* Fin de tour : à gauche, sur la même bande que l'indicateur de tour et le bouton journal
  * (entre la rangée adverse et la rangée du joueur) plutôt qu'au-dessus de la main — un bouton
  * plus petit et plus discret puisque l'énergie est déjà affichée dans le cadre deck/défausse. */
-.energyOrbContainer {
+/* Compteur de tour — purement informatif (voir TurnIndicator.tsx). L'ancienne orbe bleue
+ * cumulait ce rôle avec celui de bouton de fin de tour, ce que rien ne laissait deviner. */
+.turnCounter {
   flex-shrink: 0;
-  width: clamp(38px, 11vw, 50px);
-  height: clamp(38px, 11vw, 50px);
-}
-
-.energyOrb {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 25%, #93c5fd, #3b82f6 40%, #1e3a8a 80%, #0f172a 100%);
-  box-shadow: 
-    0 0 30px rgba(59, 130, 246, 0.6),
-    inset -5px -5px 15px rgba(0, 0, 0, 0.6),
-    inset 5px 5px 20px rgba(255, 255, 255, 0.4);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: clamp(0.95rem, 4.5vw, 1.25rem);
-  font-weight: 900;
-  font-family: var(--font-logo);
-  color: white;
-  text-shadow: 0 2px 10px #000, 0 0 20px rgba(255,255,255,0.5);
-  animation: breatheOrb 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  transition: all 0.3s;
+  min-width: clamp(38px, 11vw, 48px);
+  padding: 4px 8px;
+  background: rgba(20, 12, 6, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
-.energyOrb:hover {
-  transform: scale(1.1) !important;
-  box-shadow: 
-    0 0 50px rgba(59, 130, 246, 0.9),
-    inset -5px -5px 15px rgba(0, 0, 0, 0.6),
-    inset 5px 5px 20px rgba(255, 255, 255, 0.6);
-  filter: brightness(1.2);
-}
-
-/* Pas de transform: scale() ici : ça boucle en continu sur l'élément qui contient le chiffre
- * d'énergie, ce qui le rend visiblement flou en permanence. Seul le glow (box-shadow, propriété
- * de peinture, pas de compositing) "respire" — le texte reste net. */
-@keyframes breatheOrb {
-  0% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), inset 0 0 10px rgba(255,255,255,0.2); }
-  50% { box-shadow: 0 0 45px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(255,255,255,0.4); }
-  100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), inset 0 0 10px rgba(255,255,255,0.2); }
-}
-
-.energyOrbLabel {
-  text-align: center;
-  font-size: clamp(0.5rem, 2.2vw, 0.65rem);
-  margin-top: 6px;
-  color: #60a5fa;
+.turnCounterLabel {
+  font-size: clamp(0.42rem, 1.9vw, 0.55rem);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--color-text-dim);
+  line-height: 1;
+}
+
+.turnCounterValue {
+  font-family: var(--font-logo);
+  font-size: clamp(0.9rem, 4vw, 1.15rem);
+  font-weight: 900;
+  color: var(--color-text-main);
+  line-height: 1.1;
+}
+
+/* Fin de tour : un VRAI bouton, large et lisible. Il occupe la place centrale de la barre
+ * pendant votre tour — c'est la seule action toujours disponible, et celle qui manquait le
+ * plus après une défausse, où toutes les cartes deviennent injouables. */
+.endTurnButton {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: clamp(8px, 2.2vw, 12px) clamp(8px, 3vw, 18px);
+  font-family: var(--font-logo);
+  font-size: clamp(0.62rem, 3vw, 0.85rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #0b1020;
+  background: linear-gradient(135deg, #93c5fd, #3b82f6 55%, #1d4ed8);
+  border: 1px solid rgba(147, 197, 253, 0.7);
+  border-radius: 30px;
+  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.endTurnButton:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 26px rgba(59, 130, 246, 0.5);
+}
+
+.endTurnButton:active {
+  transform: translateY(1px);
 }
 
 /* Barre centrale de l'arène : contient le bouton fin de tour, l'indicateur de tour et le
@@ -1602,4 +1615,179 @@
 @keyframes resultStatIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- ACTIONS DE LA CARTE SÉLECTIONNÉE ---
+ * Regroupées dans le panneau de détail. Le bouton d'action flottait auparavant à 160px du bas
+ * avec un z-index de 500, donc systématiquement par-dessus ce panneau (z-index 40) : il
+ * masquait la description et parfois « DÉFAUSSER » lui-même. */
+.detailActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btnAction {
+  flex: 2;
+  min-width: 0;
+  min-height: 44px;
+  padding: 11px 10px;
+  font-family: var(--font-logo);
+  font-size: clamp(0.66rem, 3vw, 0.82rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  background: linear-gradient(135deg, #818cf8, #4f46e5 60%, #3730a3);
+  border: 1px solid rgba(165, 180, 252, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(79, 70, 229, 0.4);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.btnAction:hover { filter: brightness(1.1); }
+.btnAction:active { transform: translateY(1px); }
+
+/* La défausse reste secondaire : elle ne doit pas rivaliser visuellement avec l'action
+ * principale, mais rester atteignable au pouce. */
+.detailActions .btnDiscard {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+/* --- BLOCAGE DU MODE PAYSAGE ---
+ * Tout le gabarit du plateau est calibré en portrait (dvh/vw, clamp() réglés sur 375-430px de
+ * large). En paysage sur téléphone, les deux rangées de dieux et les deux mains ne tiennent
+ * plus dans la hauteur : c'est injouable. Plutôt que de laisser le joueur découvrir un écran
+ * écrasé, on lui demande de retourner l'appareil.
+ *
+ * Le manifeste PWA déclare bien `"orientation": "portrait"`, mais cela ne s'applique QU'À
+ * l'application installée — dans un onglet de navigateur mobile, rien n'empêche la rotation.
+ *
+ * `max-height` cible les téléphones : une tablette ou un ordinateur en paysage garde assez de
+ * hauteur pour jouer normalement, il ne faut pas les bloquer.
+ */
+.rotateNotice {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .rotateNotice {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 24px;
+    text-align: center;
+
+    background: linear-gradient(160deg, #0a0a1a, #16213e);
+    color: var(--color-text-main);
+  }
+
+  .rotateIcon {
+    font-size: 3rem;
+    animation: rotateHint 2.2s ease-in-out infinite;
+  }
+
+  .rotateTitle {
+    font-family: var(--font-logo);
+    font-size: 1.15rem;
+    letter-spacing: 0.06em;
+    color: var(--color-accent);
+  }
+
+  .rotateText {
+    max-width: 34ch;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--color-text-dim);
+  }
+}
+
+@keyframes rotateHint {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotateIcon { animation: none; }
+}
+
+/* --- CHRONO DE TOUR (modes compétitifs) ---
+ * Placé sous la main adverse, du côté droit resté libre : la barre deck/défausse n'occupe que
+ * 44 % de la largeur à gauche. Ne recouvre donc rien. */
+.turnTimer {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--hand-opponent-h));
+  right: 6px;
+  z-index: 21;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.turnTimerValue {
+  font-family: var(--font-logo);
+  font-size: clamp(0.72rem, 3vw, 0.9rem);
+  font-weight: 800;
+  /* Chiffres à chasse fixe : sans ça, la pastille tressaute à chaque seconde qui change. */
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-main);
+  min-width: 2ch;
+  text-align: right;
+}
+
+.turnTimerTrack {
+  display: block;
+  width: clamp(44px, 14vw, 68px);
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.turnTimerFill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #34d399, #60a5fa);
+  /* Transition courte : le décompte tique 4 fois par seconde, une transition longue
+   * retarderait visiblement la barre par rapport au chiffre. */
+  transition: transform 0.25s linear;
+}
+
+/* Sous 15 secondes : la pastille change de couleur et respire, pour attirer l'œil sans
+ * masquer le plateau. */
+.turnTimerUrgent {
+  border-color: rgba(239, 68, 68, 0.55);
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+.turnTimerUrgent .turnTimerValue { color: #fca5a5; }
+.turnTimerUrgent .turnTimerFill { background: linear-gradient(90deg, #f87171, #ef4444); }
+
+@keyframes timerPulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35); }
+  50% { box-shadow: 0 4px 22px rgba(239, 68, 68, 0.55); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turnTimerUrgent { animation: none; }
 }

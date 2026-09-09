@@ -1,7 +1,7 @@
 import React from 'react';
 import { PlayerState, GodState, Element } from '@/types/cards';
 import { HeroCard, ImpactReport } from './HeroCard';
-import { EnergyOrb } from './EnergyOrb';
+import { TurnIndicator } from './TurnIndicator';
 import styles from '../GameBoard.module.css';
 
 interface ArenaAreaProps {
@@ -40,7 +40,7 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
     return (
         <div className={styles.arenaContainer}>
             {/* ENEMY ROW */}
-            <div className={`${styles.row} ${styles.enemyRow}`}>
+            <div className={`${styles.row} ${styles.enemyRow}`} data-tutorial="enemy-gods">
                 {opponent.gods.map((god) => (
                     <HeroCard
                         key={`opp-${god.card.id}`}
@@ -60,17 +60,39 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
              * un calcul de hauteur à part) pour qu'elle reste toujours exactement entre les deux
              * rangées, quelle que soit leur taille ou l'écart entre elles. */}
             <div className={styles.arenaMiddleBar}>
-                <EnergyOrb turnNumber={turnNumber} onClick={onEndTurn} />
-                <div className={`${styles.turnIndicator} ${myTurn ? styles.turnMyTurn : styles.turnEnemyTurn}`}>
-                    {myTurn ? 'Vos Dieux Attendent Vos Ordres' : 'Tour de l\'Adversaire'}
-                </div>
-                <button className={styles.logButton} onClick={onOpenLog} aria-label="Journal de combat">
+                <TurnIndicator turnNumber={turnNumber} />
+
+                {/* Quand c'est au joueur, la barre porte l'ACTION plutôt qu'un simple constat :
+                    « Vos Dieux Attendent Vos Ordres » occupait toute la place sans jamais dire
+                    comment passer la main. Le bouton prend le relais ; le texte d'attente ne
+                    s'affiche que pendant le tour adverse, où il n'y a rien à faire. */}
+                {myTurn ? (
+                    <button
+                        className={styles.endTurnButton}
+                        onClick={onEndTurn}
+                        data-tutorial="end-turn"
+                        aria-label="Terminer le tour"
+                    >
+                        Terminer le tour
+                    </button>
+                ) : (
+                    <div className={`${styles.turnIndicator} ${styles.turnEnemyTurn}`}>
+                        Tour de l&apos;Adversaire
+                    </div>
+                )}
+
+                <button
+                    className={styles.logButton}
+                    onClick={onOpenLog}
+                    data-tutorial="combat-log"
+                    aria-label="Journal de combat"
+                >
                     📜
                 </button>
             </div>
 
             {/* PLAYER ROW */}
-            <div className={`${styles.row} ${styles.playerRow}`}>
+            <div className={`${styles.row} ${styles.playerRow}`} data-tutorial="player-gods">
                 {player.gods.map((god) => (
                     <HeroCard
                         key={`ply-${god.card.id}`}

@@ -69,7 +69,7 @@ export default function GamePage() {
 
     // Phase: Sélection des équipes
     if (phase === 'team_selection') {
-        return <TeamSelection onTeamsSelected={handleTeamsSelected} isCreator={isCreator} />;
+        return <TeamSelection onTeamsSelected={handleTeamsSelected} isCreator={isCreator} godsOwned={profile?.gods_owned ?? []} />;
     }
 
     // Phase: Pierre-Feuille-Ciseaux

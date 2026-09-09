@@ -196,8 +196,12 @@ function InspectModal({ card, owned, onClose, onZoomSpell }: {
 
                 <div className={styles.inspectHero}>
                     <div className={styles.inspectPortrait}>
+                        {/* `imageUrl` et non `carouselImage` : ce dernier porte les ANCIENNES
+                            illustrations `.jpg` des 12 dieux de base, héritées du carrousel de
+                            l'accueil (supprimé depuis). La fiche affichait donc un visuel périmé,
+                            différent de la vignette de la grille juste à côté. */}
                         <Image
-                            src={card.carouselImage || card.imageUrl}
+                            src={card.imageUrl}
                             alt=""
                             fill
                             sizes="(max-width: 600px) 90vw, 320px"

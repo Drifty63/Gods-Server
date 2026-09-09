@@ -8,6 +8,7 @@ import { HandArea } from './components/HandArea';
 import { DeckAndDiscard } from './components/DeckAndDiscard';
 import { SpellCardUI } from './components/SpellCardUI';
 import { CardFlight, CardFlightData } from './components/CardFlight';
+import { TurnTimer } from './components/TurnTimer';
 // `Element` est aliasé : le type du jeu masquerait sinon l'interface DOM `Element`, dont ce
 // fichier a besoin pour les mesures de position (getBoundingClientRect) de l'animation de vol.
 import { SpellCard, GodState, type Element as GameElement } from '@/types/cards';
@@ -59,6 +60,10 @@ function resultSubtitle(
             return isVictory
                 ? 'Votre adversaire a renoncé au combat.'
                 : 'Vous avez quitté le champ de bataille.';
+        case 'timeout':
+            return isVictory
+                ? 'Votre adversaire a laissé filer trop de tours sans agir.'
+                : 'Trois tours écoulés sans jouer : la partie est perdue.';
         case 'elimination':
         default:
             return isVictory
@@ -170,6 +175,25 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
      * le plus à un jeu de cartes muet. Réservée aux coups qui comptent : un critique ou une mort
      * secouent fort, un coup ordinaire à peine, un soin pas du tout.
      */
+    /**
+     * Chrono écoulé : la main passe d'office.
+     *
+     * Passe par le store — et non directement par le moteur — pour que l'état synchronisé soit
+     * poussé à l'adversaire comme n'importe quelle autre action. Au troisième dépassement
+     * CONSÉCUTIF, le moteur conclut la partie de lui-même (voir `timeoutTurn`).
+     */
+    const handleTurnTimeout = useCallback(() => {
+        const result = useGameStore.getState().timeoutTurn();
+        if (!result.success) return;
+
+        playSfx('error');
+        haptic('error');
+        setErrorMsg('Temps écoulé — votre tour est passé.');
+        setTimeout(() => setErrorMsg(null), 3000);
+
+        onAction?.({ type: 'end_turn' });
+    }, [onAction]);
+
     const handleImpact = useCallback((report: ImpactReport) => {
         if (report.kind !== 'damage') return;
 
@@ -538,6 +562,28 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             <div className={styles.bgParticles} />
             <div className={styles.vignette} />
 
+            {/* CHRONO DE TOUR — modes compétitifs uniquement (En ligne, Duel). Le mode solo,
+                l'Ascension et l'Histoire se jouent sans pression de temps. */}
+            {gameState.isOnlineGame && (
+                <TurnTimer
+                    active={myTurn && gameState.status === 'playing'}
+                    turnKey={`${gameState.turnNumber}-${gameState.currentPlayerId}`}
+                    onExpire={handleTurnTimeout}
+                />
+            )}
+
+            {/* PAYSAGE : le plateau est calibré pour le portrait, on demande de tourner
+                l'appareil plutôt que de laisser un écran écrasé et injouable.
+                Rendu en permanence, mais masqué par la feuille de style hors paysage. */}
+            <div className={styles.rotateNotice} role="alertdialog" aria-label="Orientation incorrecte">
+                <span className={styles.rotateIcon} aria-hidden="true">📱</span>
+                <h2 className={styles.rotateTitle}>Tournez votre téléphone</h2>
+                <p className={styles.rotateText}>
+                    GODS se joue à la verticale : le plateau, vos dieux et votre main n&apos;ont pas
+                    la place de s&apos;afficher en mode paysage.
+                </p>
+            </div>
+
             {/* CARTE JOUÉE : vol animé de la main jusqu'au dieu qui la lance */}
             <CardFlight flight={cardFlight} onComplete={() => setCardFlight(null)} />
 
@@ -583,6 +629,47 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
             {/* CARD DETAIL PANEL (Master Duel Style - LEFT) */}
             {(selectedCard || hoveredCard) && (() => {
                 const activeCard = selectedCard || hoveredCard;
+
+                /*
+                 * Actions de la carte, RANGÉES DANS LE PANNEAU.
+                 *
+                 * Le bouton d'action flottait auparavant à 160 px du bas avec un z-index de 500,
+                 * c'est-à-dire systématiquement PAR-DESSUS ce panneau (z-index 40, ancré en bas) :
+                 * il masquait la description, et parfois le bouton « DÉFAUSSER » lui-même. Les deux
+                 * actions possibles sur une carte vivent désormais au même endroit, sous son texte.
+                 */
+                const readyToConfirm =
+                    isSelectingTarget && requiredTargets > 0 && selectedTargetGods.length === maxSelectableTargets;
+
+                const actionButton = selectedCard && myTurn && (
+                    readyToConfirm ? (
+                        <button
+                            className={styles.btnAction}
+                            onClick={(e) => { e.stopPropagation(); handlePlayConfirmed(); }}
+                        >
+                            ✓ CONFIRMER
+                        </button>
+                    ) : !isSelectingTarget ? (
+                        <button
+                            className={styles.btnAction}
+                            data-tutorial="play-card"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const reason = getUnplayableReason(selectedCard);
+                                if (reason) { setErrorMsg(reason); return; }
+                                if (requiredTargets > 0) startTargetSelection();
+                                else handlePlayConfirmed();
+                            }}
+                        >
+                            {/* Libellé neutre pour une carte cachée : « CIBLER (2) » révélerait
+                                le nombre de cibles d'un sort que l'effet de Nyx doit garder secret. */}
+                            {selectedCard.isHiddenFromOwner
+                                ? `🎲 JOUER À L'AVEUGLE`
+                                : requiredTargets > 0 ? `🎯 CIBLER (${requiredTargets})` : `⚔️ LANCER LE SORT`}
+                        </button>
+                    ) : null
+                );
+
                 const discardButton = selectedCard && myTurn && !isSelectingTarget && (
                     <button
                         className={styles.btnDiscard}
@@ -590,6 +677,13 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                     >
                         🗑️ DÉFAUSSER
                     </button>
+                );
+
+                const actionRow = (actionButton || discardButton) && (
+                    <div className={styles.detailActions}>
+                        {actionButton}
+                        {discardButton}
+                    </div>
                 );
 
                 // Carte cachée (effet Nyx) : le propriétaire peut la sélectionner pour la jouer
@@ -608,7 +702,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                                 <p className={styles.detailDescription}>
                                     Cette carte vous est inconnue (effet de Nyx). Vous pouvez la jouer ou la défausser à l&apos;aveugle, mais pas voir son effet à l&apos;avance.
                                 </p>
-                                {discardButton}
+                                {actionRow}
                             </div>
                         </div>
                     );
@@ -630,7 +724,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                             <div className={styles.detailType} style={{ marginTop: '10px' }}>
                                 <span>COÛT: ⚡ {activeCard?.energyCost} Énergie</span>
                             </div>
-                            {discardButton}
+                            {actionRow}
                         </div>
                     </div>
                 );
@@ -745,44 +839,6 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                         </div>
                     </div>
                     <span className={styles.inspectHint}>Touchez pour fermer</span>
-                </div>
-            )}
-
-            {/* ACTION UI (Play or Target) */}
-            {selectedCard && !isSelectingTarget && (
-                <div style={{ position: 'absolute', bottom: '160px', left: '50%', transform: 'translateX(-50%)', zIndex: 500 }}>
-                    <button className={styles.btnPremium} onClick={() => {
-                        const reason = getUnplayableReason(selectedCard);
-                        if (reason) {
-                            setErrorMsg(reason);
-                            return;
-                        }
-                        if (requiredTargets > 0) {
-                            startTargetSelection();
-                        } else {
-                            handlePlayConfirmed();
-                        }
-                    }}>
-                        {/* CORRECTIF Nyx : le libellé trahissait la carte cachée. « CIBLER (2) »
-                            révélait qu'elle vise deux ennemis, et « LANCER SORT » qu'elle n'a
-                            aucune cible — de quoi deviner le sort avant même de le jouer, alors
-                            que l'effet de Nyx consiste précisément à le cacher. Un libellé neutre
-                            tant que la carte n'est pas retournée. */}
-                        {selectedCard.isHiddenFromOwner
-                            ? `JOUER À L'AVEUGLE`
-                            : requiredTargets > 0 ? `CIBLER (${requiredTargets})` : `LANCER SORT`}
-                    </button>
-                </div>
-            )}
-
-            {/* ACTION UI (Target Confirmation) */}
-            {isSelectingTarget && requiredTargets > 0 && selectedTargetGods.length === maxSelectableTargets && (
-                <div style={{ position: 'absolute', bottom: '160px', left: '50%', transform: 'translateX(-50%)', zIndex: 500 }}>
-                    <button className={styles.btnPremium} onClick={() => handlePlayConfirmed()}>
-                        {/* Même précaution : afficher le nom ici laisserait annuler le ciblage
-                            en repartant avec l'identité de la carte cachée. */}
-                        {selectedCard?.isHiddenFromOwner ? 'CONFIRMER' : `CONFIRMER ${selectedCard?.name ?? ''}`}
-                    </button>
                 </div>
             )}
 

@@ -3,28 +3,55 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { GodCard } from '@/types/cards';
-import { ALL_GODS, getVisibleGods, getGodById } from '@/data/gods';
+import { getDuelCards, getGodById } from '@/data/gods';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
 import styles from './TeamSelection.module.css';
 
 interface TeamSelectionProps {
     onTeamsSelected: (playerTeam: string[], aiTeam: string[]) => void;
     isCreator?: boolean;
+    /** Cartes possédées par le joueur (profil Supabase). */
+    godsOwned?: string[];
 }
 
-export default function TeamSelection({ onTeamsSelected, isCreator = false }: TeamSelectionProps) {
+/** Sections de la grille, dans l'ordre d'affichage. */
+const FAMILIES = [
+    { key: 'gods' as const, label: 'Dieux', icon: '⚡' },
+    { key: 'creatures' as const, label: 'Créatures', icon: '🐉' },
+    { key: 'servants' as const, label: 'Serviteurs', icon: '🛡️' },
+];
+
+export default function TeamSelection({ onTeamsSelected, isCreator = false, godsOwned = [] }: TeamSelectionProps) {
     const [playerTeam, setPlayerTeam] = useState<string[]>([]);
     const [aiTeam, setAiTeam] = useState<string[]>([]);
     const [phase, setPhase] = useState<'player' | 'ai'>('player');
 
-    // Filtrer les dieux selon le statut créateur
-    const visibleGods = useMemo(() => getVisibleGods(isCreator), [isCreator]);
+    /**
+     * L'Entraînement propose désormais EXACTEMENT ce que le joueur possède, créatures et
+     * serviteurs compris — même source que le mode Duel. Auparavant il listait getVisibleGods,
+     * c'est-à-dire les 12 dieux publics sans tenir compte des achats, et jamais la moindre
+     * créature : impossible de s'entraîner avec les unités qu'on ne pouvait jouer qu'en Duel.
+     */
+    const ownedRoster = useMemo(() => getDuelCards(godsOwned, isCreator), [godsOwned, isCreator]);
+
+    /**
+     * L'ADVERSAIRE, lui, peut aligner n'importe quelle carte publiée.
+     *
+     * Le restreindre aux cartes possédées rendrait le mode injouable : les deux équipes ne
+     * peuvent pas partager une même carte (les ids servent de clé de ciblage), donc un joueur
+     * avec un simple pack starter — 4 dieux — n'aurait plus rien à donner à l'IA après avoir
+     * composé la sienne. C'est aussi ce que fait déjà l'Ascension : on affronte des unités
+     * qu'on ne possède pas.
+     */
+    const aiRoster = useMemo(() => getDuelCards([], true), []);
+
+    const roster = phase === 'player' ? ownedRoster : aiRoster;
+    const allCards = useMemo(
+        () => [...roster.gods, ...roster.creatures, ...roster.servants],
+        [roster],
+    );
 
     const maxTeamSize = 4;
-
-    const isGodSelected = (godId: string) => {
-        return playerTeam.includes(godId) || aiTeam.includes(godId);
-    };
 
     const handleGodClick = (godId: string) => {
         if (phase === 'player') {
@@ -49,7 +76,7 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false }: Te
     };
 
     const handleRandomAiTeam = () => {
-        const availableGods = visibleGods
+        const availableGods = allCards
             .filter(g => !playerTeam.includes(g.id))
             .map(g => g.id);
 
@@ -139,14 +166,31 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false }: Te
 
             <p className={styles.instruction}>
                 {phase === 'player'
-                    ? `Sélectionnez ${maxTeamSize} dieux pour votre équipe`
-                    : `Sélectionnez ${maxTeamSize} dieux pour l'équipe de l'IA`
+                    ? `Sélectionnez ${maxTeamSize} cartes pour votre équipe`
+                    : `Sélectionnez ${maxTeamSize} cartes pour l'équipe de l'IA`
                 }
             </p>
 
-            <div className={styles.godsGrid}>
-                {visibleGods.map(god => renderGodCard(god))}
-            </div>
+            {allCards.length < maxTeamSize ? (
+                <p className={styles.instruction}>
+                    Il vous faut au moins {maxTeamSize} cartes pour vous entraîner. Passez en
+                    boutique : chaque dieu acheté vous apporte aussi sa créature et son serviteur.
+                </p>
+            ) : (
+                FAMILIES.map(({ key, label, icon }) => (
+                    roster[key].length > 0 && (
+                        <section key={key} className={styles.familyBlock}>
+                            <h2 className={styles.familyTitle}>
+                                <span aria-hidden="true">{icon}</span> {label}
+                                <span className={styles.familyCount}>{roster[key].length}</span>
+                            </h2>
+                            <div className={styles.godsGrid}>
+                                {roster[key].map(card => renderGodCard(card))}
+                            </div>
+                        </section>
+                    )
+                ))
+            )}
 
             <div className={styles.selectedTeams}>
                 <div className={styles.teamPreview}>

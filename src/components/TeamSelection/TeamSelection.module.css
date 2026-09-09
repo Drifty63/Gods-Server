@@ -545,3 +545,31 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+/* --- SECTIONS PAR FAMILLE ---
+ * L'Entraînement propose maintenant dieux, créatures et serviteurs : sans regroupement, la
+ * grille devenait un mur de cartes hétérogènes où l'on ne distinguait plus les catégories. */
+.familyBlock {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.familyTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 0 4px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: var(--gold-divine, #d4af37);
+}
+
+.familyCount {
+    margin-left: auto;
+    padding: 2px 9px;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 999px;
+}

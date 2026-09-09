@@ -98,7 +98,11 @@ export const SpellCardUI: React.FC<SpellCardUIProps> = ({
                         // Empêche le glisser-déposer natif de l'image, qui « décollait » la carte
                         // du plateau au moindre mouvement de souris pendant la sélection.
                         draggable={false}
-                        style={{ height: isMinimal ? '100%' : '100px', marginBottom: isMinimal ? '0' : '8px' }}
+                        // En mode « minimal » (main du joueur), l'illustration occupe toute la
+                        // carte. Sinon on laisse la feuille de style décider : la hauteur y est
+                        // proportionnelle au cadre, alors qu'un `100px` en dur débordait des
+                        // petites cartes sur téléphone étroit.
+                        style={isMinimal ? { height: '100%', marginBottom: 0 } : undefined}
                     />
                 )}
 

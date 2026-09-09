@@ -132,7 +132,12 @@ export interface PlayerState {
     fatigueCounter: number;              // Compteur de recyclage du deck
     hasPlayedCard: boolean;              // A joué une carte ce tour
     hasDiscardedForEnergy: boolean;      // A défaussé pour énergie ce tour
-    afkTurns?: number;                   // Compteur de tours AFK (sans jouer de carte) - pour anti-AFK online
+    /**
+     * Dépassements CONSÉCUTIFS du chrono de tour (modes compétitifs). Remis à zéro dès que
+     * le joueur agit ; au-delà de MAX_TURN_TIMEOUTS, la partie est perdue. Le champ existait
+     * depuis l'origine mais n'était lu ni écrit nulle part.
+     */
+    afkTurns?: number;
     godsCastThisMatch: string[];         // Ids des dieux ayant lancé au moins un sort cette partie (quête "jouer ce dieu")
     /**
      * Ascension : ce joueur recycle sa défausse sans subir les dégâts de fatigue. C'est une
@@ -161,7 +166,8 @@ export interface GameState {
     isOnlineGame?: boolean;         // Mode online (limite de tours activée)
     players: [PlayerState, PlayerState];
     winnerId?: string;
-    winReason?: 'elimination' | 'turn_limit' | 'surrender' | 'draw';  // Raison de la victoire (ou match nul)
+    /** Raison de la fin de partie (ou du match nul). */
+    winReason?: 'elimination' | 'turn_limit' | 'surrender' | 'draw' | 'timeout';
     log: GameLogEntry[];             // Historique des cartes jouées/défaussées, consultable en jeu
     createdAt: Date;
     updatedAt: Date;
@@ -169,7 +175,10 @@ export interface GameState {
 
 // Action de jeu
 export interface GameAction {
-    type: 'play_card' | 'discard_for_energy' | 'end_turn' | 'select_target' | 'zombie_attack' | 'cast_copied_spell';
+    type: 'play_card' | 'discard_for_energy' | 'end_turn' | 'select_target' | 'zombie_attack'
+    | 'cast_copied_spell'
+    /** Le chrono du tour a expiré : passe la main et incrémente le compteur de dépassements. */
+    | 'timeout_turn';
     playerId: string;
     cardId?: string;
     originalCardId?: string; // ID de la carte source (Perséphone)

@@ -863,3 +863,73 @@
 /* Toutes les tailles (nav, carte de dieu, titres...) sont déjà pilotées par clamp()/vw/dvh
  * directement dans leurs règles ci-dessus : pas besoin de media queries desktop/paysage
  * séparées pour une page conçue mobile-portrait dès le départ. */
+/* ================================
+   ACCÈS AU DIDACTICIEL
+   ================================
+   Depuis l'accueil, un nouveau joueur n'avait aucun accès à quoi que ce soit de pédagogique :
+   il fallait connaître le chemin Options → Règles. La carte est mise en avant tant que le
+   didacticiel n'a pas été terminé, puis s'efface. */
+
+.tutorialCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 14px;
+
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(20, 20, 35, 0.75));
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 20px rgba(212, 175, 55, 0.15);
+    backdrop-filter: blur(12px);
+
+    animation: fadeInUp 0.6s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.tutorialCard:active {
+    transform: scale(0.985);
+}
+
+/* Une fois terminé, il reste accessible mais ne réclame plus l'attention. */
+.tutorialCardDone {
+    background: linear-gradient(135deg, rgba(20, 20, 35, 0.6), rgba(10, 10, 20, 0.8));
+    border-color: rgba(212, 175, 55, 0.2);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
+}
+
+.tutorialIcon {
+    flex-shrink: 0;
+    font-size: 1.7rem;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+
+.tutorialText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.tutorialTitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.92rem;
+    color: var(--gold-light);
+}
+
+.tutorialSubtitle {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: var(--text-secondary);
+}
+
+.tutorialArrow {
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--gold-divine);
+}
