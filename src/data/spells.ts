@@ -2493,11 +2493,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
-        // À FAIRE : illustration propre à Double Estocade. En attendant, la carte réutilise
-        // celle de Balayage Lumineux — c'est le SEUL doublon d'illustration restant en dehors
-        // des clones assumés (Soldats d'Arès, Araignées Géantes). Déposer le fichier en
-        // `public/cards/spells/spell_knight_double_thrust.png` puis mettre ce chemin à jour.
-        imageUrl: '/cards/spells/spell_knight_light_sweep.png',
+        imageUrl: '/cards/spells/spell_knight_double_thrust.png',
         description: '1🩸 +💫1⏳ → ⚔️⚔️',
     },
     {
