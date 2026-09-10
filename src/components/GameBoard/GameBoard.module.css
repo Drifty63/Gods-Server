@@ -238,8 +238,18 @@
   pointer-events: none;
 }
 
+/**
+ * Dieu sélectionné comme cible.
+ *
+ * L'état ne reposait que sur le CHANGEMENT DE COULEUR d'une bordure de 2 px, sur une carte qui
+ * n'en fait que 86 de large — et son seul signal fort, le halo rouge, entrait en concurrence
+ * directe avec le halo doré du projecteur du didacticiel. On y ajoute donc une bordure plus
+ * épaisse et une légère mise à l'échelle, deux signaux que rien d'autre n'utilise sur la carte.
+ */
 .heroCard.targeted {
   border-color: var(--color-danger);
+  border-width: 4px;
+  transform: scale(1.06);
   box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
   animation: pulseTarget 1.5s infinite;
 }
@@ -631,11 +641,21 @@
 /* Réticule affiché sur un dieu déjà retenu comme cible (persiste tant qu'il l'est, y compris
  * en attente d'une cible supplémentaire pour les sorts multi-cibles) : rend le choix explicite
  * au-delà du simple contour rouge de .targeted, qui pouvait passer inaperçu. */
+/* Réticule de ciblage. Posé sur une pastille sombre opaque : sans fond, il se fondait dans
+   l'illustration du dieu, qui occupe toute la carte en `object-fit: cover`. */
 .targetMarker {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 50%;
+  background: rgba(10, 8, 14, 0.82);
+  border: 2px solid var(--color-danger);
   font-size: clamp(1.2rem, 7.5vw, 1.8rem);
   z-index: 7;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px rgba(239, 68, 68, 0.85));
@@ -1667,9 +1687,14 @@
 /* La défausse reste secondaire : elle ne doit pas rivaliser visuellement avec l'action
  * principale, mais rester atteignable au pouce. */
 .detailActions .btnDiscard {
-  flex: 1;
-  min-width: 0;
-  margin-top: 0;
+    flex: 1;
+    min-width: 0;
+    margin-top: 0;
+    /* Aligné sur ses voisins : sans `min-height`, il était visiblement plus bas qu'eux dans la
+       même rangée, ce qui le faisait passer pour un bouton de second rang, voire inactif. */
+    min-height: 44px;
+    font-size: clamp(0.66rem, 3vw, 0.82rem);
+    font-weight: 700;
 }
 
 /* --- BLOCAGE DU MODE PAYSAGE ---
@@ -1810,31 +1835,43 @@
  * Retour en arrière pendant le ciblage. Volontairement discret face au bouton de confirmation :
  * c'est une porte de sortie, pas l'action principale.
  */
+/**
+ * Retour en arrière pendant le ciblage.
+ *
+ * Volontairement secondaire face à la confirmation — mais sa première version était si terne
+ * (fond blanc à 6 %, texte à 75 %) qu'elle paraissait DÉSACTIVÉE, plus encore que le vrai
+ * bouton désactivé posé juste à côté. Un bouton actif doit se lire comme tel.
+ */
 .btnCancel {
     flex: 1;
     min-height: 44px;
     padding: 10px 8px;
     font-family: 'Cinzel', serif;
     font-size: 0.78rem;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.75);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f1f5f9;
+    background: rgba(100, 116, 139, 0.55);
+    border: 1px solid rgba(203, 213, 225, 0.55);
     border-radius: 10px;
 }
 
 .btnCancel:active {
     transform: translateY(1px);
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(100, 116, 139, 0.75);
 }
 
-/* Confirmation impossible tant que le compte de cibles n'y est pas : le bouton reste visible
-   (il disparaissait entièrement) mais annonce clairement qu'il attend encore quelque chose. */
+/**
+ * Confirmation impossible tant que le compte de cibles n'y est pas.
+ *
+ * Le bouton reste visible (il disparaissait entièrement) et son libellé dit le geste attendu.
+ * Un SEUL effet d'atténuation : cumuler `opacity` et `grayscale` le faisait passer pour mort,
+ * alors qu'il n'attend qu'un tap sur un ennemi.
+ */
 .btnAction:disabled {
-    opacity: 0.45;
-    filter: grayscale(60%);
+    opacity: 0.75;
     cursor: default;
+    box-shadow: none;
 }
 
 /**
@@ -1864,4 +1901,24 @@
 @keyframes errorToastIn {
     from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
     to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/**
+ * Compteur de fatigue.
+ *
+ * Il n'avait aucune classe (styles inline) et se perdait à ~9px au bout d'une barre déjà dense,
+ * alors qu'il annonce des dégâts subis par TOUS les dieux du camp. Pastille contrastée, plus
+ * lisible que ses voisins sans pour autant dominer la barre.
+ */
+.fatigueBadge {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 6px;
+    white-space: nowrap;
+    font-weight: 800;
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.28);
+    border: 1px solid rgba(248, 113, 113, 0.75);
+    border-radius: 999px;
 }

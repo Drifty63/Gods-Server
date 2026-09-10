@@ -253,6 +253,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const me = state.players[0];
         if (state.status !== 'playing') return;
 
+        // Démonstration DÉTERMINISTE : le compteur doit toujours afficher 1, quoi qu'il se soit
+        // passé avant. Sinon la leçon montre un nombre arbitraire et le joueur croit avoir raté
+        // quelque chose.
+        me.fatigueCounter = 0;
+
         // Il faut une place en main, sinon la boucle de pioche ne s'exécute pas du tout.
         if (me.hand.length >= 5) me.discard.push(...me.hand.splice(0, 1));
         me.discard.push(...me.deck.splice(0));
@@ -457,6 +462,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     selectCard: (card) => {
         const { engine, playerId } = get();
         if (!engine || !card) {
+            // N'écrire que si quelque chose change RÉELLEMENT.
+            //
+            // zustand notifie ses abonnés à chaque `set()`, sans comparer quoi que ce soit : un
+            // `selectCard(null)` sur un état déjà vide réveillait donc tout le plateau pour rien.
+            // C'est précisément ce `set()` fantôme qui faisait sauter une étape du didacticiel,
+            // `playCard` et `discardForEnergy` ayant déjà remis `selectedCard` à null juste avant.
+            const s = get();
+            if (s.selectedCard === null && !s.isSelectingTarget
+                && s.selectedTargetGods.length === 0 && s.requiredTargets === 0) {
+                return;
+            }
             set({ selectedCard: null, isSelectingTarget: false, selectedTargetGods: [], requiredTargets: 0 });
             return;
         }

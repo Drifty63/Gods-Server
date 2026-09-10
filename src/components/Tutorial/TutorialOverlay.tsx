@@ -11,12 +11,17 @@ interface TutorialOverlayProps {
     /** Disponible seulement sur les étapes explicatives ; les étapes d'action attendent le geste. */
     onNext?: () => void;
     onSkip: () => void;
+    /** Étape `dismissible` : referme entièrement le guidage sans quitter le didacticiel. */
+    onDismiss?: () => void;
 }
 
 interface Rect { top: number; left: number; width: number; height: number }
 
 /** Marge autour de l'élément éclairé, pour ne pas le coller au bord du trou. */
 const HALO = 8;
+
+/** Hauteur approximative de la bulle, pour la centrer avant meme de l'avoir mesuree. */
+const BUBBLE_ESTIMATED_H = 210;
 
 function findTargets(spotlight: SpotlightTarget | SpotlightTarget[]): globalThis.Element[] {
     const wanted = Array.isArray(spotlight) ? spotlight : [spotlight];
@@ -45,7 +50,7 @@ function findTargets(spotlight: SpotlightTarget | SpotlightTarget[]): globalThis
  * Les trous sont mesurés à chaque étape sur le DOM vivant (`data-tutorial`), donc ils suivent
  * automatiquement les éléments si la mise en page change.
  */
-export function TutorialOverlay({ step, index, total, onNext, onSkip }: TutorialOverlayProps) {
+export function TutorialOverlay({ step, index, total, onNext, onSkip, onDismiss }: TutorialOverlayProps) {
     const [rects, setRects] = useState<Rect[]>([]);
     const [viewport, setViewport] = useState({ w: 0, h: 0 });
 
@@ -91,14 +96,25 @@ export function TutorialOverlay({ step, index, total, onNext, onSkip }: Tutorial
         `M${r.left},${r.top} H${r.left + r.width} V${r.top + r.height} H${r.left} Z`
     ).join(' ');
 
-    // La bulle se place du côté opposé aux zones éclairées, pour ne jamais les masquer. On
-    // raisonne sur leur boîte englobante : à l'étape finale, une seule zone de référence plaçait
-    // la bulle par-dessus la main que le joueur devait justement utiliser.
+    // Placement de la bulle.
+    //
+    // Par défaut : du côté où il reste le plus de place autour de la boîte englobante des zones
+    // éclairées. Mais quand ces zones couvrent à la fois le haut et le bas de l'écran, ce calcul
+    // n'a plus d'issue — à l'étape « à vous de jouer », la main descend à 26 px du bas, donc la
+    // bulle était FATALEMENT renvoyée en haut, sur la rangée ennemie qu'il faut toucher. D'où
+    // `bubbleAnchor: 'middle'`, qui la loge dans l'intervalle libre entre les deux.
     const topMost = rects.length ? Math.min(...rects.map(r => r.top)) : 0;
     const bottomMost = rects.length ? Math.max(...rects.map(r => r.top + r.height)) : 0;
     const spaceAbove = topMost;
     const spaceBelow = viewport.h - bottomMost;
-    const bubbleAtBottom = rects.length === 0 ? true : spaceBelow >= spaceAbove;
+
+    const anchor = step.bubbleAnchor
+        ?? (rects.length === 0 || spaceBelow >= spaceAbove ? 'bottom' : 'top');
+
+    // Intervalle libre : sous la zone la plus HAUTE, au-dessus de la zone la plus BASSE.
+    const gapTop = rects.length ? Math.min(...rects.map(r => r.top + r.height)) : 0;
+    const gapBottom = rects.length ? Math.max(...rects.map(r => r.top)) : viewport.h;
+    const middleTop = Math.max(8, Math.round((gapTop + gapBottom) / 2 - BUBBLE_ESTIMATED_H / 2));
 
     return (
         <div className={styles.root} role="dialog" aria-label={step.title}>
@@ -114,7 +130,11 @@ export function TutorialOverlay({ step, index, total, onNext, onSkip }: Tutorial
                 <div key={i} className={styles.halo} style={r} />
             ))}
 
-            <div className={`${styles.bubble} ${bubbleAtBottom ? styles.bubbleBottom : styles.bubbleTop}`}>
+            <div
+                className={`${styles.bubble} ${anchor === 'bottom' ? styles.bubbleBottom
+                    : anchor === 'top' ? styles.bubbleTop : styles.bubbleMiddle}`}
+                style={anchor === 'middle' ? { top: `${middleTop}px` } : undefined}
+            >
                 <div className={styles.progress}>
                     <span className={styles.progressText}>Étape {index + 1} / {total}</span>
                     <button className={styles.skip} onClick={onSkip}>Passer</button>
@@ -123,7 +143,9 @@ export function TutorialOverlay({ step, index, total, onNext, onSkip }: Tutorial
                 <h2 className={styles.title}>{step.title}</h2>
                 <p className={styles.text}>{step.text}</p>
 
-                {onNext ? (
+                {step.dismissible && onDismiss ? (
+                    <button className={styles.next} onClick={onDismiss}>Compris !</button>
+                ) : onNext ? (
                     <button className={styles.next} onClick={onNext}>Suivant</button>
                 ) : (
                     // Étape d'action : aucun bouton, sinon le joueur cliquerait « Suivant » au

@@ -7,10 +7,6 @@ import type { GameState } from '@/types/cards';
  * l'interface, et attend une condition pour passer à la suivante. Le tout est décrit ICI, en
  * données : le composant d'affichage ne connaît aucune étape en particulier, ce qui permet de
  * réécrire la leçon sans toucher au plateau de jeu.
- *
- * Le combat est volontairement déséquilibré en faveur du joueur (Zeus, 25 PV, contre un unique
- * Soldat d'Arès de 16 PV faible à la Foudre) : on apprend mal en perdant, et il ne doit y avoir
- * aucun risque d'échec pendant une leçon.
  */
 
 /** Élément de l'interface à mettre en avant, via son attribut `data-tutorial`. */
@@ -18,10 +14,15 @@ export type SpotlightTarget =
     | 'player-energy'
     | 'player-deck'
     | 'player-discard'
+    | 'player-fatigue'
     | 'opponent-stats'
     | 'hand'
-    /** Rangée de boutons du panneau de carte (CIBLER / CONFIRMER / DÉFAUSSER). */
+    /** Toute la rangée de boutons du panneau de carte. */
     | 'card-actions'
+    /** Le seul bouton d'action (CIBLER / LANCER / CONFIRMER). */
+    | 'card-action-primary'
+    /** Le seul bouton DÉFAUSSER. */
+    | 'card-action-discard'
     | 'end-turn'
     | 'combat-log'
     | 'enemy-gods'
@@ -37,9 +38,9 @@ export interface TutorialStep {
     /**
      * Élément(s) éclairé(s) pendant l'étape.
      *
-     * Une étape d'action DOIT éclairer tout ce que le geste demandé exige de toucher. Le voile
-     * ne bloque plus rien (voir TutorialOverlay), mais un joueur guidé cherche son geste dans la
-     * zone éclairée : l'y montrer en entier est ce qui rend l'étape franchissable.
+     * Une étape d'action DOIT éclairer tout ce que le geste demandé exige de toucher — mais rien
+     * de plus. Éclairer toute la rangée de boutons revenait à entourer CIBLER *et* DÉFAUSSER en
+     * même temps : le joueur ne savait pas lequel on lui demandait.
      */
     spotlight: SpotlightTarget | SpotlightTarget[];
     /**
@@ -47,6 +48,10 @@ export interface TutorialStep {
      * - `next` : le joueur clique sur « Suivant » (étape explicative).
      * - une fonction : l'étape attend une action RÉELLE en jeu. C'est ce qui distingue un
      *   guidage d'une simple visite guidée.
+     *
+     * Attention : ces prédicats décrivent un ÉTAT, pas une transition — ils restent vrais après
+     * l'action. C'est le garde `advancedFrom` de /tutorial/page.tsx qui empêche qu'une même
+     * étape soit franchie deux fois.
      */
     advance: 'next' | ((state: GameState) => boolean);
     /**
@@ -59,10 +64,49 @@ export interface TutorialStep {
     /** Remplace « À vous de jouer » sur une étape d'action où le joueur n'agit pas lui-même. */
     waitingLabel?: string;
     /**
+     * Où poser la bulle.
+     *
+     * Par défaut elle se place du côté où il reste le plus de place. Mais quand les zones
+     * éclairées couvrent à la fois le haut et le bas de l'écran, ce calcul la renvoie
+     * fatalement sur l'une d'elles — à l'étape « à vous de jouer », elle recouvrait la rangée
+     * ennemie qu'il faut justement toucher. `'middle'` la loge dans l'intervalle libre entre la
+     * zone la plus haute et la plus basse.
+     */
+    bubbleAnchor?: 'top' | 'bottom' | 'middle';
+    /**
+     * Offre un bouton « Compris ! » qui referme entièrement le guidage.
+     *
+     * Pour la dernière étape : le joueur doit pouvoir conclure le combat sans voile, sans halo
+     * et sans bulle devant les yeux.
+     */
+    dismissible?: boolean;
+    /**
      * Mise en scène jouée à l'entrée de l'étape (voir /tutorial/page.tsx). Certaines règles se
-     * comprennent bien mieux en les VOYANT se produire qu'en les lisant.
+     * comprennent bien mieux en les VOYANT se produire.
      */
     script?: 'fatigue';
+}
+
+
+/**
+ * Faut-il franchir l'étape courante ?
+ *
+ * Fonction PURE, et c'est délibéré : cette décision ne vivait auparavant que dans un abonnement
+ * au store, donc aucun test ne pouvait l'atteindre — ce qui explique que le didacticiel ait pu
+ * sauter une étape sur deux sans que rien ne le signale.
+ *
+ * `advancedFromId` porte l'id de la dernière étape déjà franchie. Il est indispensable parce que
+ * les prédicats `advance` décrivent un ÉTAT (`hasPlayedCard`) et non une transition : ils restent
+ * vrais après l'action, et le store notifie plusieurs fois pour une seule action du joueur.
+ */
+export function shouldAdvance(
+    step: TutorialStep | undefined,
+    advancedFromId: string | null,
+    state: GameState,
+): boolean {
+    if (!step || typeof step.advance !== 'function') return false;
+    if (advancedFromId === step.id) return false;
+    return step.advance(state);
 }
 
 const me = (s: GameState) => s.players[0];
@@ -88,7 +132,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'god-anatomy',
         title: 'Lire une carte de dieu',
-        text: "La COULEUR du cadre d'un dieu indique son élément : doré pour la Lumière, bleu pour l'Eau, violet pour les Ténèbres… C'est l'élément de ses propres attaques.",
+        text: "La COULEUR du cadre indique l'élément du dieu : Zeus est encadré de Foudre, Athéna de Lumière. C'est l'élément de ses propres attaques.",
         spotlight: 'player-gods',
         advance: 'next',
         blocking: true,
@@ -120,11 +164,10 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'play-generator',
         title: 'À vous de jouer',
-        text: "Touchez une carte GÉNÉRATEUR de votre main — elles sont gratuites et rapportent de l'énergie. Puis « CIBLER », touchez un dieu ennemi en haut, et confirmez.",
-        // Les trois zones que le geste exige : la main, les boutons du panneau, et la rangée
-        // ennemie. Éclairer la seule main laissait le joueur sans indication sur l'étape
-        // suivante de son propre geste.
-        spotlight: ['hand', 'card-actions', 'enemy-gods'],
+        text: "Touchez une carte GÉNÉRATEUR — elles sont gratuites et rapportent de l'énergie. Puis « CIBLER », touchez le soldat en haut, et confirmez.",
+        spotlight: ['hand', 'card-action-primary', 'enemy-gods'],
+        // La bulle doit laisser le soldat visible : c'est lui qu'on demande de toucher.
+        bubbleAnchor: 'middle',
         // On attend que le joueur ait réellement joué : aucun bouton « Suivant » ici.
         advance: (s) => me(s).hasPlayedCard || foe(s).gods.some(g => g.currentHealth < g.card.maxHealth),
     },
@@ -140,14 +183,23 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'discard',
         title: "Défausser pour de l'énergie",
-        text: "Au lieu de jouer, vous pouvez défausser une carte pour gagner 1 énergie. Sélectionnez une carte puis touchez « DÉFAUSSER ». C'est ainsi qu'on finance les sorts les plus chers.",
-        spotlight: ['hand', 'card-actions'],
+        text: "Au lieu de jouer, vous pouvez défausser. Sélectionnez une carte puis touchez « DÉFAUSSER ».",
+        spotlight: ['hand', 'card-action-discard'],
         advance: (s) => me(s).hasDiscardedForEnergy,
+    },
+    {
+        id: 'discard-more',
+        title: 'Défaussez autant que vous voulez',
+        text: "Vous pouvez en défausser 2, 3, ou votre main entière — une par une. L'énergie, elle, n'est gagnée qu'UNE fois par tour : le reste sert à se débarrasser des cartes qui ne vous servent pas.",
+        spotlight: ['hand', 'card-action-discard'],
+        // Volontairement NON bloquante : on dit au joueur qu'il peut en défausser d'autres, il
+        // faut donc qu'il puisse le faire tout de suite s'il en a envie.
+        advance: 'next',
     },
     {
         id: 'end-turn',
         title: 'Terminer le tour à la main',
-        text: "Après une défausse, le tour NE se termine PAS tout seul : vous pouvez en défausser d'autres. Quand vous avez fini, touchez « Terminer le tour ».",
+        text: "Après une défausse, le tour NE se termine PAS tout seul. Quand vous avez fini, touchez « Terminer le tour ».",
         spotlight: 'end-turn',
         advance: (s) => !me(s).hasDiscardedForEnergy,
     },
@@ -160,10 +212,18 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         blocking: true,
     },
     {
+        id: 'deck-empty',
+        title: 'Quand la pioche se vide',
+        text: "Voici votre pioche. Que se passe-t-il quand il n'y reste plus une seule carte ? Touchez « Suivant » et regardez bien ce compteur.",
+        spotlight: 'player-deck',
+        advance: 'next',
+        blocking: true,
+    },
+    {
         id: 'fatigue',
         title: 'La fatigue',
-        text: "Regardez : votre pioche vient de se vider. La corbeille est remélangée pour la reformer, et TOUS vos dieux encaissent des dégâts — de plus en plus lourds à chaque recyclage. Une partie qui s'éternise vous use.",
-        spotlight: ['player-deck', 'player-gods'],
+        text: "Votre corbeille vient d'être remélangée pour reformer la pioche — et TOUS vos dieux ont encaissé 1 dégât. Au prochain recyclage ce sera 2, puis 3, et ainsi de suite. Une partie qui s'éternise vous use.",
+        spotlight: ['player-deck', 'player-fatigue', 'player-gods'],
         // Mise en scène plutôt qu'explication : la fatigue se produit sous les yeux du joueur.
         script: 'fatigue',
         advance: 'next',
@@ -173,7 +233,10 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         id: 'finish',
         title: 'À vous de conclure',
         text: "Vous savez l'essentiel. Achevez ce soldat pour terminer l'entraînement — visez sa faiblesse pour aller plus vite.",
-        spotlight: ['hand', 'card-actions', 'enemy-gods'],
+        spotlight: ['hand', 'card-action-primary', 'enemy-gods'],
+        bubbleAnchor: 'middle',
+        // Le joueur finit le combat sans voile ni bulle devant les yeux.
+        dismissible: true,
         advance: (s) => s.status === 'finished',
     },
 ];

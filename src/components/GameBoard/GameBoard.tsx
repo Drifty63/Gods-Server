@@ -684,16 +684,18 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                         // donnait un panneau muet et un plateau sans issue apparente.
                         <button
                             className={styles.btnAction}
+                            data-tutorial="card-action-primary"
                             disabled={!readyToConfirm}
                             onClick={(e) => { e.stopPropagation(); handlePlayConfirmed(); }}
                         >
                             {readyToConfirm
                                 ? '✓ CONFIRMER'
-                                : `✓ CONFIRMER (${selectedTargetGods.length}/${maxSelectableTargets})`}
+                                : `🎯 TOUCHEZ UN ENNEMI (${selectedTargetGods.length}/${maxSelectableTargets})`}
                         </button>
                     ) : (
                         <button
                             className={styles.btnAction}
+                            data-tutorial="card-action-primary"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 const reason = getUnplayableReason(selectedCard);
@@ -706,7 +708,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                                 le nombre de cibles d'un sort que l'effet de Nyx doit garder secret. */}
                             {selectedCard.isHiddenFromOwner
                                 ? `🎲 JOUER À L'AVEUGLE`
-                                : requiredTargets > 0 ? `🎯 CIBLER (${requiredTargets})` : `⚔️ LANCER LE SORT`}
+                                : requiredTargets > 0 ? `🎯 CIBLER (${maxSelectableTargets})` : `⚔️ LANCER LE SORT`}
                         </button>
                     )
                 );
@@ -724,6 +726,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                 const discardButton = selectedCard && myTurn && !isSelectingTarget && (
                     <button
                         className={styles.btnDiscard}
+                        data-tutorial="card-action-discard"
                         onClick={(e) => { e.stopPropagation(); handleDiscard(); }}
                     >
                         🗑️ DÉFAUSSER

@@ -1,24 +1,58 @@
 /* GODS - Team Selection Divine */
 /* Style : Écran de sélection des dieux olympien */
 
+/**
+ * Fond porté par un CALQUE FIXE, et non par la boîte du conteneur.
+ *
+ * Le fond « sautait » à chaque carte sélectionnée. La carte cliquée n'y était pour rien : c'est
+ * le panneau des équipes qui empile un badge de ~43 px par sélection, faisant grandir la page
+ * d'environ 145 px entre 0 et 4 dieux. Or `background-attachment: fixed` n'est pas honoré par
+ * WebKit mobile, qui dimensionne alors le fond contre la boîte COMPLÈTE du document : `cover`
+ * recalculait donc son échelle à chaque clic. Avec une image carrée (1024×1024) dans une page
+ * très allongée, le décalage devenait spectaculaire.
+ *
+ * Un pseudo-élément en `position: fixed; inset: 0` fait du VIEWPORT la zone de référence de
+ * `cover` : le cadrage devient indépendant de la hauteur du contenu. Et contrairement à
+ * `background-attachment: fixed`, un calque composité normal ne force pas de repaint par frame,
+ * donc pas de saccade au défilement sur iOS. Même motif que la page des Règles.
+ */
 .container {
-    min-height: 100vh;
+    position: relative;
+    isolation: isolate;
+    min-height: 100dvh;
     padding: 2rem;
-    background:
-        /* Overlay */
-        linear-gradient(180deg,
-            rgba(10, 10, 26, 0.9) 0%,
-            rgba(26, 26, 58, 0.85) 50%,
-            rgba(10, 10, 26, 0.9) 100%),
-        /* Image de fond */
-        url('/assets/team_selection_background.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-color: #0a0a1a;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
+}
+
+.container::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg,
+            rgba(10, 10, 26, 0.9) 0%,
+            rgba(26, 26, 58, 0.85) 50%,
+            rgba(10, 10, 26, 0.9) 100%),
+        url('/assets/team_selection_background.png') center / cover no-repeat;
+}
+
+/**
+ * Le contenu passe AU-DESSUS du calque de fond.
+ *
+ * Indispensable, et pas seulement par prudence : dans l'ordre de peinture CSS, un élément
+ * positionne a z-index 0 (le ::before ci-dessus) est peint APRES les arriere-plans ET le texte
+ * des descendants NON positionnes. Sans cette regle, le calque recouvrirait le contenu.
+ */
+
+.container > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* ================================
@@ -321,10 +355,18 @@
     letter-spacing: 1px;
 }
 
+/**
+ * Liste des dieux retenus.
+ *
+ * `min-height` réserve la place des quatre badges dès le départ : c'est la CAUSE du fond qui
+ * sautait, traitée à la racine plutôt qu'au seul niveau du symptôme. La page cesse purement et
+ * simplement de changer de taille au fil des sélections.
+ */
 .teamGods {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-height: calc(4 * 35px + 3 * 0.5rem);
 }
 
 .teamGod {

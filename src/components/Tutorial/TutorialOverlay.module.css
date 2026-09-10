@@ -74,6 +74,14 @@
     top: calc(env(safe-area-inset-top, 0px) + 16px);
 }
 
+/* Logée dans l'intervalle libre entre les zones eclairees : `top` est pose en style inline
+   par le composant, qui seul connait la position reelle des trous. */
+.bubbleMiddle {
+    /* `top` reel pose en style inline par le composant ; cette valeur n'est qu'un repli.
+       La regle doit rester NON VIDE, sinon le minifieur la supprime et la classe avec. */
+    top: 30dvh;
+}
+
 .progress {
     display: flex;
     align-items: center;

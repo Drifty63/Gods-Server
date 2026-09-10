@@ -36,8 +36,14 @@ export const DeckAndDiscard: React.FC<DeckAndDiscardProps> = ({ player, isOppone
                 🗑️{player.discard.length}
             </div>
 
+            {/* Fatigue : nombre de fois que la pioche a été reformée depuis la corbeille. Chaque
+              * recyclage inflige ce nombre en dégâts à TOUS les dieux du camp, d'où l'alerte. */}
             {player.fatigueCounter > 0 && (
-                <div style={{ color: '#ef4444', fontWeight: 'bold', whiteSpace: 'nowrap' }} title="Fatigue">
+                <div
+                    className={styles.fatigueBadge}
+                    data-tutorial={isOpponent ? undefined : 'player-fatigue'}
+                    title={`Fatigue : ${player.fatigueCounter} dégât(s) à tous vos dieux au prochain recyclage`}
+                >
                     ⚠️{player.fatigueCounter}
                 </div>
             )}

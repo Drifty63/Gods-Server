@@ -305,7 +305,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 16,
         imageUrl: '/cards/gods/soldier_ares_1.png',
         archetype: 'glass_cannon',
-        flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
+        flavorText: "« Pour Arès ! Pour la gloire et la guerre ! » — 16 points de vie pour 5 dégâts d'un seul coup : une munition bon marché, qu'on dépense sans regret.",
         hidden: false,  // Disponible en mode Duel
         category: 'servant',
         duelCost: 2,
@@ -353,7 +353,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 26,  // 26 PV en mode Duel, 75 PV override en mode Histoire
         imageUrl: '/cards/gods/dragon_thebes.png',
         archetype: 'tank',
-        flavorText: '"Né du sang d\'Arès lui-même, je suis la terreur des cieux. Plus grand, plus puissant que mon ancêtre, je règne sur les vents de la mort."',
+        flavorText: "« Né du sang d'Arès lui-même, je suis la terreur des cieux. Plus grand, plus puissant que mon ancêtre, je règne sur les vents de la mort. » — Le plus résistant du bestiaire : sa provocation force l'adversaire à le viser pendant que son souffle ronge toute l'équipe d'en face.",
         hidden: false,  // Disponible en mode Duel
         category: 'creature',
         duelCost: 3,
@@ -368,7 +368,7 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'light',
         maxHealth: 22,  // 22 PV en mode Duel, 50 PV override en mode Histoire
         imageUrl: '/cards/gods/arachne.png',
-        flavorText: '"Athéna m\'a maudite, mais ma vengeance sera tissée de leurs propres entrailles. Partout où rampe une araignée, je peux apparaître !"',
+        flavorText: "« Athéna m'a maudite, mais ma vengeance sera tissée de leurs propres entrailles. Partout où rampe une araignée, je peux apparaître ! » — Ni bouclier ni soin : elle empoisonne l'équipe entière et fige deux cibles pendant deux tours. On ne la tue jamais assez vite.",
         hidden: false,  // Disponible en mode Duel
         category: 'creature',
         duelCost: 3,
@@ -398,7 +398,7 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'light',
         maxHealth: 21,
         imageUrl: '/cards/gods/giant_spider_1.png',
-        flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
+        flavorText: "« Nous sommes les enfants d'Arachné. Nous tissons la mort. » — Moins retorse que sa mère, plus brutale : elle plante quatre dégâts et un poison lourd sur une seule cible, puis se retranche derrière son bouclier.",
         category: 'creature',
         affiliatedTo: 'arachne',
         duelCost: 3,
@@ -444,7 +444,7 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'lightning',
         maxHealth: 20,
         imageUrl: '/cards/gods/card_ulysses.png',
-        flavorText: '"Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies."',
+        flavorText: "« Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies. » — Vingt points de vie et aucune armure : il ne survit pas en encaissant, il devient impossible à cibler. Il frappe, disparaît, revient.",
         // Validé pour la v1.0 (illustration et sorts repris à la main) : jouable en Duel et
         // opposable en Ascension, plus seulement réservé au mode Histoire.
         category: 'creature',
@@ -463,7 +463,7 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 16,
         imageUrl: '/cards/gods/card_athena_knight.png',
         archetype: 'tank',
-        flavorText: '"Pour la gloire d\'Athéna, nous ne fléchirons jamais!"',
+        flavorText: "« Pour la gloire d'Athéna, nous ne fléchirons jamais ! » — Il ne tue personne : il provoque, il encaisse, et il couvre TOUT son camp de boucliers. Athéna en version deux points.",
         // Intégration au Duel effectuée : serviteur validé pour la v1.0.
         category: 'servant',
         affiliatedTo: 'athena',

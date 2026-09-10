@@ -136,7 +136,7 @@ export default function RulesPage() {
                             <div className={styles.stepNumber}>2</div>
                             <div className={styles.stepContent}>
                                 <strong>Phase d&apos;Action</strong>
-                                <p>Jouez une carte OU défaussez une carte pour gagner +1 énergie</p>
+                                <p>Jouez une carte OU défaussez : autant de cartes que vous voulez, mais l&apos;énergie n&apos;est gagnée qu&apos;une seule fois par tour (+1)</p>
                             </div>
                         </div>
                         <div className={styles.turnStep}>

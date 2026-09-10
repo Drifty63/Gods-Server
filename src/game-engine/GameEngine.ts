@@ -1037,7 +1037,8 @@ export class GameEngine {
 
         // Pas de gain d'énergie passif en début de tour : l'énergie ne vient que des cartes
         // générateurs (energyGain) et de la défausse volontaire contre énergie
-        // (discardForEnergy, une fois par tour).
+        // (discardForEnergy : on peut défausser autant de cartes qu'on veut, mais l'énergie
+        // n'est accordée qu'une seule fois par tour).
 
         // Piocher jusqu'à la limite
         this.drawToHandLimit(nextPlayer);

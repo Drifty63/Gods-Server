@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import GameBoard from '@/components/GameBoard/GameBoard';
 import TutorialOverlay from '@/components/Tutorial/TutorialOverlay';
-import { TUTORIAL_STEPS, TUTORIAL_OUTRO, TUTORIAL_DONE_KEY } from '@/data/tutorial';
+import { TUTORIAL_STEPS, TUTORIAL_OUTRO, TUTORIAL_DONE_KEY, shouldAdvance } from '@/data/tutorial';
 import { getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import { playSfx } from '@/lib/sfx';
@@ -16,12 +16,21 @@ import styles from './page.module.css';
 /**
  * Combat d'entraînement scripté.
  *
- * Zeus (Foudre, 25 PV) contre un unique Soldat d'Arès (Terre, 16 PV). Ce n'est pas un hasard :
- * la Terre est faible à la Foudre, donc le joueur découvrira le coup critique ×2 dès son premier
- * sort, sans qu'on ait à le lui faire chercher. Un seul adversaire, peu de PV : la leçon ne peut
- * pas se solder par une défaite.
+ * Zeus (Foudre, 25 PV) et Athéna (Lumière, 30 PV) contre un unique Soldat d'Arès (Terre, 16 PV).
+ * Rien n'est laissé au hasard :
+ *
+ *  - la Terre est faible à la Foudre, donc le joueur découvre le coup critique ×2 dès son
+ *    premier sort, sans qu'on ait à le lui faire chercher ;
+ *  - un seul adversaire, peu de PV : la leçon ne peut pas se solder par une défaite ;
+ *  - DEUX dieux, et non un seul, pour deux raisons. Leurs cadres — Foudre et Lumière — sont
+ *    franchement différents, ce qui donne sa matière à l'étape « la couleur du cadre indique
+ *    l'élément ». Et surtout, un seul dieu ne fournissait que 5 cartes pour une main de 5 : la
+ *    pioche était vide dès le premier tour, le joueur encaissait des dégâts de fatigue en
+ *    silence dès le tour 2, et l'étape qui montre « vos cartes restantes en pioche » affichait
+ *    invariablement 0. Avec dix cartes, la pioche existe et la fatigue ne survient que
+ *    lorsqu'on la met en scène.
  */
-const PLAYER_GODS = ['zeus'];
+const PLAYER_GODS = ['zeus', 'athena'];
 const ENEMY_GODS = ['soldier_ares_1'];
 
 type Phase = 'intro' | 'playing' | 'done';
@@ -32,6 +41,8 @@ export default function TutorialPage() {
 
     const [phase, setPhase] = useState<Phase>('intro');
     const [stepIndex, setStepIndex] = useState(0);
+    /** Étape `dismissible` refermée par le joueur : le guidage disparaît, la partie continue. */
+    const [guideDismissed, setGuideDismissed] = useState(false);
 
     const step = TUTORIAL_STEPS[stepIndex];
     const isLast = stepIndex >= TUTORIAL_STEPS.length - 1;
@@ -53,7 +64,11 @@ export default function TutorialPage() {
             true,   // adversaire tenu par l'IA
         );
         setStepIndex(0);
+        setGuideDismissed(false);
         setPhase('playing');
+        // Le didacticiel est rejouable : les gardes « déjà fait » doivent repartir de zéro.
+        advancedFrom.current = null;
+        scriptedSteps.current.clear();
     }, [initGame, playerGods, enemyGods]);
 
     // Nettoyage : sans ça, la partie du didacticiel resterait dans le store et s'afficherait
@@ -108,6 +123,20 @@ export default function TutorialPage() {
     const stepRef = useRef(step);
     useEffect(() => { stepRef.current = step; });
 
+    /**
+     * Id de la dernière étape déjà franchie.
+     *
+     * Sans ce garde, le didacticiel sautait une étape sur deux (7 → 9, puis 9 → 11). Trois
+     * choses se combinaient : zustand notifie à CHAQUE `set()` sans rien comparer ; une action
+     * du joueur en déclenche deux (`playCard` puis `selectCard(null)`) ; et `stepRef` n'est
+     * rafraîchie qu'après un commit React. La deuxième notification revalidait donc la
+     * condition de l'étape déjà franchie — d'autant plus facilement que ces conditions décrivent
+     * un ÉTAT (`hasPlayedCard`) et non une transition : elles restent vraies après coup.
+     *
+     * Mémoriser l'id rend le franchissement idempotent, quel que soit le nombre de notifications.
+     */
+    const advancedFrom = useRef<string | null>(null);
+
     useEffect(() => {
         if (phase !== 'playing') return;
 
@@ -118,10 +147,9 @@ export default function TutorialPage() {
             if (state.gameState.status === 'finished') { finish(); return; }
 
             const current = stepRef.current;
-            if (!current || typeof current.advance !== 'function') return;
-            if (current.advance(state.gameState)) {
-                setStepIndex(i => Math.min(i + 1, TUTORIAL_STEPS.length - 1));
-            }
+            if (!shouldAdvance(current, advancedFrom.current, state.gameState)) return;
+            advancedFrom.current = current!.id;
+            setStepIndex(i => Math.min(i + 1, TUTORIAL_STEPS.length - 1));
         };
 
         check(useGameStore.getState());
@@ -166,7 +194,7 @@ export default function TutorialPage() {
     return (
         <>
             <GameBoard />
-            {step && (
+            {step && !guideDismissed && (
                 <TutorialOverlay
                     step={step}
                     index={stepIndex}
@@ -177,6 +205,7 @@ export default function TutorialPage() {
                         ? () => { if (!isLast) setStepIndex(i => i + 1); else finish(); }
                         : undefined}
                     onSkip={skip}
+                    onDismiss={() => setGuideDismissed(true)}
                 />
             )}
         </>
