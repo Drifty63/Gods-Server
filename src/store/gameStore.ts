@@ -183,6 +183,20 @@ const cloneGameState = (state: GameState): GameState => {
 /** Laisse le joueur voir le résultat de son sort avant que la main ne passe. */
 const TURN_END_DELAY_MS = 700;
 
+/**
+ * Poussée de l'état vers l'adversaire, en ligne.
+ *
+ * Délibérément HORS du state zustand : ce n'est pas une donnée de rendu, et l'y ranger
+ * ferait un rendu à chaque enregistrement — donc une boucle, le GameBoard s'abonnant au store.
+ * Vaut `null` en solo, où il n'y a personne à prévenir.
+ */
+let turnSyncCallback: (() => void) | null = null;
+
+/** Enregistre (ou retire) la poussée d'état de fin de tour. Appelé par le GameBoard. */
+export function setTurnSync(fn: (() => void) | null): void {
+    turnSyncCallback = fn;
+}
+
 // État "toutes les modales fermées". Une seule modale de choix doit jamais être active à la
 // fois : chaque startXxx() ci-dessous applique ce patch AVANT d'ouvrir la sienne, pour garantir
 // qu'ouvrir une nouvelle modale ferme systématiquement toute modale précédente encore active
@@ -277,12 +291,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
      * joueur devant un plateau où plus aucune action n'était possible, sans lui dire qu'il
      * devait cliquer lui-même sur la fin de tour.
      *
-     * Réservé au SOLO : en ligne, la fin de tour doit passer par le gestionnaire du GameBoard,
-     * qui pousse l'état à l'adversaire. La déclencher ici désynchroniserait les deux clients.
+     * Vaut pour TOUS les modes : en ligne, l'état est poussé à l'adversaire juste après, via
+     * `turnSyncCallback`, exactement comme le fait le bouton manuel.
      */
     finishTurnAfterResolution: () => {
-        const { engine, isSoloMode, playerId } = get();
-        if (!engine || !isSoloMode) return;
+        const { engine, playerId } = get();
+        if (!engine) return;
 
         setTimeout(() => {
             const state = engine.getState();
@@ -291,6 +305,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             // alors la main, il ne faut surtout pas lui couper son tour.
             if (state.currentPlayerId === playerId && state.status === 'playing' && me?.hasPlayedCard) {
                 get().endTurn();
+                turnSyncCallback?.();
             }
         }, TURN_END_DELAY_MS);
     },
@@ -992,7 +1007,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     playCard: (cardId, targetGodId, targetGodIds, lightningAction) => {
-        const { engine, playerId, selectedTargetGods, selectedLightningAction, selectedElement, isSoloMode, pendingEnemyCardEffect } = get();
+        const { engine, playerId, selectedTargetGods, selectedLightningAction, selectedElement, pendingEnemyCardEffect } = get();
         if (!engine) return { success: false, message: 'Partie non initialisée' };
 
         // 1. CAS SPÉCIAL : Exécution d'un sort copié après sélection de cible
@@ -1275,9 +1290,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 selectedElement: null,
             });
 
-            // Fin de tour automatique UNIQUEMENT en mode solo
-            // En multijoueur, le GameBoard.onAction gère la fin de tour
-            if (isSoloMode) {
+            // Fin de tour automatique dans TOUS les modes.
+            //
+            // Elle était réservée au solo, au motif que le multijoueur doit pousser l'état à
+            // l'adversaire — ce qui est vrai, mais se règle en poussant après avoir fini le tour
+            // (`turnSyncCallback`) plutôt qu'en privant le mode en ligne de l'automatisme. Les
+            // deux modes se comportent désormais pareil, ce qu'attend le joueur.
+            {
                 // Vérifier si le tour n'a pas déjà changé (ex: mort par poison)
                 const currentState = engine.getState();
                 if (currentState.currentPlayerId === playerId && currentState.status === 'playing') {
@@ -1313,6 +1332,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                             freshState.status === 'playing' &&
                             freshPlayer?.hasPlayedCard) {
                             get().endTurn();
+                            turnSyncCallback?.();
                         }
                     }, 1500);
                 }

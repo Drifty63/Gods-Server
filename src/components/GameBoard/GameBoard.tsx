@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useGameStore } from '@/store/gameStore';
+import { useGameStore, setTurnSync } from '@/store/gameStore';
 import { ArenaArea } from './components/ArenaArea';
 import { HandArea } from './components/HandArea';
 import { DeckAndDiscard } from './components/DeckAndDiscard';
@@ -158,6 +158,21 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
      * jusqu'à la fin de la partie, y compris pendant les tours adverses. Le minuteur est gardé en
      * ref pour être remplacé à chaque nouveau message et annulé au démontage.
      */
+    /**
+     * Poussée de l'état à l'adversaire quand le tour se termine TOUT SEUL (après une carte
+     * résolue). Le bouton manuel le faisait déjà ; l'automatisme, réservé au solo, ne le
+     * faisait pas — d'où deux comportements différents entre le solo et le jeu en ligne.
+     *
+     * Passe par une ref : `onAction` n'est pas garanti stable d'un rendu à l'autre, et
+     * ré-enregistrer à chaque rendu n'apporterait rien.
+     */
+    const onActionRef = useRef(onAction);
+    useEffect(() => { onActionRef.current = onAction; });
+    useEffect(() => {
+        setTurnSync(() => onActionRef.current?.({ type: 'end_turn' }));
+        return () => setTurnSync(null);
+    }, []);
+
     const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const showError = useCallback((message: string) => {
         setErrorMsg(message);

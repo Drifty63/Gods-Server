@@ -147,7 +147,11 @@ export default function OnlineGamePage() {
         );
     }
 
-    if (opponentDisconnected) {
+    // Partie TERMINÉE : l'adversaire qui s'en va ne « se déconnecte » pas, il rentre chez lui.
+    // Cette garde remplaçait l'écran de victoire/défaite au bout d'une poignée de secondes,
+    // le temps que la présence de l'autre client retombe — le joueur n'avait pas le temps de
+    // voir son propre résultat.
+    if (opponentDisconnected && gameState?.status !== 'finished') {
         return (
             <div className={styles.disconnectedOverlay}>
                 <div className={styles.disconnectedModal}>
