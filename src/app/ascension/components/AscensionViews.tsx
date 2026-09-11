@@ -2,7 +2,7 @@
 
 import { getGodById } from '@/data/gods';
 import {
-    TIER_LABELS, TOTAL_FLOORS, floorReward, ascensionFloorBonus, TOTAL_FIRST_CLEAR_BONUS,
+    TIER_LABELS, TOTAL_FLOORS, ascensionFloorBonus, TOTAL_FIRST_CLEAR_BONUS,
     type AscensionFloor,
 } from '@/data/ascension';
 import type { GodCard } from '@/types/cards';
@@ -42,9 +42,9 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
                     <li>❌ Aucun soin entre les combats</li>
                     <li>⚡ L&apos;énergie non dépensée est conservée</li>
                     <li>💀 Un dieu tombé ne revient pas : votre équipe rétrécit</li>
-                    <li>🔄 Pas de dégâts de fatigue</li>
+                    <li>🔄 VOUS ne subissez aucun dégât de fatigue — vos adversaires, si</li>
                     <li>🎲 La composition de chaque étage est tirée au hasard</li>
-                    <li>💧 Ambroisie gagnée à chaque étage franchi</li>
+                    <li>🍯 Ambroisie gagnée à chaque étage franchi</li>
                 </ul>
             </div>
 
@@ -57,10 +57,10 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
                     fois par compte</strong>. Le refranchir ne le rapporte plus.
                 </p>
                 <ul>
-                    <li>👤 Étages 1-5 — {ascensionFloorBonus(1)} 💧 par étage</li>
-                    <li>🐉 Étages 6-10 — {ascensionFloorBonus(6)} 💧 par étage</li>
-                    <li>⚡ Étages 11-15 — {ascensionFloorBonus(11)} 💧 par étage</li>
-                    <li>🏆 Tour entière — <strong>{TOTAL_FIRST_CLEAR_BONUS} 💧</strong> au total</li>
+                    <li>👤 Étages 1-5 — {ascensionFloorBonus(1)} 🍯 par étage</li>
+                    <li>🐉 Étages 6-10 — {ascensionFloorBonus(6)} 🍯 par étage</li>
+                    <li>⚡ Étages 11-15 — {ascensionFloorBonus(11)} 🍯 par étage</li>
+                    <li>🏆 Tour entière — <strong>{TOTAL_FIRST_CLEAR_BONUS} 🍯</strong> au total</li>
                 </ul>
             </div>
 
@@ -137,13 +137,12 @@ function Tower({ floors, currentFloor }: { floors: AscensionFloor[]; currentFloo
  * Écran d'entre-deux-étages : état de l'équipe survivante et aperçu des adversaires à venir.
  * C'est ici que le joueur mesure le coût de l'étage qu'il vient de passer.
  */
-export function FloorCleared({ floors, clearedFloor, survivorHealth, carriedEnergy, reward, onClimb, onQuit }: {
+export function FloorCleared({ floors, clearedFloor, survivorHealth, carriedEnergy, onClimb, onQuit }: {
     floors: AscensionFloor[];
     clearedFloor: number;
     /** PV restants par id de dieu, tels que reportés à l'étage suivant. */
     survivorHealth: Record<string, number>;
     carriedEnergy: number;
-    reward: number;
     onClimb: () => void;
     onQuit: () => void;
 }) {
@@ -158,7 +157,9 @@ export function FloorCleared({ floors, clearedFloor, survivorHealth, carriedEner
             <div className={styles.floorIndicator}>
                 <span className={styles.currentFloor}>Étage {clearedFloor} franchi</span>
                 <span className={styles.floorType} style={{ color: TIER_LABELS.servant.color }}>
-                    +{floorReward(clearedFloor)} 💧 (total {reward})
+                    {/* Le bonus n'est versé QUE la première fois : l'annoncer comme acquis à
+                        chaque passage serait mensonger dès la deuxième ascension. */}
+                    Jusqu&apos;à {ascensionFloorBonus(clearedFloor)} 🍯 si c&apos;est une première
                 </span>
             </div>
 
@@ -195,10 +196,11 @@ export function FloorCleared({ floors, clearedFloor, survivorHealth, carriedEner
 }
 
 /** Fin d'ascension : défaite ou sommet atteint. */
-export function RunOver({ floorReached, reward, isVictory, onRestart, onQuit }: {
+export function RunOver({ floorReached, isVictory, claimedBonus, onRestart, onQuit }: {
     floorReached: number;
-    reward: number;
     isVictory: boolean;
+    /** Ambroisie réellement accordée. `null` tant que le serveur n'a pas répondu. */
+    claimedBonus: number | null;
     onRestart: () => void;
     onQuit: () => void;
 }) {
@@ -215,7 +217,13 @@ export function RunOver({ floorReached, reward, isVictory, onRestart, onQuit }: 
                 <h3>📊 Résultat</h3>
                 <ul>
                     <li>🏔️ Étage atteint : {floorReached}</li>
-                    <li>💧 Ambroisie gagnée : {reward}</li>
+                    {claimedBonus === null ? (
+                        <li>🍯 Enregistrement des récompenses…</li>
+                    ) : claimedBonus > 0 ? (
+                        <li>🍯 Ambroisie gagnée : {claimedBonus} — à récupérer dans 🎁</li>
+                    ) : (
+                        <li>🍯 Aucun nouvel étage : montez plus haut pour gagner davantage</li>
+                    )}
                 </ul>
             </div>
             <div className={styles.selectActions}>

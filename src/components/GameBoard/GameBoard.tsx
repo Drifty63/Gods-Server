@@ -598,6 +598,24 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
     // sinon le joueur restait bloqué en mode ciblage sans jamais pouvoir confirmer.
     const maxSelectableTargets = selectedCard ? getMaxSelectableTargets(selectedCard) : requiredTargets;
 
+    /**
+     * Qui faut-il toucher ?
+     *
+     * Le libellé disait « TOUCHEZ UN ENNEMI » quelle que soit la carte — y compris sur les
+     * sorts de soutien de Déméter, qui ne visent QUE des alliés. Le joueur cherchait donc
+     * une cible du mauvais côté du plateau.
+     */
+    const targetKind = (() => {
+        const t = selectedCard?.effects.find(e =>
+            e.target === 'enemy_god' || e.target === 'ally_god'
+            || e.target === 'any_god' || e.target === 'dead_ally_god'
+        )?.target;
+        if (t === 'ally_god') return 'UN ALLIÉ';
+        if (t === 'dead_ally_god') return 'UN ALLIÉ TOMBÉ';
+        if (t === 'any_god') return 'UN DIEU';
+        return 'UN ENNEMI';
+    })();
+
     return (
         <div
             className={`${styles.gameBoard} ${screenShake === 'heavy' ? styles.shakeHeavy : ''} ${screenShake === 'light' ? styles.shakeLight : ''}`}
@@ -705,7 +723,7 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                         >
                             {readyToConfirm
                                 ? '✓ CONFIRMER'
-                                : `🎯 TOUCHEZ UN ENNEMI (${selectedTargetGods.length}/${maxSelectableTargets})`}
+                                : `🎯 TOUCHEZ ${targetKind} (${selectedTargetGods.length}/${maxSelectableTargets})`}
                         </button>
                     ) : (
                         <button

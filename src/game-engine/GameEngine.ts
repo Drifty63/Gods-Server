@@ -211,15 +211,14 @@ registerEffect('heal_if_kill_8', (ctx) => {
 });
 
 registerEffect('lifesteal_damage', (ctx) => {
-    if (!ctx.castingGod || !ctx.targetGodId) return;
-    const target = ctx.opponent.gods.find(g => g.card.id === ctx.targetGodId);
-    if (!target) return;
+    if (!ctx.castingGod) return;
 
-    const hasImmunity = target.statusEffects.some(s => s.type === 'weakness_immunity');
-    const { damage } = hasImmunity
-        ? { damage: 3 }
-        : calculateDamageWithDualWeakness(3, ctx.card.element, target.card.weakness, target.temporaryWeakness);
-    healGod(ctx.castingGod, damage);
+    // Se soigner des POINTS DE VIE réellement perdus par la cible, et non d'un recalcul des
+    // dégâts annoncés. L'ancienne version refaisait le calcul dans son coin : elle ignorait
+    // donc le bouclier, la pétrification et tout ce qui a pu modifier le coup — un sort
+    // intégralement absorbé par une armure soignait quand même son lanceur à plein.
+    const healed = ctx.engine.getCastHealthLost();
+    if (healed > 0) healGod(ctx.castingGod, healed);
 });
 
 // === APOLLON ===
@@ -664,6 +663,20 @@ function logAction(state: GameState, player: PlayerState, message: string): void
 export class GameEngine {
     private state: GameState;
 
+    /**
+     * Points de vie RÉELLEMENT perdus par les cibles depuis le début du sort en cours.
+     *
+     * Le vol de vie doit suivre ce chiffre, et non les dégâts annoncés par la carte : un coup
+     * intégralement absorbé par un bouclier ne fait perdre aucun point de vie, et ne doit donc
+     * rien rendre au lanceur.
+     */
+    private castHealthLost = 0;
+
+    /** PV perdus par les cibles du sort en cours (voir `castHealthLost`). */
+    getCastHealthLost(): number {
+        return this.castHealthLost;
+    }
+
     constructor(initialState: GameState) {
         this.state = JSON.parse(JSON.stringify(initialState));
     }
@@ -763,6 +776,7 @@ export class GameEngine {
             DEFERRED_CUSTOM_EFFECTS.has(effect.customEffectId);
 
         // Appliquer les effets
+        this.castHealthLost = 0;
         for (const effect of card.effects) {
             if (isDeferred(effect)) continue;
 
@@ -1131,11 +1145,13 @@ export class GameEngine {
         switch (effect.type) {
             case 'damage':
                 for (const target of targets) {
-                    dealDamage(target, effect.value || 0,
+                    const result = dealDamage(target, effect.value || 0,
                         player.gods.includes(target) ? player : opponent,
                         this.state,
                         { element: card.element }
                     );
+                    // Seuls les PV perdus comptent : le bouclier absorbé n'est pas une blessure.
+                    this.castHealthLost += result.healthLost;
                 }
                 break;
 

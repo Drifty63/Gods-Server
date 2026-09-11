@@ -564,10 +564,10 @@
    ================================ */
 @media (max-width: 768px) {
     .header {
-        flex-direction: column;
-        gap: 12px;
-        text-align: center;
-        padding: 16px 20px;
+        /* Surtout PAS `flex-direction: column` : c'est elle qui empilait le bouton retour
+           au-dessus du titre au lieu de le poser à sa gauche, sur tous les téléphones. */
+        gap: 10px;
+        padding: 16px 72px 16px 12px;
     }
 
     .content {

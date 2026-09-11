@@ -9,6 +9,7 @@ import { useGameStore } from '@/store/gameStore';
 import { getOwnedGods } from '@/data/gods';
 import { floorReward } from '@/data/ascension';
 import { reportAscensionRun, claimAscensionFloorRewards } from '@/services/supabase-profile';
+import { toast } from '@/lib/toast';
 import { useAscensionRun } from './useAscensionRun';
 import { AscensionMenu, TeamPicker, FloorCleared, RunOver } from './components/AscensionViews';
 import styles from './page.module.css';
@@ -31,6 +32,8 @@ function AscensionContent() {
     // Une ascension terminée ne doit être remontée qu'une fois au serveur, même si la phase
     // repasse par un rendu supplémentaire.
     const reportedRef = useRef(false);
+    /** Ambroisie réellement accordée par les bonus de première ascension de ce run. */
+    const [claimedBonus, setClaimedBonus] = useState<number | null>(null);
 
     const bestFloor = profile?.ascension_best_floor ?? 0;
 
@@ -59,14 +62,25 @@ function AscensionContent() {
 
         const floorReached = run.phase === 'victory' ? run.currentFloor : Math.max(0, run.currentFloor - 1);
 
-        // Deux récompenses de natures différentes, dans cet ordre :
-        //  1. le gain du run, répétable, crédité directement (report-ascension-run) ;
-        //  2. le bonus de PREMIÈRE ascension de chaque étage, une seule fois par profil, déposé
-        //     dans la boîte 🎁 pour que le joueur voie ce qu'il vient de débloquer.
-        reportAscensionRun(floorReached, run.reward)
+        // L'Ascension ne rapporte plus RIEN de répétable.
+        //
+        // Le gain par run (jusqu'à 760 ambroisie, sans aucune limite de nombre de runs) était le
+        // seul vrai vecteur de farm du jeu : on pouvait refaire les premiers étages en boucle.
+        // On passe donc 0 — l'appel reste nécessaire pour le record d'étage — et toute la
+        // récompense passe par le bonus de PREMIÈRE ascension, accordé une seule fois par étage
+        // et par profil. Rejouer ne paie que si l'on monte plus haut qu'avant.
+        reportAscensionRun(floorReached, 0)
             .then(() => claimAscensionFloorRewards(floorReached))
-            .then(() => refreshProfile())
-            .catch(err => console.error('Ascension : remontée du résultat échouée', err));
+            .then(({ totalAmbroisie }) => {
+                setClaimedBonus(totalAmbroisie);
+                return refreshProfile();
+            })
+            .catch(err => {
+                // Visible, et plus seulement dans la console : une récompense qui n'arrive pas
+                // sans que rien ne le dise est indiscernable d'une récompense inexistante.
+                console.error('Ascension : remontée du résultat échouée', err);
+                toast.error("Vos récompenses n'ont pas pu être enregistrées. Réessayez plus tard.", 8000);
+            });
     }, [run.phase, run.currentFloor, run.reward, refreshProfile]);
 
     const toggleGod = useCallback((id: string) => {
@@ -121,7 +135,6 @@ function AscensionContent() {
                         clearedFloor={run.currentFloor}
                         survivorHealth={run.survivorHealth}
                         carriedEnergy={run.carriedEnergy}
-                        reward={run.reward}
                         onClimb={run.climbNext}
                         onQuit={backToMenu}
                     />
@@ -129,9 +142,9 @@ function AscensionContent() {
 
                 {(run.phase === 'run_over' || run.phase === 'victory') && (
                     <RunOver
+                        claimedBonus={claimedBonus}
                         isVictory={run.phase === 'victory'}
                         floorReached={run.phase === 'victory' ? run.currentFloor : Math.max(0, run.currentFloor - 1)}
-                        reward={run.reward}
                         onRestart={() => { backToMenu(); setPicking(true); }}
                         onQuit={backToMenu}
                     />
