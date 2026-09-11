@@ -9,6 +9,7 @@ import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { ALL_GODS, getDuelCards } from '@/data/gods';
 import type { GodCard } from '@/types/cards';
 import { toast } from '@/lib/toast';
+import { clearMultiplayerSession } from '@/lib/multiplayerSession';
 import { haptic } from '@/lib/haptics';
 import { playSfx } from '@/lib/sfx';
 import styles from './page.module.css';
@@ -156,6 +157,9 @@ function DuelContent() {
             toast.error('Sélectionnez au moins 2 cartes pour partir au combat');
             return false;
         }
+        // Repartir d'une session vierge : une partie précédente mal quittée laisserait son
+        // id et son jeton derrière elle, et `/online/select` s'y raccrocherait.
+        clearMultiplayerSession();
         // L'équipe est choisie AVANT la partie : `/online/select` la confirmera toute seule.
         sessionStorage.setItem('gameMode', 'duel');
         sessionStorage.setItem('selectedGods', JSON.stringify(selectedCards));

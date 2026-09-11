@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { getGodById } from '@/data/gods';
 import {
     TIER_LABELS, TOTAL_FLOORS, ascensionFloorBonus, TOTAL_FIRST_CLEAR_BONUS,
@@ -7,6 +8,24 @@ import {
 } from '@/data/ascension';
 import type { GodCard } from '@/types/cards';
 import styles from '../page.module.css';
+
+/**
+ * Icône d'ambroisie.
+ *
+ * La même image que la barre de monnaie de l'accueil et que la boutique : un émoji
+ * approchant — goutte d'eau, pot de miel — donnait l'impression d'une autre récompense.
+ */
+function Ambroisie({ size = 15 }: { size?: number }) {
+    return (
+        <Image
+            src="/icons/ambroisie.png"
+            alt="ambroisie"
+            width={size}
+            height={size}
+            style={{ verticalAlign: '-2px', display: 'inline-block' }}
+        />
+    );
+}
 
 /** Écran d'accueil : règles du mode et aperçu de la tour. */
 export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onStart: () => void }) {
@@ -44,7 +63,8 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
                     <li>💀 Un dieu tombé ne revient pas : votre équipe rétrécit</li>
                     <li>🔄 VOUS ne subissez aucun dégât de fatigue — vos adversaires, si</li>
                     <li>🎲 La composition de chaque étage est tirée au hasard</li>
-                    <li>🍯 Ambroisie gagnée à chaque étage franchi</li>
+                    <li><Ambroisie /> Ambroisie gagnée au premier franchissement de chaque étage</li>
+                    <li>🩹 Vos dieux encore debout récupèrent tous leurs PV à chaque changement de palier</li>
                 </ul>
             </div>
 
@@ -57,10 +77,10 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
                     fois par compte</strong>. Le refranchir ne le rapporte plus.
                 </p>
                 <ul>
-                    <li>👤 Étages 1-5 — {ascensionFloorBonus(1)} 🍯 par étage</li>
-                    <li>🐉 Étages 6-10 — {ascensionFloorBonus(6)} 🍯 par étage</li>
-                    <li>⚡ Étages 11-15 — {ascensionFloorBonus(11)} 🍯 par étage</li>
-                    <li>🏆 Tour entière — <strong>{TOTAL_FIRST_CLEAR_BONUS} 🍯</strong> au total</li>
+                    <li>👤 Étages 1-5 — {ascensionFloorBonus(1)} <Ambroisie /> par étage</li>
+                    <li>🐉 Étages 6-10 — {ascensionFloorBonus(6)} <Ambroisie /> par étage</li>
+                    <li>⚡ Étages 11-15 — {ascensionFloorBonus(11)} <Ambroisie /> par étage</li>
+                    <li>🏆 Tour entière — <strong>{TOTAL_FIRST_CLEAR_BONUS} <Ambroisie /></strong> au total</li>
                 </ul>
             </div>
 
@@ -159,7 +179,7 @@ export function FloorCleared({ floors, clearedFloor, survivorHealth, carriedEner
                 <span className={styles.floorType} style={{ color: TIER_LABELS.servant.color }}>
                     {/* Le bonus n'est versé QUE la première fois : l'annoncer comme acquis à
                         chaque passage serait mensonger dès la deuxième ascension. */}
-                    Jusqu&apos;à {ascensionFloorBonus(clearedFloor)} 🍯 si c&apos;est une première
+                    Jusqu&apos;à {ascensionFloorBonus(clearedFloor)} <Ambroisie /> si c&apos;est une première
                 </span>
             </div>
 
@@ -218,11 +238,11 @@ export function RunOver({ floorReached, isVictory, claimedBonus, onRestart, onQu
                 <ul>
                     <li>🏔️ Étage atteint : {floorReached}</li>
                     {claimedBonus === null ? (
-                        <li>🍯 Enregistrement des récompenses…</li>
+                        <li><Ambroisie /> Enregistrement des récompenses…</li>
                     ) : claimedBonus > 0 ? (
-                        <li>🍯 Ambroisie gagnée : {claimedBonus} — à récupérer dans 🎁</li>
+                        <li><Ambroisie /> Ambroisie gagnée : {claimedBonus} — à récupérer dans 🎁</li>
                     ) : (
-                        <li>🍯 Aucun nouvel étage : montez plus haut pour gagner davantage</li>
+                        <li><Ambroisie /> Aucun nouvel étage : montez plus haut pour gagner davantage</li>
                     )}
                 </ul>
             </div>

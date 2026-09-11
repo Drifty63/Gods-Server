@@ -55,6 +55,26 @@ const FLOOR_COMPOSITION: readonly (readonly [number, number, number])[] = [
  */
 export const ENEMIES_PER_FLOOR = 4;
 
+/**
+ * Derniers étages de chaque palier : 5 (serviteurs) et 12 (créatures).
+ *
+ * Les franchir rend TOUS leurs points de vie aux dieux encore debout. C'est le seul répit de
+ * l'ascension, et il récompense d'être arrivé jusque-là avec une équipe vivante : les dieux
+ * tombés, eux, restent tombés. Sans cela, atteindre le palier des dieux avec des survivants à
+ * 3 PV rendait les trois derniers étages purement décoratifs.
+ *
+ * Déduit de FLOOR_COMPOSITION plutôt que codé en dur : si les paliers bougent, le soin suit.
+ */
+export const TIER_END_FLOORS: readonly number[] = FLOOR_COMPOSITION
+    .map((comp, i) => ({ floor: i + 1, tier: dominantTier(comp[0], comp[1], comp[2]) }))
+    .filter((entry, i, all) => i < all.length - 1 && all[i + 1].tier !== entry.tier)
+    .map(entry => entry.floor);
+
+/** Le passage à l'étage `floor` ouvre-t-il un nouveau palier ? */
+export function isTierBoundary(clearedFloor: number): boolean {
+    return TIER_END_FLOORS.includes(clearedFloor);
+}
+
 export interface AscensionFloor {
     /** Numéro d'étage, de 1 à TOTAL_FLOORS. */
     floor: number;
@@ -102,16 +122,39 @@ function pick<T>(pool: readonly T[], count: number, rng: () => number): T[] {
 // ─────────────────────────────────────────────
 
 /**
- * Les adversaires de l'Ascension incluent les unités marquées `hidden` (exclusives au mode
- * Histoire) : « caché » ne concerne que ce que le JOUEUR peut posséder ou jouer, pas ce que le
- * jeu peut lui opposer. Cela élargit nettement la variété du bestiaire disponible.
+ * Une unité `hidden` est-elle admissible comme adversaire d'Ascension ?
+ *
+ * Il y a deux sortes très différentes d'unités cachées, que le drapeau `hidden` ne distingue pas :
+ *
+ *  - les COPIES CONFORMES, créées uniquement pour aligner plusieurs exemplaires identiques dans
+ *    un combat scénarisé (les ids devant rester uniques au sein d'une équipe). Les Soldats d'Arès
+ *    2 et 3 sont au mot près le Soldat d'Arès public : même nom, mêmes 16 PV. Les croiser en
+ *    Ascension ne surprend personne ;
+ *  - les VARIANTES AFFAIBLIES, calibrées pour un combat précis. Les Araignées Géantes du mode
+ *    Histoire portent le même nom que celle du bestiaire public mais n'ont que 12 PV contre 21.
+ *    En rencontrer une en Ascension contredit sa propre fiche dans la Collection.
+ *
+ * On n'admet donc que les premières : même nom, mêmes points de vie, même catégorie qu'une carte
+ * publique. Cette règle se vérifie sur les données, sans liste d'exceptions à tenir à jour.
+ */
+function isScriptingDuplicate(card: GodCard): boolean {
+    if (!card.hidden) return true;
+    const twin = ALL_GODS.find(g =>
+        !g.hidden && !g.draft && g.name === card.name && g.id !== card.id
+    );
+    return !!twin && twin.maxHealth === card.maxHealth && twin.category === card.category;
+}
+
+/**
+ * Adversaires possibles, par palier.
+ *
+ * `draft` exclut le bestiaire encore à l'état de brouillon : pas prêt à être montré, donc pas
+ * davantage comme adversaire.
  */
 export function enemyPools(): Record<UnitTier, GodCard[]> {
     return {
-        // `draft` exclut en revanche le bestiaire encore à l'état de brouillon : contrairement à
-        // `hidden`, il signifie « pas prêt à être montré », donc pas davantage comme adversaire.
-        servant: ALL_GODS.filter(g => g.category === 'servant' && !g.draft),
-        creature: ALL_GODS.filter(g => g.category === 'creature' && !g.draft),
+        servant: ALL_GODS.filter(g => g.category === 'servant' && !g.draft && isScriptingDuplicate(g)),
+        creature: ALL_GODS.filter(g => g.category === 'creature' && !g.draft && isScriptingDuplicate(g)),
         // Seuls les 12 dieux jouables : les dieux cachés du roster ne sont pas équilibrés
         // comme adversaires d'un mode chronométré par les PV.
         god: ALL_GODS.filter(g => (!g.category || g.category === 'god') && !g.hidden),

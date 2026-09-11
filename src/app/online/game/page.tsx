@@ -7,6 +7,7 @@ import { useGameStore } from '@/store/gameStore';
 import type { GameState } from '@/types/cards';
 import { ALL_SPELLS } from '@/data/spells';
 import GameBoard from '@/components/GameBoard/GameBoard';
+import { clearMultiplayerSession } from '@/lib/multiplayerSession';
 import styles from './page.module.css';
 
 export default function OnlineGamePage() {
@@ -116,14 +117,24 @@ export default function OnlineGamePage() {
         }
     }, [gameState?.status, gameState?.winnerId, playerId, reportMatchResult]);
 
+    /** Abandon EN COURS de partie : déclare forfait, puis nettoie. */
     const handleLeaveGame = () => {
         leaveGame();
-        sessionStorage.removeItem('multiplayerData');
-        sessionStorage.removeItem('isHost');
-        sessionStorage.removeItem('gameId');
-        sessionStorage.removeItem('multiplayerToken');
-        sessionStorage.removeItem('opponentName');
+        clearMultiplayerSession();
         router.push('/online');
+    };
+
+    /**
+     * Sortie APRÈS la fin de partie.
+     *
+     * Surtout pas de `leaveGame()` ici : il n'y a plus rien à abandonner, et ce serait annoncer
+     * un forfait sur une partie déjà conclue. On note le mode AVANT de nettoyer, sinon on le
+     * lirait effacé et on renverrait tout le monde au même endroit.
+     */
+    const handleExitFinished = () => {
+        const wasDuel = sessionStorage.getItem('gameMode') === 'duel';
+        clearMultiplayerSession();
+        router.push(wasDuel ? '/duel' : '/online');
     };
 
     // Overlay d'erreur (partie introuvable — expirée, ou nettoyée après une trop longue coupure)
@@ -195,7 +206,7 @@ export default function OnlineGamePage() {
                 </button>
             </div>
 
-            <GameBoard isOnlineMode onAction={(action) => {
+            <GameBoard isOnlineMode onExit={handleExitFinished} onAction={(action) => {
                 sendAction({
                     type: action.type,
                     payload: action.payload ?? {}

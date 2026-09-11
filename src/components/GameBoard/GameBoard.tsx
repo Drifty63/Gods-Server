@@ -38,6 +38,8 @@ import CombatLogModal from '@/components/CombatLogModal/CombatLogModal';
 interface GameBoardProps {
     isOnlineMode?: boolean;
     onAction?: (action: { type: GameAction['type']; payload?: Record<string, unknown> }) => void;
+    /** Sortie proposée sur l'écran de fin en ligne, où il n'y avait aucun bouton. */
+    onExit?: () => void;
 }
 
 /**
@@ -75,7 +77,7 @@ function resultSubtitle(
     }
 }
 
-export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardProps) {
+export default function GameBoard({ isOnlineMode = false, onAction, onExit }: GameBoardProps) {
     const router = useRouter();
 
     // --- STORE BOUNDARIES ---
@@ -411,7 +413,18 @@ export default function GameBoard({ isOnlineMode = false, onAction }: GameBoardP
                         </div>
                     </div>
 
-                    {!isOnlineMode && (
+                    {/* En ligne, cet écran n'offrait AUCUN bouton : la seule sortie était
+                        l'overlay « adversaire déconnecté », qui surgissait par effet de bord
+                        quand l'autre joueur s'en allait. Le joueur restait donc piégé, et la
+                        session de la partie terminée n'était jamais nettoyée — d'où une partie
+                        suivante qui se raccrochait à l'ancienne. */}
+                    {isOnlineMode ? (
+                        <div className={styles.resultActions}>
+                            <button className={styles.resultButtonPrimary} onClick={() => onExit?.()}>
+                                🏠 Retour au salon
+                            </button>
+                        </div>
+                    ) : (
                         <div className={styles.resultActions}>
                             <button className={styles.resultButtonPrimary} onClick={() => { window.location.href = '/game'; }}>
                                 🔄 Rejouer

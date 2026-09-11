@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
-import { generateAscensionRun, TOTAL_FLOORS, type AscensionFloor } from '@/data/ascension';
+import { generateAscensionRun, TOTAL_FLOORS, isTierBoundary, type AscensionFloor } from '@/data/ascension';
 import type { GodCard } from '@/types/cards';
 
 export type RunPhase = 'idle' | 'fighting' | 'floor_cleared' | 'run_over' | 'victory';
@@ -118,7 +118,18 @@ export function useAscensionRun() {
      * ne clique.
      */
     const climbNext = useCallback(() => {
-        startFloor(currentFloor + 1, floors, carry);
+        // Changement de palier : les survivants repartent au complet. Les dieux tombés restent
+        // tombés — c'est l'équipe qui rétrécit, pas la difficulté qui s'efface.
+        const healed = isTierBoundary(currentFloor)
+            ? {
+                ...carry,
+                health: Object.fromEntries(
+                    carry.aliveGodIds.map(id => [id, getGodById(id)?.maxHealth ?? carry.health[id]]),
+                ),
+            }
+            : carry;
+
+        startFloor(currentFloor + 1, floors, healed);
     }, [currentFloor, floors, carry, startFloor]);
 
     const abandonRun = useCallback(() => {

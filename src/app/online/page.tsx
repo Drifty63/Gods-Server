@@ -7,6 +7,7 @@ import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { toast } from '@/lib/toast';
+import { clearMultiplayerSession } from '@/lib/multiplayerSession';
 import styles from './page.module.css';
 
 export default function OnlinePage() {
@@ -92,6 +93,9 @@ function OnlineContent() {
             return;
         }
         localStorage.setItem('playerName', playerName);
+        // On ne maîtrise pas la façon dont la partie précédente s'est terminée, mais on
+        // maîtrise ce moment-ci : on repart toujours d'une session vierge.
+        clearMultiplayerSession();
         sessionStorage.setItem('gameMode', ranked ? 'ranked' : 'casual');
         setMode('matchmaking');
         joinQueue(playerName, ranked, user?.id);
@@ -108,6 +112,7 @@ function OnlineContent() {
             return;
         }
         localStorage.setItem('playerName', playerName);
+        clearMultiplayerSession();
         sessionStorage.setItem('gameMode', 'private');
         createPrivateGame(playerName);
         setMode('private-create');
@@ -119,6 +124,7 @@ function OnlineContent() {
             return;
         }
         localStorage.setItem('playerName', playerName);
+        clearMultiplayerSession();
         sessionStorage.setItem('gameMode', 'private');
         joinPrivateGame(privateCode.toUpperCase(), playerName);
     };
