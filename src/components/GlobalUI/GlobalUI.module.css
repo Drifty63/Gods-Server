@@ -1,6 +1,14 @@
+/**
+ * Roue des paramètres, flottante sur toutes les pages sauf l'accueil.
+ *
+ * `viewport-fit=cover` + barre d'état translucide font partir le viewport du haut PHYSIQUE de
+ * l'écran. À `top: 20px` pour 44 px de haut, le bouton occupait la bande 20→64 px alors que la
+ * zone sûre d'un iPhone 12 mini fait ~47 px : les deux tiers du bouton passaient sous l'heure,
+ * le réseau et la batterie, et devenaient intouchables.
+ */
 .globalContainer {
     position: fixed;
-    top: 20px;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
     right: 20px;
     z-index: 100000;
     display: flex;
@@ -890,4 +898,37 @@
     .rewardsFooter, .questsFooter {
         padding-top: 10px;
     }
+}
+/* Action irréversible : rouge, pour qu'on ne la confonde pas avec les liens voisins. */
+.optionDanger {
+    width: 100%;
+    text-align: left;
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.1);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.optionDanger:hover {
+    color: #fff;
+    border-color: rgba(239, 68, 68, 0.7);
+    background: rgba(239, 68, 68, 0.22);
+}
+
+.confirmText {
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.confirmActions {
+    display: flex;
+    gap: 10px;
+}
+
+.confirmActions > * {
+    flex: 1;
+    text-align: center;
 }

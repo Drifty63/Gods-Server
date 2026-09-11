@@ -17,7 +17,7 @@
     pointer-events: none;
 }
 
-.shade path {
+.shadeFill {
     fill: rgba(4, 5, 14, 0.78);
 }
 

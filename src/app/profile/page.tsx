@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { getMostPlayedGod, getMatchHistory, isUsernameTaken, type MatchHistoryEntry } from '@/services/supabase-profile';
 import { toast } from '@/lib/toast';
-import { ALL_GODS } from '@/data/gods';
+import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
 import { getRankByFerveur, getRankProgress } from '@/data/ranks';
 import styles from './page.module.css';
 
@@ -152,6 +152,16 @@ export default function ProfilePage() {
     const mostPlayed = getMostPlayedGod(profile.god_play_counts);
     const mostPlayedGod = mostPlayed ? ALL_GODS.find(g => g.id === mostPlayed.godId) : null;
 
+    // Portraits utilisables comme avatar : tout ce que le joueur possède réellement.
+    const releasedUnits = getReleasedUnits();
+    const isOwned = (card: typeof ALL_GODS[number]) =>
+        ownsCard(card, profile.gods_owned, profile.is_creator);
+    const avatarSections = [
+        { label: 'Mes Dieux', cards: getOwnedGods(profile.gods_owned, profile.is_creator) },
+        { label: 'Mes Créatures', cards: releasedUnits.creatures.filter(isOwned) },
+        { label: 'Mes Serviteurs', cards: releasedUnits.servants.filter(isOwned) },
+    ];
+
     return (
         <main className={styles.main}>
             {/* Header */}
@@ -160,7 +170,6 @@ export default function ProfilePage() {
                     <span aria-hidden="true">‹</span>
                 </Link>
                 <h1 className={styles.title}>Profil</h1>
-                <button className={styles.settingsButton} onClick={handleSignOut} aria-label="Se déconnecter">🚪</button>
             </header>
 
             <div className={styles.content}>
@@ -358,33 +367,37 @@ export default function ProfilePage() {
                             <button className={styles.modalClose} onClick={() => setShowAvatarModal(false)}>✕</button>
                             <h2 className={styles.modalTitle}>🎭 Choisir un avatar</h2>
 
-                            {/* Section Dieux débloqués */}
-                            <h3 className={styles.modalSubtitle}>Mes Dieux</h3>
-                            <div className={styles.avatarGrid}>
-                                {profile.gods_owned.map((godId) => {
-                                    const god = ALL_GODS.find(g => g.id === godId);
-                                    if (!god) return null;
-                                    const avatarPath = god.imageUrl;
-                                    return (
-                                        <button
-                                            key={godId}
-                                            className={`${styles.avatarOptionImage} ${profile.avatar === avatarPath ? styles.selected : ''}`}
-                                            onClick={() => {
-                                                handleAvatarChange(avatarPath);
-                                                setShowAvatarModal(false);
-                                            }}
-                                        >
-                                            <Image
-                                                src={avatarPath}
-                                                alt={god.name}
-                                                width={50}
-                                                height={50}
-                                                className={styles.avatarGodImage}
-                                            />
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                            {/* Dieux, créatures et serviteurs possédés.
+                              *
+                              * Les créatures et serviteurs ne sont pas achetés : ils appartiennent au
+                              * joueur dès qu'il possède le dieu dont ils dépendent. `ownsCard` remonte
+                              * cette chaîne `affiliatedTo` — c'est le même mécanisme que la Collection,
+                              * et c'est pour ça qu'on ne peut pas se contenter de `gods_owned`. */}
+                            {avatarSections.map(section => section.cards.length > 0 && (
+                                <div key={section.label}>
+                                    <h3 className={styles.modalSubtitle}>{section.label}</h3>
+                                    <div className={styles.avatarGrid}>
+                                        {section.cards.map((card) => (
+                                            <button
+                                                key={card.id}
+                                                className={`${styles.avatarOptionImage} ${profile.avatar === card.imageUrl ? styles.selected : ''}`}
+                                                onClick={() => {
+                                                    handleAvatarChange(card.imageUrl);
+                                                    setShowAvatarModal(false);
+                                                }}
+                                            >
+                                                <Image
+                                                    src={card.imageUrl}
+                                                    alt={card.name}
+                                                    width={50}
+                                                    height={50}
+                                                    className={styles.avatarGodImage}
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )

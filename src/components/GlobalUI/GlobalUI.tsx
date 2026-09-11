@@ -43,9 +43,11 @@ function formatRewardDate(iso: string): string {
 
 export default function GlobalUI() {
     const pathname = usePathname();
-    const { user, profile, refreshProfile } = useAuth();
+    const { user, profile, refreshProfile, signOut } = useAuth();
 
     const [showOptionsModal, setShowOptionsModal] = useState(false);
+    /** Déconnexion : confirmation obligatoire, c'est une action qu'on ne déclenche pas par erreur. */
+    const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
     const [showRewardsModal, setShowRewardsModal] = useState(false);
     const [showQuestsModal, setShowQuestsModal] = useState(false);
     const [showRulesModal, setShowRulesModal] = useState(false);
@@ -553,6 +555,17 @@ export default function GlobalUI() {
                                 <Link href="/profile" className={styles.optionLink} onClick={closeOptionsModal}>
                                     Gérer mon profil
                                 </Link>
+                                {/* La déconnexion vivait dans l'en-tête du profil, derrière une porte 🚪
+                                    dont la classe s'appelait `settingsButton` : personne ne la trouvait,
+                                    et ceux qui la trouvaient ne s'attendaient pas à être déconnectés. */}
+                                {user && (
+                                    <button
+                                        className={`${styles.optionLink} ${styles.optionDanger}`}
+                                        onClick={() => setShowSignOutConfirm(true)}
+                                    >
+                                        Se déconnecter
+                                    </button>
+                                )}
                             </div>
 
                             {/* Section Règles du jeu */}
@@ -838,6 +851,39 @@ export default function GlobalUI() {
                             <button className={styles.closeButton} onClick={closeRulesModal}>
                                 Fermer
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirmation de déconnexion */}
+            {showSignOutConfirm && (
+                <div className={styles.modalOverlay} onClick={() => setShowSignOutConfirm(false)}>
+                    <div className={styles.optionsModal} onClick={(e) => e.stopPropagation()}>
+                        <h2>🚪 Se déconnecter</h2>
+                        <div className={styles.optionsContent}>
+                            <p className={styles.confirmText}>
+                                Votre progression est enregistrée sur votre compte : vous la retrouverez
+                                en vous reconnectant.
+                            </p>
+                            <div className={styles.confirmActions}>
+                                <button
+                                    className={styles.optionLink}
+                                    onClick={() => setShowSignOutConfirm(false)}
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    className={`${styles.optionLink} ${styles.optionDanger}`}
+                                    onClick={async () => {
+                                        setShowSignOutConfirm(false);
+                                        closeOptionsModal();
+                                        await signOut();
+                                    }}
+                                >
+                                    Se déconnecter
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

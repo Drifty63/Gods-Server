@@ -18,6 +18,9 @@
     align-items: center;
     gap: 12px;
     padding: 10px 56px 20px 0;
+    /* Sous la barre d'etat iOS sinon : viewport-fit=cover fait partir le viewport du haut
+       physique de l'ecran, et la fleche retour tombait sous l'heure et la batterie. */
+    padding-top: max(10px, env(safe-area-inset-top));
     position: relative;
     margin-bottom: 12px;
 }
@@ -1234,4 +1237,13 @@
     border-radius: 12px;
     padding: 16px;
     margin: 12px 0;
+}
+/* Avatar emoji : occupe la même pastille ronde qu'une image (voir AvatarImage). */
+.avatarEmoji {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }

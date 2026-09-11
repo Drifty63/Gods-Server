@@ -28,9 +28,26 @@ import {
 type TabType = 'friends' | 'leaderboard';
 type FriendStatus = 'online' | 'ingame' | 'offline';
 
+/**
+ * Avatar d'un autre joueur.
+ *
+ * Un avatar est soit un CHEMIN d'image (portrait de carte), soit un EMOJI — celui choisi à
+ * l'inscription. Tout ce qui n'était pas un chemin retombait ici sur `/avatars/default.png` :
+ * un joueur ayant gardé son emoji apparaissait donc en avatar par défaut pour tout le monde
+ * sauf lui, puisque son propre profil, lui, sait afficher les emojis.
+ */
 function AvatarImage({ src, alt, size }: { src: string; alt: string; size: number }) {
-    const url = src && src.startsWith('/') ? src : '/avatars/default.png';
-    return <Image src={url} alt={alt} width={size} height={size} className={styles.avatarImg} />;
+    if (src && src.startsWith('/')) {
+        return <Image src={src} alt={alt} width={size} height={size} className={styles.avatarImg} />;
+    }
+    if (src) {
+        return (
+            <span className={styles.avatarEmoji} style={{ fontSize: size * 0.55 }} role="img" aria-label={alt}>
+                {src}
+            </span>
+        );
+    }
+    return <Image src="/avatars/default.png" alt={alt} width={size} height={size} className={styles.avatarImg} />;
 }
 
 function getFriendStatus(f: FriendEntry): FriendStatus {

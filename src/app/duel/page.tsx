@@ -53,6 +53,7 @@ function DuelContent() {
         leaveQueue,
         currentGame,
         opponentName,
+        getSessionInfo,
     } = useMultiplayer();
 
     const [view, setView] = useState<'menu' | 'select' | 'searching'>('menu');
@@ -89,8 +90,19 @@ function DuelContent() {
     // Redirection quand un match est trouvé
     useEffect(() => {
         if (currentGame && currentGame.status === 'selecting') {
-            sessionStorage.setItem('gameId', currentGame.gameId);
-            sessionStorage.setItem('isHost', String(currentGame.isHost));
+            // Le JETON est indispensable, et il manquait ici.
+            //
+            // `/online/select` exige `gameId` ET `multiplayerToken`, faute de quoi il renvoie
+            // vers `/online` : une recherche de Duel réussie éjectait donc le joueur de son
+            // propre mode. Le jeton est l'unique preuve d'autorisation d'écriture côté serveur
+            // (`game_tokens` est en refus RLS total) et n'est remis qu'une seule fois — il doit
+            // être lu depuis le hook, comme le fait le mode en ligne.
+            const { gameId, token, isHost } = getSessionInfo();
+            if (!gameId || !token) return;
+
+            sessionStorage.setItem('gameId', gameId);
+            sessionStorage.setItem('multiplayerToken', token);
+            sessionStorage.setItem('isHost', String(isHost));
             sessionStorage.setItem('playerName', profile?.username || 'Joueur');
             sessionStorage.setItem('gameMode', 'duel');
             sessionStorage.setItem('selectedGods', JSON.stringify(selectedCards));
@@ -99,7 +111,7 @@ function DuelContent() {
             }
             router.push('/online/select');
         }
-    }, [currentGame, profile, opponentName, router, selectedCards]);
+    }, [currentGame, profile, opponentName, router, selectedCards, getSessionInfo]);
 
     const handleSelectCard = (cardId: string) => {
         const card = ALL_GODS.find(g => g.id === cardId);

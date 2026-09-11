@@ -48,6 +48,9 @@
     align-items: center;
     gap: 12px;
     padding: 8px 72px 20px 4px;
+    /* Sous la barre d'etat iOS sinon : viewport-fit=cover fait partir le viewport du haut
+       physique de l'ecran, et la fleche retour tombait sous l'heure et la batterie. */
+    padding-top: max(8px, env(safe-area-inset-top));
     position: relative;
     margin-bottom: 8px;
     z-index: 1;
@@ -213,21 +216,6 @@
 .modeCard.featured:active {
     border-color: rgba(139, 92, 246, 0.7);
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(0, 0, 0, 0.2));
-}
-
-.newBadge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 3px 10px;
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    color: white;
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    border-radius: var(--radius-full);
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 /* Mode Icon */

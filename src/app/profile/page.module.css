@@ -21,11 +21,13 @@
     align-items: center;
     gap: 10px;
     padding: 12px 72px 20px 16px;
+    /* Sous la barre d'etat iOS sinon : viewport-fit=cover fait partir le viewport du haut
+       physique de l'ecran, et la fleche retour tombait sous l'heure et la batterie. */
+    padding-top: max(12px, env(safe-area-inset-top));
     position: relative;
 }
 
-.backButton,
-.settingsButton {
+.backButton {
     flex-shrink: 0;
     width: 40px;
     height: 40px;
@@ -44,19 +46,13 @@
 }
 
 .backButton:hover,
-.backButton:active,
-.settingsButton:hover,
-.settingsButton:active {
+.backButton:active {
     background: rgba(212, 175, 55, 0.12);
     border-color: rgba(212, 175, 55, 0.5);
 }
 
 .backButton:hover {
     transform: translateX(-2px);
-}
-
-.settingsButton:hover {
-    transform: scale(1.05);
 }
 
 .title {

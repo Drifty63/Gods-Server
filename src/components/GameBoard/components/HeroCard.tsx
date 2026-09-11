@@ -59,6 +59,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
     const [impact, setImpact] = useState<Impact | null>(null);
     const prevHealthRef = useRef(god.currentHealth);
     const prevDeadRef = useRef(god.isDead);
+    const prevShieldRef = useRef(0);
     const impactKeyRef = useRef(0);
 
     // Les valeurs les plus fraîches, lues dans l'effet d'impact sans le faire redéclencher :
@@ -113,6 +114,18 @@ export const HeroCard: React.FC<HeroCardProps> = ({
         const timer = setTimeout(() => setImpact(null), isCritical ? 900 : 650);
         return () => clearTimeout(timer);
     }, [god.currentHealth, god.card.weakness, god.temporaryWeakness]);
+
+    // Le bouclier ne fait varier AUCUN point de vie : il échappait donc complètement à l'effet
+    // d'impact ci-dessus, et son son restait le seul du jeu à n'être jamais joué. On surveille
+    // la valeur du statut, comme on surveille la mort.
+    useEffect(() => {
+        const shield = god.statusEffects.find(s => s.type === 'shield')?.stacks ?? 0;
+        if (shield > prevShieldRef.current) {
+            playSfx('shield');
+            haptic('tap');
+        }
+        prevShieldRef.current = shield;
+    }, [god.statusEffects]);
 
     // La mort est un événement à part : elle peut survenir sans variation de PV visible
     // (fatigue, poison résolu côté moteur) et mérite son propre son grave.

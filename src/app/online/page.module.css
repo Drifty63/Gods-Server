@@ -22,6 +22,9 @@
     align-items: center;
     gap: 10px;
     padding: 12px 72px 12px 16px;
+    /* Sous la barre d'etat iOS sinon : viewport-fit=cover fait partir le viewport du haut
+       physique de l'ecran, et la fleche retour tombait sous l'heure et la batterie. */
+    padding-top: max(12px, env(safe-area-inset-top));
     background: rgba(0, 0, 0, 0.5);
     border-bottom: 1px solid rgba(212, 175, 55, 0.2);
     position: sticky;

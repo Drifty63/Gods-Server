@@ -23,6 +23,9 @@ const HALO = 8;
 /** Hauteur approximative de la bulle, pour la centrer avant meme de l'avoir mesuree. */
 const BUBBLE_ESTIMATED_H = 210;
 
+/** Identifiant du masque SVG. Une seule instance du guidage existe a la fois. */
+const MASK_ID = 'tutorial-spotlight-mask';
+
 function findTargets(spotlight: SpotlightTarget | SpotlightTarget[]): globalThis.Element[] {
     const wanted = Array.isArray(spotlight) ? spotlight : [spotlight];
     return wanted
@@ -85,17 +88,6 @@ export function TutorialOverlay({ step, index, total, onNext, onSkip, onDismiss 
         return () => window.removeEventListener('keydown', onKey);
     }, [onSkip]);
 
-    /**
-     * Voile percé : un rectangle plein écran suivi d'un rectangle par zone éclairée, tous dans
-     * le même `<path>` en `fill-rule="evenodd"` — les zones intérieures se soustraient donc du
-     * contour extérieur. C'est ce qui permet PLUSIEURS trous, là où les quatre bandes de
-     * l'implémentation précédente ne pouvaient en dessiner qu'un seul.
-     */
-    const outer = `M0,0 H${viewport.w} V${viewport.h} H0 Z`;
-    const holes = rects.map(r =>
-        `M${r.left},${r.top} H${r.left + r.width} V${r.top + r.height} H${r.left} Z`
-    ).join(' ');
-
     // Placement de la bulle.
     //
     // Par défaut : du côté où il reste le plus de place autour de la boîte englobante des zones
@@ -122,8 +114,38 @@ export function TutorialOverlay({ step, index, total, onNext, onSkip, onDismiss 
                 tâtonne. Sur une étape d'action, ce calque n'existe pas du tout. */}
             {step.blocking && <div className={styles.blocker} />}
 
+            {/*
+              * Voile percé par un MASQUE, et non par un tracé en `fill-rule="evenodd"`.
+              *
+              * La parité paire-impaire faisait qu'une zone percée DEUX fois redevenait pleine :
+              * à l'étape « à vous de jouer », le rectangle du bouton d'action est entièrement
+              * contenu dans celui de la main (le panneau de carte recouvre la zone de la main),
+              * donc le bouton était ré-assombri exactement là où le halo l'entourait — il avait
+              * l'air désactivé alors qu'il était parfaitement cliquable.
+              *
+              * Un masque fait une UNION : deux rectangles noirs qui se chevauchent restent noirs.
+              */}
             <svg className={styles.shade} width={viewport.w} height={viewport.h} aria-hidden="true">
-                <path d={`${outer} ${holes}`} fillRule="evenodd" />
+                <defs>
+                    <mask id={MASK_ID} maskUnits="userSpaceOnUse">
+                        <rect x="0" y="0" width={viewport.w} height={viewport.h} fill="white" />
+                        {rects.map((r, i) => (
+                            <rect
+                                key={i}
+                                x={r.left} y={r.top}
+                                width={r.width} height={r.height}
+                                rx="12"
+                                fill="black"
+                            />
+                        ))}
+                    </mask>
+                </defs>
+                <rect
+                    x="0" y="0"
+                    width={viewport.w} height={viewport.h}
+                    className={styles.shadeFill}
+                    mask={`url(#${MASK_ID})`}
+                />
             </svg>
 
             {rects.map((r, i) => (

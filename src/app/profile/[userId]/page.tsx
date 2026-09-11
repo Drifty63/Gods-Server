@@ -63,7 +63,9 @@ function PublicProfileContent() {
     const winRate = profile.stats.totalGames > 0
         ? ((profile.stats.victories / profile.stats.totalGames) * 100).toFixed(1)
         : '0.0';
-    const avatarSrc = profile.avatar && profile.avatar.startsWith('/') ? profile.avatar : '/avatars/default.png';
+    // Un avatar est soit un chemin d'image, soit un emoji (choisi à l'inscription) : les deux
+    // doivent s'afficher, sinon les joueurs à emoji apparaissent tous en avatar par défaut.
+    const avatarIsImage = !!profile.avatar && profile.avatar.startsWith('/');
 
     return (
         <main className={styles.main}>
@@ -77,7 +79,13 @@ function PublicProfileContent() {
             <div className={styles.content}>
                 <section className={styles.profileCard}>
                     <div className={styles.avatarContainer}>
-                        <Image src={avatarSrc} alt={profile.username} width={80} height={80} className={styles.avatarImage} />
+                        {avatarIsImage ? (
+                            <Image src={profile.avatar} alt={profile.username} width={80} height={80} className={styles.avatarImage} />
+                        ) : (
+                            <span className={styles.avatarEmoji} role="img" aria-label={profile.username}>
+                                {profile.avatar || '👤'}
+                            </span>
+                        )}
                     </div>
                     <div className={styles.profileInfo}>
                         <h2 className={styles.username}>{profile.username}</h2>

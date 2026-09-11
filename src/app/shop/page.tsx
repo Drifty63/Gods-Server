@@ -230,12 +230,6 @@ export default function ShopPage() {
                         </button>
                         <button
                             className={styles.navTab}
-                            onClick={() => document.getElementById('section-cosmetiques')?.scrollIntoView({ behavior: 'smooth' })}
-                        >
-                            Cosmétiques
-                        </button>
-                        <button
-                            className={styles.navTab}
                             onClick={() => document.getElementById('section-ambroisie')?.scrollIntoView({ behavior: 'smooth' })}
                         >
                             Ambroisie
@@ -449,16 +443,6 @@ export default function ShopPage() {
                                 </div>
                             );
                         })}
-                    </div>
-                </section>
-
-                {/* Section Cosmétiques */}
-                <section id="section-cosmetiques" className={styles.section}>
-                    <h2 className={styles.sectionTitle}>✨ Cosmétiques</h2>
-                    <div className={styles.comingSoon}>
-                        <span className={styles.comingSoonIcon}>🚧</span>
-                        <p className={styles.comingSoonText}>Cette section n&apos;est pas encore disponible.</p>
-                        <p className={styles.comingSoonSubtext}>Les cosmétiques arrivent bientôt !</p>
                     </div>
                 </section>
 

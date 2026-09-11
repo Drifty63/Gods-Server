@@ -33,9 +33,8 @@ function PlayContent() {
                     <span className={styles.sectionIcon}>⚔️</span> Modes Compétitifs
                 </h2>
                 <div className={styles.modesGrid}>
-                    {/* Mode Duel - NOUVEAU */}
+                    {/* Mode Duel */}
                     <Link href="/duel" className={`${styles.modeCard} ${styles.featured}`}>
-                        <div className={styles.newBadge}>Nouveau</div>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>⚔️</span>
                         </div>
@@ -68,9 +67,8 @@ function PlayContent() {
                     <span className={styles.sectionIcon}>🎮</span> Modes Solo
                 </h2>
                 <div className={styles.modesGrid}>
-                    {/* Mode Ascension - NOUVEAU */}
+                    {/* Mode Ascension */}
                     <Link href="/ascension" className={`${styles.modeCard} ${styles.featured}`}>
-                        <div className={styles.newBadge}>Nouveau</div>
                         <div className={styles.modeIconWrapper}>
                             <span className={styles.modeIcon}>🏔️</span>
                         </div>
