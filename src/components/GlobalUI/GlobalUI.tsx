@@ -8,12 +8,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
     getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest,
     getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, MailboxReward,
-    markWelcomeSeen, pingLastActive,
+    markWelcomeSeen, pingLastActive, submitBugReport,
 } from '@/services/supabase-profile';
 import { getGodById } from '@/data/gods';
 import { useSettings } from '@/lib/settings';
 import { hapticsSupported, haptic } from '@/lib/haptics';
 import { playSfx } from '@/lib/sfx';
+import { toast } from '@/lib/toast';
+
+/** Version affichée et jointe aux rapports de bug. Une seule source, pour qu'un rapport ne
+  * mente jamais sur la version où le problème a été vu. */
+const APP_VERSION = '0.24';
 
 // La quête "usegod_<godId>" est générée dynamiquement côté serveur (un dieu possédé au
 // hasard) et ne connaît que son id de dieu -- le nom réel est résolu ici, côté client, plutôt
@@ -48,6 +53,9 @@ export default function GlobalUI() {
     const [showOptionsModal, setShowOptionsModal] = useState(false);
     /** Déconnexion : confirmation obligatoire, c'est une action qu'on ne déclenche pas par erreur. */
     const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+    const [showBugModal, setShowBugModal] = useState(false);
+    const [bugMessage, setBugMessage] = useState('');
+    const [sendingBug, setSendingBug] = useState(false);
     const [showRewardsModal, setShowRewardsModal] = useState(false);
     const [showQuestsModal, setShowQuestsModal] = useState(false);
     const [showRulesModal, setShowRulesModal] = useState(false);
@@ -213,6 +221,9 @@ export default function GlobalUI() {
                     r.id === rewardId ? { ...r, claimed: true } : r
                 ));
                 await refreshProfile();
+                // L'accueil recompte ses récompenses en attente : sans ça, la pastille
+                // resterait allumée jusqu'au prochain chargement de page.
+                window.dispatchEvent(new Event('rewards-claimed'));
             }
         } catch (error) {
             console.error('Erreur réclamation récompense:', error);
@@ -230,6 +241,7 @@ export default function GlobalUI() {
             if (result.success) {
                 setMailboxRewards(prev => prev.map(r => ({ ...r, claimed: true })));
                 await refreshProfile();
+                window.dispatchEvent(new Event('rewards-claimed'));
             }
         } catch (error) {
             console.error('Erreur réclamation récompenses:', error);
@@ -568,6 +580,31 @@ export default function GlobalUI() {
                                 )}
                             </div>
 
+                            {/* Section Signaler un bug */}
+                            <div className={styles.optionsSection}>
+                                <h3 className={styles.optionsSectionTitle}>
+                                    <span>🐞</span> Un problème ?
+                                </h3>
+                                {user ? (
+                                    <button
+                                        className={styles.optionLink}
+                                        style={{ width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
+                                        onClick={() => { setBugMessage(''); setShowBugModal(true); }}
+                                    >
+                                        Signaler un bug
+                                    </button>
+                                ) : (
+                                    <p className={styles.confirmText}>
+                                        Connectez-vous pour signaler un bug.
+                                    </p>
+                                )}
+                                {profile?.is_creator && (
+                                    <Link href="/admin/bugs" className={styles.optionLink} onClick={closeOptionsModal}>
+                                        Consulter les rapports
+                                    </Link>
+                                )}
+                            </div>
+
                             {/* Section Règles du jeu */}
                             <div className={styles.optionsSection}>
                                 <h3 className={styles.optionsSectionTitle}>
@@ -583,7 +620,7 @@ export default function GlobalUI() {
                                 <h3 className={styles.optionsSectionTitle}>
                                     <span>ℹ️</span> À propos
                                 </h3>
-                                <p className={styles.versionText}>GODS - Série 1 • Version 0.24</p>
+                                <p className={styles.versionText}>GODS - Série 1 • Version {APP_VERSION}</p>
                                 <p className={styles.creditsText}>Développé par Aseo, Drift & Zedycuss</p>
                             </div>
                         </div>
@@ -851,6 +888,66 @@ export default function GlobalUI() {
                             <button className={styles.closeButton} onClick={closeRulesModal}>
                                 Fermer
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Signalement de bug.
+              *
+              * La page, le navigateur et la version sont joints automatiquement : un rapport
+              * sans contexte oblige à redemander au joueur ce qu'il a déjà oublié. */}
+            {showBugModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowBugModal(false)}>
+                    <div className={styles.optionsModal} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.closeModalIcon} onClick={() => setShowBugModal(false)}>✕</button>
+                        <h2>🐞 Signaler un bug</h2>
+                        <div className={styles.optionsContent}>
+                            <p className={styles.confirmText}>
+                                Décrivez ce qui s&apos;est passé, et ce que vous attendiez. La page où
+                                vous êtes et votre appareil sont joints automatiquement.
+                            </p>
+                            <textarea
+                                className={styles.bugTextarea}
+                                value={bugMessage}
+                                onChange={(e) => setBugMessage(e.target.value)}
+                                placeholder="Exemple : en Duel, après avoir confirmé mon équipe, l'écran est resté noir."
+                                maxLength={4000}
+                                rows={6}
+                            />
+                            <div className={styles.confirmActions}>
+                                <button
+                                    className={styles.optionLink}
+                                    onClick={() => setShowBugModal(false)}
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    className={styles.optionLink}
+                                    disabled={sendingBug || bugMessage.trim().length < 5}
+                                    onClick={async () => {
+                                        if (!user || !profile) return;
+                                        setSendingBug(true);
+                                        try {
+                                            await submitBugReport({
+                                                userId: user.id,
+                                                username: profile.username,
+                                                message: bugMessage,
+                                                appVersion: APP_VERSION,
+                                            });
+                                            setShowBugModal(false);
+                                            setBugMessage('');
+                                            toast.success('Merci — votre rapport a bien été envoyé');
+                                        } catch {
+                                            toast.error("L'envoi a échoué. Réessayez dans un instant.");
+                                        } finally {
+                                            setSendingBug(false);
+                                        }
+                                    }}
+                                >
+                                    {sendingBug ? 'Envoi…' : 'Envoyer'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

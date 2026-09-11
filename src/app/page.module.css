@@ -421,6 +421,8 @@
 }
 
 .topBarButton {
+    /* Ancre la pastille de non-lu, qui est en position absolue. */
+    position: relative;
     width: 42px;
     height: 42px;
     display: flex;

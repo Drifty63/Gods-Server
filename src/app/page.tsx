@@ -6,7 +6,7 @@ import Image from 'next/image';
 import styles from './page.module.css';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPendingRequests } from '@/services/supabase-profile';
+import { getPendingRequests, countUnclaimedRewards } from '@/services/supabase-profile';
 import { TUTORIAL_DONE_KEY } from '@/data/tutorial';
 
 export default function Home() {
@@ -27,6 +27,15 @@ function HomeContent() {
   // arrivée -- il fallait aller sur /social par réflexe pour le découvrir. Petit point rouge
   // sur l'icône Social le temps qu'on a une vraie notification.
   const [hasPendingFriendRequests, setHasPendingFriendRequests] = useState(false);
+
+  /**
+   * Récompenses en attente.
+   *
+   * Rien n'indiquait qu'un cadeau attendait : le calcul n'existait qu'À L'INTÉRIEUR du modal,
+   * donc il fallait déjà l'avoir ouvert pour savoir qu'il fallait l'ouvrir. Un joueur pouvait
+   * accumuler des récompenses sans jamais s'en douter. Simple comptage au chargement.
+   */
+  const [pendingRewards, setPendingRewards] = useState(0);
 
   /**
    * Didacticiel déjà terminé ?
@@ -53,6 +62,16 @@ function HomeContent() {
     getPendingRequests()
       .then(requests => setHasPendingFriendRequests(requests.length > 0))
       .catch(() => { });
+  }, [profile]);
+
+  // Rechargé à chaque fermeture du modal : une récompense réclamée doit faire disparaître la
+  // pastille sans qu'on ait à rafraîchir la page.
+  useEffect(() => {
+    if (!profile) return;
+    const refresh = () => { countUnclaimedRewards().then(setPendingRewards).catch(() => { }); };
+    refresh();
+    window.addEventListener('rewards-claimed', refresh);
+    return () => window.removeEventListener('rewards-claimed', refresh);
   }, [profile]);
 
   const handleOptionsClick = () => {
@@ -114,9 +133,12 @@ function HomeContent() {
           <button
             className={styles.topBarButton}
             onClick={handleRewardsClick}
-            aria-label="Récompenses"
+            aria-label={pendingRewards > 0
+              ? `Récompenses — ${pendingRewards} en attente`
+              : 'Récompenses'}
           >
             <span className={styles.topBarIcon}>🎁</span>
+            {pendingRewards > 0 && <span className={styles.navBadge} />}
           </button>
         </div>
       </header>

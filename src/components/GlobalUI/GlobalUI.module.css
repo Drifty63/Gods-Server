@@ -932,3 +932,30 @@
     flex: 1;
     text-align: center;
 }
+
+/* Champ de saisie d'un rapport de bug : assez grand pour décrire vraiment, pas au point
+   de pousser les boutons hors de l'écran sur un téléphone. */
+.bugTextarea {
+    width: 100%;
+    min-height: 120px;
+    max-height: 34dvh;
+    margin-bottom: 14px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 10px;
+    resize: vertical;
+}
+
+.bugTextarea:focus {
+    outline: none;
+    border-color: var(--gold-divine);
+}
+
+.bugTextarea::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}

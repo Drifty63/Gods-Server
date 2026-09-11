@@ -1,7 +1,10 @@
 'use client';
 
 import { getGodById } from '@/data/gods';
-import { TIER_LABELS, TOTAL_FLOORS, floorReward, type AscensionFloor } from '@/data/ascension';
+import {
+    TIER_LABELS, TOTAL_FLOORS, floorReward, ascensionFloorBonus, TOTAL_FIRST_CLEAR_BONUS,
+    type AscensionFloor,
+} from '@/data/ascension';
 import type { GodCard } from '@/types/cards';
 import styles from '../page.module.css';
 
@@ -42,6 +45,22 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
                     <li>🔄 Pas de dégâts de fatigue</li>
                     <li>🎲 La composition de chaque étage est tirée au hasard</li>
                     <li>💧 Ambroisie gagnée à chaque étage franchi</li>
+                </ul>
+            </div>
+
+            {/* Le joueur ne savait pas ce qu'il pouvait gagner : le barème n'était annoncé
+              * nulle part, et le gros de la récompense n'est touchable qu'UNE fois. */}
+            <div className={styles.rulesBox}>
+                <h3>💎 Première ascension</h3>
+                <p className={styles.bonusIntro}>
+                    Franchir un étage pour la première fois rapporte un bonus, <strong>une seule
+                    fois par compte</strong>. Le refranchir ne le rapporte plus.
+                </p>
+                <ul>
+                    <li>👤 Étages 1-5 — {ascensionFloorBonus(1)} 💧 par étage</li>
+                    <li>🐉 Étages 6-10 — {ascensionFloorBonus(6)} 💧 par étage</li>
+                    <li>⚡ Étages 11-15 — {ascensionFloorBonus(11)} 💧 par étage</li>
+                    <li>🏆 Tour entière — <strong>{TOTAL_FIRST_CLEAR_BONUS} 💧</strong> au total</li>
                 </ul>
             </div>
 

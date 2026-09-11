@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { StoryProgress, StoryEvent, DialogueLine } from '@/types/story';
 import { ZEUS_CAMPAIGN, getChapterById, getEventById, getNextEvent, getFirstEvent } from '@/data/story/campaign';
+import { claimStoryChapterReward } from '@/services/supabase-profile';
 
 interface StoryState {
     // Progression sauvegardée
@@ -153,13 +154,30 @@ export const useStoryStore = create<StoryState>()(
                     // Fin du chapitre
                     const chapter = getChapterById(progress.currentChapterId);
                     if (chapter) {
+                        // Dédoublonné : le mode est rejouable, et sans ce filtre le même
+                        // chapitre s'ajoutait une fois de plus à chaque traversée.
+                        const completedChapters = progress.completedChapters.includes(chapter.id)
+                            ? progress.completedChapters
+                            : [...progress.completedChapters, chapter.id];
+
                         set({
                             progress: {
                                 ...progress,
-                                completedChapters: [...progress.completedChapters, chapter.id],
+                                completedChapters,
                                 lastPlayedAt: new Date().toISOString()
                             }
                         });
+
+                        // Récompense de chapitre : 250 ambroisie, une seule fois par profil.
+                        //
+                        // C'est le SERVEUR qui tient l'unicité (index sur mailbox_rewards), pas
+                        // cette progression-ci : elle vit en localStorage, donc effaçable par le
+                        // joueur, et ne peut rien garantir. Le gain atterrit dans la boîte 🎁 de
+                        // l'accueil plutôt que d'être crédité en silence, pour que le joueur voie
+                        // ce qu'il a gagné. L'échec est volontairement muet : un souci réseau ne
+                        // doit pas gâcher une fin de chapitre, et la récompense reste réclamable
+                        // à la prochaine traversée.
+                        claimStoryChapterReward(chapter.id).catch(() => undefined);
                     }
                     return null;
                 }

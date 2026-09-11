@@ -1,0 +1,182 @@
+/* Page d'administration des rapports de bugs — sobre et dense, elle sert à lire, pas à séduire. */
+
+.main {
+    min-height: 100dvh;
+    background: #0b0b18;
+    color: var(--text-primary, #fff);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* Réserve à droite pour la roue des paramètres flottante (fixed, 44px + marge). */
+    padding: 12px 72px 16px 16px;
+    /* Sous la barre d'état iOS sinon : viewport-fit=cover fait partir le viewport du haut
+       physique de l'écran. */
+    padding-top: max(12px, env(safe-area-inset-top));
+    background: rgba(0, 0, 0, 0.55);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.backButton {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--gold-divine, #d4af37);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 12px;
+    text-decoration: none;
+}
+
+.title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1rem, 4vw, 1.4rem);
+    color: var(--gold-divine, #d4af37);
+}
+
+.content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px 16px calc(40px + env(safe-area-inset-bottom));
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.filterTab {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.filterActive {
+    color: #0b0b18;
+    background: var(--gold-divine, #d4af37);
+    border-color: var(--gold-divine, #d4af37);
+    font-weight: 700;
+}
+
+.empty {
+    padding: 32px 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.report {
+    margin-bottom: 14px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+.reportHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.reportAuthor {
+    font-weight: 700;
+    color: var(--gold-divine, #d4af37);
+}
+
+.badge {
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 999px;
+}
+
+.new {
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.25);
+    border: 1px solid rgba(248, 113, 113, 0.6);
+}
+
+.seen {
+    color: #fde68a;
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.5);
+}
+
+.resolved {
+    color: #bbf7d0;
+    background: rgba(34, 197, 94, 0.18);
+    border: 1px solid rgba(74, 222, 128, 0.5);
+}
+
+/* `pre-wrap` : le joueur a peut-être structuré son rapport en lignes, on ne l'aplatit pas. */
+.reportMessage {
+    margin: 0 0 10px;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.reportMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.userAgent {
+    margin: 8px 0 0;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reportActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.actionBtn {
+    padding: 7px 12px;
+    font-size: 0.76rem;
+    font-family: inherit;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.actionBtn:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold-divine, #d4af37);
+}

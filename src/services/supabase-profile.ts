@@ -462,4 +462,113 @@ export async function claimAllMailboxRewards(): Promise<{ success: boolean; tota
     return rows[0] ?? { success: false, total_ambroisie: 0 };
 }
 
+
+// =====================================
+// RÉCOMPENSES UNIQUES (Histoire, Ascension)
+// =====================================
+
+/**
+ * Récompense de fin de chapitre : 250 ambroisie, UNE SEULE FOIS par profil.
+ *
+ * Le combat étant calculé côté client, le serveur ne peut pas vérifier que le chapitre a
+ * réellement été terminé — mais l'index d'unicité de `mailbox_rewards` garantit qu'il ne sera
+ * jamais payé deux fois, ce qui suffit sur un mode rejouable à volonté.
+ *
+ * `granted` vaut false si la récompense avait déjà été accordée : ce n'est PAS une erreur.
+ */
+export async function claimStoryChapterReward(
+    chapterId: string,
+): Promise<{ granted: boolean; ambroisie: number }> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('claim_story_chapter_reward', { p_chapter_id: chapterId });
+    if (error) throw error;
+    const rows = (data ?? []) as { granted: boolean; ambroisie: number }[];
+    return rows[0] ?? { granted: false, ambroisie: 0 };
+}
+
+/**
+ * Bonus de première ascension : 100 / 200 / 600 ambroisie par étage selon le palier, une seule
+ * fois par étage et par profil. Réclame d'un coup tous les étages jusqu'à celui atteint, ceux
+ * déjà payés étant simplement ignorés.
+ *
+ * Distinct de `reportAscensionRun`, qui crédite le gain RÉPÉTABLE de chaque run.
+ */
+export async function claimAscensionFloorRewards(
+    floorReached: number,
+): Promise<{ grantedFloors: number; totalAmbroisie: number }> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('claim_ascension_floor_rewards', { p_floor_reached: floorReached });
+    if (error) throw error;
+    const rows = (data ?? []) as { granted_floors: number; total_ambroisie: number }[];
+    const row = rows[0];
+    return { grantedFloors: row?.granted_floors ?? 0, totalAmbroisie: row?.total_ambroisie ?? 0 };
+}
+
+// =====================================
+// REMONTÉE DE BUGS
+// =====================================
+
+export interface BugReport {
+    id: string;
+    user_id: string;
+    username: string;
+    message: string;
+    page_url: string;
+    user_agent: string;
+    app_version: string;
+    status: 'new' | 'seen' | 'resolved';
+    created_at: string;
+}
+
+/**
+ * Envoie un rapport de bug. Le contexte (page, navigateur, version) est joint automatiquement :
+ * un rapport sans contexte oblige à redemander ce que le joueur a déjà oublié.
+ */
+export async function submitBugReport(params: {
+    userId: string;
+    username: string;
+    message: string;
+    appVersion: string;
+}): Promise<void> {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from('bug_reports').insert({
+        user_id: params.userId,
+        username: params.username,
+        message: params.message.trim(),
+        page_url: typeof window !== 'undefined' ? window.location.pathname : '',
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 500) : '',
+        app_version: params.appVersion,
+    });
+    if (error) throw error;
+}
+
+/** Lecture réservée aux comptes `is_creator` — c'est la RLS qui l'impose, pas cette fonction. */
+export async function getBugReports(limit = 100): Promise<BugReport[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+        .from('bug_reports')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as BugReport[];
+}
+
+export async function setBugReportStatus(id: string, status: BugReport['status']): Promise<void> {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from('bug_reports').update({ status }).eq('id', id);
+    if (error) throw error;
+}
+
+/** Nombre de récompenses en attente, pour la pastille de l'accueil. */
+export async function countUnclaimedRewards(): Promise<number> {
+    const supabase = getSupabaseClient();
+    const { count, error } = await supabase
+        .from('mailbox_rewards')
+        .select('id', { count: 'exact', head: true })
+        .eq('claimed', false);
+    if (error) throw error;
+    return count ?? 0;
+}
+
 export type { User };

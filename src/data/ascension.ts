@@ -161,3 +161,26 @@ export const TIER_LABELS: Record<UnitTier, { label: string; color: string; icon:
 export function floorReward(floor: number): number {
     return 10 + floor * 5;
 }
+
+/**
+ * Bonus de PREMIÈRE ascension, accordé une seule fois par étage et par profil.
+ *
+ * À ne pas confondre avec `floorReward`, qui récompense chaque run. Celui-ci est la vraie
+ * récompense de progression : franchir un étage inédit rapporte gros, le refranchir ne rapporte
+ * plus rien. C'est ce qui permet de récompenser généreusement sans ouvrir une boucle de farm.
+ *
+ * Le barème est dupliqué dans `ascension_floor_bonus()` côté Postgres, qui fait autorité — cette
+ * fonction ne sert qu'à ANNONCER au joueur ce qu'il peut gagner.
+ */
+export function ascensionFloorBonus(floor: number): number {
+    if (floor >= 1 && floor <= 5) return 100;
+    if (floor >= 6 && floor <= 10) return 200;
+    if (floor >= 11 && floor <= 15) return 600;
+    return 0;
+}
+
+/** Total des bonus de première ascension d'une tour entière : 500 + 1000 + 3000. */
+export const TOTAL_FIRST_CLEAR_BONUS = Array.from(
+    { length: TOTAL_FLOORS },
+    (_, i) => ascensionFloorBonus(i + 1),
+).reduce((a, b) => a + b, 0);

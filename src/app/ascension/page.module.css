@@ -459,3 +459,10 @@
         font-size: 0.6rem;
     }
 }
+/* Introduction du barème de première ascension : une phrase, pas une puce. */
+.bonusIntro {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
+}

@@ -8,7 +8,7 @@ import GameBoard from '@/components/GameBoard/GameBoard';
 import { useGameStore } from '@/store/gameStore';
 import { getOwnedGods } from '@/data/gods';
 import { floorReward } from '@/data/ascension';
-import { reportAscensionRun } from '@/services/supabase-profile';
+import { reportAscensionRun, claimAscensionFloorRewards } from '@/services/supabase-profile';
 import { useAscensionRun } from './useAscensionRun';
 import { AscensionMenu, TeamPicker, FloorCleared, RunOver } from './components/AscensionViews';
 import styles from './page.module.css';
@@ -58,7 +58,13 @@ function AscensionContent() {
         reportedRef.current = true;
 
         const floorReached = run.phase === 'victory' ? run.currentFloor : Math.max(0, run.currentFloor - 1);
+
+        // Deux récompenses de natures différentes, dans cet ordre :
+        //  1. le gain du run, répétable, crédité directement (report-ascension-run) ;
+        //  2. le bonus de PREMIÈRE ascension de chaque étage, une seule fois par profil, déposé
+        //     dans la boîte 🎁 pour que le joueur voie ce qu'il vient de débloquer.
         reportAscensionRun(floorReached, run.reward)
+            .then(() => claimAscensionFloorRewards(floorReached))
             .then(() => refreshProfile())
             .catch(err => console.error('Ascension : remontée du résultat échouée', err));
     }, [run.phase, run.currentFloor, run.reward, refreshProfile]);
