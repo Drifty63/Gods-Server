@@ -92,6 +92,16 @@ export function useMultiplayer() {
     const queueChannelRef = useRef<RealtimeChannel | null>(null);
     const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const pendingActionRef = useRef<GameAction | null>(null);
+    /**
+     * File d'attente des poussées d'état : chacune attend que la précédente ait abouti.
+     *
+     * Sans elle, deux poussées rapprochées partent en parallèle, et le serveur les traite en
+     * lire-valider-écrire sans transaction : c'est la DERNIÈRE RÉPONSE ARRIVÉE qui l'emporte,
+     * pas la dernière envoyée. Sur un réseau mobile lent, la poussée d'une carte jouée pouvait
+     * atterrir après celle de la fin de tour et restaurer l'état d'avant — l'adversaire restait
+     * alors bloqué au tour précédent pendant que le lanceur avait déjà avancé.
+     */
+    const syncQueueRef = useRef<Promise<void>>(Promise.resolve());
     const lastRpsRevealKeyRef = useRef<string | null>(null);
 
     const applyGameRow = useCallback((row: GameRow) => {
@@ -383,20 +393,40 @@ export function useMultiplayer() {
 
     const syncState = useCallback(async (gameState: Record<string, unknown>) => {
         if (!gameIdRef.current || !tokenRef.current) return;
-        const supabase = getSupabaseClient();
+
+        // L'action est prélevée TOUT DE SUITE, pas au moment où la requête partira : entre-temps
+        // une autre action aurait pu écraser la référence, et on enverrait alors l'état d'une
+        // action avec l'étiquette d'une autre.
         const action = pendingActionRef.current;
         pendingActionRef.current = null;
-        const { data, error: fnErr } = await supabase.functions.invoke('sync-game-state', {
-            body: { gameId: gameIdRef.current, token: tokenRef.current, action, gameState },
-        });
-        if (fnErr) {
-            setError(fnErr.message);
-            return;
-        }
-        if (data?.ok === false) {
-            setError(data.reason || 'Action refusée');
-        }
-    }, []);
+        const gameId = gameIdRef.current;
+        const token = tokenRef.current;
+
+        const run = async () => {
+            const supabase = getSupabaseClient();
+            const { data, error: fnErr } = await supabase.functions.invoke('sync-game-state', {
+                body: { gameId, token, action, gameState },
+            });
+            if (fnErr) {
+                setError(fnErr.message);
+                return;
+            }
+            if (data?.ok === false) {
+                // Le serveur a refusé : nos deux états ont divergé. Le recharger est la seule
+                // issue — sans ça le client reste sur une version que personne d'autre ne voit.
+                setError(data.reason || 'Action refusée');
+                const supabase2 = getSupabaseClient();
+                const { data: fresh } = await supabase2
+                    .from('games').select('*').eq('id', gameId).single();
+                if (fresh) applyGameRow(fresh as GameRow);
+            }
+        };
+
+        // Chaînage : la poussée suivante n'est émise qu'une fois celle-ci terminée, pour que
+        // l'ordre d'arrivée côté serveur soit l'ordre d'émission.
+        syncQueueRef.current = syncQueueRef.current.then(run, run);
+        return syncQueueRef.current;
+    }, [applyGameRow]);
 
     // Signale la fin de partie (déclenchée localement dès que le moteur passe en 'finished') pour
     // que le résultat soit persisté (Ferveur/stats/historique) côté serveur. Les deux clients le

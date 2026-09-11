@@ -33,6 +33,14 @@ interface HeroCardProps {
     /** Notifie le plateau d'un impact, pour la secousse d'écran et les effets globaux. */
     onImpact?: (report: ImpactReport) => void;
     onClick: () => void;
+    /**
+     * Le ciblage en cours vise-t-il les alliés TOMBÉS ?
+     *
+     * Une carte morte porte `pointer-events: none` — c'est voulu, on ne vise pas un cadavre.
+     * Sauf qu'on le vise justement pour le ranimer : « Graine de vie » était donc impossible
+     * à jouer, le clic n'atteignant jamais la carte.
+     */
+    canTargetDead?: boolean;
 }
 
 interface Impact {
@@ -51,6 +59,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
     incomingElement,
     onImpact,
     onClick,
+    canTargetDead = false,
 }) => {
     const healthPercent = Math.max(0, (god.currentHealth / god.card.maxHealth) * 100);
 
@@ -147,7 +156,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
     return (
         <div
-            className={`${styles.heroCard} ${god.isDead ? styles.dead : ''} ${isTargeted ? styles.targeted : ''} ${isCaster ? styles.caster : ''} ${impact?.kind === 'damage' ? styles.shaking : ''}`}
+            className={`${styles.heroCard} ${god.isDead ? styles.dead : ''} ${god.isDead && canTargetDead ? styles.reviveTarget : ''} ${isTargeted ? styles.targeted : ''} ${isCaster ? styles.caster : ''} ${impact?.kind === 'damage' ? styles.shaking : ''}`}
             data-god-key={godKey}
             style={{ '--element-color': elementColor } as React.CSSProperties}
             onClick={onClick}

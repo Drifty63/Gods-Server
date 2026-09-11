@@ -8,6 +8,8 @@ interface ArenaAreaProps {
     player: PlayerState;
     opponent: PlayerState;
     selectedTargetGods: GodState[];
+    /** Le sort en cours vise un allié tombé (résurrection). */
+    canTargetDead?: boolean;
     onTargetGod: (god: GodState) => void;
     /** godId du dieu adverse en train de lancer un sort (carte sélectionnée/jouée par l'IA). */
     opponentCasterGodId?: string | null;
@@ -34,6 +36,7 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
     onImpact,
     myTurn,
     turnNumber,
+    canTargetDead,
     onEndTurn,
     onOpenLog,
 }) => {
@@ -114,6 +117,7 @@ export const ArenaArea: React.FC<ArenaAreaProps> = ({
                     <HeroCard
                         key={`ply-${god.card.id}`}
                         god={god}
+                        canTargetDead={canTargetDead}
                         isTargeted={isTargeted(god)}
                         isCaster={!!playerCasterGodId && god.card.id === playerCasterGodId}
                         godKey={`player-${god.card.id}`}

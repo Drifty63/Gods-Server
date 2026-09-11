@@ -629,6 +629,9 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
         return 'UN ENNEMI';
     })();
 
+    /** Les cartes de résurrection visent des dieux tombés, qui sont inertes par défaut. */
+    const canTargetDead = isSelectingTarget && targetKind === 'UN ALLIÉ TOMBÉ';
+
     return (
         <div
             className={`${styles.gameBoard} ${screenShake === 'heavy' ? styles.shakeHeavy : ''} ${screenShake === 'light' ? styles.shakeLight : ''}`}
@@ -895,6 +898,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                 onImpact={handleImpact}
                 myTurn={myTurn}
                 turnNumber={gameState.turnNumber}
+                canTargetDead={canTargetDead}
                 onOpenLog={() => setIsLogOpen(true)}
                 onEndTurn={() => {
                     if (myTurn) {

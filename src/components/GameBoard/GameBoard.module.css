@@ -1922,3 +1922,19 @@
     border: 1px solid rgba(248, 113, 113, 0.75);
     border-radius: 999px;
 }
+
+/**
+ * Dieu tombé que l'on peut ranimer.
+ *
+ * `.heroCard.dead` coupe les événements de pointeur — sans quoi on viserait des cadavres par
+ * mégarde. Mais les cartes de résurrection visent PRÉCISÉMENT un allié tombé : « Graine de vie »
+ * était donc injouable, le clic n'atteignant jamais la carte. On rend la cible cliquable, et
+ * lisible, uniquement pendant ce ciblage-là.
+ */
+.heroCard.dead.reviveTarget {
+  pointer-events: auto;
+  cursor: pointer;
+  filter: grayscale(45%) opacity(0.8);
+  border-color: var(--gold-divine, #d4af37);
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.5);
+}
