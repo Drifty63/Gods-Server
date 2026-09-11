@@ -54,9 +54,17 @@ function DuelContent() {
         currentGame,
         opponentName,
         getSessionInfo,
+        createPrivateGame,
+        joinPrivateGame,
     } = useMultiplayer();
 
-    const [view, setView] = useState<'menu' | 'select' | 'searching'>('menu');
+    /**
+     * Le Duel offre les memes portes d'entree que le mode en ligne : classe, amical, et
+     * parties privees entre amis. Seul le classe touche au classement — les deux autres
+     * posent `is_ranked = false`, et `apply_match_result` s'arrete net dans ce cas.
+     */
+    const [view, setView] = useState<'menu' | 'select' | 'mode' | 'searching' | 'private-create' | 'private-join'>('menu');
+    const [privateCode, setPrivateCode] = useState('');
     const [selectedCards, setSelectedCards] = useState<string[]>([]);
     const [searchTime, setSearchTime] = useState(0);
 
@@ -138,25 +146,47 @@ function DuelContent() {
         }
     };
 
-    const handleStartSearch = () => {
+    /** Garde commune aux quatre entrées : équipe valide et joueur connecté. */
+    const readyToPlay = () => {
         if (!profile?.username) {
             toast.error('Vous devez être connecté pour jouer en Duel');
-            return;
+            return false;
         }
         if (selectedCards.length < 2) {
             toast.error('Sélectionnez au moins 2 cartes pour partir au combat');
-            return;
+            return false;
         }
-        setView('searching');
+        // L'équipe est choisie AVANT la partie : `/online/select` la confirmera toute seule.
         sessionStorage.setItem('gameMode', 'duel');
         sessionStorage.setItem('selectedGods', JSON.stringify(selectedCards));
-        // Le Duel est toujours classé (même infrastructure de matchmaking que "Partie Classée").
-        joinQueue(profile.username, true, profile.id);
+        return true;
+    };
+
+    /** `ranked: false` = partie amicale, sans aucun effet sur le classement. */
+    const handleStartSearch = (ranked: boolean) => {
+        if (!readyToPlay()) return;
+        setView('searching');
+        joinQueue(profile!.username, ranked, profile!.id);
+    };
+
+    const handleCreatePrivate = () => {
+        if (!readyToPlay()) return;
+        setView('private-create');
+        createPrivateGame(profile!.username);
+    };
+
+    const handleJoinPrivate = () => {
+        if (!readyToPlay()) return;
+        if (privateCode.trim().length < 4) {
+            toast.error('Entrez le code de la partie');
+            return;
+        }
+        joinPrivateGame(privateCode.toUpperCase(), profile!.username);
     };
 
     const handleCancelSearch = () => {
         leaveQueue();
-        setView('select');
+        setView('mode');
     };
 
     const formatTime = (seconds: number) => {
@@ -346,10 +376,120 @@ function DuelContent() {
                             </button>
                             <button
                                 className={styles.confirmBtn}
-                                onClick={handleStartSearch}
+                                onClick={() => { if (readyToPlay()) setView('mode'); }}
                                 disabled={selectedCards.length < 2}
                             >
-                                🔍 Trouver un adversaire ({selectedCards.length}/4)
+                                ⚔️ Choisir un mode ({selectedCards.length}/4)
+                            </button>
+                        </div>
+                    </section>
+                )}
+
+                {/* Choix du mode, une fois l'équipe composée */}
+                {view === 'mode' && (
+                    <section className={styles.selectSection}>
+                        <h2 className={styles.selectTitle}>Comment voulez-vous jouer ?</h2>
+
+                        <div className={styles.modeList}>
+                            <button className={styles.duelModeCard} onClick={() => handleStartSearch(true)}>
+                                <span className={styles.duelModeIcon}>🏆</span>
+                                <span className={styles.duelModeInfo}>
+                                    <strong>Partie Classée</strong>
+                                    <small>Compte pour votre classement</small>
+                                </span>
+                            </button>
+
+                            <button className={styles.duelModeCard} onClick={() => handleStartSearch(false)}>
+                                <span className={styles.duelModeIcon}>🎯</span>
+                                <span className={styles.duelModeInfo}>
+                                    <strong>Partie Amicale</strong>
+                                    <small>Adversaire aléatoire, sans effet sur le classement</small>
+                                </span>
+                            </button>
+
+                            <button className={styles.duelModeCard} onClick={handleCreatePrivate}>
+                                <span className={styles.duelModeIcon}>🔒</span>
+                                <span className={styles.duelModeInfo}>
+                                    <strong>Créer une partie privée</strong>
+                                    <small>Un code à partager avec un ami</small>
+                                </span>
+                            </button>
+
+                            <button className={styles.duelModeCard} onClick={() => setView('private-join')}>
+                                <span className={styles.duelModeIcon}>🔑</span>
+                                <span className={styles.duelModeInfo}>
+                                    <strong>Rejoindre une partie privée</strong>
+                                    <small>Avec le code reçu d&apos;un ami</small>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div className={styles.selectActions}>
+                            <button className={styles.backBtn} onClick={() => setView('select')}>
+                                Retour
+                            </button>
+                        </div>
+                    </section>
+                )}
+
+                {/* Partie privée créée : on attend l'ami */}
+                {view === 'private-create' && (
+                    <section className={styles.selectSection}>
+                        <h2 className={styles.selectTitle}>Code de la partie</h2>
+                        {currentGame ? (
+                            <>
+                                <div className={styles.privateCode}>{currentGame.gameId}</div>
+                                <button
+                                    className={styles.confirmBtn}
+                                    onClick={async () => {
+                                        try {
+                                            await navigator.clipboard.writeText(currentGame.gameId);
+                                            toast.success('Code copié dans le presse-papiers');
+                                        } catch {
+                                            toast.error(`Copie impossible — code : ${currentGame.gameId}`, 8000);
+                                        }
+                                    }}
+                                >
+                                    📋 Copier le code
+                                </button>
+                                <p className={styles.privateHint}>En attente de votre adversaire…</p>
+                            </>
+                        ) : (
+                            <p className={styles.privateHint}>Création du salon…</p>
+                        )}
+                        <div className={styles.selectActions}>
+                            <button className={styles.backBtn} onClick={() => setView('mode')}>
+                                Annuler
+                            </button>
+                        </div>
+                    </section>
+                )}
+
+                {/* Rejoindre une partie privée */}
+                {view === 'private-join' && (
+                    <section className={styles.selectSection}>
+                        <h2 className={styles.selectTitle}>Rejoindre une partie</h2>
+                        <p className={styles.privateHint}>Entrez le code fourni par votre ami</p>
+
+                        <input
+                            type="text"
+                            value={privateCode}
+                            onChange={(e) => setPrivateCode(e.target.value.toUpperCase())}
+                            placeholder="XXXXXX"
+                            className={styles.privateInput}
+                            maxLength={6}
+                        />
+
+                        <div className={styles.selectActions}>
+                            <button className={styles.backBtn} onClick={() => setView('mode')}>
+                                Retour
+                            </button>
+                            <button
+                                className={styles.confirmBtn}
+                                onClick={handleJoinPrivate}
+                                disabled={privateCode.length < 4}
+                            >
+                                Rejoindre
                             </button>
                         </div>
                     </section>

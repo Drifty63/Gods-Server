@@ -629,3 +629,108 @@
         width: 100%;
     }
 }
+/* ================================
+   CHOIX DU MODE ET PARTIES PRIVÉES
+   ================================ */
+
+.modeList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.duelModeCard {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 14px;
+    color: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.duelModeCard:hover,
+.duelModeCard:active {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: var(--gold-divine);
+    transform: translateY(-2px);
+}
+
+.duelModeIcon {
+    flex-shrink: 0;
+    font-size: 1.7rem;
+    line-height: 1;
+}
+
+.duelModeInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.duelModeInfo strong {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: var(--gold-divine);
+}
+
+.duelModeInfo small {
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+/* Code de salon : il doit se lire et se recopier sans hésitation, d'où le chasse fixe
+   et l'espacement des caractères. */
+.privateCode {
+    margin: 16px auto;
+    padding: 14px 20px;
+    max-width: 280px;
+    font-family: 'Courier New', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-align: center;
+    color: var(--gold-divine);
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 12px;
+}
+
+.privateHint {
+    margin: 12px 0;
+    text-align: center;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.privateInput {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    margin: 16px auto;
+    padding: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 12px;
+}
+
+.privateInput:focus {
+    outline: none;
+    border-color: var(--gold-divine);
+}
