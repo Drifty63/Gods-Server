@@ -67,11 +67,13 @@ create table if not exists public.season_results (
     username  text not null,
     avatar    text not null default '',
     ferveur   int  not null,
-    position  int  not null,
+    -- `position` est un mot-clé réservé de PostgreSQL : accepté dans un CREATE TABLE,
+    -- mais refusé dans une liste RETURNS TABLE. On le nomme donc explicitement partout.
+    rank_position int not null,
     primary key (season_id, mode, user_id)
 );
 
-create index if not exists season_results_lookup_idx on public.season_results (season_id, mode, position);
+create index if not exists season_results_lookup_idx on public.season_results (season_id, mode, rank_position);
 
 alter table public.seasons        enable row level security;
 alter table public.season_results enable row level security;
@@ -315,17 +317,22 @@ $$;
 drop function if exists public.get_leaderboard(int);
 
 create or replace function public.get_leaderboard(p_limit int default 100, p_mode text default 'ranked')
-returns table (id uuid, username text, avatar text, ferveur int, victories int, position int)
+returns table (id uuid, username text, avatar text, ferveur int, victories int, rank_position int)
 language sql
 security definer
 set search_path = public
 stable
 as $$
+    -- Alias volontairement distincts des colonnes de sortie : dans une fonction `language sql`,
+    -- les noms déclarés par RETURNS TABLE deviennent des paramètres et peuvent entrer en conflit
+    -- avec une colonne du même nom. On s'épargne toute ambiguïté plutôt que de parier dessus.
     with classed as (
         select
-            p.id, p.username, p.avatar,
-            public.ferveur_in_mode(p.id, p_mode) as ferveur,
-            coalesce((p.stats->>'victories')::int, 0) as victories,
+            p.id as uid,
+            p.username as uname,
+            p.avatar as uavatar,
+            public.ferveur_in_mode(p.id, p_mode) as fv,
+            coalesce((p.stats->>'victories')::int, 0) as wins,
             case p_mode
                 when 'duel13'    then p.placement_duel13
                 when 'duel_open' then p.placement_duel_open
@@ -333,13 +340,13 @@ as $$
             end as played
         from public.profiles p
     )
-    select id, username, avatar, ferveur, victories,
-           row_number() over (order by ferveur desc, username asc)::int as position
+    select uid, uname, uavatar, fv, wins,
+           row_number() over (order by fv desc, uname asc)::int
     from classed
     -- Un joueur non placé n'apparaît pas : un rang affiché après une seule partie ne
-    -- reflèterait rien, et fausserait la position de tous les autres.
+    -- reflèterait rien, et fausserait le rang de tous les autres.
     where played >= public.placement_matches()
-    order by ferveur desc, username asc
+    order by fv desc, uname asc
     limit least(coalesce(p_limit, 100), 200);
 $$;
 
@@ -372,8 +379,8 @@ begin
     end if;
 
     foreach v_mode in array array['ranked', 'duel13', 'duel_open'] loop
-        insert into public.season_results (season_id, mode, user_id, username, avatar, ferveur, position)
-        select v_season.id, v_mode, l.id, l.username, coalesce(l.avatar, ''), l.ferveur, l.position
+        insert into public.season_results (season_id, mode, user_id, username, avatar, ferveur, rank_position)
+        select v_season.id, v_mode, l.id, l.username, coalesce(l.avatar, ''), l.ferveur, l.rank_position
         from public.get_leaderboard(200, v_mode) l
         on conflict do nothing;
     end loop;
