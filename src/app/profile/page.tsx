@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getMostPlayedGod, getMatchHistory, isUsernameTaken, type MatchHistoryEntry } from '@/services/supabase-profile';
 import { toast } from '@/lib/toast';
 import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
-import { getRankByFerveur, getRankProgress } from '@/data/ranks';
+import { getRankByFerveur, getRankProgress, getLadder } from '@/data/ranks';
 import styles from './page.module.css';
 
 function formatMatchDate(iso: string): string {
@@ -305,7 +305,9 @@ export default function ProfilePage() {
                                         <span className={`${styles.matchResultText} ${match.result === 'victory' ? styles.win : styles.loss}`}>
                                             {match.result === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}
                                         </span>
-                                        <span className={styles.matchTurns}>{formatMatchDate(match.created_at)}</span>
+                                        <span className={styles.matchTurns}>
+                                        {getLadder(match.mode).short} • {formatMatchDate(match.created_at)}
+                                    </span>
                                     </div>
 
                                     <span className={`${styles.matchFerveurChange} ${match.ferveur_change >= 0 ? styles.win : styles.loss}`}>

@@ -3,6 +3,7 @@
 
 import type { User } from '@supabase/supabase-js';
 import { getSupabaseClient } from './supabase-realtime';
+import type { LadderMode } from '@/data/ranks';
 
 // =====================================
 // TYPES
@@ -118,6 +119,8 @@ export interface MatchHistoryEntry {
     opponent_name: string;
     result: 'victory' | 'defeat';
     ferveur_change: number;
+    /** Classement concerné. L'historique ne disait pas de quel mode venait la partie. */
+    mode: LadderMode;
     created_at: string;
 }
 
@@ -334,11 +337,75 @@ export function getMostPlayedGod(
 // CLASSEMENT (Ferveur)
 // =====================================
 
-export async function getLeaderboard(limit: number = 100): Promise<LeaderboardEntry[]> {
+/**
+ * Classement d'un mode donné.
+ *
+ * Les joueurs encore en placements n'y figurent pas : un rang affiché après une seule partie ne
+ * reflèterait rien, et décalerait la position de tous les autres.
+ */
+export async function getLeaderboard(
+    limit: number = 100,
+    mode: LadderMode = 'ranked',
+): Promise<LeaderboardEntry[]> {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase.rpc('get_leaderboard', { p_limit: limit });
+    const { data, error } = await supabase.rpc('get_leaderboard', { p_limit: limit, p_mode: mode });
     if (error) throw error;
     return (data ?? []) as LeaderboardEntry[];
+}
+
+export interface Season {
+    id: number;
+    started_at: string;
+    ends_at: string;
+    closed_at: string | null;
+}
+
+export interface SeasonResult {
+    season_id: number;
+    mode: LadderMode;
+    user_id: string;
+    username: string;
+    avatar: string;
+    ferveur: number;
+    rank_position: number;
+}
+
+/** Saisons closes, de la plus récente à la plus ancienne : le palmarès des saisons passées. */
+export async function getClosedSeasons(): Promise<Season[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+        .from('seasons')
+        .select('*')
+        .not('closed_at', 'is', null)
+        .order('id', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as Season[];
+}
+
+/** Saison en cours, pour annoncer au joueur quand tombera la remise à zéro. */
+export async function getCurrentSeason(): Promise<Season | null> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+        .from('seasons')
+        .select('*')
+        .is('closed_at', null)
+        .order('id', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+    if (error) throw error;
+    return (data ?? null) as Season | null;
+}
+
+export async function getSeasonResults(seasonId: number, mode: LadderMode): Promise<SeasonResult[]> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+        .from('season_results')
+        .select('*')
+        .eq('season_id', seasonId)
+        .eq('mode', mode)
+        .order('rank_position', { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as SeasonResult[];
 }
 
 export async function getPublicProfile(userId: string): Promise<PublicProfile | null> {

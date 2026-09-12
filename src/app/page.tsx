@@ -8,6 +8,7 @@ import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPendingRequests, countUnclaimedRewards } from '@/services/supabase-profile';
 import { TUTORIAL_DONE_KEY } from '@/data/tutorial';
+import { NEWS_ITEMS } from '@/data/news';
 
 export default function Home() {
   return (
@@ -187,18 +188,16 @@ function HomeContent() {
             <h2>Actualité</h2>
           </div>
           <div className={styles.newsContent}>
-            <p className={styles.newsItem}>
-              <span className={styles.newsBullet}>-</span>
-              Patch 0.24 : Correctif des bugs sur le mode en ligne.
-            </p>
-            <p className={styles.newsItem}>
-              <span className={styles.newsBullet}>-</span>
-              Présentation de l&apos;extension Death &amp; Glory.
-            </p>
-            <p className={styles.newsItem}>
-              <span className={styles.newsBullet}>-</span>
-              Patch 0.23 : Sortie de l&apos;histoire de ZEUS
-            </p>
+            {NEWS_ITEMS.map(item => (
+              <p key={item.title} className={styles.newsItem}>
+                <span className={styles.newsBullet}>-</span>
+                <span>
+                  <strong className={styles.newsTitle}>{item.title}</strong>
+                  {' — '}
+                  {item.text}
+                </span>
+              </p>
+            ))}
           </div>
         </section>
       </div>

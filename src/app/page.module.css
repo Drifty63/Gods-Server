@@ -935,3 +935,10 @@
     line-height: 1;
     color: var(--gold-divine);
 }
+
+/* Titre d'une entrée d'actualité : le joueur doit pouvoir survoler la liste et savoir de quoi
+   parle chaque ligne sans tout lire. */
+.newsTitle {
+    color: var(--gold-divine, #d4af37);
+    font-weight: 700;
+}

@@ -159,3 +159,59 @@ export function getNextRank(currentRank: Rank): Rank | null {
 export function formatFerveur(ferveur: number): string {
     return ferveur.toLocaleString();
 }
+
+// =====================================
+// CLASSEMENTS
+// =====================================
+
+/**
+ * Les trois classements du jeu.
+ *
+ * Ils partageaient la même colonne de Ferveur, donc le même tableau — un joueur de Duel et un
+ * joueur de partie classée s'y retrouvaient mélangés alors qu'ils ne jouent pas au même jeu.
+ * Chacun a maintenant son compteur, ses placements et son palmarès de saison.
+ *
+ * À ne pas confondre avec `is_ranked`, qui dit seulement si une partie COMPTE : une amicale en
+ * Duel 13 points porte le mode 'duel13' sans jamais toucher au classement.
+ */
+export type LadderMode = 'ranked' | 'duel13' | 'duel_open';
+
+export interface LadderInfo {
+    mode: LadderMode;
+    label: string;
+    /** Libellé court, pour les onglets étroits d'un téléphone. */
+    short: string;
+    icon: string;
+    description: string;
+}
+
+export const LADDERS: LadderInfo[] = [
+    {
+        mode: 'ranked',
+        label: 'Partie Classée',
+        short: 'Classé',
+        icon: '⚔️',
+        description: 'Matchmaking en ligne, équipes libres.',
+    },
+    {
+        mode: 'duel13',
+        label: 'Duel — 13 points',
+        short: 'Duel 13',
+        icon: '🎯',
+        description: 'Équipes composées sous un budget de 13 points.',
+    },
+    {
+        mode: 'duel_open',
+        label: 'Duel — illimité',
+        short: 'Illimité',
+        icon: '🔥',
+        description: 'Aucune contrainte de budget : les meilleures cartes possédées.',
+    },
+];
+
+export function getLadder(mode: LadderMode): LadderInfo {
+    return LADDERS.find(l => l.mode === mode) ?? LADDERS[0];
+}
+
+/** Matchs à jouer avant d'apparaître au classement. Doit rester aligné sur placement_matches() en base. */
+export const PLACEMENT_MATCHES = 5;

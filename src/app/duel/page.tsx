@@ -9,12 +9,19 @@ import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { ALL_GODS, getDuelCards } from '@/data/gods';
 import type { GodCard } from '@/types/cards';
 import { toast } from '@/lib/toast';
+import { LADDERS, type LadderMode } from '@/data/ranks';
 import { clearMultiplayerSession } from '@/lib/multiplayerSession';
 import { haptic } from '@/lib/haptics';
 import { playSfx } from '@/lib/sfx';
 import styles from './page.module.css';
 
-// Configuration du mode Duel
+/**
+ * Configuration du mode Duel.
+ *
+ * `MAX_BUDGET` n'est plus qu'un plafond parmi deux : le budget se choisit AVANT la composition,
+ * entre 13 points et illimité. Le placer avant plutôt qu'après est ce qui garde l'écran lisible —
+ * quatre entrées de jeu multipliées par deux budgets feraient huit boutons sur un téléphone.
+ */
 const DUEL_CONFIG = {
     MAX_BUDGET: 13,
     MAX_CHARACTERS: 4,
@@ -66,6 +73,10 @@ function DuelContent() {
      */
     const [view, setView] = useState<'menu' | 'select' | 'mode' | 'searching' | 'private-create' | 'private-join'>('menu');
     const [privateCode, setPrivateCode] = useState('');
+    /** Classement visé, déduit du budget : deux tableaux distincts, deux files d'attente. */
+    const [ladder, setLadder] = useState<LadderMode>('duel13');
+    const isOpenBudget = ladder === 'duel_open';
+    const budgetCap = isOpenBudget ? Infinity : DUEL_CONFIG.MAX_BUDGET;
     const [selectedCards, setSelectedCards] = useState<string[]>([]);
     const [searchTime, setSearchTime] = useState(0);
 
@@ -81,7 +92,7 @@ function DuelContent() {
         const card = ALL_GODS.find(g => g.id === cardId);
         return sum + (card ? getCardCost(card) : 0);
     }, 0);
-    const budgetRemaining = DUEL_CONFIG.MAX_BUDGET - budgetUsed;
+    const budgetRemaining = budgetCap - budgetUsed;
 
     // Timer de recherche
     useEffect(() => {
@@ -170,7 +181,7 @@ function DuelContent() {
     const handleStartSearch = (ranked: boolean) => {
         if (!readyToPlay()) return;
         setView('searching');
-        joinQueue(profile!.username, ranked, profile!.id);
+        joinQueue(profile!.username, ranked, profile!.id, undefined, ladder);
     };
 
     const handleCreatePrivate = () => {
@@ -286,13 +297,24 @@ function DuelContent() {
                             </div>
                         </div>
 
-                        <button
-                            className={styles.searchButton}
-                            onClick={() => setView('select')}
-                            disabled={!isConnected}
-                        >
-                            {isConnected ? '🎯 Composer mon équipe' : 'Connexion...'}
-                        </button>
+                        {/* Le budget se choisit AVANT la composition : il détermine à la fois les
+                            équipes possibles et le classement dans lequel la partie comptera. */}
+                        <div className={styles.modeList}>
+                            {LADDERS.filter(l => l.mode !== 'ranked').map(l => (
+                                <button
+                                    key={l.mode}
+                                    className={styles.duelModeCard}
+                                    disabled={!isConnected}
+                                    onClick={() => { setLadder(l.mode); setSelectedCards([]); setView('select'); }}
+                                >
+                                    <span className={styles.duelModeIcon}>{l.icon}</span>
+                                    <span className={styles.duelModeInfo}>
+                                        <strong>{l.label}</strong>
+                                        <small>{l.description}</small>
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
 
                         {!isConnected && (
                             <p className={styles.connectionHint}>
@@ -303,7 +325,7 @@ function DuelContent() {
                         <div className={styles.rulesBox}>
                             <h3>📜 Règles du Duel</h3>
                             <ul>
-                                <li>💰 Budget maximum : <strong>{DUEL_CONFIG.MAX_BUDGET} points</strong></li>
+                                <li>💰 Budget : <strong>{isOpenBudget ? 'illimité' : `${DUEL_CONFIG.MAX_BUDGET} points`}</strong></li>
                                 <li>⚡ Dieu = {DUEL_CONFIG.COSTS.god} points</li>
                                 <li>🐉 Créature = {DUEL_CONFIG.COSTS.creature} points</li>
                                 <li>👤 Serviteur = {DUEL_CONFIG.COSTS.servant} points</li>
@@ -324,16 +346,20 @@ function DuelContent() {
                             <div className={styles.budgetTrack}>
                                 <div
                                     className={styles.budgetFill}
-                                    style={{ width: `${(budgetUsed / DUEL_CONFIG.MAX_BUDGET) * 100}%` }}
+                                    style={{ width: `${isOpenBudget ? 0 : Math.min(100, (budgetUsed / DUEL_CONFIG.MAX_BUDGET) * 100)}%` }}
                                 />
                             </div>
-                            <span className={styles.budgetValue}>{budgetUsed}/{DUEL_CONFIG.MAX_BUDGET}</span>
+                            <span className={styles.budgetValue}>
+                                {isOpenBudget ? `${budgetUsed} pts` : `${budgetUsed}/${DUEL_CONFIG.MAX_BUDGET}`}
+                            </span>
                         </div>
 
                         <p className={styles.selectHint}>
                             {selectedCards.length === 0
                                 ? `Sélectionnez vos cartes (max ${DUEL_CONFIG.MAX_CHARACTERS})`
-                                : `${selectedCards.length} carte${selectedCards.length > 1 ? 's' : ''} • ${budgetRemaining} pts restants`
+                                : isOpenBudget
+                                    ? `${selectedCards.length} carte${selectedCards.length > 1 ? 's' : ''} • budget illimité`
+                                    : `${selectedCards.length} carte${selectedCards.length > 1 ? 's' : ''} • ${budgetRemaining} pts restants`
                             }
                         </p>
 

@@ -8,11 +8,14 @@ import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
-import { getRankByFerveur, RANKS } from '@/data/ranks';
+import { getRankByFerveur, RANKS, LADDERS, PLACEMENT_MATCHES, type LadderMode } from '@/data/ranks';
 import {
     getFriendsList,
     getPendingRequests,
     getLeaderboard,
+    getClosedSeasons,
+    getCurrentSeason,
+    getSeasonResults,
     searchUsers,
     sendFriendRequest,
     respondFriendRequest,
@@ -22,6 +25,8 @@ import {
     type FriendEntry,
     type PendingRequestEntry,
     type LeaderboardEntry,
+    type Season,
+    type SeasonResult,
     type UserSearchResult,
 } from '@/services/supabase-profile';
 
@@ -96,6 +101,21 @@ function SocialContent() {
     const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
     const [expandedRank, setExpandedRank] = useState<string | null>(null);
 
+    /**
+     * Classement affiché.
+     *
+     * Les trois modes partageaient le même tableau : un joueur de Duel et un joueur de partie
+     * classée s'y mélangeaient alors qu'ils ne jouent pas au même jeu, avec des équipes composées
+     * sous des contraintes différentes.
+     */
+    const [ladderMode, setLadderMode] = useState<LadderMode>('ranked');
+
+    /** Saison consultée : `null` = celle en cours, un identifiant = une saison archivée. */
+    const [viewedSeason, setViewedSeason] = useState<number | null>(null);
+    const [closedSeasons, setClosedSeasons] = useState<Season[]>([]);
+    const [currentSeason, setCurrentSeason] = useState<Season | null>(null);
+    const [seasonRows, setSeasonRows] = useState<SeasonResult[]>([]);
+
     const loadFriendsData = useCallback(async () => {
         setLoadingFriends(true);
         try {
@@ -112,13 +132,30 @@ function SocialContent() {
     useEffect(() => { loadFriendsData(); }, [loadFriendsData]);
 
     useEffect(() => {
-        if (activeTab !== 'leaderboard') return;
+        if (activeTab !== 'leaderboard' || viewedSeason !== null) return;
         setLoadingLeaderboard(true);
-        getLeaderboard(200)
+        getLeaderboard(200, ladderMode)
             .then(setLeaderboard)
             .catch((err) => console.error('Erreur chargement classement:', err))
             .finally(() => setLoadingLeaderboard(false));
+    }, [activeTab, ladderMode, viewedSeason]);
+
+    // Saisons : la liste des archives et la saison courante, chargées une fois l'onglet ouvert.
+    useEffect(() => {
+        if (activeTab !== 'leaderboard') return;
+        getClosedSeasons().then(setClosedSeasons).catch(() => { });
+        getCurrentSeason().then(setCurrentSeason).catch(() => { });
     }, [activeTab]);
+
+    // Classement figé d'une saison révolue.
+    useEffect(() => {
+        if (viewedSeason === null) { setSeasonRows([]); return; }
+        setLoadingLeaderboard(true);
+        getSeasonResults(viewedSeason, ladderMode)
+            .then(setSeasonRows)
+            .catch(() => setSeasonRows([]))
+            .finally(() => setLoadingLeaderboard(false));
+    }, [viewedSeason, ladderMode]);
 
     // Recherche pour ajouter un ami (débattue, distincte du filtre local ci-dessous)
     useEffect(() => {
@@ -383,13 +420,78 @@ function SocialContent() {
                     <>
                         <div className={styles.leaderboardTitle}>
                             <span>🏆</span>
-                            <h2>Classement Global</h2>
+                            <h2>Classement</h2>
                         </div>
 
-                        {loadingLeaderboard ? (
+                        {/* Un tableau par mode : les équipes n'y sont pas composées sous les
+                            mêmes contraintes, les mélanger n'apprendrait rien à personne. */}
+                        <div className={styles.ladderTabs}>
+                            {LADDERS.map(l => (
+                                <button
+                                    key={l.mode}
+                                    className={`${styles.ladderTab} ${ladderMode === l.mode ? styles.ladderTabActive : ''}`}
+                                    onClick={() => setLadderMode(l.mode)}
+                                >
+                                    {l.icon} {l.short}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Saison en cours, ou l'une des archives. */}
+                        {closedSeasons.length > 0 && (
+                            <div className={styles.ladderTabs}>
+                                <button
+                                    className={`${styles.ladderTab} ${viewedSeason === null ? styles.ladderTabActive : ''}`}
+                                    onClick={() => setViewedSeason(null)}
+                                >
+                                    En cours
+                                </button>
+                                {closedSeasons.map(s => (
+                                    <button
+                                        key={s.id}
+                                        className={`${styles.ladderTab} ${viewedSeason === s.id ? styles.ladderTabActive : ''}`}
+                                        onClick={() => setViewedSeason(s.id)}
+                                    >
+                                        Saison {s.id}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {viewedSeason === null && currentSeason && (
+                            <p className={styles.searchHint}>
+                                Saison {currentSeason.id} — remise à zéro le{' '}
+                                {new Date(currentSeason.ends_at).toLocaleDateString('fr-FR')}.
+                                Les {PLACEMENT_MATCHES} premiers matchs servent de placement.
+                            </p>
+                        )}
+
+                        {/* Palmarès figé : on n'y affiche que le classement, sans les outils
+                            d'une saison vivante (position personnelle, progression). */}
+                        {viewedSeason !== null && (
+                            loadingLeaderboard ? (
+                                <p className={styles.searchHint}>Chargement…</p>
+                            ) : seasonRows.length === 0 ? (
+                                <p className={styles.searchHint}>Aucun joueur classé dans cette saison.</p>
+                            ) : (
+                                <div className={styles.leaderboardList}>
+                                    {seasonRows.map(row => (
+                                        <div key={row.user_id} className={styles.leaderboardRow}>
+                                            <span className={styles.leaderboardRank}>#{row.rank_position}</span>
+                                            <span className={styles.leaderboardName}>{row.username}</span>
+                                            <span className={styles.leaderboardFerveur}>{row.ferveur}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )
+                        )}
+
+                        {viewedSeason !== null ? null : loadingLeaderboard ? (
                             <p className={styles.searchHint}>Chargement du classement...</p>
                         ) : leaderboard.length < 3 ? (
-                            <p className={styles.searchHint}>Pas encore assez de joueurs classés.</p>
+                            <p className={styles.searchHint}>
+                                Pas encore assez de joueurs classés dans ce mode.
+                            </p>
                         ) : (
                             <>
                                 {myRank && (

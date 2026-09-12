@@ -1247,3 +1247,63 @@
     justify-content: center;
     line-height: 1;
 }
+
+/* ===================== CLASSEMENTS ET SAISONS ===================== */
+
+/* Trois modes, et autant de saisons archivées : il faut que ça défile sans casser la mise
+   en page sur un téléphone étroit. */
+.ladderTabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+
+.ladderTabs::-webkit-scrollbar {
+    display: none;
+}
+
+.ladderTab {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ladderTabActive {
+    color: #0b0b18;
+    font-weight: 700;
+    background: var(--gold-divine, #d4af37);
+    border-color: var(--gold-divine, #d4af37);
+}
+
+/* Palmarès figé d'une saison close : rang, pseudo, ferveur finale. */
+.leaderboardRank {
+    width: 48px;
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--gold-divine, #d4af37);
+}
+
+.leaderboardName {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.leaderboardFerveur {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: #f87171;
+}

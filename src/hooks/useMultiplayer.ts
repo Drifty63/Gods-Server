@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { GodCard } from '@/types/cards';
 import { getSupabaseClient } from '@/services/supabase-realtime';
+import type { LadderMode } from '@/data/ranks';
 
 export interface MultiplayerGame {
     gameId: string;
@@ -292,11 +293,25 @@ export function useMultiplayer() {
     // MATCHMAKING
     // =====================================
 
-    const joinQueue = useCallback(async (playerName: string, ranked: boolean = true, userId?: string, rating?: number) => {
+    /**
+     * Rejoint la file d'attente.
+     *
+     * `ranked` dit si la partie COMPTE ; `mode` dit dans QUEL classement. Les deux se composent :
+     * un Duel amical a mode='duel13' et ranked=false. Le mode sert aussi à l'appariement — on ne
+     * croise que des joueurs du même, faute de quoi une équipe composée sous contrainte de
+     * 13 points affronterait une équipe libre.
+     */
+    const joinQueue = useCallback(async (
+        playerName: string,
+        ranked: boolean = true,
+        userId?: string,
+        rating?: number,
+        mode: LadderMode = 'ranked',
+    ) => {
         const supabase = getSupabaseClient();
         const { data, error: insErr } = await supabase
             .from('matchmaking_queue')
-            .insert({ player_name: playerName, rating: rating ?? 1000, ranked, user_id: userId ?? null })
+            .insert({ player_name: playerName, rating: rating ?? 1000, ranked, mode, user_id: userId ?? null })
             .select()
             .single();
         if (insErr || !data) {
