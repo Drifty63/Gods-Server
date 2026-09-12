@@ -59,6 +59,17 @@ create table if not exists public.seasons (
     closed_at   timestamptz
 );
 
+-- Repartir d'une table propre.
+--
+-- L'éditeur SQL de Supabase ne joue PAS le fichier dans une transaction : une exécution
+-- interrompue en cours de route laisse derrière elle tout ce qui a précédé l'erreur. Une
+-- première version de ce fichier nommait cette colonne `position` — un mot-clé réservé, refusé
+-- plus loin dans une liste RETURNS TABLE — et la table a donc pu être créée avec l'ancien nom
+-- avant que le reste n'échoue. `create table if not exists` la laisserait alors telle quelle.
+--
+-- Aucune donnée en jeu : seule close_season() y écrit, et elle n'a jamais tourné.
+drop table if exists public.season_results;
+
 -- Le classement figé d'une saison révolue : l'histoire de gloire passée.
 create table if not exists public.season_results (
     season_id int  not null references public.seasons(id) on delete cascade,
