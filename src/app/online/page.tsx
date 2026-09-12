@@ -139,7 +139,7 @@ function OnlineContent() {
         <main className={styles.main}>
             {/* Header */}
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                <Link href="/play" className={styles.backButton} aria-label="Retour aux modes de jeu">
                     <span aria-hidden="true">‹</span>
                 </Link>
                 <h1 className={styles.title}>🌐 En Ligne</h1>

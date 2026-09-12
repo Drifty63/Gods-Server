@@ -105,7 +105,7 @@ export default function GamePage() {
                         <button onClick={handleNewGame} className={styles.retryButton}>
                             🔄 Réessayer
                         </button>
-                        <Link href="/" className={styles.homeButton}>
+                        <Link href="/play" className={styles.homeButton}>
                             🏠 Retour à l&apos;accueil
                         </Link>
                     </div>

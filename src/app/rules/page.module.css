@@ -47,23 +47,25 @@
 /* ================================
    HEADER
    ================================ */
+/**
+ * Bandeau calqué sur celui de la Collection, qui est la référence du projet.
+ *
+ * Trois écarts expliquaient qu'il tombe mal : un titre nettement plus gros (jusqu'à 2rem contre
+ * 1.5) qui épaississait la bande, un rembourrage vertical de 16px au lieu de 10, et une réserve
+ * de 72px à droite pour la roue des paramètres — inutile ici, le titre s'étirant déjà sans
+ * jamais passer dessous.
+ */
 .header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    /* Réserve à droite pour la roue des paramètres flottante (fixed, 44px + 20px de
-       marge) : sans elle le titre passait dessous et repassait à la ligne, ce qui décrochait
-       visuellement le bouton retour du texte auquel il appartient. */
-    padding: 16px 72px 16px 16px;
-    /* Sous la barre d'etat iOS sinon : viewport-fit=cover fait partir le viewport du haut
-       physique de l'ecran, et la fleche retour tombait sous l'heure et la batterie. */
-    padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
-    background: rgba(0, 0, 0, 0.6);
-    border-bottom: 2px solid rgba(212, 175, 55, 0.2);
     position: sticky;
     top: 0;
-    z-index: 100;
-    backdrop-filter: blur(15px);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: max(10px, env(safe-area-inset-top)) 14px 10px;
+    background: linear-gradient(180deg, rgba(6, 6, 16, 0.96), rgba(6, 6, 16, 0.72));
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
 }
 
 /**
@@ -80,12 +82,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     line-height: 1;
     color: var(--gold-divine);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(212, 175, 55, 0.25);
-    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 50%;
     text-decoration: none;
     transition: all 0.3s ease;
 }
@@ -101,7 +103,7 @@
     min-width: 0;
     margin: 0;
     font-family: 'Cinzel Decorative', 'Cinzel', serif;
-    font-size: clamp(1.1rem, 4vw, 2rem);
+    font-size: clamp(1.1rem, 5vw, 1.5rem);
     background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

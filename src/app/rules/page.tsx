@@ -11,7 +11,7 @@ export default function RulesPage() {
     return (
         <main className={styles.main}>
             <header className={styles.header}>
-                <Link href="/" className={styles.backButton} aria-label="Retour à l'accueil">
+                <Link href="/play" className={styles.backButton} aria-label="Retour aux modes de jeu">
                     <span aria-hidden="true">‹</span>
                 </Link>
                 <h1 className={styles.title}>📖 Règles du Jeu</h1>
