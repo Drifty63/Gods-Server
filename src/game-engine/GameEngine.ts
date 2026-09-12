@@ -766,6 +766,8 @@ export class GameEngine {
         const targetIds = action.targetGodIds || (action.targetGodId ? [action.targetGodId] : []);
         let targetIndex = 0;
         let lastUsedTargetId: string | undefined;
+        // Camp de la dernière cible : `target: 'same'` doit rester du MÊME côté du plateau.
+        let lastTargetIsAlly = false;
 
         // Un effet custom nécessitant un choix humain est différé : on ne l'exécute pas ici,
         // le store rappellera engine.resolveDeferredEffect() une fois le choix connu.
@@ -786,7 +788,7 @@ export class GameEngine {
                         effect, card, lastUsedTargetId, action.selectedElement,
                         action.lightningAction, [lastUsedTargetId],
                         action.selectedCardIds, action.healDistribution, action.optionalChoice,
-                        action.selectedPlayerTarget
+                        action.selectedPlayerTarget, lastTargetIsAlly
                     );
                 }
                 continue;
@@ -804,6 +806,7 @@ export class GameEngine {
                     action.selectedPlayerTarget
                 );
                 lastUsedTargetId = castingGod.card.id;
+                lastTargetIsAlly = true;
                 continue;
             }
 
@@ -822,6 +825,9 @@ export class GameEngine {
                     action.selectedPlayerTarget
                 );
                 lastUsedTargetId = currentTarget;
+                lastTargetIsAlly = effect.target === 'ally_god' || effect.target === 'dead_ally_god'
+                    || (effect.target === 'any_god'
+                        && player.gods.some(g => g.card.id === currentTarget && !g.isDead));
                 targetIndex++;
             } else if (!effect.target && effect.type === 'custom') {
                 this.applyEffect(
@@ -1119,11 +1125,12 @@ export class GameEngine {
         selectedCardIds?: string[],
         healDistribution?: { godId: string, amount: number }[],
         optionalChoice?: boolean,
-        selectedPlayerTarget?: 'self' | 'opponent'
+        selectedPlayerTarget?: 'self' | 'opponent',
+        sameSideIsAlly?: boolean,
     ): void {
         const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
-        const targets = this.resolveTargets(effect.target, player, opponent, targetGodId, targetGodIds);
+        const targets = this.resolveTargets(effect.target, player, opponent, targetGodId, targetGodIds, sameSideIsAlly);
 
         const ctx: EffectContext = {
             engine: this,
@@ -1254,7 +1261,9 @@ export class GameEngine {
         player: PlayerState,
         opponent: PlayerState,
         targetGodId?: string,
-        targetGodIds?: string[]
+        targetGodIds?: string[],
+        /** Camp de la cible précédente, pour `target: 'same'`. */
+        sameSideIsAlly?: boolean,
     ): GodState[] {
         switch (targetType) {
             case 'enemy_god':
@@ -1286,6 +1295,23 @@ export class GameEngine {
                 }
                 return [];
 
+            /**
+             * `same` : le dieu déjà visé par l'effet précédent.
+             *
+             * Ce cas MANQUAIT, et retombait donc sur `default`, qui fusionne les deux camps et
+             * filtre par id. En match miroir — deux équipes portant le même Chevalier d'Athéna —
+             * un poison posé sur le chevalier adverse empoisonnait AUSSI celui du lanceur. Le
+             * camp est donc transmis explicitement plutôt que redeviné.
+             */
+            case 'same': {
+                if (!targetGodId) return [];
+                const side = sameSideIsAlly ? player : opponent;
+                const t = side.gods.find(g => g.card.id === targetGodId && !g.isDead);
+                if (!t) return [];
+                if (!sameSideIsAlly && isUntargetable(t)) return [];
+                return [t];
+            }
+
             case 'all_enemies':
                 return opponent.gods.filter(g => !g.isDead && !isUntargetable(g));
 
@@ -1301,9 +1327,19 @@ export class GameEngine {
 
             default:
                 if (targetGodIds && targetGodIds.length > 0) {
-                    return [...player.gods, ...opponent.gods].filter(
-                        g => targetGodIds.includes(g.card.id) && !g.isDead && !(opponent.gods.includes(g) && isUntargetable(g))
-                    );
+                    // Un id désigne UN dieu, pas tous ceux qui le portent. Le filtre sur les deux
+                    // camps réunis en renvoyait deux dès qu'un match miroir opposait la même
+                    // carte des deux côtés, et l'effet frappait alors le lanceur en même temps
+                    // que sa cible. À défaut de camp déclaré, on privilégie l'adversaire : un
+                    // effet sans cible explicite est offensif dans toutes les cartes existantes.
+                    const resolved: GodState[] = [];
+                    for (const id of targetGodIds) {
+                        const enemy = opponent.gods.find(g => g.card.id === id && !g.isDead && !isUntargetable(g));
+                        const ally = player.gods.find(g => g.card.id === id && !g.isDead);
+                        const found = enemy ?? ally;
+                        if (found) resolved.push(found);
+                    }
+                    return resolved;
                 }
                 if (targetGodId) {
                     const all = [...player.gods, ...opponent.gods];
@@ -1337,8 +1373,17 @@ export class GameEngine {
             g => !g.isDead && !isUntargetable(g) && g.statusEffects.some(s => s.type === 'provocation')
         );
 
-        if (provokers.length > 0 && targetType === 'enemy_god' && !isMultiTarget) {
-            return provokers;
+        if (provokers.length > 0 && targetType === 'enemy_god') {
+            // Cible unique : le provocateur est le SEUL choix possible.
+            if (!isMultiTarget) return provokers;
+
+            // Plusieurs cibles : les autres ennemis restent visables, mais les provocateurs
+            // passent en tête. Tout consommateur qui prend les N premières cibles — l'IA, au
+            // premier chef — les inclut donc naturellement, comme on l'exige du joueur.
+            const others = opponent.gods.filter(
+                g => !g.isDead && !isUntargetable(g) && !provokers.includes(g)
+            );
+            return [...provokers, ...others];
         }
 
         switch (targetType) {

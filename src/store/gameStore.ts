@@ -1653,7 +1653,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
     },
 
-    // === ACTIONS POUR ZOMBIE RESURRECTION (Perséphone - temp_resurrect) ===
+    // === ACTIONS POUR LE CHOIX D'UN DIEU TOMBÉ ===
+    // Deux cartes très différentes passent par ici : la résurrection de Déméter (8 PV, le
+    // dieu revient pour de bon) et le zombie de Perséphone (5 PV, temporaire).
     startDeadGodSelection: (title, effectId) => {
         set({
             ...ALL_MODALS_CLOSED,

@@ -8,6 +8,14 @@ import styles from './DeadGodSelectionModal.module.css';
 interface DeadGodSelectionModalProps {
     isOpen: boolean;
     title: string;
+    /**
+     * Ce que la carte va réellement faire.
+     *
+     * La modale est partagée entre le zombie de Perséphone et la résurrection de Déméter,
+     * et annonçait toujours un zombie : « Graine de vie » promettait donc une invocation de
+     * 5 PV là où elle ramène vraiment le dieu avec 8 PV.
+     */
+    description?: string;
     deadGods: GodState[];
     onSelectGod: (godId: string) => void;
     onCancel: () => void;
@@ -16,6 +24,7 @@ interface DeadGodSelectionModalProps {
 export default function DeadGodSelectionModal({
     isOpen,
     title,
+    description,
     deadGods,
     onSelectGod,
     onCancel
@@ -24,7 +33,7 @@ export default function DeadGodSelectionModal({
         <ModalShell isOpen={isOpen} onCancel={onCancel} accentColor="#8e44ad" maxWidth={600}>
             <h2 className={styles.title}>{title}</h2>
             <p className={styles.description}>
-                Choisissez un dieu mort à invoquer en zombie (5 PV, inflige 1 dégât par tour)
+                {description ?? 'Choisissez un dieu tombé.'}
             </p>
             <div className={styles.godsContainer}>
                 {deadGods.length === 0 ? (

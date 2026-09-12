@@ -96,6 +96,8 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
         getMaxSelectableTargets,
         startTargetSelection,
         cancelTargetSelection,
+        pendingZombieEffect,
+        getRequiredEnemyTargets,
         playerId,
         playAITurn,
         canPlayCard,
@@ -532,9 +534,12 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
         // applique chaque effet à cibles multiples positionnellement (1 cible par effet), donc un
         // sort à 2 cibles n'appliquerait son 2e effet à personne si un seul ennemi était en vie et
         // sélectionnable — ce même dieu encaisse alors les deux effets, plutôt qu'un blocage.
-        while (targetIds.length > 0 && targetIds.length < requiredTargets) {
-            targetIds.push(targetIds[targetIds.length - 1]);
-        }
+        // Surtout PAS de remplissage en dupliquant la dernière cible.
+        //
+        // « Attaque Coordonnée » inflige 2 dégâts à DEUX cibles. Face à un seul survivant, la
+        // duplication envoyait les deux coups sur lui : 4 dégâts d'un coup, soit le double de ce
+        // que la carte annonce. Un coup sans cible disponible est simplement perdu — c'est déjà
+        // ce que fait le moteur, qui saute l'effet quand l'index dépasse la liste.
 
         // Capturées AVANT playCard() : une fois la carte réellement jouée, son élément DOM en
         // main disparaît dès le prochain rendu.
@@ -632,6 +637,27 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
     /** Les cartes de résurrection visent des dieux tombés, qui sont inertes par défaut. */
     const canTargetDead = isSelectingTarget && targetKind === 'UN ALLIÉ TOMBÉ';
 
+    /**
+     * Provocation : un dieu provocateur doit figurer dans le ciblage.
+     *
+     * Le moteur ne l'imposait que pour les sorts à cible UNIQUE — dès qu'une carte visait deux
+     * cibles, la provocation était purement et simplement ignorée. La règle voulue est plus
+     * simple à énoncer : un sort qui frappe TOUT le terrain passe outre, mais un sort qui
+     * désigne ses cibles doit inclure le provocateur pour partir.
+     *
+     * On garde toutes les cibles sélectionnables — sinon on ne pourrait plus choisir la seconde —
+     * et c'est la CONFIRMATION qui est retenue tant que le provocateur manque.
+     */
+    const mandatoryTargets = isSelectingTarget && targetKind === 'UN ENNEMI'
+        ? getRequiredEnemyTargets()
+        : [];
+    const mandatorySelected = mandatoryTargets.filter(
+        m => selectedTargetGods.some(s => s.card.id === m.card.id)
+    ).length;
+    // Plus de provocateurs que de places : on n'en exige que ce que la carte peut viser.
+    const mandatoryNeeded = Math.min(mandatoryTargets.length, maxSelectableTargets);
+    const provocationSatisfied = mandatorySelected >= mandatoryNeeded;
+
     return (
         <div
             className={`${styles.gameBoard} ${screenShake === 'heavy' ? styles.shakeHeavy : ''} ${screenShake === 'light' ? styles.shakeLight : ''}`}
@@ -724,7 +750,9 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                  * actions possibles sur une carte vivent désormais au même endroit, sous son texte.
                  */
                 const readyToConfirm =
-                    isSelectingTarget && requiredTargets > 0 && selectedTargetGods.length === maxSelectableTargets;
+                    isSelectingTarget && requiredTargets > 0
+                    && selectedTargetGods.length === maxSelectableTargets
+                    && provocationSatisfied;
 
                 const actionButton = selectedCard && myTurn && (
                     isSelectingTarget ? (
@@ -739,7 +767,9 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                         >
                             {readyToConfirm
                                 ? '✓ CONFIRMER'
-                                : `🎯 TOUCHEZ ${targetKind} (${selectedTargetGods.length}/${maxSelectableTargets})`}
+                                : !provocationSatisfied && selectedTargetGods.length >= maxSelectableTargets
+                                    ? '🗡️ VISEZ D\'ABORD LE PROVOCATEUR'
+                                    : `🎯 TOUCHEZ ${targetKind} (${selectedTargetGods.length}/${maxSelectableTargets})`}
                         </button>
                     ) : (
                         <button
@@ -1053,6 +1083,9 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
             <DeadGodSelectionModal 
                 isOpen={isSelectingDeadGod}
                 title={deadGodSelectionTitle}
+                description={pendingZombieEffect === 'revive_god'
+                    ? 'Choisissez un dieu tombé : il revient pour de bon, avec 8 PV.'
+                    : 'Choisissez un dieu tombé à invoquer en zombie (5 PV, inflige 1 dégât par tour).'}
                 deadGods={player.gods.filter(g => g.isDead)}
                 onSelectGod={confirmDeadGodSelection}
                 onCancel={cancelDeadGodSelection}
