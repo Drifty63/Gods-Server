@@ -11,7 +11,12 @@
  *    un état de partie périmé casserait le multijoueur.
  */
 
-const VERSION = 'gods-v1';
+/*
+ * À INCRÉMENTER à chaque remplacement d'illustrations. Les images sont servies en
+ * `stale-while-revalidate` : sans changement de version, un joueur déjà venu continuerait de
+ * voir les anciennes cartes, parfois pendant des jours.
+ */
+const VERSION = 'gods-v2';
 const STATIC_CACHE = `${VERSION}-static`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const OFFLINE_URL = '/offline.html';
