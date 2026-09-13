@@ -48,3 +48,6 @@ firebase-admin-key.json
 # d'artefacts dérivés, avec des sauvegardes datées et un cache qui changent à chaque build.
 graphify-out/
 .playwright-cli/
+
+# Feuille de travail des illustrations : regeneree a la demande, jamais versionnee.
+/illustrations-v1.csv
