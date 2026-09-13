@@ -120,8 +120,10 @@ export default function ShopPage() {
         }
     };
 
-    // Obtenir le dieu du mois actuel
-    const currentMonth = new Date().getMonth();
+    // Mois lu en UTC, comme le fait le serveur dans `purchase-god` : sur un fuseau décalé,
+    // l'heure locale change de mois avant lui et la boutique afficherait un prix promotionnel
+    // que l'achat refuserait ensuite.
+    const currentMonth = new Date().getUTCMonth();
     const currentGodId = MONTHLY_GODS[currentMonth];
     const currentGod = getGodById(currentGodId);
 
@@ -147,7 +149,7 @@ export default function ShopPage() {
     }, []);
 
     // Acheter un dieu
-    const handlePurchaseGod = async (godId: string, isPromo: boolean = false) => {
+    const handlePurchaseGod = async (godId: string) => {
         if (!user) {
             setPurchaseMessage({ type: 'error', text: 'Vous devez être connecté pour acheter' });
             return;
@@ -158,7 +160,7 @@ export default function ShopPage() {
         setPurchaseMessage(null);
 
         try {
-            const result = await purchaseGod(godId, isPromo);
+            const result = await purchaseGod(godId);
             setPurchaseMessage({ type: result.success ? 'success' : 'error', text: result.message });
             if (result.success) {
                 await refreshProfile();
@@ -602,7 +604,7 @@ export default function ShopPage() {
                         ) : (
                             <button
                                 className={styles.buyButton}
-                                onClick={() => handlePurchaseGod(selectedGod.id, currentGod?.id === selectedGod.id)}
+                                onClick={() => handlePurchaseGod(selectedGod.id)}
                                 disabled={purchasing || userAmbroisie < (currentGod?.id === selectedGod.id ? GOD_PROMO_PRICE : GOD_PRICE)}
                             >
                                 {purchasing ? '⏳ Achat en cours...' :

@@ -22,11 +22,11 @@ export const NEWS_ITEMS: NewsItem[] = [
     },
     {
         title: 'Trois classements distincts',
-        text: "Partie Classée, Duel 13 points et Duel illimité ont chacun leur tableau. Les équipes n'y sont pas composées sous les mêmes contraintes : les mélanger n'aurait rien appris à personne.",
+        text: "Partie Classée, Duel 13 points et Duel illimité ont chacun leur tableau. Les équipes n'y sont pas composées sous les mêmes contraintes.",
     },
     {
         title: 'Cinq matchs de placement',
-        text: 'Vos cinq premiers matchs dans un classement comptent double, à la victoire comme à la défaite, et votre rang reste masqué tant qu’ils ne sont pas joués. De quoi vous situer vite, sans vingt parties de montée.',
+        text: 'Vos cinq premiers matchs dans un classement comptent double, à la victoire comme à la défaite, et votre rang reste masqué tant qu’ils ne sont pas joués. De quoi vous situer vite.',
     },
     {
         title: 'Récompenses de fin de saison',

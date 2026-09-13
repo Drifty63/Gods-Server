@@ -34,7 +34,7 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
             <div className={styles.ascensionIcon}>🏔️</div>
             <h2 className={styles.menuTitle}>Mode Ascension</h2>
             <p className={styles.menuDesc}>
-                Enchaînez {TOTAL_FLOORS} étages sans reprendre de points de vie. Grimpez le plus haut possible.
+                Enchaînez {TOTAL_FLOORS} étages. Grimpez le plus haut possible.
             </p>
 
             <div className={styles.floorsPreview}>
@@ -58,7 +58,7 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
             <div className={styles.rulesBox}>
                 <h3>📜 Règles</h3>
                 <ul>
-                    <li>❌ Aucun soin entre les combats</li>
+                    <li>❌ Aucun soin entre les combats d&apos;un même palier</li>
                     <li>⚡ L&apos;énergie non dépensée est conservée</li>
                     <li>💀 Un dieu tombé ne revient pas : votre équipe rétrécit</li>
                     <li>🔄 VOUS ne subissez aucun dégât de fatigue — vos adversaires, si</li>

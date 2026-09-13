@@ -45,82 +45,22 @@
 }
 
 /* ================================
-   HEADER
-   ================================ */
-/**
- * Bandeau calqué sur celui de la Collection, qui est la référence du projet.
- *
- * Trois écarts expliquaient qu'il tombe mal : un titre nettement plus gros (jusqu'à 2rem contre
- * 1.5) qui épaississait la bande, un rembourrage vertical de 16px au lieu de 10, et une réserve
- * de 72px à droite pour la roue des paramètres — inutile ici, le titre s'étirant déjà sans
- * jamais passer dessous.
- */
-.header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: max(10px, env(safe-area-inset-top)) 14px 10px;
-    background: linear-gradient(180deg, rgba(6, 6, 16, 0.96), rgba(6, 6, 16, 0.72));
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
-}
-
-/**
- * Bouton retour compact, aligné sur les autres pages.
- *
- * Le large cadre « ← RETOUR À L'ACCUEIL » qu'il remplace occupait toute la largeur utile de
- * l'en-tête : sur un petit écran à encoche, il passait en partie sous les capteurs frontaux et
- * devenait pénible à viser.
- */
-.backButton {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    line-height: 1;
-    color: var(--gold-divine);
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    border-radius: 50%;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.backButton:hover {
-    background: rgba(212, 175, 55, 0.15);
-    border-color: var(--gold-divine);
-    color: var(--gold-divine);
-}
-
-.title {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-    font-family: 'Cinzel Decorative', 'Cinzel', serif;
-    font-size: clamp(1.1rem, 5vw, 1.5rem);
-    background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-}
-
-/* ================================
    CONTENT
    ================================ */
+/**
+ * Plus de bandeau ni de titre : la page s'ouvre directement sur le fond, avec pour seule
+ * chrome un retour flottant en miroir de la roue (voir components/BackButton/).
+ *
+ * Le rembourrage haut doit dégager ce bouton, qui est en `fixed` et ne pousse donc rien :
+ * zone sûre + 12px d'ancrage + 44px de bouton + 16px de respiration.
+ */
 .content {
     /* Au-dessus du calque de fond fixe (voir .main::before). */
     position: relative;
     z-index: 1;
     max-width: 950px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: calc(env(safe-area-inset-top, 0px) + 72px) 20px 40px;
 }
 
 .section {
@@ -565,15 +505,10 @@
    RESPONSIVE
    ================================ */
 @media (max-width: 768px) {
-    .header {
-        /* Surtout PAS `flex-direction: column` : c'est elle qui empilait le bouton retour
-           au-dessus du titre au lieu de le poser à sa gauche, sur tous les téléphones. */
-        gap: 10px;
-        padding: 16px 72px 16px 12px;
-    }
-
     .content {
-        padding: 20px 16px;
+        /* La réserve haute est reconduite telle quelle : c'est sur téléphone que le bouton
+           flottant recouvrirait le premier titre, pas sur grand écran. */
+        padding: calc(env(safe-area-inset-top, 0px) + 68px) 16px 20px;
     }
 
     .infoGrid {

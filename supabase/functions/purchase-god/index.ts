@@ -1,7 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { getAdminClient } from '../_shared/admin-client.ts';
 import { getRequestUser } from '../_shared/auth-client.ts';
-import { GOD_PRICE, GOD_PROMO_PRICE } from '../_shared/game-data.ts';
+import { GOD_PRICE, GOD_PROMO_PRICE, getPromoGodId } from '../_shared/game-data.ts';
 
 Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -10,7 +10,7 @@ Deno.serve(async (req: Request) => {
         const user = await getRequestUser(req);
         if (!user) return jsonResponse({ error: 'Non authentifié' }, 401);
 
-        const { godId, isPromo } = await req.json();
+        const { godId } = await req.json();
         if (!godId || typeof godId !== 'string') return jsonResponse({ error: 'godId requis' }, 400);
 
         const admin = getAdminClient();
@@ -25,7 +25,9 @@ Deno.serve(async (req: Request) => {
             return jsonResponse({ success: false, message: 'Vous possédez déjà ce dieu' });
         }
 
-        const price = isPromo ? GOD_PROMO_PRICE : GOD_PRICE;
+        // The promotion is decided HERE, never by the caller: a client-sent `isPromo` let
+        // any god be bought at the promo price simply by changing the device clock.
+        const price = godId === getPromoGodId() ? GOD_PROMO_PRICE : GOD_PRICE;
         if (profile.ambroisie < price) {
             return jsonResponse({ success: false, message: "Pas assez d'ambroisie" });
         }

@@ -18,7 +18,7 @@ import { toast } from '@/lib/toast';
 
 /** Version affichée et jointe aux rapports de bug. Une seule source, pour qu'un rapport ne
   * mente jamais sur la version où le problème a été vu. */
-const APP_VERSION = '0.24';
+const APP_VERSION = '1.0';
 
 // La quête "usegod_<godId>" est générée dynamiquement côté serveur (un dieu possédé au
 // hasard) et ne connaît que son id de dieu -- le nom réel est résolu ici, côté client, plutôt
@@ -861,25 +861,6 @@ export default function GlobalUI() {
                                 <p>
                                     Quand votre deck est vide, la défausse est recyclée.
                                     À chaque recyclage, tous vos dieux subissent des <strong>dégâts croissants</strong> (+1, +2, +3...).
-                                </p>
-                            </div>
-
-                            {/* Saignement & Pétrification */}
-                            <div className={styles.rulesSection}>
-                                <h3>🩸 Saignement</h3>
-                                <p>
-                                    Inflige ses dégâts en <strong>fin de tour</strong> et <strong>ignore le bouclier</strong> —
-                                    contrairement au poison, qui ne frappe qu&apos;au moment où le dieu lance un sort.
-                                    Plafonné à 2 marques, et chaque point de soin en retire une.
-                                </p>
-                            </div>
-
-                            <div className={styles.rulesSection}>
-                                <h3>🗿 Pétrification</h3>
-                                <p>
-                                    Rend la cible cassante : le <strong>prochain coup qu&apos;elle subit inflige +2 dégâts</strong> par
-                                    marque. La marque attend ce coup et <strong>n&apos;expire jamais toute seule</strong> ; seuls des
-                                    dégâts reçus ou un sort de purification (Aphrodite) la retirent.
                                 </p>
                             </div>
                         </div>

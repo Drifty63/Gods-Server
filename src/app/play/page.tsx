@@ -75,7 +75,7 @@ function PlayContent() {
                         <div className={styles.modeInfo}>
                             <h2 className={styles.modeTitle}>Ascension</h2>
                             <p className={styles.modeDescription}>
-                                15 étages • Aucun soin autorisé
+                                15 étages • Difficulté croissante
                             </p>
                         </div>
                         <div className={styles.modeArrow}>›</div>

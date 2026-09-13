@@ -262,11 +262,14 @@ export async function claimStarterPack(packId: StarterPackId): Promise<void> {
     if (!result.success) throw new Error(result.message ?? 'Impossible de réclamer le pack starter');
 }
 
-export async function purchaseGod(
-    godId: string,
-    isPromo: boolean = false
-): Promise<{ success: boolean; message: string }> {
-    return invokeFn('purchase-god', { godId, isPromo });
+/**
+ * Achat d'un dieu.
+ *
+ * La promotion du mois n'est PAS transmise : elle est recalculée par l'Edge Function depuis
+ * l'horloge du serveur. L'envoyer d'ici revenait à laisser le client fixer son propre prix.
+ */
+export async function purchaseGod(godId: string): Promise<{ success: boolean; message: string }> {
+    return invokeFn('purchase-god', { godId });
 }
 
 export async function purchaseCoffret(

@@ -20,7 +20,15 @@
     position: relative;
     isolation: isolate;
     min-height: 100dvh;
-    padding: 2rem;
+    /*
+     * Le rembourrage haut part de la ZONE SÛRE, pas du haut physique de l'écran.
+     *
+     * Avec `viewport-fit=cover`, un `padding: 2rem` sec faisait démarrer l'en-tête à 32px du
+     * haut physique alors que la zone sûre d'un iPhone 12 mini fait ~47px : le titre passait
+     * sous l'heure. Les 12px repris ici sont ceux de l'ancrage de la roue et du retour, pour
+     * que les trois se retrouvent sur la même bande.
+     */
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) 2rem 2rem;
     background-color: #0a0a1a;
     display: flex;
     flex-direction: column;
@@ -58,35 +66,20 @@
 /* ================================
    HEADER
    ================================ */
+/**
+ * Le retour n'est plus en flux : il est ancré au viewport en miroir de la roue
+ * (voir components/BackButton/). L'en-tête ne porte donc plus que le titre, avec une réserve
+ * SYMÉTRIQUE de chaque côté — 40px s'ajoutant aux 2rem du conteneur, soit 72px, la bande
+ * qu'occupent les deux boutons flottants. Sans cette symétrie, le titre serait décentré.
+ */
 .header {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    min-height: 44px;
     width: 100%;
     max-width: 1100px;
-    padding: 0 72px 0 1rem;
-}
-
-.backLink {
-    flex-shrink: 0;
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    line-height: 1;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    border-radius: 10px;
-    color: var(--gold-divine);
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.backLink:hover {
-    background: rgba(212, 175, 55, 0.1);
-    border-color: var(--gold-divine);
+    padding: 0 40px;
 }
 
 /* ================================
@@ -517,8 +510,16 @@
    ================================ */
 @media (max-width: 768px) {
     .container {
-        padding: 1rem;
+        /* La réserve haute est reconduite : c'est sur téléphone, et là seulement, que le titre
+           passerait sous la barre d'état. Seuls les côtés et le bas se resserrent. */
+        padding: calc(env(safe-area-inset-top, 0px) + 12px) 1rem 1rem;
         gap: 1rem;
+    }
+
+    /* Le conteneur ne réserve plus que 1rem : la marge latérale du titre doit compenser pour
+       rester à l'écart des deux boutons flottants (20px + 44px de large). */
+    .header {
+        padding: 0 48px;
     }
 
     .godsGrid {

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BackButton from '@/components/BackButton/BackButton';
 import styles from './page.module.css';
 import { ELEMENT_SYMBOLS, ELEMENT_NAMES, ELEMENT_COLORS } from '@/game-engine/ElementSystem';
 import { Element } from '@/types/cards';
@@ -10,12 +11,7 @@ export default function RulesPage() {
 
     return (
         <main className={styles.main}>
-            <header className={styles.header}>
-                <Link href="/play" className={styles.backButton} aria-label="Retour aux modes de jeu">
-                    <span aria-hidden="true">‹</span>
-                </Link>
-                <h1 className={styles.title}>📖 Règles du Jeu</h1>
-            </header>
+            <BackButton href="/play" label="Retour aux modes de jeu" />
 
             <div className={styles.content}>
                 {/* Introduction */}
@@ -197,23 +193,6 @@ export default function RulesPage() {
                             <span className={styles.statusIcon}>😵</span>
                             <strong>Stun</strong>
                             <p>Le dieu ne peut pas lancer de sorts pendant la durée</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>🩸</span>
-                            <strong>Saignement</strong>
-                            <p>
-                                Inflige ses dégâts en <strong>fin de tour</strong> et ignore le bouclier.
-                                Maximum 2 marques ; chaque point de soin en retire une.
-                            </p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>🗿</span>
-                            <strong>Pétrification</strong>
-                            <p>
-                                Le prochain coup subi infligera <strong>+2 dégâts par marque</strong>.
-                                La marque attend ce coup sans jamais expirer : seuls des dégâts reçus
-                                ou un sort de purification la retirent.
-                            </p>
                         </div>
                     </div>
                 </section>

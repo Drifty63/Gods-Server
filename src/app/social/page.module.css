@@ -1,14 +1,47 @@
+/**
+ * Fond porté par un CALQUE FIXE, et non par la boîte du conteneur.
+ *
+ * Le fond « gigotait » au changement d'onglet de classement. Les onglets n'y sont pour rien :
+ * c'est la HAUTEUR de la page qui change d'un mode à l'autre — le podium disparaît sous trois
+ * joueurs classés (~230 px), et le tableau passe de 0 à 47 lignes. Or `background-attachment:
+ * fixed` n'est pas honoré par WebKit mobile, qui dimensionne alors le fond contre la boîte
+ * COMPLÈTE du document : `cover` recalculait son échelle à chaque changement de mode.
+ *
+ * Un pseudo-élément en `position: fixed; inset: 0` fait du VIEWPORT la zone de référence de
+ * `cover` : le cadrage devient indépendant de la hauteur du contenu. Même motif que la page des
+ * Règles et que la sélection d'équipe.
+ */
 .main {
-    min-height: 100vh;
-    background:
-        linear-gradient(to bottom, rgba(5, 5, 16, 0.85), rgba(26, 26, 46, 0.9)),
-        url('/assets/social_background.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    position: relative;
+    isolation: isolate;
+    min-height: 100dvh;
+    background-color: #05050f;
     color: white;
     padding: 20px;
     padding-bottom: 40px;
+}
+
+.main::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(to bottom, rgba(5, 5, 16, 0.85), rgba(26, 26, 46, 0.9)),
+        url('/assets/social_background.png') center / cover no-repeat;
+}
+
+/**
+ * Le contenu passe AU-DESSUS du calque de fond.
+ *
+ * Dans l'ordre de peinture CSS, un élément positionné à z-index 0 (le ::before ci-dessus) est
+ * peint APRÈS les arrière-plans et le texte des descendants NON positionnés. Sans cette règle,
+ * le calque recouvrirait toute la page.
+ */
+.main > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* Header : bouton retour circulaire + titre, avec une réserve d'espace à droite pour le

@@ -12,6 +12,7 @@ import { ELEMENT_SYMBOLS, ELEMENT_NAMES, ELEMENT_COLORS } from '@/game-engine/El
 import type { GodCard, SpellCard } from '@/types/cards';
 import { useAuth } from '@/contexts/AuthContext';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
+import BackButton from '@/components/BackButton/BackButton';
 import { haptic } from '@/lib/haptics';
 
 /** Familles de la collection, dans l'ordre d'affichage. */
@@ -187,13 +188,16 @@ function InspectModal({ card, owned, onClose, onZoomSpell }: {
 
     return (
         <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-label={card.name}>
+            {/* Ancré au viewport, HORS du panneau : celui-ci défile et joue une animation
+                `transform`, qui referait de lui le référentiel d'un enfant fixe. L'ancien ✕
+                sortait de l'écran dès qu'on descendait lire les sorts. */}
+            <BackButton onClick={onClose} label="Fermer la fiche" />
+
             <div
                 className={styles.inspectPanel}
                 style={{ '--card-color': color } as React.CSSProperties}
                 onClick={(e) => e.stopPropagation()}
             >
-                <button className={styles.modalClose} onClick={onClose} aria-label="Fermer">✕</button>
-
                 <div className={styles.inspectHero}>
                     <div className={styles.inspectPortrait}>
                         {/* `imageUrl` et non `carouselImage` : ce dernier porte les ANCIENNES
@@ -304,6 +308,10 @@ function SpellZoom({ spell, onClose }: { spell: SpellCard; onClose: () => void }
     const meta = getCardTypeMeta(spell.type);
     return (
         <div className={styles.zoomOverlay} onClick={onClose} role="dialog" aria-label={spell.name}>
+            {/* La carte occupe 92vw : il ne restait que ~4% de largeur de chaque côté pour
+                viser l'overlay, et aucun bouton de fermeture. */}
+            <BackButton onClick={onClose} label="Fermer l'agrandissement" />
+
             <div className={styles.zoomCard} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.zoomImageWrap}>
                     <Image

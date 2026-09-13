@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
 import { GodCard } from '@/types/cards';
+import BackButton from '@/components/BackButton/BackButton';
 import { getDuelCards, getGodById } from '@/data/gods';
 import { ELEMENT_COLORS, ELEMENT_SYMBOLS, ELEMENT_NAMES } from '@/game-engine/ElementSystem';
 import styles from './TeamSelection.module.css';
@@ -141,12 +141,13 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false, gods
     };
 
     return (
-        <div className={styles.container}>
-            {/* Header avec bouton retour */}
+        <>
+            {/* Hors du conteneur à dessein : `.container > *` force `position: relative` sur ses
+                enfants directs, ce qui annulerait l'ancrage fixe du retour. */}
+            <BackButton href="/play" label="Retour aux modes de jeu" />
+
+            <div className={styles.container}>
             <header className={styles.header}>
-                <Link href="/" className={styles.backLink} aria-label="Retour à l'accueil">
-                    <span aria-hidden="true">‹</span>
-                </Link>
                 <h1 className={styles.title}>⚔️ Sélection des Équipes</h1>
             </header>
 
@@ -258,6 +259,7 @@ export default function TeamSelection({ onTeamsSelected, isCreator = false, gods
                     </>
                 )}
             </div>
-        </div>
+            </div>
+        </>
     );
 }
