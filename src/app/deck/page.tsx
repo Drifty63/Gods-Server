@@ -167,10 +167,10 @@ function CollectionTile({ card, owned, onInspect }: { card: GodCard; owned: bool
 /**
  * Fiche détaillée : portrait, caractéristiques, et les 5 cartes de sort de l'unité.
  *
- * Les sorts viennent de `spells.ts`, la donnée RÉELLE du jeu. L'ancienne page lisait
- * `mock_spells.ts`, un jeu de cartes factices dont les valeurs ne correspondaient pas à ce qui
- * se passe en partie (le Trident y était une compétence à 1 énergie, alors que c'est un
- * générateur gratuit) : la collection annonçait donc des effets qui n'existaient pas.
+ * Les sorts viennent de `spells.ts`, la donnée RÉELLE du jeu. L'ancienne page lisait un jeu
+ * de cartes factices dont les valeurs ne correspondaient pas à ce qui se passe en partie (le
+ * Trident y était une compétence à 1 énergie, alors que c'est un générateur gratuit) : la
+ * collection annonçait donc des effets qui n'existaient pas. Ce fichier a depuis été supprimé.
  */
 function InspectModal({ card, owned, onClose, onZoomSpell }: {
     card: GodCard;
@@ -200,10 +200,6 @@ function InspectModal({ card, owned, onClose, onZoomSpell }: {
             >
                 <div className={styles.inspectHero}>
                     <div className={styles.inspectPortrait}>
-                        {/* `imageUrl` et non `carouselImage` : ce dernier porte les ANCIENNES
-                            illustrations `.jpg` des 12 dieux de base, héritées du carrousel de
-                            l'accueil (supprimé depuis). La fiche affichait donc un visuel périmé,
-                            différent de la vignette de la grille juste à côté. */}
                         <Image
                             src={card.imageUrl}
                             alt=""

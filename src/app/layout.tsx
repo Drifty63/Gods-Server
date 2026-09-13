@@ -49,7 +49,8 @@ export const metadata: Metadata = {
     type: "website",
   },
   // Icônes générées par `node scripts/generateAppIcons.js` : de vrais PNG légers, là où les
-  // anciens `/favicon.png` et `/apple-touch-icon.png` étaient des JPEG de 376 Ko renommés.
+  // anciennes icônes de la racine de `public/` étaient des JPEG de 376 Ko renommés. Elles ont
+  // été supprimées ; tout passe désormais par `public/icons/`.
   icons: {
     icon: [
       { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },

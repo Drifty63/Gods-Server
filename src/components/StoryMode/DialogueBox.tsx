@@ -4,6 +4,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import styles from './DialogueBox.module.css';
 import { DialogueLine } from '@/types/story';
+import { getCardImage } from '@/data/gods';
+
+/**
+ * Le narrateur n'est pas une carte : son portrait n'existe que pour le mode Histoire, et sert
+ * aussi de repli quand un interlocuteur n'a pas d'illustration.
+ */
+export const NARRATOR_PORTRAIT = '/cards/gods/narrator.png';
 
 interface DialogueBoxProps {
     dialogues: DialogueLine[];
@@ -11,24 +18,6 @@ interface DialogueBoxProps {
     onAdvance: () => void;
     onComplete: () => void;
 }
-
-// Mapping des IDs de dieux vers leurs images
-const GOD_PORTRAITS: Record<string, string> = {
-    narrator: '/cards/gods/narrator.png',
-    zeus: '/cards/gods/zeus.png',
-    hestia: '/cards/gods/hestia.png',
-    aphrodite: '/cards/gods/aphrodite.png',
-    dionysos: '/cards/gods/dionysos.png',
-    hades: '/cards/gods/hades.png',
-    nyx: '/cards/gods/nyx.png',
-    apollon: '/cards/gods/apollon.png',
-    ares: '/cards/gods/ares.png',
-    poseidon: '/cards/gods/poseidon.png',
-    athena: '/cards/gods/athena.png',
-    demeter: '/cards/gods/demeter.png',
-    artemis: '/cards/gods/artemis.png',
-    arachne: '/cards/gods/arachne.png',
-};
 
 // Couleurs par dieu pour l'effet de glow
 const GOD_COLORS: Record<string, string> = {
@@ -134,7 +123,14 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
 
     if (!currentDialogue) return null;
 
-    const portraitUrl = GOD_PORTRAITS[currentDialogue.speakerId] || '/cards/gods/zeus.png';
+    /*
+     * Le portrait est lu dans les données, plus dans une table tenue à la main : celle-ci
+     * n'avait pas d'entrée pour Thanatos, Ulysse ni le Chevalier d'Athéna, qui parlaient donc
+     * sous le visage de Zeus.
+     */
+    const portraitUrl = currentDialogue.speakerId === 'narrator'
+        ? NARRATOR_PORTRAIT
+        : getCardImage(currentDialogue.speakerId) ?? NARRATOR_PORTRAIT;
     const glowColor = GOD_COLORS[currentDialogue.speakerId] || '#ffd700';
 
     // #7 - Classes dynamiques pour les animations

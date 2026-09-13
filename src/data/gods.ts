@@ -24,7 +24,6 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'lightning',
         maxHealth: 25,
         imageUrl: '/cards/gods/poseidon.png',
-        carouselImage: '/cards/gods/poseidon.jpg',
         flavorText: "« Vos routes m'appartiennent. C'est moi qui décide de la marée. » — Noie la pioche adverse et appauvrit chaque tour : on ne le bat pas, on s'épuise contre lui.",
     },
 
@@ -39,7 +38,6 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 25,
         imageUrl: '/cards/gods/zeus.png',
         archetype: 'glass_cannon',
-        carouselImage: '/cards/gods/zeus.jpg',
         flavorText: "« Je n'avertis jamais deux fois. » — Marque ses cibles, puis fait tout détoner d'un coup. Frappe très fort, encaisse très mal.",
     },
 
@@ -53,7 +51,6 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'light',
         maxHealth: 26,
         imageUrl: '/cards/gods/nyx.png',
-        carouselImage: '/cards/gods/nyx.jpg',
         flavorText: "« Regarde bien ta main. Es-tu certain de savoir ce que tu tiens ? » — Glisse des cartes aveugles chez l'adversaire et transforme son tour en pari.",
     },
 
@@ -67,7 +64,6 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'water',
         maxHealth: 24,
         imageUrl: '/cards/gods/hestia.png',
-        carouselImage: '/cards/gods/hestia.jpg',
         flavorText: "« Tant que le foyer brûle, personne ne tombe. » — Soigne, ravive, efface les faiblesses : elle ne gagne pas les échanges, elle les fait durer.",
     },
 
@@ -82,7 +78,6 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 30,
         imageUrl: '/cards/gods/athena.png',
         archetype: 'tank',
-        carouselImage: '/cards/gods/athena.jpg',
         flavorText: "« Frappe-moi. C'est exactement ce que je veux. » — Le plus gros réservoir de points de vie du jeu ; sa provocation dicte à l'adversaire ce qu'il a le droit de viser.",
     },
 
@@ -97,7 +92,6 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 24,
         imageUrl: '/cards/gods/demeter.png',
         archetype: 'support',
-        carouselImage: '/cards/gods/demeter.jpg',
         flavorText: "« Ce que l'on coupe, je le fais repousser. » — Soins répartis et renforts : elle rend l'échange de dégâts intenable pour l'adversaire.",
     },
 
@@ -111,7 +105,6 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'air',
         maxHealth: 22,
         imageUrl: '/cards/gods/dionysos.png',
-        carouselImage: '/cards/gods/dionysos.jpg',
         flavorText: "« Bois donc. Tu verras, tout devient beaucoup plus simple. » — Empoisonne et désorganise : chaque sort lancé en face finit par coûter cher.",
     },
 
@@ -126,7 +119,6 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 20,
         imageUrl: '/cards/gods/hades.png',
         archetype: 'glass_cannon',
-        carouselImage: '/cards/gods/hades.jpg',
         flavorText: "« Tout ce qui meurt finit par m'appartenir. » — Peu de points de vie, mais il se soigne de ce qu'il détruit : le laisser conclure un échange, c'est le relancer.",
     },
 
@@ -140,7 +132,6 @@ export const ALL_GODS: GodCard[] = [
         weakness: 'fire',
         maxHealth: 22,
         imageUrl: '/cards/gods/apollon.png',
-        carouselImage: '/cards/gods/apollon.jpg',
         flavorText: "« Je vois la flèche arriver avant même de l'avoir tirée. » — Assèche l'énergie adverse et étourdit : en face, on a les cartes, jamais le tour pour les jouer.",
     },
 
@@ -155,7 +146,6 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 28,
         imageUrl: '/cards/gods/ares.png',
         archetype: 'glass_cannon',
-        carouselImage: '/cards/gods/ares.jpg',
         flavorText: "« La douleur ? C'est le prix, et je le paie d'avance. » — Ses sorts les plus violents lui coûtent ses propres points de vie : une réserve à dépenser comme des munitions.",
     },
 
@@ -170,7 +160,6 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 20,
         imageUrl: '/cards/gods/artemis.png',
         archetype: 'glass_cannon',
-        carouselImage: '/cards/gods/artemis.jpg',
         flavorText: "« Je ne rate pas. Je choisis simplement où ça fait le plus mal. » — Impose des faiblesses puis frappe plusieurs cibles à la fois : la reine du doublement de dégâts.",
     },
 
@@ -185,7 +174,6 @@ export const ALL_GODS: GodCard[] = [
         maxHealth: 25,
         imageUrl: '/cards/gods/aphrodite.png',
         archetype: 'support',
-        carouselImage: '/cards/gods/aphrodite.jpg',
         flavorText: "« Personne ne se bat vraiment contre moi. » — Purifie son camp, charme et fige celui d'en face : la partie se joue à son rythme, pas au vôtre.",
     },
 
@@ -475,6 +463,18 @@ export const ALL_GODS: GodCard[] = [
 ];
 
 // Helper pour obtenir un dieu par son ID
+/**
+ * Illustration d'une carte, par identifiant.
+ *
+ * À utiliser partout plutôt que de fabriquer `/cards/gods/${id}.png` : deux cartes ne suivent
+ * pas cette convention — les fichiers d'Ulysse et du Chevalier d'Athéna sont préfixés `card_`.
+ * Leurs portraits étaient donc cassés en mode Histoire, aux deux endroits qui construisaient le
+ * chemin à la main.
+ */
+export function getCardImage(id: string): string | undefined {
+    return ALL_GODS.find(g => g.id === id)?.imageUrl;
+}
+
 export function getGodById(id: string): GodCard | undefined {
     return ALL_GODS.find(god => god.id === id);
 }

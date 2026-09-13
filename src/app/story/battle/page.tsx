@@ -7,9 +7,10 @@ import Image from 'next/image';
 import { useGameStore } from '@/store/gameStore';
 import { useStoryStore } from '@/store/storyStore';
 import GameBoard from '@/components/GameBoard/GameBoard';
-import { getGodById, ALL_GODS } from '@/data/gods';
+import { getGodById, getCardImage, ALL_GODS } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
+import { NARRATOR_PORTRAIT } from '@/components/StoryMode/DialogueBox';
 import {
     PROLOGUE_AFTER_BATTLE_1_WIN,
     PROLOGUE_AFTER_BATTLE_1_LOSE,
@@ -653,7 +654,7 @@ function StoryBattleContent() {
                                     {/* Afficher seulement les dieux du combat (1v1 = 1 dieu) */}
                                     {playerTeam.slice(0, currentBattleConfig?.playerTeam?.length || 1).map(id => (
                                         <div key={id} className={styles.godIcon}>
-                                            <img src={`/cards/gods/${id}.png`} alt={id} />
+                                            <img src={getCardImage(id)} alt={getGodById(id)?.name ?? ''} />
                                         </div>
                                     ))}
                                 </div>
@@ -665,7 +666,7 @@ function StoryBattleContent() {
                                 <div className={styles.teamIcons}>
                                     {enemyTeam.map(id => (
                                         <div key={id} className={styles.godIcon}>
-                                            <img src={`/cards/gods/${id}.png`} alt={id} />
+                                            <img src={getCardImage(id)} alt={getGodById(id)?.name ?? ''} />
                                         </div>
                                     ))}
                                 </div>
@@ -766,7 +767,7 @@ function StoryBattleContent() {
                         >
                             <div className={styles.portrait}>
                                 <Image
-                                    src={`/cards/gods/${dialogue.portrait}.png`}
+                                    src={getCardImage(dialogue.portrait) ?? NARRATOR_PORTRAIT}
                                     alt={dialogue.speakerName}
                                     fill
                                     className={styles.portraitImage}

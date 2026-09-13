@@ -71,7 +71,6 @@ export interface Chapter {
     difficulty: 'easy' | 'medium' | 'hard';
     events: StoryEvent[];
     battles?: ChapterBattle[];     // Liste des combats affichables dans le chapitre
-    imageUrl?: string;
     comingSoon?: boolean;          // Chapitre en cours de développement
 }
 

@@ -47,7 +47,6 @@ export interface GodCard {
     weakness: Element;
     maxHealth: number;
     imageUrl: string;
-    carouselImage?: string; // Image spécifique pour le carrousel (optionnelle)
     flavorText: string;
     hidden?: boolean; // True si le dieu est caché (accessible uniquement aux créateurs)
     category?: 'god' | 'creature' | 'servant'; // Catégorie pour mode Duel (god par défaut)

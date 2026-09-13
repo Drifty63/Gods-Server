@@ -422,8 +422,7 @@ const CHAPTER_1: Chapter = {
     description: "L'Olympe est en paix depuis des siècles, mais une ombre menace l'équilibre des dieux. Hadès, jaloux du pouvoir de Zeus, prépare un coup d'état...",
     difficulty: 'easy',
     events: chapter1Events,
-    battles: CHAPTER_1_BATTLES,
-    imageUrl: '/story/chapter1.jpg'
+    battles: CHAPTER_1_BATTLES
 };
 
 // ===========================================
@@ -784,7 +783,6 @@ const CHAPTER_2: Chapter = {
     difficulty: 'medium',
     events: chapter2Events,
     battles: CHAPTER_2_BATTLES,  // Ajout pour affichage dans le modal
-    imageUrl: '/story/chapter2.jpg',
     comingSoon: false
 };
 
@@ -817,7 +815,6 @@ const CHAPTER_3: Chapter = {
     description: "L'heure de la confrontation finale approche. (Chapitre en cours de développement)",
     difficulty: 'hard',
     events: chapter3Events,
-    imageUrl: '/story/chapter3.jpg',
     comingSoon: true
 };
 
