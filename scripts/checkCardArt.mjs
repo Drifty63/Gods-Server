@@ -109,6 +109,7 @@ const oversized = [];
 for (const f of onDisk) {
     const p = web(f);
     if (!p.startsWith('/cards/')) continue;      // fonds et icônes : dimensions libres
+    if (TOOL_DIRS.some(d => p.startsWith(d))) continue;
     let buf;
     try { buf = fs.readFileSync(f); } catch { continue; }
     const size = pngSize(buf) ?? jpegSize(buf);
