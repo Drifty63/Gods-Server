@@ -1,6 +1,8 @@
 /* Écrans d'entrée et de conclusion du didacticiel */
 
 .main {
+    position: relative;
+    isolation: isolate;
     min-height: 100dvh;
     display: flex;
     align-items: center;
@@ -9,7 +11,37 @@
     /* Sous la barre d'etat iOS sinon : viewport-fit=cover fait partir le viewport du haut
        physique de l'ecran, et la fleche retour tombait sous l'heure et la batterie. */
     padding-top: max(24px, env(safe-area-inset-top));
-    background: linear-gradient(160deg, #0a0a1a 0%, #141432 55%, #0a0a1a 100%);
+    background-color: #0a0a1a;
+}
+
+/**
+ * Fond porté par un CALQUE FIXE, comme partout ailleurs dans le jeu.
+ *
+ * `position: fixed; inset: 0` fait du VIEWPORT la zone de référence de `cover` : le cadrage ne
+ * dépend plus de la hauteur du contenu, qui change entre l'écran d'entrée et celui de fin. Et
+ * contrairement à `background-attachment: fixed`, un calque composité normal n'est pas ignoré
+ * par WebKit mobile.
+ *
+ * Le dégradé reste par-dessus l'image : cet écran est un panneau de texte, il lui faut un fond
+ * assombri pour rester lisible.
+ */
+.main::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(160deg,
+            rgba(10, 10, 26, 0.82) 0%,
+            rgba(20, 20, 50, 0.72) 55%,
+            rgba(10, 10, 26, 0.88) 100%),
+        url('/assets/tutorial_background.png') center / cover no-repeat;
+}
+
+.main > * {
+    position: relative;
+    z-index: 1;
 }
 
 .card {
