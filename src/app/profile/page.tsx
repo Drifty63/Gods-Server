@@ -311,7 +311,9 @@ export default function ProfilePage() {
                                 {/* Sommet historique, et non la ferveur du moment : les deux
                                     chiffres lisaient la même valeur et étaient donc toujours
                                     identiques. Il survit aux remises à zéro de fin de saison. */}
-                                <span className={styles.statValue}>{Math.max(profile.ferveur_max, userFerveur)}</span>
+                                <span className={styles.statValue}>
+                                    {Math.max(profile.ferveur_max ?? 0, userFerveur)}
+                                </span>
                                 <span className={styles.statLabel}>🔥 Ferveur max</span>
                             </div>
                             <div className={styles.statItem}>

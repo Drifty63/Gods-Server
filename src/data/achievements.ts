@@ -26,7 +26,8 @@ export interface AchievementProfile {
         bestStreak: number;
     };
     ferveur: number;
-    ferveur_max: number;
+    /** Absent tant que la migration des sommets n'est pas appliquée. */
+    ferveur_max?: number;
     ascension_best_floor: number;
     god_play_counts: Record<string, number>;
     /** Chapitres du mode Histoire terminés, lus depuis le magasin local. */
@@ -65,7 +66,10 @@ function baseGodsOwned(p: AchievementProfile): number {
 
 /** Ferveur la plus haute jamais atteinte, à l'épreuve des remises à zéro de saison. */
 function peakFerveur(p: AchievementProfile): number {
-    return Math.max(p.ferveur, p.ferveur_max);
+    // `?? 0` : entre le déploiement du code et l'application de la migration, la colonne
+    // n'existe pas encore et le champ arrive `undefined`. `Math.max` renverrait NaN, et NaN
+    // n'est jamais `>=` : le haut fait deviendrait silencieusement impossible à obtenir.
+    return Math.max(p.ferveur, p.ferveur_max ?? 0);
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
