@@ -1,3 +1,6 @@
+/** Marque une session REPRISE, par opposition à une partie qui vient de commencer. */
+export const RESUMED_KEY = 'multiplayerResumed';
+
 /**
  * Session multijoueur rangée dans `sessionStorage`.
  *
@@ -17,6 +20,7 @@ const SESSION_KEYS = [
     'opponentName',
     'gameMode',
     'selectedGods',
+    RESUMED_KEY,
 ] as const;
 
 /**
@@ -31,4 +35,33 @@ export function clearMultiplayerSession(): void {
     for (const key of SESSION_KEYS) {
         sessionStorage.removeItem(key);
     }
+}
+
+/** Données rendues par l'Edge Function `resume-game`. */
+export interface ResumePayload {
+    gameId: string;
+    token: string;
+    isHost: boolean;
+    opponentName: string | null;
+    startData: unknown;
+}
+
+/**
+ * Réinstalle la session d'une partie reprise, puis marque qu'il s'agit d'une REPRISE.
+ *
+ * Ce marqueur n'est pas cosmétique : sans lui, l'hôte qui revient reconstruirait une partie
+ * neuve et l'écraserait dans Postgres, effaçant le combat en cours pour les DEUX joueurs. La
+ * page de jeu s'en sert pour adopter l'état existant au lieu d'en fabriquer un.
+ *
+ * Efface d'abord : une session périmée laissée à côté raccrocherait la partie au mauvais id.
+ */
+export function restoreMultiplayerSession(p: ResumePayload): void {
+    if (typeof window === 'undefined') return;
+    clearMultiplayerSession();
+    sessionStorage.setItem('gameId', p.gameId);
+    sessionStorage.setItem('multiplayerToken', p.token);
+    sessionStorage.setItem('isHost', String(p.isHost));
+    sessionStorage.setItem('multiplayerData', JSON.stringify(p.startData));
+    if (p.opponentName) sessionStorage.setItem('opponentName', p.opponentName);
+    sessionStorage.setItem(RESUMED_KEY, 'true');
 }

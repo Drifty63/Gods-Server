@@ -7,7 +7,7 @@ import { useGameStore } from '@/store/gameStore';
 import type { GameState } from '@/types/cards';
 import { ALL_SPELLS } from '@/data/spells';
 import GameBoard from '@/components/GameBoard/GameBoard';
-import { clearMultiplayerSession } from '@/lib/multiplayerSession';
+import { clearMultiplayerSession, RESUMED_KEY } from '@/lib/multiplayerSession';
 import styles from './page.module.css';
 
 export default function OnlineGamePage() {
@@ -76,6 +76,24 @@ export default function OnlineGamePage() {
     // disparu, l'état étant maintenant lu directement depuis la ligne de la partie).
     useEffect(() => {
         if (!multiplayerData || isInitialized) return;
+
+        /*
+         * Partie REPRISE : on adopte l'état trouvé en base, on n'en fabrique pas un.
+         *
+         * Sans cette sortie, l'hôte qui rouvre l'application rejouerait `initGame` et
+         * réécrirait une partie NEUVE par-dessus le combat en cours — pour lui comme pour son
+         * adversaire. On attend simplement que Realtime livre `syncedState`.
+         */
+        if (sessionStorage.getItem(RESUMED_KEY) === 'true') {
+            if (!syncedState) return;
+            useGameStore.getState().initWithState(
+                syncedState as unknown as GameState,
+                isHost ? 'player1' : 'player2',
+            );
+            setIsInitialized(true);
+            sessionStorage.removeItem(RESUMED_KEY);
+            return;
+        }
 
         if (isHost) {
             const myGods = multiplayerData.hostGods;

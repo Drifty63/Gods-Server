@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPendingRequests, countUnclaimedRewards } from '@/services/supabase-profile';
+import { getPendingRequests, countUnclaimedRewards, getResumableGame, type ResumableGame } from '@/services/supabase-profile';
+import { restoreMultiplayerSession } from '@/lib/multiplayerSession';
 import { TUTORIAL_DONE_KEY } from '@/data/tutorial';
 import { NEWS_ITEMS } from '@/data/news';
 
@@ -18,8 +20,21 @@ export default function Home() {
   );
 }
 
+/**
+ * Fenêtre de reprise, en minutes.
+ *
+ * Ce n'est pas un réglage : `cleanup_stale_multiplayer_data` supprime les parties `playing`
+ * inactives depuis 30 minutes (init_multiplayer.sql). Au-delà, la ligne n'existe plus et il n'y
+ * a rien à reprendre. On l'annonce au joueur plutôt que de le laisser espérer.
+ */
+const RESUME_WINDOW_MIN = 30;
+
 function HomeContent() {
   const { profile } = useAuth();
+  const router = useRouter();
+  const [resumable, setResumable] = useState<ResumableGame | null>(null);
+  /** Minutes restantes, figées à la lecture : `Date.now()` pendant le rendu n'est pas pur. */
+  const [minutesLeft, setMinutesLeft] = useState(0);
 
   // Utiliser l'ambroisie du profil ou 0 par défaut
   const userAmbroisie = profile?.ambroisie ?? 0;
@@ -74,6 +89,38 @@ function HomeContent() {
     window.addEventListener('rewards-claimed', refresh);
     return () => window.removeEventListener('rewards-claimed', refresh);
   }, [profile]);
+
+  /*
+   * Partie en ligne encore ouverte.
+   *
+   * Interrogé une fois à l'ouverture de l'accueil : c'est le seul écran où la question se pose,
+   * et le service ne lève jamais — un joueur qui n'a rien à reprendre, le cas de très loin le
+   * plus fréquent, ne doit rien voir du tout.
+   */
+  useEffect(() => {
+    if (!profile) return;
+    let cancelled = false;
+    getResumableGame().then(r => {
+      if (cancelled || !r.resumable) return;
+      setResumable(r);
+      setMinutesLeft(r.updatedAt
+        ? RESUME_WINDOW_MIN - Math.floor((Date.now() - new Date(r.updatedAt).getTime()) / 60000)
+        : 0);
+    });
+    return () => { cancelled = true; };
+  }, [profile]);
+
+  const handleResume = () => {
+    if (!resumable?.gameId || !resumable.token) return;
+    restoreMultiplayerSession({
+      gameId: resumable.gameId,
+      token: resumable.token,
+      isHost: !!resumable.isHost,
+      opponentName: resumable.opponentName ?? null,
+      startData: resumable.startData,
+    });
+    router.push('/online/game');
+  };
 
   const handleOptionsClick = () => {
     // Déclencher l'événement pour ouvrir le modal global
@@ -157,6 +204,27 @@ function HomeContent() {
           </h1>
           <p className={styles.subtitle}>Le Jeu de Cartes des Dieux</p>
         </div>
+
+        {/*
+          Reprise d'une partie en ligne interrompue.
+
+          Placée avant tout le reste : si le joueur a une partie ouverte, son adversaire
+          l'attend. La durée restante est affichée parce qu'elle est réelle — passé 30 minutes
+          sans activité, la partie est supprimée côté serveur.
+        */}
+        {resumable?.resumable && minutesLeft > 0 && (
+          <button className={styles.resumeBanner} onClick={handleResume}>
+            <span className={styles.resumeIcon}>⚔️</span>
+            <span className={styles.resumeText}>
+              <span className={styles.resumeTitle}>Reprendre votre partie</span>
+              <span className={styles.resumeSubtitle}>
+                {resumable.opponentName ? `Contre ${resumable.opponentName} · ` : ''}
+                {minutesLeft} min pour la reprendre
+              </span>
+            </span>
+            <span className={styles.resumeArrow}>›</span>
+          </button>
+        )}
 
         {/*
           Didacticiel, sous les actualités.

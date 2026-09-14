@@ -25,7 +25,7 @@ Deno.serve(async (req: Request) => {
             .update({ status: 'finished', winner_id: winnerSide, finished_at: new Date().toISOString() })
             .eq('id', gameId)
             .neq('status', 'finished')
-            .select('id, host_user_id, guest_user_id, is_ranked, is_private');
+            .select('id, host_user_id, guest_user_id, is_ranked, is_private, host_gods, guest_gods');
         if (updateErr) return jsonResponse({ error: updateErr.message }, 500);
 
         if (!updated || updated.length === 0) {
@@ -61,6 +61,26 @@ Deno.serve(async (req: Request) => {
                 });
                 if (error) console.error('report-match-result: bump_daily_quest_progress (guest) failed:', error.message, gameId, game.guest_user_id);
             }
+        }
+
+        // Compteurs "dieu le plus joue" : lus dans la PARTIE, pas dans la requete.
+        //
+        // `godsUsed` ci-dessus ne renseigne que l'equipe de l'appelant, et la garde anti-doublon
+        // fait que seul l'un des deux clients arrive ici -- l'autre joueur ne serait donc jamais
+        // credite. Les deux equipes sont deja en base depuis `select-gods`, on les y prend.
+        const teamIds = (gods: unknown): string[] =>
+            Array.isArray(gods)
+                ? gods.map((g) => (g as { id?: unknown })?.id).filter((id): id is string => typeof id === 'string')
+                : [];
+
+        for (const [userId, gods] of [
+            [game.host_user_id, game.host_gods],
+            [game.guest_user_id, game.guest_gods],
+        ] as const) {
+            const ids = teamIds(gods);
+            if (!userId || ids.length === 0) continue;
+            const { error } = await admin.rpc('bump_god_play_counts', { p_user_id: userId, p_god_ids: ids });
+            if (error) console.error('report-match-result: bump_god_play_counts failed:', error.message, gameId, userId);
         }
 
         if (game.is_ranked && game.host_user_id && game.guest_user_id) {

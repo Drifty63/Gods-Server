@@ -643,7 +643,29 @@
 }
 
 /* Achievements */
+
+/* Compte « débloqués / total », aligné à droite de l'en-tête de section. */
+.sectionCount {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--gold-divine);
+}
+
+.achievementFamily {
+    margin-bottom: 14px;
+}
+
+.achievementFamilyTitle {
+    margin: 0 0 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
 .achievementsGrid {
+
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;

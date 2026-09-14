@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMostPlayedGod, getMatchHistory, isUsernameTaken, type MatchHistoryEntry } from '@/services/supabase-profile';
+import { getMostPlayedGod, getMatchHistory, isUsernameTaken, unlockAchievements, type MatchHistoryEntry } from '@/services/supabase-profile';
+import { useStoryStore } from '@/store/storyStore';
+import { ACHIEVEMENTS, FAMILY_LABELS, newlyUnlocked, type AchievementFamily } from '@/data/achievements';
 import { toast } from '@/lib/toast';
 import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
 import { getRankByFerveur, getRankProgress, getLadder } from '@/data/ranks';
@@ -32,6 +34,40 @@ export default function ProfilePage() {
     const [nameError, setNameError] = useState<string | null>(null);
     const [matchHistory, setMatchHistory] = useState<MatchHistoryEntry[]>([]);
     const [historyLoading, setHistoryLoading] = useState(true);
+    const completedChapters = useStoryStore(s => s.progress.completedChapters);
+
+    /**
+     * Évaluation des hauts faits à l'ouverture du profil.
+     *
+     * Ici et pas à la fin d'une partie : les prédicats portent sur l'état AGRÉGÉ du profil
+     * (victoires totales, dieux possédés, meilleur étage), pas sur un événement. Les évaluer
+     * en une passe au moment où le joueur vient les regarder évite d'avoir à câbler un contrôle
+     * dans chacun des six modes de jeu — et aucun n'est oublié.
+     *
+     * `refreshProfile()` n'est appelé que si le serveur a réellement ajouté quelque chose :
+     * sinon chaque ouverture du profil déclencherait une relecture pour rien.
+     */
+    useEffect(() => {
+        if (!profile) return;
+        const pending = newlyUnlocked({ ...profile, completedChapters }, profile.achievements);
+        if (pending.length === 0) return;
+
+        let cancelled = false;
+        unlockAchievements(pending)
+            .then(added => {
+                if (cancelled || added.length === 0) return;
+                const first = ACHIEVEMENTS.find(a => a.id === added[0]);
+                toast.success(
+                    added.length === 1 && first
+                        ? `Haut fait débloqué : ${first.icon} ${first.name}`
+                        : `${added.length} hauts faits débloqués !`,
+                );
+                refreshProfile();
+            })
+            .catch(err => console.error('Hauts faits : enregistrement impossible', err));
+
+        return () => { cancelled = true; };
+    }, [profile, completedChapters, refreshProfile]);
 
     useEffect(() => {
         // Rafraîchir le profil au chargement si user existe mais pas de profil
@@ -152,6 +188,20 @@ export default function ProfilePage() {
     const mostPlayed = getMostPlayedGod(profile.god_play_counts);
     const mostPlayedGod = mostPlayed ? ALL_GODS.find(g => g.id === mostPlayed.godId) : null;
 
+    /*
+     * `gods_owned` contient aussi les créatures et serviteurs, dont les identifiants portent
+     * tous un souligné. Sans ce filtre, la statistique affichait « 15/12 » dès qu'un joueur
+     * possédait quelques unités.
+     */
+    const baseGodsOwnedCount = profile.gods_owned.filter(id => !id.includes('_')).length;
+
+    const unlockedIds = new Set(profile.achievements);
+    const unlockedCount = ACHIEVEMENTS.filter(a => unlockedIds.has(a.id)).length;
+    const achievementsByFamily = ACHIEVEMENTS.reduce((acc, a) => {
+        (acc[a.family] ??= []).push(a);
+        return acc;
+    }, {} as Record<AchievementFamily, typeof ACHIEVEMENTS>);
+
     // Portraits utilisables comme avatar : tout ce que le joueur possède réellement.
     const releasedUnits = getReleasedUnits();
     const isOwned = (card: typeof ALL_GODS[number]) =>
@@ -258,7 +308,10 @@ export default function ProfilePage() {
                         </div>
                         <div className={styles.statsRow}>
                             <div className={styles.statItem}>
-                                <span className={styles.statValue}>{userFerveur}</span>
+                                {/* Sommet historique, et non la ferveur du moment : les deux
+                                    chiffres lisaient la même valeur et étaient donc toujours
+                                    identiques. Il survit aux remises à zéro de fin de saison. */}
+                                <span className={styles.statValue}>{Math.max(profile.ferveur_max, userFerveur)}</span>
                                 <span className={styles.statLabel}>🔥 Ferveur max</span>
                             </div>
                             <div className={styles.statItem}>
@@ -268,15 +321,50 @@ export default function ProfilePage() {
                         </div>
                         <div className={styles.statsRow}>
                             <div className={styles.statItem}>
-                                <span className={styles.statValue}>{profile.gods_owned.length}/12</span>
+                                <span className={styles.statValue}>{baseGodsOwnedCount}/12</span>
                                 <span className={styles.statLabel}>Dieux obtenus</span>
                             </div>
                             <div className={styles.statItem}>
-                                <span className={styles.statValue}>0</span>
-                                <span className={styles.statLabel}>Défis réalisés</span>
+                                <span className={styles.statValue}>
+                                    {unlockedCount}/{ACHIEVEMENTS.length}
+                                </span>
+                                <span className={styles.statLabel}>Hauts faits</span>
                             </div>
                         </div>
                     </div>
+                </section>
+
+                {/* Hauts faits */}
+                <section className={styles.historySection}>
+                    <div className={styles.sectionHeader}>
+                        <span className={styles.sectionIcon}>🏅</span>
+                        <span className={styles.sectionTitle}>Hauts faits</span>
+                        <span className={styles.sectionCount}>{unlockedCount}/{ACHIEVEMENTS.length}</span>
+                    </div>
+
+                    {/* Groupés par famille : quinze icônes en vrac ne disent pas au joueur ce
+                        qu'il lui reste à explorer. */}
+                    {(Object.keys(achievementsByFamily) as AchievementFamily[]).map(family => (
+                        <div key={family} className={styles.achievementFamily}>
+                            <h3 className={styles.achievementFamilyTitle}>{FAMILY_LABELS[family]}</h3>
+                            <div className={styles.achievementsGrid}>
+                                {achievementsByFamily[family].map(a => {
+                                    const unlocked = unlockedIds.has(a.id);
+                                    return (
+                                        <div
+                                            key={a.id}
+                                            className={`${styles.achievement} ${unlocked ? '' : styles.locked}`}
+                                            title={a.description}
+                                        >
+                                            <span className={styles.achievementIcon}>{a.icon}</span>
+                                            <span className={styles.achievementName}>{a.name}</span>
+                                            {!unlocked && <span className={styles.lockIcon}>🔒</span>}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </section>
 
                 {/* Historique des parties */}

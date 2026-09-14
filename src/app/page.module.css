@@ -872,7 +872,70 @@
    il fallait connaître le chemin Options → Règles. La carte est mise en avant tant que le
    didacticiel n'a pas été terminé, puis s'efface. */
 
+/*
+ * Bannière de reprise de partie.
+ *
+ * Calquée sur la carte du didacticiel, mais en rouge : c'est la seule chose de l'accueil qui
+ * soit urgente — un adversaire attend de l'autre côté, et la partie expire.
+ */
+.resumeBanner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+
+    color: inherit;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, rgba(180, 60, 60, 0.28), rgba(20, 20, 35, 0.8));
+    border: 1px solid rgba(220, 90, 90, 0.55);
+    border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 22px rgba(200, 60, 60, 0.2);
+    backdrop-filter: blur(12px);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.resumeBanner:active {
+    transform: scale(0.985);
+}
+
+.resumeIcon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.resumeText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.resumeTitle {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--gold-light);
+}
+
+.resumeSubtitle {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.resumeArrow {
+    font-size: 1.4rem;
+    color: rgba(220, 120, 120, 0.9);
+    flex-shrink: 0;
+}
+
 .tutorialCard {
+
     display: flex;
     align-items: center;
     gap: 12px;

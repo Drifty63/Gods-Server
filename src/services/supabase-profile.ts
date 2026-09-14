@@ -60,6 +60,15 @@ export interface UserProfile {
     daily_quests: DailyQuestsData | null;
     god_play_counts: Record<string, number>;
     ferveur: number;
+    /**
+     * Ferveur la plus haute jamais atteinte dans chaque classement.
+     *
+     * Distincte de la ferveur courante, qui retombe à zéro à la clôture de chaque saison : sans
+     * ces colonnes, la statistique « Ferveur max » du profil affichait la ferveur du moment.
+     */
+    ferveur_max: number;
+    ferveur_max_duel13: number;
+    ferveur_max_duel_open: number;
     /** Meilleur étage atteint en mode Ascension (écrit uniquement côté serveur). */
     ascension_best_floor: number;
     created_at: string;
@@ -255,6 +264,49 @@ async function invokeFn<T>(name: string, body: Record<string, unknown>): Promise
     const { data, error } = await supabase.functions.invoke(name, { body });
     if (error) throw error;
     return data as T;
+}
+
+/**
+ * Enregistre des hauts faits pour le joueur connecté, et renvoie ceux réellement ajoutés.
+ *
+ * Le serveur ignore les identifiants déjà acquis : le retour vide veut dire « rien de nouveau »,
+ * et c'est lui, pas le client, qui décide s'il y a matière à notifier.
+ */
+export async function unlockAchievements(ids: string[]): Promise<string[]> {
+    if (ids.length === 0) return [];
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('unlock_achievements', { p_ids: ids });
+    if (error) throw error;
+    return (data ?? []) as string[];
+}
+
+/** Partie en ligne encore en cours pour le joueur connecté, telle que la rend `resume-game`. */
+export interface ResumableGame {
+    resumable: boolean;
+    gameId?: string;
+    token?: string;
+    isHost?: boolean;
+    opponentName?: string | null;
+    mode?: string;
+    isRanked?: boolean;
+    /** Dernière écriture sur la partie : sert à afficher le temps restant avant expiration. */
+    updatedAt?: string;
+    startData?: unknown;
+}
+
+/**
+ * Cherche une partie en ligne à reprendre.
+ *
+ * Ne lève jamais : cet appel est fait à l'ouverture de l'accueil, en arrière-plan. Un joueur qui
+ * n'a rien à reprendre — le cas de très loin le plus fréquent — ne doit pas voir d'erreur, et un
+ * réseau capricieux ne doit pas empêcher l'accueil de s'afficher.
+ */
+export async function getResumableGame(): Promise<ResumableGame> {
+    try {
+        return await invokeFn<ResumableGame>('resume-game', {});
+    } catch {
+        return { resumable: false };
+    }
 }
 
 export async function claimStarterPack(packId: StarterPackId): Promise<void> {
