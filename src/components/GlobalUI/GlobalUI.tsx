@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import Ambroisie from '@/components/Ambroisie/Ambroisie';
 import {
     getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest,
     getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, MailboxReward,
@@ -646,7 +647,7 @@ export default function GlobalUI() {
                                         <span className={styles.rewardIcon}>🎁</span>
                                         <div className={styles.rewardInfo}>
                                             <p className={styles.rewardText}>
-                                                {reward.title} — {reward.description} (+{reward.ambroisie_reward} 🍯)
+                                                {reward.title} — {reward.description} (+{reward.ambroisie_reward} <Ambroisie />)
                                             </p>
                                             <div className={styles.rewardMetadata}>
                                                 <span className={styles.rewardTime}>{formatRewardDate(reward.created_at)}</span>

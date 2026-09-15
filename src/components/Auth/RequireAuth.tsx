@@ -39,8 +39,21 @@ export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps
         }
     }, [user, profile, loading, profileLoading, router, redirectTo, pathname]);
 
-    // Afficher un loader pendant la vérification
-    if (loading || profileLoading) {
+    /**
+     * Écran de chargement au PREMIER chargement seulement.
+     *
+     * `profileLoading` repasse à vrai à chaque `refreshProfile()`, et remplacer alors les enfants
+     * par ce loader les DÉMONTE : tout l'état local de la page est perdu, puis la page se remonte
+     * à zéro. C'est ce qui faisait disparaître l'écran de fin d'ascension quelques secondes après
+     * son apparition — le temps de l'aller-retour serveur — en ramenant le joueur au menu.
+     *
+     * Le défaut touchait tous les écrans qui rafraîchissent le profil : Ascension, Profil,
+     * Boutique, et la récupération des récompenses.
+     *
+     * Une fois le profil connu, un rafraîchissement est une mise à jour d'arrière-plan : il ne
+     * doit plus rien interrompre.
+     */
+    if (loading || (profileLoading && !profile)) {
         return (
             <div style={{
                 display: 'flex',

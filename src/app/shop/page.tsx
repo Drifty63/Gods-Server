@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
+import Ambroisie from '@/components/Ambroisie/Ambroisie';
 import { getVisibleGods, getGodById } from '@/data/gods';
 import { purchaseGod, purchaseCoffret, GOD_PRICE, GOD_PROMO_PRICE, COFFRET_PRICE, STARTER_PACKS } from '@/services/supabase-profile';
 
@@ -450,7 +451,9 @@ export default function ShopPage() {
 
                 {/* Section Ambroisie */}
                 <section id="section-ambroisie" className={styles.section}>
-                    <h2 className={styles.sectionTitle}>🍯 Acheter de l&apos;Ambroisie</h2>
+                    <h2 className={styles.sectionTitle}>
+                        <Ambroisie size={20} /> Acheter de l&apos;Ambroisie
+                    </h2>
                     <p className={styles.comingSoonSubtext} style={{ marginTop: '-8px', marginBottom: '16px' }}>
                         Le paiement par carte arrive bientôt. En attendant, gagnez de l&apos;ambroisie via les quêtes journalières !
                     </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import Ambroisie from '@/components/Ambroisie/Ambroisie';
 import { getGodById } from '@/data/gods';
 import {
     TIER_LABELS, TOTAL_FLOORS, ascensionFloorBonus, TOTAL_FIRST_CLEAR_BONUS,
@@ -8,24 +8,6 @@ import {
 } from '@/data/ascension';
 import type { GodCard } from '@/types/cards';
 import styles from '../page.module.css';
-
-/**
- * Icône d'ambroisie.
- *
- * La même image que la barre de monnaie de l'accueil et que la boutique : un émoji
- * approchant — goutte d'eau, pot de miel — donnait l'impression d'une autre récompense.
- */
-function Ambroisie({ size = 15 }: { size?: number }) {
-    return (
-        <Image
-            src="/icons/ambroisie.png"
-            alt="ambroisie"
-            width={size}
-            height={size}
-            style={{ verticalAlign: '-2px', display: 'inline-block' }}
-        />
-    );
-}
 
 /** Écran d'accueil : règles du mode et aperçu de la tour. */
 export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onStart: () => void }) {
