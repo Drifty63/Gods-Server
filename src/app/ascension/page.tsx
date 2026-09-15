@@ -10,11 +10,23 @@ import { getOwnedGods } from '@/data/gods';
 import { floorReward } from '@/data/ascension';
 import { reportAscensionRun, claimAscensionFloorRewards } from '@/services/supabase-profile';
 import { toast } from '@/lib/toast';
-import { useAscensionRun } from './useAscensionRun';
+import { useAscensionRun, type RunPhase } from './useAscensionRun';
 import { AscensionMenu, TeamPicker, FloorCleared, RunOver } from './components/AscensionViews';
 import styles from './page.module.css';
 
-export default function AscensionPage() {
+/**
+ * Étages réellement franchis, selon la façon dont l'ascension s'est terminée.
+ *
+ * `currentFloor` désigne l'étage EN COURS, d'où la distinction : une défaite s'y produit sans
+ * l'avoir franchi, un abandon depuis l'entre-deux-étages intervient juste après l'avoir nettoyé.
+ */
+function floorsCleared(phase: RunPhase, currentFloor: number): number {
+    if (phase === 'run_over') return Math.max(0, currentFloor - 1);
+    return currentFloor;
+}
+
+export default function AscensionPage()
+ {
     return (
         <RequireAuth>
             <AscensionContent />
@@ -56,11 +68,11 @@ function AscensionContent() {
 
     // Remontée du résultat au serveur (record + ambroisie) une fois l'ascension close.
     useEffect(() => {
-        if (run.phase !== 'run_over' && run.phase !== 'victory') return;
+        if (run.phase !== 'run_over' && run.phase !== 'victory' && run.phase !== 'abandoned') return;
         if (reportedRef.current) return;
         reportedRef.current = true;
 
-        const floorReached = run.phase === 'victory' ? run.currentFloor : Math.max(0, run.currentFloor - 1);
+        const floorReached = floorsCleared(run.phase, run.currentFloor);
 
         // L'Ascension ne rapporte plus RIEN de répétable.
         //
@@ -136,15 +148,15 @@ function AscensionContent() {
                         survivorHealth={run.survivorHealth}
                         carriedEnergy={run.carriedEnergy}
                         onClimb={run.climbNext}
-                        onQuit={backToMenu}
+                        onQuit={run.stopRun}
                     />
                 )}
 
-                {(run.phase === 'run_over' || run.phase === 'victory') && (
+                {(run.phase === 'run_over' || run.phase === 'victory' || run.phase === 'abandoned') && (
                     <RunOver
                         claimedBonus={claimedBonus}
-                        isVictory={run.phase === 'victory'}
-                        floorReached={run.phase === 'victory' ? run.currentFloor : Math.max(0, run.currentFloor - 1)}
+                        outcome={run.phase === 'victory' ? 'victory' : run.phase === 'abandoned' ? 'abandoned' : 'defeat'}
+                        floorReached={floorsCleared(run.phase, run.currentFloor)}
                         onRestart={() => { backToMenu(); setPicking(true); }}
                         onQuit={backToMenu}
                     />

@@ -7,7 +7,14 @@ import { createDeck } from '@/data/spells';
 import { generateAscensionRun, TOTAL_FLOORS, isTierBoundary, type AscensionFloor } from '@/data/ascension';
 import type { GodCard } from '@/types/cards';
 
-export type RunPhase = 'idle' | 'fighting' | 'floor_cleared' | 'run_over' | 'victory';
+/**
+ * `abandoned` est distinct de `run_over`, et l'écart compte.
+ *
+ * Sur une DÉFAITE (`run_over`), l'étage en cours n'a pas été franchi : le record vaut
+ * `currentFloor - 1`. Sur un ABANDON depuis l'entre-deux-étages, l'étage vient d'être nettoyé :
+ * le record vaut `currentFloor`. Confondre les deux faisait perdre un étage au joueur.
+ */
+export type RunPhase = 'idle' | 'fighting' | 'floor_cleared' | 'run_over' | 'victory' | 'abandoned';
 
 /** Ce que le joueur transporte d'un étage au suivant. */
 interface Carry {
@@ -132,6 +139,17 @@ export function useAscensionRun() {
         startFloor(currentFloor + 1, floors, healed);
     }, [currentFloor, floors, carry, startFloor]);
 
+    /**
+     * Arrête l'ascension en CONSERVANT la progression, pour qu'elle soit remontée au serveur.
+     *
+     * Sans cela, abandonner après avoir nettoyé des étages jetait tout : la phase passait
+     * directement à `idle`, et l'effet qui enregistre le record ne se déclenchait jamais.
+     */
+    const stopRun = useCallback(() => {
+        setPhase('abandoned');
+    }, []);
+
+    /** Remet l'ascension à zéro et revient au menu. Ne remonte rien : tout l'a déjà été. */
     const abandonRun = useCallback(() => {
         resetGame();
         setPhase('idle');
@@ -151,5 +169,6 @@ export function useAscensionRun() {
         resolveFloor,
         climbNext,
         abandonRun,
+        stopRun,
     };
 }

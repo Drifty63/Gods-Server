@@ -216,23 +216,34 @@ export function FloorCleared({ floors, clearedFloor, survivorHealth, carriedEner
 }
 
 /** Fin d'ascension : défaite ou sommet atteint. */
-export function RunOver({ floorReached, isVictory, claimedBonus, onRestart, onQuit }: {
+/**
+ * Écran de fin d'ascension.
+ *
+ * Trois fins, et non deux : abandonner volontairement n'est pas se faire tuer. Annoncer « vos
+ * dieux sont tombés » sous une tête de mort à un joueur qui a choisi de redescendre lui raconte
+ * une histoire fausse — et lui laisse croire qu'il a perdu sa progression, alors qu'elle vient
+ * précisément d'être enregistrée.
+ */
+export function RunOver({ floorReached, outcome, claimedBonus, onRestart, onQuit }: {
     floorReached: number;
-    isVictory: boolean;
+    outcome: 'victory' | 'defeat' | 'abandoned';
     /** Ambroisie réellement accordée. `null` tant que le serveur n'a pas répondu. */
     claimedBonus: number | null;
     onRestart: () => void;
     onQuit: () => void;
 }) {
+    const icon = outcome === 'victory' ? '👑' : outcome === 'abandoned' ? '🚪' : '💀';
+    const title = outcome === 'victory' ? 'Sommet atteint !'
+        : outcome === 'abandoned' ? 'Redescente' : 'Ascension terminée';
+    const lead = outcome === 'victory' ? `Vous avez gravi les ${TOTAL_FLOORS} étages de la tour.`
+        : outcome === 'abandoned' ? `Vous quittez la tour après ${floorReached} étage${floorReached > 1 ? 's' : ''}.`
+            : `Vos dieux sont tombés à l'étage ${floorReached + 1}.`;
+
     return (
         <section className={styles.menuSection}>
-            <div className={styles.ascensionIcon}>{isVictory ? '👑' : '💀'}</div>
-            <h2 className={styles.menuTitle}>{isVictory ? 'Sommet atteint !' : 'Ascension terminée'}</h2>
-            <p className={styles.menuDesc}>
-                {isVictory
-                    ? `Vous avez gravi les ${TOTAL_FLOORS} étages de la tour.`
-                    : `Vos dieux sont tombés à l'étage ${floorReached}.`}
-            </p>
+            <div className={styles.ascensionIcon}>{icon}</div>
+            <h2 className={styles.menuTitle}>{title}</h2>
+            <p className={styles.menuDesc}>{lead}</p>
             <div className={styles.rulesBox}>
                 <h3>📊 Résultat</h3>
                 <ul>
