@@ -131,7 +131,7 @@ function pick<T>(pool: readonly T[], count: number, rng: () => number): T[] {
  *    2 et 3 sont au mot près le Soldat d'Arès public : même nom, mêmes 16 PV. Les croiser en
  *    Ascension ne surprend personne ;
  *  - les VARIANTES AFFAIBLIES, calibrées pour un combat précis. Les Araignées Géantes du mode
- *    Histoire portent le même nom que celle du bestiaire public mais n'ont que 12 PV contre 21.
+ *    Histoire portent le même nom que celle du bestiaire public mais n'ont que 12 PV contre 16.
  *    En rencontrer une en Ascension contredit sa propre fiche dans la Collection.
  *
  * On n'admet donc que les premières : même nom, mêmes points de vie, même catégorie qu'une carte
@@ -173,22 +173,64 @@ function dominantTier(s: number, c: number, g: number): UnitTier {
  *
  * @param seed graine du tirage ; conservez-la pour rejouer exactement la même tour.
  */
+/** Paliers du plus faible au plus fort : ordre dans lequel on comble un étage incomplet. */
+const TIER_ORDER: readonly UnitTier[] = ['servant', 'creature', 'god'];
+
+/**
+ * Adversaires d'un étage, tous DISTINCTS.
+ *
+ * `pick` autorise la répétition quand un pool est plus petit que demandé, et c'est un piège :
+ * deux cartes de même identifiant dans une équipe rendent le ciblage ambigu — le moteur résout
+ * une cible par `card.id` (voir `resolveTargets`) et trouverait toujours la première. Le joueur
+ * ne pourrait plus viser la seconde.
+ *
+ * Or un palier peut compter moins de cartes distinctes que l'étage n'a d'emplacements, tant que
+ * le roster n'est pas étoffé : le bestiaire est entièrement en brouillon, il ne reste donc que
+ * les unités écrites à la main, et les créatures publiques ne sont que trois pour quatre places.
+ *
+ * On complète alors depuis les paliers voisins, en commençant par le plus faible — un adversaire
+ * de moindre niveau plutôt qu'un dieu surnuméraire. Le complément cesse de se déclencher tout
+ * seul dès qu'un réservoir redevient assez fourni : rien à retirer plus tard.
+ */
+function drawFloor(
+    pools: Record<UnitTier, GodCard[]>,
+    counts: readonly [number, number, number],
+    rng: () => number,
+): GodCard[] {
+    const used = new Set<string>();
+    const out: GodCard[] = [];
+
+    /** Tire au plus `n` cartes encore inutilisées de ce palier, et renvoie ce qui manque. */
+    const take = (tier: UnitTier, n: number): number => {
+        if (n <= 0) return 0;
+        const free = pools[tier].filter(c => !used.has(c.id));
+        const count = Math.min(n, free.length);
+        for (const card of pick(free, count, rng)) {
+            used.add(card.id);
+            out.push(card);
+        }
+        return n - count;
+    };
+
+    let missing = TIER_ORDER.reduce((acc, tier, i) => acc + take(tier, counts[i]), 0);
+    for (const tier of TIER_ORDER) {
+        if (missing === 0) break;
+        missing = take(tier, missing);
+    }
+    return out;
+}
+
 export function generateAscensionRun(seed: number): AscensionFloor[] {
     const rng = makeRng(seed);
     const pools = enemyPools();
 
-    return FLOOR_COMPOSITION.map(([nServants, nCreatures, nGods], i) => {
-        const enemies = [
-            ...pick(pools.servant, nServants, rng),
-            ...pick(pools.creature, nCreatures, rng),
-            ...pick(pools.god, nGods, rng),
-        ];
-        return {
-            floor: i + 1,
-            enemyIds: enemies.map(e => e.id),
-            tier: dominantTier(nServants, nCreatures, nGods),
-        };
-    });
+    return FLOOR_COMPOSITION.map((counts, i) => ({
+        floor: i + 1,
+        enemyIds: drawFloor(pools, counts, rng).map(e => e.id),
+        // Le palier reste celui de la COMPOSITION voulue, même si l'étage a dû être complété
+        // depuis un palier voisin : c'est l'intention qui nomme l'étage, pas le remplissage.
+        tier: dominantTier(counts[0], counts[1], counts[2]),
+    }));
 }
 
 export const TIER_LABELS: Record<UnitTier, { label: string; color: string; icon: string }> = {

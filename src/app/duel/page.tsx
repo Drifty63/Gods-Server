@@ -94,6 +94,9 @@ function DuelContent() {
     }, 0);
     const budgetRemaining = budgetCap - budgetUsed;
 
+    /** Prix d'une famille, entre parenthèses. Omis quand le budget est illimité. */
+    const priceSuffix = (cost: number) => (isOpenBudget ? '' : ` (${cost} pts)`);
+
     // Timer de recherche
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -211,7 +214,16 @@ function DuelContent() {
     };
 
     // Composant pour afficher une carte sélectionnable
-    const CardItem = ({ card, cost }: { card: GodCard; cost: number }) => {
+    /**
+     * Vignette de carte.
+     *
+     * Le coût est relu sur la CARTE et non reçu du parent : l'appelant le passait en dur par
+     * section (5 / 3 / 2) alors que le débit passe par `getCardCost`, qui lit `duelCost`. Les
+     * deux divergeaient dès qu'une carte portait un coût atypique — et c'est précisément le cas
+     * de l'Araignée Géante.
+     */
+    const CardItem = ({ card }: { card: GodCard }) => {
+        const cost = getCardCost(card);
         const isSelected = selectedCards.includes(card.id);
         const canSelect = isSelected || (selectedCards.length < DUEL_CONFIG.MAX_CHARACTERS && budgetRemaining >= cost);
 
@@ -222,7 +234,7 @@ function DuelContent() {
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
-                aria-label={`${card.name}, ${cost} points${isSelected ? ', sélectionné' : ''}`}
+                aria-label={`${card.name}${isOpenBudget ? '' : `, ${cost} points`}${isSelected ? ', sélectionné' : ''}`}
                 // Cette carte joue ses propres sons (sélection / retrait / refus) : on désactive
                 // le clic générique de la couche globale pour ne pas les superposer.
                 data-no-sound
@@ -243,7 +255,9 @@ function DuelContent() {
                 />
                 <div className={styles.godInfo}>
                     <span className={styles.godName}>{card.name.split(',')[0]}</span>
-                    <span className={styles.godCost}>{cost} pts</span>
+                    {/* Un coût n'a de sens que face à un plafond : en budget illimité, il
+                        n'informe de rien et encombre la vignette. */}
+                    {!isOpenBudget && <span className={styles.godCost}>{cost} pts</span>}
                 </div>
                 {isSelected && (
                     <div className={styles.selectedBadge}>
@@ -340,19 +354,22 @@ function DuelContent() {
                     <section className={styles.selectSection}>
                         <h2>Composez votre équipe</h2>
 
-                        {/* Budget */}
-                        <div className={styles.budgetBar}>
-                            <span className={styles.budgetLabel}>Budget</span>
-                            <div className={styles.budgetTrack}>
-                                <div
-                                    className={styles.budgetFill}
-                                    style={{ width: `${isOpenBudget ? 0 : Math.min(100, (budgetUsed / DUEL_CONFIG.MAX_BUDGET) * 100)}%` }}
-                                />
+                        {/* Budget — seulement quand il y en a un. Une jauge qui ne se
+                            remplit jamais et un compteur sans plafond n'apprennent rien. */}
+                        {!isOpenBudget && (
+                            <div className={styles.budgetBar}>
+                                <span className={styles.budgetLabel}>Budget</span>
+                                <div className={styles.budgetTrack}>
+                                    <div
+                                        className={styles.budgetFill}
+                                        style={{ width: `${Math.min(100, (budgetUsed / DUEL_CONFIG.MAX_BUDGET) * 100)}%` }}
+                                    />
+                                </div>
+                                <span className={styles.budgetValue}>
+                                    {budgetUsed}/{DUEL_CONFIG.MAX_BUDGET}
+                                </span>
                             </div>
-                            <span className={styles.budgetValue}>
-                                {isOpenBudget ? `${budgetUsed} pts` : `${budgetUsed}/${DUEL_CONFIG.MAX_BUDGET}`}
-                            </span>
-                        </div>
+                        )}
 
                         <p className={styles.selectHint}>
                             {selectedCards.length === 0
@@ -365,10 +382,10 @@ function DuelContent() {
 
                         {/* Catégorie: Dieux */}
                         <div className={styles.categorySection}>
-                            <h3 className={styles.categoryTitle}>⚡ Dieux ({DUEL_CONFIG.COSTS.god} pts)</h3>
+                            <h3 className={styles.categoryTitle}>⚡ Dieux{priceSuffix(DUEL_CONFIG.COSTS.god)}</h3>
                             <div className={styles.godsGrid}>
                                 {ownedGods.map(god => (
-                                    <CardItem key={god.id} card={god} cost={DUEL_CONFIG.COSTS.god} />
+                                    <CardItem key={god.id} card={god} />
                                 ))}
                             </div>
                         </div>
@@ -376,10 +393,10 @@ function DuelContent() {
                         {/* Catégorie: Créatures */}
                         {creatures.length > 0 && (
                             <div className={styles.categorySection}>
-                                <h3 className={styles.categoryTitle}>🐉 Créatures Mythiques ({DUEL_CONFIG.COSTS.creature} pts)</h3>
+                                <h3 className={styles.categoryTitle}>🐉 Créatures{priceSuffix(DUEL_CONFIG.COSTS.creature)}</h3>
                                 <div className={styles.godsGrid}>
                                     {creatures.map(creature => (
-                                        <CardItem key={creature.id} card={creature} cost={DUEL_CONFIG.COSTS.creature} />
+                                        <CardItem key={creature.id} card={creature} />
                                     ))}
                                 </div>
                             </div>
@@ -388,10 +405,10 @@ function DuelContent() {
                         {/* Catégorie: Serviteurs */}
                         {servants.length > 0 && (
                             <div className={styles.categorySection}>
-                                <h3 className={styles.categoryTitle}>👤 Serviteurs ({DUEL_CONFIG.COSTS.servant} pts)</h3>
+                                <h3 className={styles.categoryTitle}>👤 Serviteurs{priceSuffix(DUEL_CONFIG.COSTS.servant)}</h3>
                                 <div className={styles.godsGrid}>
                                     {servants.map(servant => (
-                                        <CardItem key={servant.id} card={servant} cost={DUEL_CONFIG.COSTS.servant} />
+                                        <CardItem key={servant.id} card={servant} />
                                     ))}
                                 </div>
                             </div>

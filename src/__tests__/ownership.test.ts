@@ -79,8 +79,10 @@ describe('mode Duel', () => {
 
     it('élargit la sélection à mesure que le joueur acquiert des dieux', () => {
         const { creatures, servants } = getDuelCards(['ares', 'athena', 'hestia'], false);
-        expect(servants.map(s => s.id).sort()).toEqual(['athena_knight', 'soldier_ares_1']);
-        expect(creatures.map(c => c.id).sort()).toEqual(['arachne', 'dragon_thebes', 'giant_spider_1', 'ulysses']);
+        // L'Araignée Géante est un SERVITEUR : c'est une progéniture d'Arachné, pas une
+        // créature à part entière. Voir le commentaire de conception dans gods.ts.
+        expect(servants.map(s => s.id).sort()).toEqual(['athena_knight', 'giant_spider_1', 'soldier_ares_1']);
+        expect(creatures.map(c => c.id).sort()).toEqual(['arachne', 'dragon_thebes', 'ulysses']);
     });
 
     it('ne propose aucune unité à un joueur sans dieu', () => {

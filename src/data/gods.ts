@@ -364,32 +364,34 @@ export const ALL_GODS: GodCard[] = [
     },
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // LES ARAIGNÉES D'ARACHNÉ — deux rôles distincts, ne pas les confondre
+    // LES ARAIGNÉES D'ARACHNÉ — toutes serviteurs, mais deux usages distincts
+    //
+    // Les trois sont des SERVITEURS : une progéniture d'Arachné n'est pas une créature à
+    // part entière, elle tire sa force du nombre.
+    //
+    // L'araignée 1 est la seule jouable hors Histoire (Duel, Ascension). Ses 16 PV sont
+    // exactement ceux des autres serviteurs écrits à la main — Soldat d'Arès, Chevalier
+    // d'Athéna — ce qui l'aligne au lieu d'en faire une exception.
     //
     // La NUÉE (araignées 2 et 3) n'existe que pour le combat d'Arachné du mode Histoire :
-    // des bestioles faibles dont l'intérêt est le nombre, pas la statistique. Ce sont donc
-    // des SERVITEURS, dans le bas de leur bande de PV (12, pour une bande 10-18).
-    //
-    // L'araignée 1, elle, est la seule jouable hors Histoire (Duel, Ascension) : à ce titre
-    // c'est une CRÉATURE à part entière, avec les PV et le coût de Duel correspondants.
-    //
-    // Ces rôles étaient exactement inversés : l'unité visible était un serviteur de 14 PV
-    // tandis que les deux figurantes de la nuée étaient classées créatures à 12 PV — soit
-    // des « créatures » plus faibles que n'importe quel serviteur du jeu.
+    // des figurantes volontairement plus faibles, à 12 PV. Cet écart de PV avec la carte
+    // publique n'est pas un oubli, c'est LUI qui les tient hors des réservoirs d'Ascension
+    // (voir `isScriptingDuplicate` dans ascension.ts) : on ne veut pas qu'un joueur croise
+    // une « Araignée Géante » à 12 PV alors que sa fiche de Collection en annonce 16.
     // ─────────────────────────────────────────────────────────────────────────────
 
-    // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Créature jouable : Duel + Ascension + Histoire
+    // ARAIGNÉE GÉANTE 1 (Ténèbres 💀) - Serviteur jouable : Duel + Ascension + Histoire
     {
         id: 'giant_spider_1',
         name: 'Araignée Géante',
         element: 'darkness',
         weakness: 'light',
-        maxHealth: 21,
+        maxHealth: 16,
         imageUrl: '/cards/gods/giant_spider_1.png',
         flavorText: "« Nous sommes les enfants d'Arachné. Nous tissons la mort. » — Moins retorse que sa mère, plus brutale : elle plante quatre dégâts et un poison lourd sur une seule cible, puis se retranche derrière son bouclier.",
-        category: 'creature',
+        category: 'servant',
         affiliatedTo: 'arachne',
-        duelCost: 3,
+        duelCost: 2,
     },
 
     // ARAIGNÉE GÉANTE 2 (Ténèbres 💀) - Nuée, exclusif Histoire

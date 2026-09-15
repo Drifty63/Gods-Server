@@ -103,18 +103,6 @@
     text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
 }
 
-.subtitle {
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0;
-}
-
-.instruction {
-    font-size: 1.1rem;
-    color: var(--gold-divine);
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
 @keyframes pulse {
 
     0%,
@@ -386,12 +374,6 @@
     font-size: 2rem;
 }
 
-.decideHint {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
-    font-weight: 400;
-}
-
 /* Responsive */
 @media (max-width: 600px) {
     .choices {
@@ -426,12 +408,6 @@
     .title {
         font-size: 1.8rem;
     }
-}
-
-/* Styles spécifiques mode en ligne */
-.opponentName {
-    color: var(--gold-divine);
-    font-weight: 600;
 }
 
 .waitingPhase {

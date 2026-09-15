@@ -119,12 +119,10 @@ export default function RockPaperScissors({ onComplete }: RockPaperScissorsProps
 
             <div className={styles.content}>
                 <h1 className={styles.title}>⚔️ Qui commence ?</h1>
-                <p className={styles.subtitle}>Pierre - Feuille - Ciseaux</p>
 
                 {/* Phase de choix */}
                 {phase === 'choose' && (
                     <div className={styles.choicePhase}>
-                        <p className={styles.instruction}>Fais ton choix !</p>
                         <div className={styles.choices}>
                             {CHOICES.map((choice) => (
                                 <button
@@ -218,7 +216,6 @@ export default function RockPaperScissors({ onComplete }: RockPaperScissorsProps
                             >
                                 <span className={styles.decideIcon}>1️⃣</span>
                                 <span>Premier</span>
-                                <span className={styles.decideHint}>+ d&apos;actions au début</span>
                             </button>
                             <button
                                 className={`${styles.decideButton} ${styles.second}`}
@@ -226,7 +223,6 @@ export default function RockPaperScissors({ onComplete }: RockPaperScissorsProps
                             >
                                 <span className={styles.decideIcon}>2️⃣</span>
                                 <span>Second</span>
-                                <span className={styles.decideHint}>Réagir à l&apos;adversaire</span>
                             </button>
                         </div>
                     </div>
