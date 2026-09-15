@@ -48,7 +48,67 @@ export default function DuelPage() {
     );
 }
 
+/**
+ * Vignette d'une carte dans la grille de composition.
+ *
+ * Déclarée AU NIVEAU DU MODULE, et c'est essentiel : tant qu'elle vivait dans le corps de
+ * `DuelContent`, chaque rendu en produisait une fonction d'identité nouvelle. React y voyait
+ * alors un composant d'un TYPE différent, démontait toute la grille et la remontait — les
+ * portraits, portés par `background-image`, se rechargeaient et la grille clignotait environ
+ * une seconde à chaque clic.
+ *
+ * Les valeurs dont elle dépendait par fermeture sont devenues des propriétés explicites. C'est
+ * aussi ce qui la rend mémoïsable si la grille venait à s'allonger.
+ */
+function CardItem({ card, cost, order, disabled, showCost, onSelect }: {
+    card: GodCard;
+    cost: number;
+    /** Rang dans l'équipe, à partir de 1. `0` quand la carte n'est pas sélectionnée. */
+    order: number;
+    disabled: boolean;
+    showCost: boolean;
+    onSelect: (id: string) => void;
+}) {
+    const isSelected = order > 0;
+
+    return (
+        <div
+            className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${disabled ? styles.disabled : ''}`}
+            role="button"
+            tabIndex={0}
+            aria-pressed={isSelected}
+            aria-label={`${card.name}${showCost ? `, ${cost} points` : ''}${isSelected ? ', sélectionné' : ''}`}
+            // Cette carte joue ses propres sons (sélection / retrait / refus) : on désactive
+            // le clic générique de la couche globale pour ne pas les superposer.
+            data-no-sound
+            // Toujours transmis au gestionnaire, même quand la carte est indisponible : c'est
+            // lui qui explique le refus (budget ou équipe pleine) au lieu de laisser le clic
+            // se perdre sans aucun retour.
+            onClick={() => onSelect(card.id)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelect(card.id);
+                }
+            }}
+        >
+            <div
+                className={styles.godImage}
+                style={{ backgroundImage: `url(${card.imageUrl})` }}
+            />
+            <div className={styles.godInfo}>
+                <span className={styles.godName}>{card.name.split(',')[0]}</span>
+                {/* Un coût n'a de sens que face à un plafond : en budget illimité, il
+                    n'informe de rien et encombre la vignette. */}
+                {showCost && <span className={styles.godCost}>{cost} pts</span>}
+            </div>
+            {isSelected && <div className={styles.selectedBadge}>{order}</div>}
+        </div>
+    );
+}
+
 function DuelContent() {
+
     const router = useRouter();
     const { profile } = useAuth();
     const {
@@ -94,7 +154,28 @@ function DuelContent() {
     }, 0);
     const budgetRemaining = budgetCap - budgetUsed;
 
+    /**
+     * Propriétés d'une vignette, dérivées de la carte.
+     *
+     * Une seule source pour les trois familles : le coût, la disponibilité et le rang y sont
+     * calculés au même endroit, ce qui évite qu'une section diverge des autres.
+     */
+    const cardProps = (card: GodCard) => {
+        const cost = getCardCost(card);
+        const order = selectedCards.indexOf(card.id) + 1;
+        return {
+            card,
+            cost,
+            order,
+            disabled: order === 0
+                && (selectedCards.length >= DUEL_CONFIG.MAX_CHARACTERS || budgetRemaining < cost),
+            showCost: !isOpenBudget,
+            onSelect: handleSelectCard,
+        };
+    };
+
     /** Prix d'une famille, entre parenthèses. Omis quand le budget est illimité. */
+
     const priceSuffix = (cost: number) => (isOpenBudget ? '' : ` (${cost} pts)`);
 
     // Timer de recherche
@@ -222,52 +303,6 @@ function DuelContent() {
      * deux divergeaient dès qu'une carte portait un coût atypique — et c'est précisément le cas
      * de l'Araignée Géante.
      */
-    const CardItem = ({ card }: { card: GodCard }) => {
-        const cost = getCardCost(card);
-        const isSelected = selectedCards.includes(card.id);
-        const canSelect = isSelected || (selectedCards.length < DUEL_CONFIG.MAX_CHARACTERS && budgetRemaining >= cost);
-
-        return (
-            <div
-                key={card.id}
-                className={`${styles.godCard} ${isSelected ? styles.selected : ''} ${!canSelect && !isSelected ? styles.disabled : ''}`}
-                role="button"
-                tabIndex={0}
-                aria-pressed={isSelected}
-                aria-label={`${card.name}${isOpenBudget ? '' : `, ${cost} points`}${isSelected ? ', sélectionné' : ''}`}
-                // Cette carte joue ses propres sons (sélection / retrait / refus) : on désactive
-                // le clic générique de la couche globale pour ne pas les superposer.
-                data-no-sound
-                // Toujours transmis au gestionnaire, même quand la carte est indisponible : c'est
-                // lui qui explique le refus (budget ou équipe pleine) au lieu de laisser le clic
-                // se perdre sans aucun retour.
-                onClick={() => handleSelectCard(card.id)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleSelectCard(card.id);
-                    }
-                }}
-            >
-                <div
-                    className={styles.godImage}
-                    style={{ backgroundImage: `url(${card.imageUrl})` }}
-                />
-                <div className={styles.godInfo}>
-                    <span className={styles.godName}>{card.name.split(',')[0]}</span>
-                    {/* Un coût n'a de sens que face à un plafond : en budget illimité, il
-                        n'informe de rien et encombre la vignette. */}
-                    {!isOpenBudget && <span className={styles.godCost}>{cost} pts</span>}
-                </div>
-                {isSelected && (
-                    <div className={styles.selectedBadge}>
-                        {selectedCards.indexOf(card.id) + 1}
-                    </div>
-                )}
-            </div>
-        );
-    };
-
     return (
         <main className={styles.main}>
             {/* Header */}
@@ -385,7 +420,7 @@ function DuelContent() {
                             <h3 className={styles.categoryTitle}>⚡ Dieux{priceSuffix(DUEL_CONFIG.COSTS.god)}</h3>
                             <div className={styles.godsGrid}>
                                 {ownedGods.map(god => (
-                                    <CardItem key={god.id} card={god} />
+                                    <CardItem key={god.id} {...cardProps(god)} />
                                 ))}
                             </div>
                         </div>
@@ -396,7 +431,7 @@ function DuelContent() {
                                 <h3 className={styles.categoryTitle}>🐉 Créatures{priceSuffix(DUEL_CONFIG.COSTS.creature)}</h3>
                                 <div className={styles.godsGrid}>
                                     {creatures.map(creature => (
-                                        <CardItem key={creature.id} card={creature} />
+                                        <CardItem key={creature.id} {...cardProps(creature)} />
                                     ))}
                                 </div>
                             </div>
@@ -408,7 +443,7 @@ function DuelContent() {
                                 <h3 className={styles.categoryTitle}>👤 Serviteurs{priceSuffix(DUEL_CONFIG.COSTS.servant)}</h3>
                                 <div className={styles.godsGrid}>
                                     {servants.map(servant => (
-                                        <CardItem key={servant.id} card={servant} />
+                                        <CardItem key={servant.id} {...cardProps(servant)} />
                                     ))}
                                 </div>
                             </div>
