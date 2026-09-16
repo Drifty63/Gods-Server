@@ -69,13 +69,14 @@
 .playerInfo {
     font-family: var(--font-title);
     color: var(--gold-divine);
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     font-size: 1rem;
     text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
 }
 
 .leaveButton {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     padding: 8px 18px;
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.4);
@@ -116,6 +117,7 @@
 
 .loading p {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     color: var(--gold-divine);
     font-size: 1.1rem;
     text-align: center;
@@ -138,6 +140,7 @@
 
 .retryButton {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     margin-top: 20px;
     padding: 12px 28px;
     background: rgba(0, 0, 0, 0.4);
@@ -201,6 +204,7 @@
 
 .disconnectedModal h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     color: #fca5a5;
     margin: 0 0 1rem 0;
     font-size: 1.4rem;
@@ -220,7 +224,7 @@
     border: 2px solid var(--gold-divine);
     border-radius: 8px;
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;

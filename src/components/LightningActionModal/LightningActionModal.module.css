@@ -3,6 +3,7 @@
     color: #f59e0b;
     margin-bottom: 15px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
 }
 
 .description {

@@ -31,6 +31,7 @@
 
 .header h1 {
     font-family: var(--font-display);
+    font-weight: var(--weight-title);
     font-size: clamp(1.5rem, 4vw, 2.2rem);
     background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
     -webkit-background-clip: text;
@@ -42,6 +43,7 @@
 
 .subtitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     color: rgba(255, 255, 255, 0.7);
     margin: 0;
     font-size: 0.95rem;
@@ -66,13 +68,13 @@
     padding: 10px 20px;
     border-radius: 10px;
     color: var(--gold-divine);
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
 }
 
 .opponentStatus {
     font-family: var(--font-title);
     color: #22c55e;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -87,7 +89,7 @@
 .waitingStatus {
     font-family: var(--font-title);
     color: #f59e0b;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -226,6 +228,7 @@
 
 .godInfo h3 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     color: var(--gold-divine);
     margin: 0 0 0.25rem 0;
     font-size: 0.9rem;
@@ -303,7 +306,7 @@
     border: 2px solid var(--gold-divine);
     border-radius: 10px;
     font-size: 1.05rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
@@ -354,6 +357,7 @@
 
 .waitingSpinner p {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     color: var(--gold-divine);
     margin: 0;
     font-size: 1.1rem;
@@ -456,6 +460,7 @@
 
 .toggleButton {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     padding: 10px 20px;
     background: transparent;
     border: none;
@@ -488,6 +493,7 @@
 
 .sectionTitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     color: var(--gold-divine);
     text-align: center;
     margin-bottom: 1rem;
@@ -523,7 +529,7 @@
     font-family: var(--font-title);
     color: var(--gold-divine);
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
 }
 
 .deckGods {

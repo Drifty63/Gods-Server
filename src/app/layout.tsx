@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Cinzel, Cinzel_Decorative } from "next/font/google";
+import { Alegreya_Sans, Marcellus, Marcellus_SC } from "next/font/google";
 import "./globals.css";
 
 import GlobalUI from "@/components/GlobalUI/GlobalUI";
@@ -7,21 +7,35 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Toaster from "@/components/Toast/Toaster";
 import PwaProvider from "@/components/PWA/PwaProvider";
 
-const inter = Inter({
+/*
+ * Les trois polices du jeu, nommees d'apres leur ROLE et non d'apres leur dessin.
+ *
+ * Changer l'habillage typographique du jeu entier, c'est changer ces trois lignes et les trois
+ * jetons de globals.css qui les consomment -- rien d'autre : plus aucune feuille ne nomme une
+ * police en clair.
+ *
+ * Marcellus et Marcellus SC n'ont qu'une graisse. C'est assume : c'est une lapidaire, elle tire
+ * sa hierarchie de la taille et de l'interlettrage, pas du gras. Voir --weight-title dans
+ * globals.css.
+ */
+const titleFace = Marcellus({
   subsets: ["latin"],
-  variable: '--font-inter',
+  variable: '--font-title-face',
+  weight: '400',
 });
 
-const cinzel = Cinzel({
+const displayFace = Marcellus_SC({
   subsets: ["latin"],
-  variable: '--font-cinzel',
-  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-display-face',
+  weight: '400',
 });
 
-const cinzelDecorative = Cinzel_Decorative({
+const bodyFace = Alegreya_Sans({
   subsets: ["latin"],
-  variable: '--font-cinzel-decorative',
-  weight: ['400', '700', '900'],
+  variable: '--font-body-face',
+  // 600 n'existe pas chez Alegreya Sans : une regle qui le demande tombe sur 700, sans
+  // fabrication de graisse. 800 tombe de meme sur 900.
+  weight: ['400', '500', '700', '900'],
 });
 
 // Configuration du viewport
@@ -84,7 +98,7 @@ export default function RootLayout({
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${inter.variable} ${cinzel.variable} ${cinzelDecorative.variable}`}
+      className={`${titleFace.variable} ${displayFace.variable} ${bodyFace.variable}`}
     >
       <body>
         <AuthProvider>

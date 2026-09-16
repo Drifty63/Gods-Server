@@ -34,6 +34,7 @@
 .title {
     flex: 1;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.6rem;
     color: var(--gold-divine);
     text-transform: uppercase;
@@ -84,6 +85,7 @@
 
 .username {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.3rem;
     color: white;
     margin: 0;
@@ -151,7 +153,7 @@
     font-variant-numeric: tabular-nums;
     font-family: var(--font-title);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     color: var(--gold-divine);
 }
 
@@ -186,6 +188,7 @@
     color: var(--gold-divine);
     text-decoration: none;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
 }
 
 /* Avatar emoji : même pastille que l'image, taille adaptée au cadre de 80 px. */

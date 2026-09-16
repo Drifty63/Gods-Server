@@ -43,6 +43,7 @@
 
 .title {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.5rem;
     background: linear-gradient(135deg, #ffd700, #ff8c00);
     -webkit-background-clip: text;
@@ -81,6 +82,7 @@
 
 .loadingContent h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.5rem;
     color: #ffd700;
     margin-bottom: 10px;

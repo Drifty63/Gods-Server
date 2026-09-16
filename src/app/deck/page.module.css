@@ -57,6 +57,7 @@
 .title {
     flex: 1;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: clamp(1.1rem, 5vw, 1.5rem);
     color: var(--gold-divine);
     margin: 0;
@@ -66,6 +67,7 @@
     flex-shrink: 0;
     padding: 5px 12px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.82rem;
     font-variant-numeric: tabular-nums;
     color: var(--gold-light);
@@ -122,6 +124,7 @@
     gap: 8px;
     margin-bottom: 10px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.95rem;
     color: var(--gold-divine);
 }
@@ -199,6 +202,7 @@
 
 .tileName {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.82rem;
     color: var(--text-primary);
     /* Un nom long ne doit pas déformer la vignette. */
@@ -283,6 +287,7 @@
 
 .inspectName {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: clamp(1rem, 4.4vw, 1.25rem);
     line-height: 1.25;
     color: var(--text-primary);
@@ -310,6 +315,7 @@
     margin-top: 4px;
     padding: 7px 12px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.75rem;
     color: var(--obsidian);
     background: linear-gradient(135deg, var(--gold-light), var(--gold-divine));
@@ -334,6 +340,7 @@
     gap: 8px;
     margin-bottom: 10px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.9rem;
     color: var(--gold-divine);
 }
@@ -403,6 +410,7 @@
 
 .spellName {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.85rem;
     color: var(--text-primary);
 }
@@ -498,6 +506,7 @@
 
 .zoomName {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.05rem;
     color: var(--gold-light);
     margin: 0;
@@ -571,6 +580,7 @@
     padding: 8px 12px;
     text-align: center;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.95rem;
     color: var(--text-primary);
     background: rgba(0, 0, 0, 0.45);
@@ -639,6 +649,7 @@
 .pickerTitle {
     margin-bottom: 10px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.9rem;
     color: var(--gold-divine);
 }
@@ -704,7 +715,7 @@
     padding: 15px;
     font-family: var(--font-title);
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     letter-spacing: 0.05em;
     color: var(--obsidian);
     background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));

@@ -67,6 +67,7 @@
 .title {
     margin: 0;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: clamp(1.3rem, 6vw, 1.7rem);
     color: var(--gold-divine, #d4af37);
 }
@@ -97,7 +98,7 @@
     padding: 13px 20px;
     font-family: var(--font-title);
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     letter-spacing: 0.04em;
     border-radius: 10px;
 }

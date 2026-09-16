@@ -92,6 +92,7 @@
 .rewardsModal h2,
 .questsModal h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.4rem;
     color: var(--gold-divine);
     text-align: center;
@@ -145,7 +146,7 @@
     text-decoration: none;
     font-family: var(--font-title);
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     text-align: center;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(220, 50, 50, 0.15);
@@ -168,6 +169,7 @@
 
 .optionsSectionTitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1rem;
     color: var(--gold-divine);
     margin-bottom: 14px;
@@ -726,6 +728,7 @@
 
 .rulesModal h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.4rem;
     color: var(--gold-divine);
     text-align: center;
@@ -752,6 +755,7 @@
 
 .rulesSection h3 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1rem;
     color: var(--gold-divine);
     margin-bottom: 10px;
@@ -788,7 +792,7 @@
 .rulesInfoNumber {
     font-family: var(--font-title);
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: var(--weight-title-strong);
     color: var(--gold-divine);
 }
 

@@ -104,7 +104,7 @@
     padding: 0.4rem;
     text-align: center;
     font-family: var(--font-title);
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     font-size: 0.7rem;
     color: #fff;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
@@ -159,7 +159,7 @@
     margin: 0;
     font-family: var(--font-title);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     color: var(--gold-divine, #d4af37);
     border-bottom: 2px solid rgba(212, 175, 55, 0.4);
     padding-bottom: 0.4rem;
@@ -251,7 +251,7 @@
     border-radius: 6px;
     font-family: var(--font-title);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     cursor: pointer;
     transition: all 0.2s ease;
 }

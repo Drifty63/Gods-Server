@@ -90,6 +90,7 @@
     flex: 1;
     min-width: 0;
     font-family: var(--font-display);
+    font-weight: var(--weight-title);
     font-size: clamp(1.2rem, 5.5vw, 2.8rem);
     background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
     -webkit-background-clip: text;
@@ -128,7 +129,7 @@
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     color: rgba(255, 255, 255, 0.4);
     transition: all 0.3s ease;
 }
@@ -162,6 +163,7 @@
 
 .instruction {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     color: var(--gold-divine);
     font-size: 1.1rem;
     margin: 0;
@@ -248,7 +250,7 @@
 .godInitial {
     font-family: var(--font-display);
     font-size: 2rem;
-    font-weight: bold;
+    font-weight: var(--weight-title-strong);
     color: var(--element-color);
     text-shadow: 0 0 15px var(--element-color);
 }
@@ -306,7 +308,7 @@
 .godName {
     font-family: var(--font-title);
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     color: var(--gold-divine);
     white-space: nowrap;
     overflow: hidden;
@@ -360,7 +362,7 @@
     border: none;
     border-radius: 8px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: var(--weight-title-strong);
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
@@ -533,6 +535,7 @@
     margin: 0 0 10px;
     padding: 0 4px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.95rem;
     color: var(--gold-divine, #d4af37);
 }

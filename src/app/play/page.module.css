@@ -87,6 +87,7 @@
 
 .title {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.9rem;
     color: var(--gold-divine);
     text-transform: uppercase;
@@ -118,6 +119,7 @@
     align-items: center;
     gap: 8px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1rem;
     letter-spacing: 1px;
     color: rgba(212, 175, 55, 0.9);
@@ -250,6 +252,7 @@
 
 .modeTitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.1rem;
     color: var(--gold-divine);
     margin: 0 0 3px;

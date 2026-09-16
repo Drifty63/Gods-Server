@@ -381,6 +381,7 @@
 
 .packName {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.1rem;
     color: #fff;
     margin-bottom: 16px;

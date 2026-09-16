@@ -47,6 +47,7 @@
     flex: 1;
     min-width: 0;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: clamp(1.5rem, 6.5vw, 2.5rem);
     color: var(--gold-divine);
     text-transform: uppercase;
@@ -80,6 +81,7 @@
     align-items: center;
     height: 60vh;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.5rem;
     color: var(--gold-divine);
 }
@@ -103,6 +105,7 @@
 
 .campaignTitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 2rem;
     color: var(--gold-divine);
     margin: 0 0 10px 0;
@@ -123,6 +126,7 @@
 
 .sectionTitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.2rem;
     color: var(--gold-divine);
     margin: 0 0 15px 0;
@@ -164,7 +168,7 @@
     padding: 16px 32px;
     font-family: var(--font-title);
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     color: #1a1a2e;
     background: linear-gradient(135deg, var(--gold-divine), #ffd700);
     border: none;
@@ -313,6 +317,7 @@
 /* Chapter Number */
 .chapterNumber {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
@@ -323,6 +328,7 @@
 /* Chapter Title */
 .chapterTitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.5rem;
     color: var(--gold-divine);
     margin: 0 0 4px 0;
@@ -330,6 +336,7 @@
 
 .chapterSubtitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1rem;
     color: rgba(255, 255, 255, 0.6);
     font-style: italic;
@@ -514,6 +521,7 @@
 
 .battlePrompt h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.8rem;
     color: var(--gold-divine);
     margin: 0 0 15px 0;
@@ -540,7 +548,7 @@
     padding: 16px 40px;
     font-family: var(--font-title);
     font-size: 1.2rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     color: #1a1a2e;
     background: linear-gradient(135deg, #ff4444, #cc0000);
     border: none;
@@ -659,6 +667,7 @@
 
 .modalTitle {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.6rem;
     color: var(--gold-divine);
     text-align: center;
@@ -697,6 +706,7 @@
 
 .battleNumber {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
@@ -706,6 +716,7 @@
 
 .battleName {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.2rem;
     color: var(--gold-divine);
     margin: 0 0 8px 0;

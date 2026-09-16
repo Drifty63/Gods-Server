@@ -114,6 +114,7 @@
 .title {
     margin: 0;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.05rem;
     color: var(--gold-light, #f5d76e);
 }
@@ -132,7 +133,7 @@
     padding: 11px 26px;
     font-family: var(--font-title);
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     letter-spacing: 0.05em;
     color: #1a1a2e;
     background: linear-gradient(135deg, #f5d76e, #d4af37);

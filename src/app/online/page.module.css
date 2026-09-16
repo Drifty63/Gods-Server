@@ -59,6 +59,7 @@
     flex: 1;
     min-width: 0;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: clamp(0.95rem, 4.5vw, 1.2rem);
     color: var(--gold-divine);
     white-space: nowrap;
@@ -133,6 +134,7 @@
 .label {
     display: block;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.9rem;
     color: var(--gold-divine);
     margin-bottom: 10px;
@@ -162,6 +164,7 @@
 
 .modesSection h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.1rem;
     color: var(--gold-divine);
     margin-bottom: 16px;
@@ -208,6 +211,7 @@
 
 .modeInfo h3 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1rem;
     color: white;
     margin-bottom: 4px;
@@ -313,6 +317,7 @@
 
 .matchmakingSection h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.4rem;
     color: white;
     margin-bottom: 10px;
@@ -320,6 +325,7 @@
 
 .searchTime {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 2rem;
     color: var(--gold-divine);
     margin-bottom: 10px;
@@ -334,6 +340,7 @@
 .cancelButton {
     padding: 14px 30px;
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.95rem;
     background: rgba(239, 68, 68, 0.2);
     border: 1px solid rgba(239, 68, 68, 0.4);
@@ -357,6 +364,7 @@
 
 .tips h4 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 0.9rem;
     color: var(--gold-divine);
     margin-bottom: 8px;
@@ -384,6 +392,7 @@
 
 .codeDisplay h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.1rem;
     color: var(--text-secondary);
     margin-bottom: 16px;
@@ -392,7 +401,7 @@
 .gameCode {
     font-family: var(--font-display);
     font-size: 3rem;
-    font-weight: 900;
+    font-weight: var(--weight-title-strong);
     letter-spacing: 8px;
     color: var(--gold-divine);
     background: linear-gradient(145deg, rgba(212, 175, 55, 0.2), rgba(0, 0, 0, 0.4));
@@ -412,7 +421,7 @@
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     transition: all 0.3s ease;
 }
 
@@ -474,6 +483,7 @@
 
 .joinSection h2 {
     font-family: var(--font-title);
+    font-weight: var(--weight-title);
     font-size: 1.4rem;
     color: white;
     margin-bottom: 10px;
@@ -490,7 +500,7 @@
     padding: 20px;
     font-family: var(--font-title);
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     text-align: center;
     letter-spacing: 8px;
     background: rgba(0, 0, 0, 0.4);
@@ -524,7 +534,7 @@
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: var(--weight-title-strong);
     transition: all 0.3s ease;
 }
 
