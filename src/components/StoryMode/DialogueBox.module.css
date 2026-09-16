@@ -1,11 +1,19 @@
 /* Bouton œil pour masquer/afficher le dialogue */
+/*
+ * Miroir exact de la roue des paramètres, qui est ancrée par GlobalUI en
+ * `top: calc(safe-area + 12px); right: 20px`, 44×44, arrondi 10px.
+ *
+ * À `top: 20px` pour 48px de haut, ce bouton occupait la bande 20→68px alors que la zone sûre
+ * d'un iPhone 12 mini fait ~47px : il passait en partie sous l'heure et la batterie, et tombait
+ * plus haut que la roue qu'il est censé refléter.
+ */
 .toggleButton {
     position: fixed;
-    top: 20px;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
     left: 20px;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
     background: rgba(20, 20, 40, 0.85);
     border: 2px solid rgba(212, 175, 55, 0.4);
     color: white;
@@ -232,12 +240,20 @@
 }
 
 /* Texte du dialogue */
+/*
+ * La réserve du bas n'est pas décorative.
+ *
+ * `.continueIndicator` est en `position: absolute` par-dessus la boîte : il ne pousse donc
+ * rien. Dès qu'un dialogue était assez long pour descendre jusqu'en bas, « ▼ Suite » se
+ * superposait à la dernière ligne. On lui réserve sa place ici.
+ */
 .dialogueText {
     font-family: 'Inter', sans-serif;
     font-size: 1.1rem;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.95);
     min-height: 60px;
+    padding-bottom: 26px;
 }
 
 .cursor {
@@ -254,8 +270,9 @@
 /* Indicateur de continuation */
 .continueIndicator {
     position: absolute;
-    bottom: 12px;
-    right: 20px;
+    /* Au-dessus de la barre de progression (3px), sous la réserve de `.dialogueText`. */
+    bottom: 10px;
+    right: 24px;
     font-family: 'Cinzel', serif;
     font-size: 0.85rem;
     color: var(--gold-divine, #d4af37);

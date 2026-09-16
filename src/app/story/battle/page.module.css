@@ -451,6 +451,17 @@
     z-index: 0;
 }
 
+/*
+ * Voile ALLÉGÉ.
+ *
+ * Il montait à 70-90 %% d'opacité, ce qui faisait passer chaque illustration derrière un
+ * rideau. Cette densité n'a jamais été nécessaire pour la lisibilité : la boîte de dialogue
+ * porte son PROPRE fond opaque (rgba(20, 20, 40, 0.95)) et le nom du personnage son ombre
+ * portée. Le voile ne sert qu'à asseoir l'ambiance et à détacher le bas de l'écran.
+ *
+ * Il reste donc un dégradé — plus clair en haut où l'on veut voir l'image, plus dense en bas où
+ * repose la boîte — mais divisé par deux.
+ */
 .backgroundOverlay {
     position: absolute;
     top: 0;
@@ -458,9 +469,9 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom,
-            rgba(5, 5, 16, 0.7),
-            rgba(5, 5, 16, 0.5),
-            rgba(5, 5, 16, 0.9));
+            rgba(5, 5, 16, 0.35),
+            rgba(5, 5, 16, 0.15),
+            rgba(5, 5, 16, 0.7));
     z-index: 1;
 }
 
@@ -471,9 +482,9 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom,
-            rgba(50, 80, 50, 0.5),
-            rgba(20, 40, 20, 0.4),
-            rgba(5, 5, 16, 0.8));
+            rgba(50, 80, 50, 0.3),
+            rgba(20, 40, 20, 0.2),
+            rgba(5, 5, 16, 0.6));
     z-index: 1;
 }
 
@@ -484,9 +495,9 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom,
-            rgba(40, 0, 60, 0.7),
-            rgba(20, 0, 40, 0.6),
-            rgba(5, 5, 16, 0.95));
+            rgba(40, 0, 60, 0.4),
+            rgba(20, 0, 40, 0.3),
+            rgba(5, 5, 16, 0.7));
     z-index: 1;
 }
 
@@ -500,7 +511,8 @@
     background: url('/assets/story/olympus_storm.png') center/cover no-repeat;
     background-size: cover;
     z-index: 0;
-    filter: brightness(0.6) saturate(0.7);
+    /* Le voile suffit : ce filtre s'y ajoutait et écrasait l'illustration deux fois. */
+    filter: brightness(0.85) saturate(0.9);
 }
 
 .backgroundOverlayNarrator {
@@ -510,9 +522,9 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom,
-            rgba(10, 0, 30, 0.85),
-            rgba(20, 0, 50, 0.75),
-            rgba(5, 5, 16, 0.95));
+            rgba(10, 0, 30, 0.5),
+            rgba(20, 0, 50, 0.4),
+            rgba(5, 5, 16, 0.7));
     z-index: 1;
 }
 

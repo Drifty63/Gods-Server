@@ -426,6 +426,17 @@
     transition: background-image 0.8s ease-in-out;
 }
 
+/*
+ * Voile ALLÉGÉ.
+ *
+ * Il montait à 70-90 %% d'opacité, ce qui faisait passer chaque illustration derrière un
+ * rideau. Cette densité n'a jamais été nécessaire pour la lisibilité : la boîte de dialogue
+ * porte son PROPRE fond opaque (rgba(20, 20, 40, 0.95)) et le nom du personnage son ombre
+ * portée. Le voile ne sert qu'à asseoir l'ambiance et à détacher le bas de l'écran.
+ *
+ * Il reste donc un dégradé — plus clair en haut où l'on veut voir l'image, plus dense en bas où
+ * repose la boîte — mais divisé par deux.
+ */
 .backgroundOverlay {
     position: absolute;
     top: 0;
@@ -433,9 +444,9 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom,
-            rgba(5, 5, 16, 0.7),
-            rgba(5, 5, 16, 0.5),
-            rgba(5, 5, 16, 0.9));
+            rgba(5, 5, 16, 0.35),
+            rgba(5, 5, 16, 0.15),
+            rgba(5, 5, 16, 0.7));
     z-index: 1;
 }
 
@@ -447,9 +458,9 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom,
-            rgba(15, 10, 5, 0.85),
-            rgba(20, 15, 10, 0.7),
-            rgba(10, 5, 0, 0.95));
+            rgba(15, 10, 5, 0.5),
+            rgba(20, 15, 10, 0.3),
+            rgba(10, 5, 0, 0.75));
     z-index: 1;
 }
 

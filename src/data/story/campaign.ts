@@ -115,6 +115,10 @@ const chapter1Battle1Events: StoryEvent[] = [
         id: 'ch1_after_battle_win',
         type: 'dialogue',
         dialogues: PROLOGUE_AFTER_BATTLE_1_WIN,
+        // Symétrique de la défaite ci-dessous, qui avait son image alors que la victoire n'en
+        // avait aucune : la scène retombait sur le fond générique. Le joueur qui gagnait voyait
+        // donc un décor plus pauvre que celui qui perdait.
+        backgroundImage: '/assets/story/battle1_victory_v2.png',
         nextEventId: 'ch1_hades_throne'
     },
     // Après combat - Défaite
