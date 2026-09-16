@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { getMostPlayedGod, getMatchHistory, isUsernameTaken, unlockAchievements, type MatchHistoryEntry } from '@/services/supabase-profile';
 import { useStoryStore } from '@/store/storyStore';
-import { ACHIEVEMENTS, FAMILY_LABELS, newlyUnlocked, type AchievementFamily } from '@/data/achievements';
+import { ACHIEVEMENTS, FAMILY_LABELS, newlyUnlocked, type Achievement, type AchievementFamily } from '@/data/achievements';
 import { toast } from '@/lib/toast';
 import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
 import { getRankByFerveur, getRankProgress, getLadder } from '@/data/ranks';
@@ -34,6 +34,8 @@ export default function ProfilePage() {
     const [nameError, setNameError] = useState<string | null>(null);
     const [matchHistory, setMatchHistory] = useState<MatchHistoryEntry[]>([]);
     const [historyLoading, setHistoryLoading] = useState(true);
+    /** Haut fait dont la fiche est ouverte. `null` = aucune. */
+    const [openAchievement, setOpenAchievement] = useState<Achievement | null>(null);
     const completedChapters = useStoryStore(s => s.progress.completedChapters);
 
     /**
@@ -353,15 +355,18 @@ export default function ProfilePage() {
                                 {achievementsByFamily[family].map(a => {
                                     const unlocked = unlockedIds.has(a.id);
                                     return (
-                                        <div
+                                        <button
                                             key={a.id}
+                                            type="button"
                                             className={`${styles.achievement} ${unlocked ? '' : styles.locked}`}
                                             title={a.description}
+                                            aria-label={`${a.name} — ${unlocked ? 'débloqué' : 'à accomplir'}`}
+                                            onClick={() => setOpenAchievement(a)}
                                         >
                                             <span className={styles.achievementIcon}>{a.icon}</span>
                                             <span className={styles.achievementName}>{a.name}</span>
                                             {!unlocked && <span className={styles.lockIcon}>🔒</span>}
-                                        </div>
+                                        </button>
                                     );
                                 })}
                             </div>
@@ -409,6 +414,45 @@ export default function ProfilePage() {
                     </div>
                 </section>
             </div >
+
+            {/*
+              * Fiche d'un haut fait.
+              *
+              * Elle dit la meme chose selon les deux etats, mais pas sur le meme ton : une
+              * CONDITION a remplir tant qu'il est verrouille, un rappel de ce qui a ete
+              * accompli une fois obtenu. C'est la seule facon de lire cette phrase au doigt.
+              */}
+            {openAchievement && (
+                <div className={styles.modalOverlay} onClick={() => setOpenAchievement(null)}>
+                    <div
+                        className={`${styles.modal} ${unlockedIds.has(openAchievement.id) ? '' : styles.modalLocked}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className={styles.modalClose}
+                            onClick={() => setOpenAchievement(null)}
+                            aria-label="Fermer"
+                        >
+                            ✕
+                        </button>
+                        <div className={styles.achievementDetail}>
+                            <span className={styles.achievementDetailIcon}>{openAchievement.icon}</span>
+                            <h2 className={styles.achievementDetailName}>{openAchievement.name}</h2>
+                            <span className={styles.achievementDetailFamily}>
+                                {FAMILY_LABELS[openAchievement.family]}
+                            </span>
+                            {unlockedIds.has(openAchievement.id) ? (
+                                <span className={styles.achievementDetailStatus}>✓ Débloqué</span>
+                            ) : (
+                                <span className={`${styles.achievementDetailStatus} ${styles.achievementDetailTodo}`}>
+                                    🔒 À accomplir
+                                </span>
+                            )}
+                            <p className={styles.achievementDetailText}>{openAchievement.description}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Changer d'avatar */}
             {
