@@ -86,7 +86,13 @@ const chapter1Battle1Events: StoryEvent[] = [
     {
         id: 'ch1_battle1',
         type: 'battle',
-        backgroundImage: '/assets/story/battle1_intro.png',
+        // L'ecran VS de ce combat, et lui seul, garde l'Olympe sous l'orage.
+        //
+        // C'est le plan large qui servait de decor a TOUTES les scenes du mode avant que
+        // chacune recoive son illustration ; il ne s'affichait plus nulle part. Le dialogue
+        // qui precede garde battle1_intro.png, si bien que les deux ecrans cessent aussi de
+        // montrer la meme image coup sur coup.
+        backgroundImage: '/assets/story/olympus_storm.png',
         battle: {
             id: 'battle_zeus_vs_hades',
             name: "Duel des Frères",
