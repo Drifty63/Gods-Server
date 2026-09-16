@@ -21,7 +21,31 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
+/**
+ * Largeur par défaut, pour une illustration de CARTE.
+ *
+ * Les cartes s'affichent à 150-200px : les servir plus large ne fait que peser. Un fond plein
+ * écran, lui, a besoin de ses pixels — c'est pourquoi la largeur se lit d'abord dans la colonne
+ * « Taille conseillée » de la feuille, qui la porte ligne par ligne.
+ */
 const TARGET_WIDTH = 640;
+
+/** Largeur visée pour une ligne, lue dans sa colonne de taille (« 941 x 1672 px »). */
+function widthFor(size) {
+    const m = String(size).match(/(\d{2,5})\s*[x×]/);
+    return m ? Number(m[1]) : TARGET_WIDTH;
+}
+
+/**
+ * Destinations à NE PAS écrire, passées en `--skip=/chemin/1,/chemin/2`.
+ *
+ * Sert quand une ligne de la feuille est douteuse : on applique tout le reste sans rien livrer
+ * dont on n'est pas sûr, et la destination garde son illustration actuelle.
+ */
+const SKIP = new Set(
+    (process.argv.find(a => a.startsWith('--skip=')) ?? '').replace('--skip=', '')
+        .split(',').map(s => s.trim()).filter(Boolean),
+);
 const QUALITY = 86;
 
 /** Seuils de détection d'une bande morte : en dessous = noir, au-dessus = blanc. */
@@ -38,7 +62,8 @@ if (!csvArg) {
 const raw = fs.readFileSync(path.resolve(ROOT, csvArg), 'utf8').replace(/^﻿/, '');
 const rows = raw.split(/\r?\n/).filter(l => l.trim()).slice(1)
     .map(l => l.split('";"').map(c => c.replace(/^"|"$/g, '')))
-    .map(c => ({ src: c[0].trim(), dest: c[1].trim(), nom: c[4] }));
+    .map(c => ({ src: c[0].trim(), dest: c[1].trim(), nom: c[4], size: c[5] ?? '' }))
+    .filter(r => !SKIP.has(r.dest));
 
 /** Bandes uniformes collées à un bord, mesurées en pixels. */
 function deadBorders(data, W, H, C) {
@@ -87,7 +112,7 @@ for (const r of rows) {
     // PNG pèse plusieurs fois plus pour un résultat identique à l'œil. L'extension reste `.png`
     // parce que c'est elle que le code référence — le navigateur lit le contenu, pas le nom.
     const out = await pipeline
-        .resize({ width: TARGET_WIDTH, withoutEnlargement: true })
+        .resize({ width: widthFor(r.size), withoutEnlargement: true })
         .jpeg({ quality: QUALITY, mozjpeg: true })
         .toBuffer();
 
