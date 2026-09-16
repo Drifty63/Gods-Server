@@ -560,6 +560,8 @@
     color: rgba(220, 200, 255, 0.95);
     font-style: italic;
     text-shadow: 0 0 20px rgba(100, 50, 150, 0.3);
+    /* Bande reservee a « Suite » / « Continuer », qui flotte au fond de la boite. */
+    padding-bottom: 30px;
 }
 
 /* ================================ */
@@ -698,6 +700,8 @@
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.95);
     min-height: 60px;
+    /* Bande reservee a « Suite » / « Continuer », qui flotte au fond de la boite. */
+    padding-bottom: 30px;
 }
 
 .cursor {
@@ -1100,14 +1104,24 @@
 }
 
 /* Bouton œil pour masquer/afficher le dialogue - même style que DialogueBox */
+/**
+ * Jumeau du bouton oeil de DialogueBox : memes coordonnees, meme taille, meme rayon.
+ *
+ * Il etait ancre a 20px du haut PHYSIQUE de l'ecran. Avec `viewport-fit=cover`, la zone sure
+ * d'un iPhone 12 mini commence vers 47px : le bouton se logeait donc sous l'heure. Il part
+ * maintenant de la zone sure, sur la meme bande que la roue des reglages et le retour.
+ *
+ * Le z-index passe a 1100 : la boite de dialogue post-combat monte a 1000, et le bouton qui
+ * sert precisement a la masquer se retrouvait derriere elle.
+ */
 .toggleButton {
     position: fixed;
-    top: 20px;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
     left: 20px;
-    z-index: 100;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    z-index: 1100;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
     background: rgba(20, 20, 40, 0.85);
     border: 2px solid rgba(212, 175, 55, 0.4);
     color: white;
