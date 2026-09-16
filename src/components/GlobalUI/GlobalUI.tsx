@@ -14,7 +14,7 @@ import {
 import { getGodById } from '@/data/gods';
 import { useSettings } from '@/lib/settings';
 import { hapticsSupported, haptic } from '@/lib/haptics';
-import { playSfx } from '@/lib/sfx';
+import { playSfx, unlockAudio, connectMediaElement } from '@/lib/sfx';
 import { toast } from '@/lib/toast';
 
 /** Version affichée et jointe aux rapports de bug. Une seule source, pour qu'un rapport ne
@@ -84,6 +84,15 @@ export default function GlobalUI() {
 
     const menuAudioRef = useRef<HTMLAudioElement | null>(null);
     const battleAudioRef = useRef<HTMLAudioElement | null>(null);
+    /**
+     * Gains Web Audio des deux musiques.
+     *
+     * `null` tant que le joueur n'a pas touché l'écran — on ne peut pas débloquer l'audio
+     * avant — et `null` pour toujours si Web Audio est indisponible, auquel cas on
+     * retombe sur `element.volume`.
+     */
+    const menuGainRef = useRef<GainNode | null>(null);
+    const battleGainRef = useRef<GainNode | null>(null);
     const [hasInteracted, setHasInteracted] = useState(false);
 
     const isHomePage = pathname === '/';
@@ -293,17 +302,42 @@ export default function GlobalUI() {
         };
     }, [hasInteracted]);
 
-    // Appliquer volume et sourdine aux deux pistes.
+    /**
+     * Router les deux musiques dans le graphe Web Audio, au premier geste.
+     *
+     * Pas avant : créer ou reprendre un AudioContext hors d'un geste utilisateur est
+     * refusé par les navigateurs. Une fois routées, les pistes obéissent à un GainNode —
+     * la seule façon de régler leur volume sur iPhone, où `element.volume` est en
+     * lecture seule.
+     */
     useEffect(() => {
-        if (menuAudioRef.current) {
-            menuAudioRef.current.volume = musicVolume;
-            menuAudioRef.current.muted = muted;
+        if (!hasInteracted) return;
+        unlockAudio();
+        if (menuAudioRef.current && !menuGainRef.current) {
+            menuGainRef.current = connectMediaElement(menuAudioRef.current);
         }
-        if (battleAudioRef.current) {
-            battleAudioRef.current.volume = battleVolume;
-            battleAudioRef.current.muted = muted;
+        if (battleAudioRef.current && !battleGainRef.current) {
+            battleGainRef.current = connectMediaElement(battleAudioRef.current);
         }
-    }, [musicVolume, battleVolume, muted]);
+    }, [hasInteracted]);
+
+    /**
+     * Appliquer volume et sourdine aux deux pistes.
+     *
+     * Le gain d'abord, `element.volume` en repli : le premier fonctionne partout, le
+     * second partout SAUF sur iOS. Écrire les deux ne coûte rien et couvre le cas où Web
+     * Audio n'existe pas. `element.muted`, lui, est bien honoré par iOS.
+     */
+    useEffect(() => {
+        const apply = (el: HTMLAudioElement | null, gain: GainNode | null, volume: number) => {
+            if (!el) return;
+            if (gain) gain.gain.value = muted ? 0 : volume;
+            else el.volume = volume;
+            el.muted = muted;
+        };
+        apply(menuAudioRef.current, menuGainRef.current, musicVolume);
+        apply(battleAudioRef.current, battleGainRef.current, battleVolume);
+    }, [musicVolume, battleVolume, muted, hasInteracted]);
 
     /**
      * Aiguillage menu / combat.
@@ -324,6 +358,10 @@ export default function GlobalUI() {
             battle.pause();
             return;
         }
+
+        // Routées dans le graphe, les pistes restent muettes tant que le contexte est
+        // suspendu — ce qui arrive dès que l'onglet passe en arrière-plan.
+        unlockAudio();
 
         const [toPlay, toStop] = isInGame ? [battle, menu] : [menu, battle];
         toStop.pause();

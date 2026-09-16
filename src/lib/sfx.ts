@@ -237,3 +237,40 @@ export function unlockAudio(): void {
     const audio = getCtx();
     if (audio && audio.state === 'suspended') void audio.resume().catch(() => { });
 }
+
+/**
+ * Branche un élément <audio> sur le graphe Web Audio et renvoie son gain.
+ *
+ * SEUL moyen de régler le volume d'une musique sur iPhone. Sur iOS, la propriété `volume`
+ * d'un élément média est en lecture seule : Safari renvoie toujours 1 et ignore l'écriture,
+ * le niveau étant réservé aux boutons physiques de l'appareil. Un GainNode, lui, obéit.
+ *
+ * Effet de bord à connaître : une fois l'élément routé, il ne sort PLUS directement par les
+ * haut-parleurs — tout passe par le graphe. Si le contexte est suspendu, on n'entend rien,
+ * d'où `unlockAudio()` au premier geste, que l'appelant doit avoir déclenché.
+ *
+ * Renvoie `null` quand Web Audio est indisponible : l'appelant retombe alors sur `.volume`,
+ * qui fonctionne partout ailleurs que sur iOS.
+ */
+const mediaGains = new WeakMap<HTMLMediaElement, GainNode>();
+
+export function connectMediaElement(el: HTMLMediaElement): GainNode | null {
+    const existing = mediaGains.get(el);
+    if (existing) return existing;
+
+    const audio = getCtx();
+    if (!audio) return null;
+
+    try {
+        // Un même élément ne peut être branché qu'une fois : un second appel lève
+        // InvalidStateError. La WeakMap rend donc la fonction idempotente.
+        const source = audio.createMediaElementSource(el);
+        const gain = audio.createGain();
+        source.connect(gain);
+        gain.connect(audio.destination);
+        mediaGains.set(el, gain);
+        return gain;
+    } catch {
+        return null;
+    }
+}
