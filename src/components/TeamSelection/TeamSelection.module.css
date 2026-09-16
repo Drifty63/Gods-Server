@@ -5,8 +5,9 @@
  * Fond porté par un CALQUE FIXE, et non par la boîte du conteneur.
  *
  * Le fond « sautait » à chaque carte sélectionnée. La carte cliquée n'y était pour rien : c'est
- * le panneau des équipes qui empile un badge de ~43 px par sélection, faisant grandir la page
- * d'environ 145 px entre 0 et 4 dieux. Or `background-attachment: fixed` n'est pas honoré par
+ * le panneau des équipes, depuis retiré, qui empilait un badge de ~43 px par sélection et
+ * faisait grandir la page d'environ 145 px. La page change encore de hauteur au passage en
+ * phase 2, donc la protection reste nécessaire. Or `background-attachment: fixed` n'est pas honoré par
  * WebKit mobile, qui dimensionne alors le fond contre la boîte COMPLÈTE du document : `cover`
  * recalculait donc son échelle à chaque clic. Avec une image carrée (1024×1024) dans une page
  * très allongée, le décalage devenait spectaculaire.
@@ -105,6 +106,7 @@
    ================================ */
 .phaseIndicator {
     display: flex;
+    max-width: 100%;
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 1.5rem;
@@ -118,6 +120,10 @@
 }
 
 .phaseStep {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
     font-family: 'Cinzel', serif;
     padding: 0.5rem 1rem;
     border-radius: 8px;
@@ -139,6 +145,16 @@
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
+.phaseTeam {
+    /* Quatre noms tiennent rarement sur une ligne de telephone : ils passent a la ligne
+       plutot que d'elargir l'indicateur, qui deborderait du viewport. */
+    overflow-wrap: anywhere;
+    font-family: system-ui, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
 .phaseArrow {
     color: rgba(212, 175, 55, 0.3);
     font-size: 1.3rem;
@@ -156,34 +172,41 @@
 }
 
 /* ================================
-   GRILLE DES DIEUX
+   GRILLE DES CARTES
    ================================ */
+/**
+ * Vignette reprise du mode Duel.
+ *
+ * L'Entraînement et le Duel composaient la même chose de deux façons différentes : ici une
+ * fiche haute avec en-tête, portrait, et une barre de statistiques ; là une vignette 3/4 dont
+ * le portrait occupe les sept dixièmes. Un seul cadre pour les deux modes, celui du Duel.
+ *
+ * Ce qui change vraiment pour le joueur : la sélection ne se marque plus par un ✓ posé sur le
+ * portrait mais par un NUMÉRO d'ordre, qui dit en plus dans quel ordre l'équipe a été composée.
+ */
 .godsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
     max-width: 1100px;
     width: 100%;
-    padding: 1rem;
     animation: fadeInUp 0.6s ease forwards;
     animation-delay: 0.4s;
     opacity: 0;
 }
 
 .godCard {
-    background:
-        linear-gradient(145deg,
-            rgba(16, 16, 32, 0.95) 0%,
-            rgba(26, 26, 58, 0.9) 100%);
-    border: 2px solid rgba(212, 175, 55, 0.15);
-    border-radius: 12px;
-    padding: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    aspect-ratio: 3/4;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
     overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Liseré d'élément : la couleur identifie la carte d'un coup d'œil, la pastille la nomme. */
 .godCard::before {
     content: '';
     position: absolute;
@@ -192,57 +215,97 @@
     right: 0;
     height: 3px;
     background: var(--element-gradient);
+    z-index: 2;
 }
 
-.godCard::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-    transition: left 0.4s ease;
-}
-
-.godCard:hover::after {
-    left: 100%;
-}
-
-.godCard:hover {
-    transform: translateY(-6px);
+.godCard:hover:not(.disabled) {
+    transform: translateY(-3px);
     border-color: var(--gold-divine);
-    box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(212, 175, 55, 0.15);
 }
 
 .godCard.selected {
     border-color: #22c55e;
-    box-shadow:
-        0 0 30px rgba(34, 197, 94, 0.4),
-        inset 0 0 20px rgba(34, 197, 94, 0.1);
-    background:
-        linear-gradient(145deg,
-            rgba(34, 197, 94, 0.15) 0%,
-            rgba(26, 26, 58, 0.95) 100%);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.45);
 }
 
-.godHeader {
+.godCard.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.godImage {
+    width: 100%;
+    height: 70%;
+    background-color: rgba(0, 0, 0, 0.4);
+    background-size: cover;
+    background-position: center top;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    justify-content: center;
+}
+
+/* Repli quand la carte n'a pas encore d'illustration : l'initiale, à la couleur de l'élément. */
+.godInitial {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--element-color);
+    text-shadow: 0 0 15px var(--element-color);
+}
+
+/**
+ * Élément et faiblesse, empilés dans le coin haut-gauche.
+ *
+ * Le Duel s'en passe, et il le peut : on y compose sans jamais voir l'équipe adverse. Ici on
+ * choisit les DEUX équipes, l'une contre l'autre, dans un jeu bâti sur les faiblesses
+ * élémentaires — les retirer reviendrait à cacher l'information au moment où elle sert.
+ */
+.badges {
+    position: absolute;
+    top: 8px;
+    left: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.godElement,
+.godWeakness {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.65);
+    line-height: 1;
 }
 
 .godElement {
-    font-size: 1.1rem;
+    font-size: 0.75rem;
     filter: drop-shadow(0 0 5px var(--element-color));
+}
+
+.godWeakness {
+    font-size: 0.6rem;
+    opacity: 0.85;
+}
+
+.godInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .godName {
     font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--gold-divine);
     white-space: nowrap;
@@ -250,135 +313,30 @@
     text-overflow: ellipsis;
 }
 
-.godImage {
-    height: 75px;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-    border: 1px solid rgba(212, 175, 55, 0.1);
-    overflow: hidden;
-    position: relative;
+.godHealth {
+    font-size: 0.65rem;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
 }
 
-.godImageImg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-}
-
-.godInitial {
-    font-family: 'Cinzel Decorative', 'Cinzel', serif;
-    font-size: 2.2rem;
-    font-weight: bold;
-    color: var(--element-color);
-    text-shadow: 0 0 15px var(--element-color);
+/* Rang dans l'équipe. Même emplacement et même forme qu'en Duel, aux couleurs de ce mode. */
+.selectedBadge {
     position: absolute;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.godStats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-    padding: 4px 0;
-    border-top: 1px solid rgba(212, 175, 55, 0.1);
-}
-
-.selectedOverlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    color: #22c55e;
-    text-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
-    pointer-events: none;
-    animation: checkAppear 0.3s ease-out;
-}
-
-@keyframes checkAppear {
-    from {
-        transform: translate(-50%, -50%) scale(0);
-        opacity: 0;
-    }
-
-    to {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-}
-
-/* ================================
-   ÉQUIPES SÉLECTIONNÉES
-   ================================ */
-.selectedTeams {
-    display: flex;
-    gap: 2rem;
-    width: 100%;
-    max-width: 850px;
-    justify-content: center;
-    animation: fadeInUp 0.5s ease forwards;
-    animation-delay: 0.5s;
-    opacity: 0;
-}
-
-.teamPreview {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 12px;
-    padding: 1rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(212, 175, 55, 0.15);
-}
-
-.teamPreview h3 {
-    font-family: 'Cinzel', serif;
-    margin: 0 0 0.75rem 0;
-    color: var(--gold-divine);
-    font-size: 1rem;
-    text-align: center;
-    letter-spacing: 1px;
-}
-
-/**
- * Liste des dieux retenus.
- *
- * `min-height` réserve la place des quatre badges dès le départ : c'est la CAUSE du fond qui
- * sautait, traitée à la racine plutôt qu'au seul niveau du symptôme. La page cesse purement et
- * simplement de changer de taille au fil des sélections.
- */
-.teamGods {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-height: calc(4 * 35px + 3 * 0.5rem);
-}
-
-.teamGod {
-    padding: 0.5rem 0.75rem;
-    background: rgba(212, 175, 55, 0.08);
-    border-radius: 8px;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #22c55e, #15803d);
     color: white;
-    font-size: 0.85rem;
-    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-}
-
-.emptyTeam {
-    color: rgba(212, 175, 55, 0.4);
-    font-style: italic;
-    text-align: center;
+    justify-content: center;
     font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    z-index: 2;
 }
 
 /* ================================
@@ -523,25 +481,11 @@
     }
 
     .godsGrid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 0.75rem;
-    }
-
-    .godCard {
-        padding: 0.6rem;
-    }
-
-    .godImage {
-        height: 60px;
+        gap: 0.5rem;
     }
 
     .godInitial {
-        font-size: 1.8rem;
-    }
-
-    .selectedTeams {
-        flex-direction: column;
-        gap: 1rem;
+        font-size: 1.6rem;
     }
 
     .actions {
@@ -568,8 +512,10 @@
         display: none;
     }
 
+    /* Trois colonnes, et non deux : la vignette 3/4 est bien plus étroite que l'ancienne
+       fiche, et deux colonnes donneraient des cartes démesurées sur un téléphone. */
     .godsGrid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 /* --- SECTIONS PAR FAMILLE ---
