@@ -120,17 +120,34 @@ add('/cards/gods/narrator.png', 'Portrait', 'Narrateur',
     'Visage affiché quand le récit parle sans interlocuteur', '640 x 640 px');
 
 // ── 4. Fonds de page demandés ────────────────────────────────────────────────
+/*
+ * Rôle de chaque fond, TRANSCRIT depuis les CSS.
+ *
+ * Une première version balayait chaque feuille de style et étiquetait tout ce qu'elle y trouvait
+ * du nom de la page. C'était faux pour le mode Histoire : son CSS déclare trois images de rôles
+ * très différents, et les trois se retrouvaient annoncées comme « fond de la page d'accueil ».
+ * Or `olympus_storm` n'est pas un fond de page — c'est le DÉCOR PAR DÉFAUT des scènes qui n'ont
+ * pas d'illustration dédiée, celui qu'on voit le plus souvent sans jamais l'avoir choisi.
+ *
+ * Une étiquette fausse est pire qu'une étiquette absente : elle fait fournir la mauvaise image.
+ */
 const PAGE_BACKGROUNDS = [
-    ['src/app/shop/page.module.css', 'Boutique'],
-    ['src/app/profile/page.module.css', 'Profil'],
-    ['src/app/story/page.module.css', "Accueil du mode Histoire"],
+    ['/backgrounds/shop_bg.png', 'Fond de page',
+        'Boutique', 'Fond plein écran de la boutique'],
+    ['/assets/profile_background.png', 'Fond de page',
+        'Profil', 'Fond plein écran de la page de profil'],
+    ['/assets/story/library_background.png', 'Fond de page',
+        'Accueil du mode Histoire', 'Fond plein écran de la page qui liste les chapitres'],
+    ['/assets/story/olympus_storm.png', 'Décor PAR DÉFAUT',
+        'Scènes sans illustration dédiée',
+        'Affiché dès qu’une scène n’a pas d’image à elle — c’est le décor le plus vu du mode'],
+    ['/assets/story/narrator_backdrop.png', 'Décor PAR DÉFAUT',
+        'Scènes du narrateur sans illustration dédiée',
+        'Affiché quand le récit parle et que la scène n’a pas d’image à elle'],
 ];
 
-for (const [file, label] of PAGE_BACKGROUNDS) {
-    const css = fs.readFileSync(path.join(ROOT, file), 'utf8');
-    for (const m of css.matchAll(/url\('([^']+\.(?:png|jpe?g))'\)/g)) {
-        add(m[1], 'Fond de page', label, `Fond plein écran de la page ${label}`, '941 x 1672 px (portrait)');
-    }
+for (const [file, kind, context, details] of PAGE_BACKGROUNDS) {
+    add(file, kind, context, details, '941 x 1672 px (portrait)');
 }
 
 // ── Écriture ─────────────────────────────────────────────────────────────────
