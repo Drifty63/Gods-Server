@@ -380,7 +380,7 @@
 }
 
 .packName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.1rem;
     color: #fff;
     margin-bottom: 16px;

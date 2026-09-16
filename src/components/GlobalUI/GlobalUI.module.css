@@ -91,7 +91,7 @@
 .optionsModal h2,
 .rewardsModal h2,
 .questsModal h2 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.4rem;
     color: var(--gold-divine);
     text-align: center;
@@ -143,7 +143,7 @@
     border-radius: 12px;
     color: #ff6b6b;
     text-decoration: none;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1rem;
     font-weight: 600;
     text-align: center;
@@ -167,7 +167,7 @@
 }
 
 .optionsSectionTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1rem;
     color: var(--gold-divine);
     margin-bottom: 14px;
@@ -283,6 +283,7 @@
 }
 
 .volumeValue {
+    font-variant-numeric: tabular-nums;
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.8rem;
     font-weight: 600;
@@ -584,6 +585,7 @@
 }
 
 .ambroisieAmount {
+    font-variant-numeric: tabular-nums;
     color: #ffb432;
     font-weight: bold;
     font-size: 0.95rem;
@@ -723,7 +725,7 @@
 }
 
 .rulesModal h2 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.4rem;
     color: var(--gold-divine);
     text-align: center;
@@ -749,7 +751,7 @@
 }
 
 .rulesSection h3 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1rem;
     color: var(--gold-divine);
     margin-bottom: 10px;
@@ -784,7 +786,7 @@
 }
 
 .rulesInfoNumber {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--gold-divine);

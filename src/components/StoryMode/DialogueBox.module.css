@@ -197,7 +197,7 @@
 
 /* Nom du personnage */
 .speakerName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -248,7 +248,7 @@
  * superposait à la dernière ligne. On lui réserve sa place ici.
  */
 .dialogueText {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 1.1rem;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.95);
@@ -273,7 +273,7 @@
     /* Au-dessus de la barre de progression (3px), sous la réserve de `.dialogueText`. */
     bottom: 10px;
     right: 24px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.85rem;
     color: var(--gold-divine, #d4af37);
     animation: bounce 1s ease-in-out infinite;

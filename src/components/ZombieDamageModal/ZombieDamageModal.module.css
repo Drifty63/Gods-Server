@@ -37,6 +37,7 @@
 }
 
 .zombieHealth {
+    font-variant-numeric: tabular-nums;
     color: #e74c3c;
     font-size: 1rem;
 }
@@ -99,6 +100,7 @@
 }
 
 .targetHealth {
+    font-variant-numeric: tabular-nums;
     color: #e74c3c;
     font-size: 0.8rem;
 }

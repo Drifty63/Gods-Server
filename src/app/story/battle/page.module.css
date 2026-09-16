@@ -24,7 +24,7 @@
     color: white;
     padding: 8px 16px;
     border-radius: 8px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -35,7 +35,7 @@
 }
 
 .title {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.5rem;
     color: var(--gold-divine);
     margin: 0;
@@ -85,7 +85,7 @@
 }
 
 .loadingContent h2 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: var(--gold-divine);
     margin: 0 0 10px 0;
 }
@@ -106,7 +106,7 @@
 }
 
 .errorScreen h2 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: #ff6b6b;
     font-size: 2rem;
     margin-bottom: 15px;
@@ -127,7 +127,7 @@
 
 .retryButton {
     padding: 14px 40px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.1rem;
     font-weight: 700;
     color: #1a1a2e;
@@ -145,7 +145,7 @@
 
 .backButton {
     padding: 12px 30px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: rgba(255, 255, 255, 0.8);
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -188,7 +188,7 @@
 }
 
 .battleTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 2.5rem;
     color: var(--gold-divine);
     text-transform: uppercase;
@@ -229,7 +229,7 @@
 
 .teamLabel {
     display: block;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.6);
     margin-bottom: 10px;
@@ -258,7 +258,7 @@
 }
 
 .vsText {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 2rem;
     color: #ff4444;
     font-weight: 700;
@@ -267,7 +267,7 @@
 
 .preparingText {
     color: var(--gold-divine);
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -331,7 +331,7 @@
 }
 
 .resultContent h1 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 2.5rem;
     margin: 0 0 15px 0;
 }
@@ -362,7 +362,7 @@
 }
 
 .rewards h3 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: var(--gold-divine);
     margin: 0 0 10px 0;
     font-size: 1rem;
@@ -377,7 +377,7 @@
 /* Continue Button */
 .continueButton {
     padding: 16px 50px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.2rem;
     font-weight: 700;
     color: #1a1a2e;
@@ -397,7 +397,7 @@
 /* Quit Button */
 .quitButton {
     padding: 12px 30px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: rgba(255, 255, 255, 0.6);
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -554,7 +554,7 @@
 }
 
 .narratorTextNew {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.2rem;
     line-height: 1.9;
     color: rgba(220, 200, 255, 0.95);
@@ -685,7 +685,7 @@
 }
 
 .speakerNameNew {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -695,7 +695,7 @@
 }
 
 .dialogueTextNew {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     font-size: 1.1rem;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.95);
@@ -719,7 +719,7 @@
     position: absolute;
     bottom: 12px;
     right: 20px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.85rem;
     color: var(--gold-divine, #d4af37);
     animation: bounce 1s ease-in-out infinite;
@@ -854,7 +854,7 @@
 }
 
 .speakerName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: var(--gold-divine);
     margin: 0 0 15px 0;
     font-size: 1.2rem;
@@ -873,7 +873,7 @@
     bottom: 20px;
     right: 20px;
     padding: 10px 25px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-weight: 700;
     background: linear-gradient(135deg, var(--gold-divine), #ffd700);
     color: #1a1a2e;
@@ -920,7 +920,7 @@
 }
 
 .teamSelectionTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 2rem;
     color: var(--gold-divine);
     text-align: center;
@@ -942,7 +942,7 @@
 
 .fixedGodsSection h3,
 .choiceGodsSection h3 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1rem;
     color: rgba(255, 255, 255, 0.8);
     margin: 0 0 15px 0;
@@ -1020,7 +1020,7 @@
 .godName {
     display: block;
     padding: 8px 5px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.9);
     background: rgba(0, 0, 0, 0.3);
@@ -1045,7 +1045,7 @@
     max-width: 400px;
     margin: 30px auto 15px;
     padding: 18px 40px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.3rem;
     font-weight: 700;
     color: #1a1a2e;

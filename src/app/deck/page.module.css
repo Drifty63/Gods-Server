@@ -56,7 +56,7 @@
 
 .title {
     flex: 1;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: clamp(1.1rem, 5vw, 1.5rem);
     color: var(--gold-divine);
     margin: 0;
@@ -65,7 +65,7 @@
 .headerCount {
     flex-shrink: 0;
     padding: 5px 12px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.82rem;
     font-variant-numeric: tabular-nums;
     color: var(--gold-light);
@@ -121,7 +121,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.95rem;
     color: var(--gold-divine);
 }
@@ -198,7 +198,7 @@
 }
 
 .tileName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.82rem;
     color: var(--text-primary);
     /* Un nom long ne doit pas déformer la vignette. */
@@ -282,7 +282,7 @@
 }
 
 .inspectName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: clamp(1rem, 4.4vw, 1.25rem);
     line-height: 1.25;
     color: var(--text-primary);
@@ -309,7 +309,7 @@
     align-self: flex-start;
     margin-top: 4px;
     padding: 7px 12px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.75rem;
     color: var(--obsidian);
     background: linear-gradient(135deg, var(--gold-light), var(--gold-divine));
@@ -333,12 +333,13 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.9rem;
     color: var(--gold-divine);
 }
 
 .spellsCount {
+    font-variant-numeric: tabular-nums;
     padding: 2px 8px;
     font-size: 0.7rem;
     color: var(--text-muted);
@@ -401,12 +402,13 @@
 }
 
 .spellName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.85rem;
     color: var(--text-primary);
 }
 
 .spellCost {
+    font-variant-numeric: tabular-nums;
     flex-shrink: 0;
     font-size: 0.75rem;
     font-weight: 700;
@@ -495,7 +497,7 @@
 }
 
 .zoomName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.05rem;
     color: var(--gold-light);
     margin: 0;
@@ -568,7 +570,7 @@
     width: 100%;
     padding: 8px 12px;
     text-align: center;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.95rem;
     color: var(--text-primary);
     background: rgba(0, 0, 0, 0.45);
@@ -577,6 +579,7 @@
 }
 
 .deckCount {
+    font-variant-numeric: tabular-nums;
     font-size: 0.72rem;
     color: var(--text-muted);
 }
@@ -635,7 +638,7 @@
 
 .pickerTitle {
     margin-bottom: 10px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.9rem;
     color: var(--gold-divine);
 }
@@ -699,7 +702,7 @@
 .saveButton {
     width: 100%;
     padding: 15px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: 0.05em;

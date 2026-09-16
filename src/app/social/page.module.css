@@ -85,7 +85,7 @@
 .title {
     flex: 1;
     min-width: 0;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: clamp(1.5rem, 6.5vw, 2.5rem);
     color: var(--gold-divine);
     text-transform: uppercase;
@@ -211,6 +211,7 @@
 }
 
 .friendsCount {
+    font-variant-numeric: tabular-nums;
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.9rem;
     margin-bottom: 16px;
@@ -432,7 +433,7 @@
 }
 
 .leaderboardTitle h2 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.4rem;
     color: var(--gold-divine);
     margin: 0;
@@ -520,7 +521,8 @@
 }
 
 .podiumRank {
-    font-family: 'Cinzel', serif;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-title);
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--gold-divine);
@@ -537,6 +539,7 @@
 }
 
 .podiumScore {
+    font-variant-numeric: tabular-nums;
     color: #4ade80;
     font-weight: 700;
     font-size: 0.8rem;
@@ -610,6 +613,7 @@
 }
 
 .playerLevel {
+    font-variant-numeric: tabular-nums;
     color: #888;
     font-size: 0.75rem;
 }
@@ -670,7 +674,7 @@
 }
 
 .ranksSectionTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.2rem;
     color: var(--gold-divine);
     text-align: center;
@@ -903,6 +907,7 @@
 
 /* Friends in Rank */
 .friendsInRank {
+    font-variant-numeric: tabular-nums;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -929,6 +934,7 @@
 }
 
 .friendsCount {
+    font-variant-numeric: tabular-nums;
     font-size: 0.75rem;
     color: #888;
     margin-left: 4px;
@@ -981,7 +987,7 @@
 }
 
 .modalTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.4rem;
     color: var(--gold-divine);
     text-align: center;
@@ -1045,6 +1051,7 @@
 }
 
 .requestLevel {
+    font-variant-numeric: tabular-nums;
     color: #888;
     font-size: 0.8rem;
 }
@@ -1260,7 +1267,7 @@
 
 /* =================== MODAL DÉFI =================== */
 .challengeCode {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 2rem;
     letter-spacing: 4px;
     text-align: center;
@@ -1321,6 +1328,7 @@
 
 /* Palmarès figé d'une saison close : rang, pseudo, ferveur finale. */
 .leaderboardRank {
+    font-variant-numeric: tabular-nums;
     width: 48px;
     flex-shrink: 0;
     font-weight: 700;

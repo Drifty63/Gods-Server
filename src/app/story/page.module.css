@@ -46,7 +46,7 @@
 .title {
     flex: 1;
     min-width: 0;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: clamp(1.5rem, 6.5vw, 2.5rem);
     color: var(--gold-divine);
     text-transform: uppercase;
@@ -79,7 +79,7 @@
     justify-content: center;
     align-items: center;
     height: 60vh;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.5rem;
     color: var(--gold-divine);
 }
@@ -102,7 +102,7 @@
 }
 
 .campaignTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 2rem;
     color: var(--gold-divine);
     margin: 0 0 10px 0;
@@ -122,7 +122,7 @@
 }
 
 .sectionTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.2rem;
     color: var(--gold-divine);
     margin: 0 0 15px 0;
@@ -162,7 +162,7 @@
     max-width: 400px;
     margin: 0 auto 30px;
     padding: 16px 32px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.3rem;
     font-weight: 700;
     color: #1a1a2e;
@@ -312,7 +312,7 @@
 
 /* Chapter Number */
 .chapterNumber {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
@@ -322,14 +322,14 @@
 
 /* Chapter Title */
 .chapterTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.5rem;
     color: var(--gold-divine);
     margin: 0 0 4px 0;
 }
 
 .chapterSubtitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1rem;
     color: rgba(255, 255, 255, 0.6);
     font-style: italic;
@@ -371,6 +371,7 @@
 
 /* Event Count */
 .eventCount {
+    font-variant-numeric: tabular-nums;
     display: inline-block;
     padding: 4px 12px;
     background: rgba(255, 255, 255, 0.1);
@@ -512,7 +513,7 @@
 }
 
 .battlePrompt h2 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.8rem;
     color: var(--gold-divine);
     margin: 0 0 15px 0;
@@ -537,7 +538,7 @@
 
 .battleButton {
     padding: 16px 40px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.2rem;
     font-weight: 700;
     color: #1a1a2e;
@@ -657,7 +658,7 @@
 }
 
 .modalTitle {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.6rem;
     color: var(--gold-divine);
     text-align: center;
@@ -695,7 +696,7 @@
 }
 
 .battleNumber {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
@@ -704,7 +705,7 @@
 }
 
 .battleName {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.2rem;
     color: var(--gold-divine);
     margin: 0 0 8px 0;

@@ -42,7 +42,7 @@
     flex: 1;
     min-width: 0;
     margin: 0;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: clamp(1rem, 4vw, 1.4rem);
     color: var(--gold-divine, #d4af37);
 }

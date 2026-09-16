@@ -103,7 +103,7 @@
 .godNameOverlay {
     padding: 0.4rem;
     text-align: center;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-weight: 700;
     font-size: 0.7rem;
     color: #fff;
@@ -157,7 +157,7 @@
 
 .spellName {
     margin: 0;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--gold-divine, #d4af37);
@@ -204,6 +204,7 @@
 }
 
 .energyValue {
+    font-variant-numeric: tabular-nums;
     font-weight: 700;
     font-size: 0.95rem;
     color: #fff;
@@ -248,7 +249,7 @@
     padding: 0.6rem 0.75rem;
     border: none;
     border-radius: 6px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;

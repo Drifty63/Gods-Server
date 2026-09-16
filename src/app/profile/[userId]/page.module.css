@@ -33,7 +33,7 @@
 
 .title {
     flex: 1;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.6rem;
     color: var(--gold-divine);
     text-transform: uppercase;
@@ -83,7 +83,7 @@
 }
 
 .username {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.3rem;
     color: white;
     margin: 0;
@@ -148,7 +148,8 @@
 }
 
 .statValue {
-    font-family: 'Cinzel', serif;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-title);
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--gold-divine);
@@ -184,7 +185,7 @@
 .linkButton {
     color: var(--gold-divine);
     text-decoration: none;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
 }
 
 /* Avatar emoji : même pastille que l'image, taille adaptée au cadre de 80 px. */

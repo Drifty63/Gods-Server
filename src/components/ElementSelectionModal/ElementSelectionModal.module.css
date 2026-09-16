@@ -2,7 +2,7 @@
     font-size: 2rem;
     color: #f59e0b;
     margin-bottom: 10px;
-    font-family: var(--font-logo);
+    font-family: var(--font-title);
     text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
 }
 

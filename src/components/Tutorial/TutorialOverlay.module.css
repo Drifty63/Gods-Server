@@ -113,7 +113,7 @@
 
 .title {
     margin: 0;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 1.05rem;
     color: var(--gold-light, #f5d76e);
 }
@@ -130,7 +130,7 @@
     margin-top: 4px;
     min-height: 44px;
     padding: 11px 26px;
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.05em;

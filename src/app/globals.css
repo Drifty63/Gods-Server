@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
-/* Google Fonts loaded via layout.tsx <link> tag instead of @import to avoid Tailwind v4 injection order issues */
+/*
+ * Les polices sont chargees par `next/font` dans layout.tsx, qui les AUTO-HEBERGE et expose
+ * --font-inter / --font-cinzel / --font-cinzel-decorative sur <html>. Ni <link>, ni @import :
+ * aucune requete vers Google, et un repli a metriques ajustees qui evite le saut de mise en
+ * page au chargement.
+ *
+ * Les jetons --font-title / --font-body / --font-display sont la seule facon correcte d'y
+ * acceder : nommer une police en clair dans une declaration contourne ce repli et ramene le
+ * saut de mise en page.
+ */
 
 /* GODS - Global Design System */
 /* Direction artistique : Mythologie grecque antique avec touche épique et moderne */
@@ -144,6 +153,37 @@
   --transition-divine: 600ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ================================
+     TYPOGRAPHIE
+     ================================ */
+  /*
+   * Trois roles, et trois seulement.
+   *
+   * --font-display : Cinzel Decorative. Les grands titres d'ecran, rien d'autre. Tres
+   *   dessinee, illisible en dessous de ~1.2rem.
+   * --font-title   : Cinzel. Les noms -- dieux, sorts, sections, boutons de titre.
+   * --font-body    : Inter. Le texte courant, les libelles, les CHIFFRES et les boutons.
+   *   Une antique a empattements comme Cinzel devient penible sous 12px : tout ce qui est
+   *   petit ou numerique revient ici.
+   *
+   * La regle de partage tient en une phrase : Cinzel nomme, Inter informe.
+   */
+  --font-display: var(--font-cinzel-decorative), 'Cinzel Decorative', 'Cinzel', serif;
+  --font-title: var(--font-cinzel), 'Cinzel', 'Times New Roman', serif;
+  --font-body: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /*
+   * PLANCHER DE LISIBILITE.
+   *
+   * 11px. En dessous, un texte n'est plus lu : il est devine. Le jeu descendait jusqu'a 4px
+   * sur les cartes d'un iPhone 12 mini -- pas un texte petit, un texte invisible.
+   *
+   * La regle qui va avec compte autant que le jeton : ce qui ne tient pas au-dessus du
+   * plancher DISPARAIT, il ne retrecit pas. Une carte de 50px de large porte un portrait, un
+   * cout et une barre de vie ; elle ne porte pas de phrase.
+   */
+  --font-size-floor: 0.6875rem;
+
+  /* ================================
      Z-INDEX
      ================================ */
   --z-base: 1;
@@ -169,7 +209,7 @@ body {
      déborder de la hauteur de cette barre et créerait un scroll vertical parasite. */
   min-height: 100dvh;
   overflow-x: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg-olympus);
   color: var(--text-primary);
   line-height: 1.6;
@@ -278,7 +318,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-family: var(--font-title);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.02em;
@@ -299,7 +339,7 @@ h3 {
 }
 
 .title-divine {
-  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-family: var(--font-display);
   background: linear-gradient(135deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -364,7 +404,7 @@ a:hover {
 }
 
 button {
-  font-family: 'Cinzel', serif;
+  font-family: var(--font-title);
   cursor: pointer;
   border: none;
   background: none;
@@ -380,7 +420,7 @@ button {
   justify-content: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-xl);
-  font-family: 'Cinzel', serif;
+  font-family: var(--font-title);
   font-size: 1rem;
   font-weight: 600;
   color: var(--obsidian);
@@ -427,7 +467,7 @@ button {
   justify-content: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-xl);
-  font-family: 'Cinzel', serif;
+  font-family: var(--font-title);
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);

@@ -76,9 +76,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Les variables de police sont portees par <html>, et non par <body> : les jetons
+  // --font-title / --font-body de globals.css sont declares dans `:root`, et une propriete
+  // personnalisee est substituee sur l'element ou elle est declaree. Sur <body>, elles
+  // seraient invisibles depuis `:root` et les jetons tomberaient en panne.
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body className={`${inter.variable} ${cinzel.variable} ${cinzelDecorative.variable}`}>
+    <html
+      lang="fr"
+      suppressHydrationWarning
+      className={`${inter.variable} ${cinzel.variable} ${cinzelDecorative.variable}`}
+    >
+      <body>
         <AuthProvider>
           <GlobalUI />
           {children}

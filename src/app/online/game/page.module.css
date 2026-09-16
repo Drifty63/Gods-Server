@@ -67,7 +67,7 @@
 }
 
 .playerInfo {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: var(--gold-divine);
     font-weight: 600;
     font-size: 1rem;
@@ -75,7 +75,7 @@
 }
 
 .leaveButton {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     padding: 8px 18px;
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.4);
@@ -115,7 +115,7 @@
 }
 
 .loading p {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: var(--gold-divine);
     font-size: 1.1rem;
     text-align: center;
@@ -137,7 +137,7 @@
 }
 
 .retryButton {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     margin-top: 20px;
     padding: 12px 28px;
     background: rgba(0, 0, 0, 0.4);
@@ -200,7 +200,7 @@
 }
 
 .disconnectedModal h2 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     color: #fca5a5;
     margin: 0 0 1rem 0;
     font-size: 1.4rem;
@@ -213,7 +213,7 @@
 }
 
 .disconnectedModal button {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     padding: 14px 32px;
     background: linear-gradient(145deg, var(--gold-light), var(--gold-divine), var(--bronze-antique));
     color: #0a0a1a;
