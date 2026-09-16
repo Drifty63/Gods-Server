@@ -197,7 +197,14 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
     /** Carte examinée en plein écran via un appui long (n'engage aucune action de jeu). */
     const [inspectedCard, setInspectedCard] = useState<SpellCard | null>(null);
     const [cardFlight, setCardFlight] = useState<CardFlightData | null>(null);
-    const [playedCardPreview, setPlayedCardPreview] = useState<SpellCard | null>(null);
+    /**
+     * Carte que le joueur vient de lancer, retenue deux secondes.
+     *
+     * Elle affichait aussi un panneau « SORT LANCÉ » en bas a droite : redondant avec
+     * l'animation de la carte qui vole vers son lanceur, et surajoute a elle. Il ne reste que
+     * son usage utile — la surbrillance doree du dieu qui lance, le temps de l'incantation.
+     */
+    const [justCastCard, setJustCastCard] = useState<SpellCard | null>(null);
     const flightIdRef = useRef(0);
 
     /**
@@ -577,11 +584,11 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
 
         // Succès réel : la carte a bien été jouée — elle vole de la main jusqu'au dieu qui la lance.
         triggerCardFlight(cardBeingPlayed, handEl, casterEl);
-        setPlayedCardPreview(cardBeingPlayed);
+        setJustCastCard(cardBeingPlayed);
         playSfx('cardPlay');
         haptic('select');
         setTimeout(() => {
-            setPlayedCardPreview(null);
+            setJustCastCard(null);
             setCastElement(null);
         }, 2000);
         dismissError();
@@ -607,7 +614,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
 
     // Dieu qui lance le sort en ce moment (carte sélectionnée en main, ou tout juste jouée) :
     // mis en surbrillance dorée sur le plateau pour qu'on comprenne qui lance quoi.
-    const playerCasterGodId = selectedCard?.godId || playedCardPreview?.godId || null;
+    const playerCasterGodId = selectedCard?.godId || justCastCard?.godId || null;
     const opponentCasterGodId = lastOpponentCard?.godId || null;
 
     // Nombre de cibles réellement à sélectionner avant que CONFIRMER apparaisse : peut être
@@ -863,22 +870,6 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                     </div>
                 );
             })()}
-
-            {/* PLAYED CARD PREVIEW (BAS, entre le bouton fin de tour et le cadre deck/défausse/énergie) */}
-            {playedCardPreview && (
-                <div className={`${styles.playedCardPreview} ${styles.playedCardPreviewSelf}`}>
-                    <div className={styles.previewTitle}>SORT LANCÉ</div>
-                    <div className={styles.previewBody}>
-                        <div className={styles.previewContent}>
-                            <h3 className={styles.previewName}>{playedCardPreview.name}</h3>
-                            <p className={styles.previewDesc}>{getReadableSpellDescription(playedCardPreview)}</p>
-                        </div>
-                        <div className={styles.detailCardImage}>
-                            <img src={playedCardPreview.imageUrl} alt={playedCardPreview.name} />
-                        </div>
-                    </div>
-                </div>
-            )}
 
 
             {/* DECK, DISCARD, ENERGIES & FATIGUE */}

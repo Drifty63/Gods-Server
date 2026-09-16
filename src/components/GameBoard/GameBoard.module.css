@@ -597,14 +597,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 0;
+  /* Marges laterales : sans elles, un libelle long touche les bords de l'ecran. */
+  padding: 14px 18px;
 
   pointer-events: none;
   transform: translateY(-50%);
+  animation: turnBannerFade 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/*
+ * Le bandeau colore est un calque a part, et c'est lui seul qui se deploie.
+ *
+ * Le `scaleX` vivait sur la banniere entiere : il ecrasait les lettres a l'ouverture et les
+ * etirait a la sortie. Un texte ne doit jamais servir de support a une animation d'echelle
+ * horizontale.
+ */
+.turnBanner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   animation: turnBannerSweep 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.turnBannerMine {
+.turnBannerMine::before {
   background: linear-gradient(90deg,
       transparent,
       rgba(212, 175, 55, 0.28) 18%,
@@ -615,7 +631,7 @@
   border-bottom: 1px solid rgba(245, 215, 110, 0.6);
 }
 
-.turnBannerTheirs {
+.turnBannerTheirs::before {
   background: linear-gradient(90deg,
       transparent,
       rgba(239, 68, 68, 0.22) 18%,
@@ -628,21 +644,37 @@
 
 .turnBannerText {
   font-family: var(--font-title);
-  font-size: clamp(1.1rem, 6.5vw, 1.9rem);
+  /*
+   * 4.6vw, et non 6.5vw. Le plus long libelle, « TOUR DE L'ADVERSAIRE », fait 20 caracteres :
+   * a 6.5vw et 0.16em d'interlettrage il reclamait ~370px sur un ecran de 375. Ces valeurs le
+   * font tenir avec de la marge, sur le plus etroit des telephones vises.
+   */
+  font-size: clamp(0.95rem, 4.6vw, 1.9rem);
   font-weight: 900;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   color: #fff;
+  max-width: 100%;
+  text-align: center;
+  white-space: nowrap;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 26px currentColor;
 }
 
 .turnBannerMine .turnBannerText { color: var(--gold-light, #f5d76e); }
 .turnBannerTheirs .turnBannerText { color: #fca5a5; }
 
+/* Le bandeau se deploie... */
 @keyframes turnBannerSweep {
-  0% { opacity: 0; transform: translateY(-50%) scaleX(0.75); }
-  14% { opacity: 1; transform: translateY(-50%) scaleX(1); }
+  0% { transform: scaleX(0.75); }
+  14% { transform: scaleX(1); }
+  100% { transform: scaleX(1.04); }
+}
+
+/* ...pendant que la banniere, texte compris, se contente d'apparaitre et de s'effacer. */
+@keyframes turnBannerFade {
+  0% { opacity: 0; }
+  14% { opacity: 1; }
   72% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-50%) scaleX(1.04); }
+  100% { opacity: 0; }
 }
 
 /* Réticule affiché sur un dieu déjà retenu comme cible (persiste tant qu'il l'est, y compris
@@ -1303,38 +1335,6 @@
 .playedCardPreview .detailCardImage {
   width: clamp(40px, 12vw, 56px);
   flex-shrink: 0;
-}
-
-/* Variante "je viens de jouer une carte" : repositionnée en bas, dans l'espace libre entre le
- * bouton fin de tour (désormais au centre du plateau) et le cadre deck/défausse/énergie du
- * joueur (gauche) — même bande verticale qu'eux, plutôt qu'en haut de l'écran où elle n'avait
- * aucun rapport visuel avec ce qui vient de se passer côté joueur. Ancrée à droite du cadre
- * deck/défausse plutôt que centrée sur tout l'écran, dans l'espace disponible à droite. */
-.playedCardPreviewSelf {
-  top: auto;
-  bottom: clamp(122px, 24dvh, 182px);
-  left: auto;
-  right: 8px;
-  transform: none;
-  max-width: min(240px, 58vw);
-  z-index: 26;
-}
-
-.playedCardPreviewSelf .detailCardImage {
-  width: clamp(36px, 11vw, 48px);
-}
-
-.playedCardPreviewSelf .previewName {
-  font-size: clamp(0.65rem, 2.6vw, 0.8rem);
-}
-
-.playedCardPreviewSelf .previewTitle {
-  font-size: clamp(0.5rem, 2vw, 0.6rem);
-}
-
-.playedCardPreviewSelf .previewDesc {
-  font-size: clamp(0.55rem, 2.2vw, 0.68rem);
-  line-height: 1.25;
 }
 
 .previewContent {
