@@ -5,7 +5,7 @@
 
 import { GodState, PlayerState, GameState, SpellCard } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
-import type { Element } from '@/types/cards';
+import type { Element, StatusEffect } from '@/types/cards';
 
 // ─────────────────────────────────────────────
 // Types
@@ -18,12 +18,26 @@ export interface DamageResult {
     healthLost: number;
     killed: boolean;
     wasWeak: boolean;
-    /** Dégâts supplémentaires apportés par la pétrification consommée sur ce coup. */
-    petrifyBonus: number;
+    /** Dégâts supplémentaires apportés par les marques de pétrification et de brûlure. */
+    markBonus: number;
 }
 
-/** Dégâts supplémentaires par marque de pétrification, consommés au premier coup reçu. */
-export const PETRIFY_DAMAGE_BONUS = 2;
+/**
+ * Dégâts supplémentaires par marque de PÉTRIFICATION, sur n'importe quel sort offensif.
+ *
+ * La marque n'est pas consommée : elle amplifie chaque coup jusqu'à ce qu'un nettoyage la
+ * retire. Une pétrification est donc une dette durable, pas une mise en place à usage unique.
+ */
+export const PETRIFY_DAMAGE_BONUS = 1;
+
+/**
+ * Dégâts supplémentaires par marque de BRÛLURE, mais seulement pour un sort de FEU.
+ *
+ * C'est ce qui distingue la brûlure de la pétrification : la pierre encaisse mal tous les
+ * coups, alors que la brûlure n'aide que celui qui attise le feu. Elle récompense une équipe
+ * bâtie autour du feu au lieu d'être un bonus universel.
+ */
+export const BURN_DAMAGE_BONUS = 1;
 
 // ─────────────────────────────────────────────
 // Fonctions publiques
@@ -43,15 +57,16 @@ export function dealDamage(
         ignoreShield?: boolean;
         ignoreWeakness?: boolean;
         /**
-         * Ce coup peut-il consommer la pétrification ? `false` pour les dégâts passifs
-         * (saignement) : la marque est une mise en place pour une ATTAQUE, il serait
-         * incompréhensible qu'un tick de fin de tour la gaspille.
+         * Ce coup profite-t-il des marques de pétrification et de brûlure ? `false` pour les
+         * dégâts passifs (saignement) : les marques amplifient les SORTS OFFENSIFS, pas les
+         * ticks de fin de tour. Sans ce garde-fou, saignement et brûlure s'empileraient en
+         * une spirale que rien ne rattrape.
          */
-        consumesPetrify?: boolean;
+        amplifiedByMarks?: boolean;
     }
 ): DamageResult {
     if (target.isDead || rawDamage <= 0) {
-        return { rawDamage, finalDamage: 0, shieldAbsorbed: 0, healthLost: 0, killed: false, wasWeak: false, petrifyBonus: 0 };
+        return { rawDamage, finalDamage: 0, shieldAbsorbed: 0, healthLost: 0, killed: false, wasWeak: false, markBonus: 0 };
     }
 
     // 1. Calculer les dégâts avec faiblesses élémentaires
@@ -78,27 +93,38 @@ export function dealDamage(
         wasWeak = result.isWeakness;
     }
 
-    // 1bis. Pétrification : la pierre encaisse mal. Chaque marque ajoute PETRIFY_DAMAGE_BONUS
-    // aux dégâts, puis le statut est ENTIÈREMENT consommé -- il ne s'use pas au fil des tours,
-    // seul un coup encaissé (ou un cleanse type Aphrodite) le retire. Appliqué après la faiblesse
-    // pour que le bonus soit un ajout fixe et non un montant doublé par la faiblesse.
-    //
-    // Deux garde-fous, pour que la marque ne soit jamais gaspillée à l'insu du joueur :
-    //  - les dégâts passifs (saignement) ne la consomment pas (`consumesPetrify: false`) ;
-    //  - un coup que le bouclier absorbe INTÉGRALEMENT ne la consomme pas non plus : le dieu
-    //    n'a rien encaissé, la marque continue d'attendre le coup qui passera vraiment.
+    /*
+     * 1bis. MARQUES D'AMPLIFICATION — pétrification et brûlure.
+     *
+     * Les deux ajoutent des dégâts fixes par marque, et ne sont JAMAIS consommées : elles
+     * amplifient chaque sort offensif jusqu'à ce qu'un nettoyage les retire. C'est ce qui en
+     * fait une pression durable plutôt qu'une mise en place à usage unique.
+     *
+     * Ce qui les sépare : la pétrification aide n'importe quel attaquant — la pierre encaisse
+     * mal — là où la brûlure n'aide QUE les sorts de feu. La seconde récompense donc une
+     * équipe bâtie autour d'un élément, la première non.
+     *
+     * Appliqué APRÈS la faiblesse élémentaire, pour que le bonus reste un ajout fixe au lieu
+     * d'être doublé par elle : deux marques valent +2 dégâts, jamais +4.
+     *
+     * Un coup entièrement absorbé par le bouclier profite quand même du bonus — il creuse le
+     * bouclier d'autant. Rien n'est gaspillé puisque rien n'est consommé.
+     */
+    const marks = (type: StatusEffect) =>
+        target.statusEffects.find(s => s.type === type)?.stacks ?? 0;
+
+    let markBonus = 0;
+    if (options?.amplifiedByMarks !== false) {
+        markBonus += marks('petrify') * PETRIFY_DAMAGE_BONUS;
+        if (options?.element === 'fire') {
+            markBonus += marks('burn') * BURN_DAMAGE_BONUS;
+        }
+        finalDamage += markBonus;
+    }
+
     const shieldEntry = options?.ignoreShield
         ? undefined
         : target.statusEffects.find(s => s.type === 'shield');
-    const fullyBlocked = (shieldEntry?.stacks ?? 0) >= finalDamage;
-
-    const petrifyIndex = target.statusEffects.findIndex(s => s.type === 'petrify');
-    let petrifyBonus = 0;
-    if (petrifyIndex !== -1 && options?.consumesPetrify !== false && !fullyBlocked) {
-        petrifyBonus = target.statusEffects[petrifyIndex].stacks * PETRIFY_DAMAGE_BONUS;
-        finalDamage += petrifyBonus;
-        target.statusEffects.splice(petrifyIndex, 1);
-    }
 
     // 2. Appliquer le bouclier
     let shieldAbsorbed = 0;
@@ -126,18 +152,22 @@ export function dealDamage(
         handleGodDeath(owner, target, state);
     }
 
-    return { rawDamage, finalDamage, shieldAbsorbed, healthLost, killed, wasWeak, petrifyBonus };
+    return { rawDamage, finalDamage, shieldAbsorbed, healthLost, killed, wasWeak, markBonus };
 }
 
 /**
- * Soigne une cible. Le soin referme les plaies : il retire le poison ET le saignement,
- * à raison d'une marque par point de soin.
+ * Soigne une cible.
+ *
+ * Le soin referme les plaies : il retire le poison, le saignement ET la brûlure, à raison
+ * d'une marque par point de soin. Soigner éteint le feu autant que ça referme une coupure.
+ *
+ * La PÉTRIFICATION, elle, y résiste : on ne soigne pas de la pierre. Seul un nettoyage
+ * d'effets négatifs (`cleanse`, chez Aphrodite) l'enlève.
  */
 export function healGod(target: GodState, amount: number): number {
     if (target.isDead || amount <= 0) return 0;
 
-    // Retirer le poison et le saignement (soigner referme les plaies)
-    for (const cleansable of ['poison', 'bleed'] as const) {
+    for (const cleansable of ['poison', 'bleed', 'burn'] as const) {
         const index = target.statusEffects.findIndex(s => s.type === cleansable);
         if (index !== -1) {
             const toRemove = Math.min(amount, target.statusEffects[index].stacks);

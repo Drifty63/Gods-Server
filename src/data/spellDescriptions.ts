@@ -9,7 +9,15 @@ import { SpellCard, SpellEffect, TargetType, StatusEffect } from '@/types/cards'
  * un compteur (ex: deux effets "1 dégât à un ennemi" → "Inflige 1 dégât à 2 ennemis").
  */
 
-const STATUS_LABELS: Record<StatusEffect, string> = {
+/**
+ * Nom affichable de chaque statut. SOURCE UNIQUE.
+ *
+ * CardDetailModal portait sa propre table, non typee, qui avait divergé : elle nommait
+ * encore des statuts disparus (lightning_mark, confusion) et ignorait le saignement et la
+ * petrification. Le typage en Record<StatusEffect, string> rend cet oubli impossible --
+ * ajouter un statut casse la compilation tant que son nom manque.
+ */
+export const STATUS_LABELS: Record<StatusEffect, string> = {
     poison: 'Poison',
     lightning: 'Marque Foudre',
     shield: 'Bouclier',
@@ -21,6 +29,7 @@ const STATUS_LABELS: Record<StatusEffect, string> = {
     untargetable: 'Inciblable',
     bleed: 'Saignement',
     petrify: 'Pétrification',
+    burn: 'Brûlure',
 };
 
 function targetSuffix(target: TargetType | undefined, count: number, kind: 'ennemi' | 'allié'): string {

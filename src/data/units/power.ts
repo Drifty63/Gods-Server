@@ -18,7 +18,11 @@ const STATUS_WEIGHT: Record<StatusEffect, number> = {
     shield: 0.8,
     provocation: 1,
     stun: 3,
+    // La petrification vaut cher : elle etourdit un tour ET pese sur tous les coups suivants,
+    // sans jamais expirer. La brulure vaut moins : elle n amplifie que les sorts de FEU, donc
+    // sa valeur depend de l equipe qui la pose.
     petrify: 3.5,
+    burn: 1.5,
     weakness: 1.5,
     weakness_immunity: 1,
     regen: 1.2,

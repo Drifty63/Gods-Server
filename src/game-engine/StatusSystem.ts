@@ -45,9 +45,29 @@ export function addStatus(
         removeStatus(god, 'poison');
     }
 
-    // La pétrification est une vulnérabilité qui attend le prochain coup : elle ne doit jamais
-    // expirer au fil des tours, seuls des dégâts reçus (ou un cleanse) la retirent.
-    const effectiveDuration = status === 'petrify' ? undefined : duration;
+    /*
+     * Se faire pétrifier FIGE : la marque s'accompagne d'un étourdissement d'un tour.
+     *
+     * Les deux moitiés sont volontairement dissociées. L'étourdissement est le choc, et il
+     * passe au bout d'un tour ; la marque, elle, reste et continue d'amplifier les coups
+     * reçus. Sans ça, pétrifier reviendrait à poser une vulnérabilité que la cible peut
+     * ignorer en continuant de jouer normalement.
+     *
+     * Une seule récursion, sans risque de boucle : la branche 'stun' ne rappelle rien.
+     */
+    if (status === 'petrify') {
+        addStatus(god, 'stun', 1, 1, appliedTurn);
+    }
+
+    /*
+     * Marques PERMANENTES : ni la pétrification ni la brûlure ne s'usent au fil des tours.
+     *
+     * Ce sont des vulnérabilités qui pèsent jusqu'à ce qu'on s'en occupe — un nettoyage
+     * d'effets négatifs pour la pierre, un soin pour le feu. Leur donner une durée les ferait
+     * disparaître toutes seules et viderait de leur sens les cartes bâties autour.
+     */
+    const permanent = status === 'petrify' || status === 'burn';
+    const effectiveDuration = permanent ? undefined : duration;
 
     const cap = STATUS_STACK_CAPS[status];
     const existing = god.statusEffects.find(s => s.type === status);
@@ -87,10 +107,12 @@ export function getStatusStacks(god: GodState, status: StatusEffect): number {
 }
 
 /**
- * Vérifier si un dieu peut agir (pas étourdi).
+ * Vérifier si un dieu peut agir : seul l'étourdissement l'en empêche.
  *
- * La pétrification ne bloque PAS l'action : c'est une vulnérabilité (+2 dégâts au prochain coup
- * reçu, voir PETRIFY_DAMAGE_BONUS dans DamageSystem), pas une immobilisation.
+ * La marque de pétrification ne bloque rien par elle-même — c'est une vulnérabilité durable
+ * (+1 dégât par marque sur chaque sort reçu, voir PETRIFY_DAMAGE_BONUS). L'immobilisation
+ * vient de l'étourdissement d'un tour que `addStatus` pose EN MÊME TEMPS que la marque : la
+ * cible est figée le temps du choc, puis rejoue en restant vulnérable.
  */
 export function canGodAct(god: GodState): boolean {
     return !god.isDead && !god.statusEffects.some(s => s.type === 'stun');
@@ -124,7 +146,7 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
         // applyPoisonOnCast). Un dieu qui se terre derrière un bouclier saigne quand même.
         const bleedEffect = god.statusEffects.find(s => s.type === 'bleed');
         if (bleedEffect && bleedEffect.stacks > 0) {
-            dealDamage(god, bleedEffect.stacks, player, state, { ignoreShield: true, consumesPetrify: false });
+            dealDamage(god, bleedEffect.stacks, player, state, { ignoreShield: true, amplifiedByMarks: false });
             if (god.isDead) continue;
         }
 

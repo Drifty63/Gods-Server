@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { GameEngine } from '@/game-engine/GameEngine';
 import { addStatus, canGodAct, tickStatusEffects } from '@/game-engine/StatusSystem';
-import { healGod, addShield, dealDamage, PETRIFY_DAMAGE_BONUS } from '@/game-engine/DamageSystem';
+import { healGod, addShield, dealDamage, PETRIFY_DAMAGE_BONUS, BURN_DAMAGE_BONUS } from '@/game-engine/DamageSystem';
 import { getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import {
@@ -101,52 +101,71 @@ describe('Pétrification', () => {
         return dealDamage(god, raw, player, state);
     };
 
-    it('n\'empêche PAS d\'agir : c\'est une vulnérabilité, pas une immobilisation', () => {
+    it('étourdit un tour au moment où elle est posée', () => {
         const god = godState('zeus');
         addStatus(god, 'petrify', 1);
-        expect(canGodAct(god)).toBe(true);
+
+        // Le choc fige la cible : c'est l'étourdissement qui bloque, pas la marque.
+        expect(canGodAct(god)).toBe(false);
+        expect(god.statusEffects.find(s => s.type === 'stun')?.duration).toBe(1);
     });
 
-    it('n\'empêche pas les soins', () => {
+    it("rend la main après l'étourdissement, mais garde la marque", () => {
+        const god = godState('zeus');
+        const { player, state } = soloState(god);
+        addStatus(god, 'petrify', 1);
+
+        // Deux ticks : le premier ne décrémente pas le tour de pose, le second expire le stun.
+        tickStatusEffects(player, state);
+        state.turnSequence = (state.turnSequence ?? 0) + 1;
+        tickStatusEffects(player, state);
+
+        expect(canGodAct(god)).toBe(true);
+        expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
+    });
+
+    it("n'empêche pas les soins : on ne soigne pas la pierre, mais on soigne le dieu", () => {
         const god = godState('zeus');
         god.currentHealth = 10;
         addStatus(god, 'petrify', 1);
+
         expect(healGod(god, 5)).toBe(5);
+        // Le soin referme les plaies, il ne fait pas tomber la pierre.
+        expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
     });
 
-    it('ajoute +2 aux dégâts du prochain coup reçu', () => {
+    it('ajoute +1 dégât par marque à un sort offensif', () => {
         const god = godState('zeus');
         addStatus(god, 'petrify', 1);
 
         const result = hit(god, 4);
 
-        expect(result.petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
+        expect(result.markBonus).toBe(PETRIFY_DAMAGE_BONUS);
         expect(result.healthLost).toBe(4 + PETRIFY_DAMAGE_BONUS);
     });
 
-    it('est consommée par ce coup : le suivant est normal', () => {
+    it("n'est PAS consommée : elle amplifie chaque coup suivant", () => {
         const god = godState('zeus');
         addStatus(god, 'petrify', 1);
 
         hit(god, 4);
         const second = hit(god, 4);
 
-        expect(second.petrifyBonus).toBe(0);
-        expect(second.healthLost).toBe(4);
-        expect(god.statusEffects.find(s => s.type === 'petrify')).toBeUndefined();
+        expect(second.markBonus).toBe(PETRIFY_DAMAGE_BONUS);
+        expect(second.healthLost).toBe(4 + PETRIFY_DAMAGE_BONUS);
+        expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
     });
 
-    it('cumule +2 par marque', () => {
+    it('cumule +1 par marque', () => {
         const god = godState('zeus');
         addStatus(god, 'petrify', 2);
         expect(hit(god, 3).healthLost).toBe(3 + 2 * PETRIFY_DAMAGE_BONUS);
     });
 
-    it('ne s\'use pas au fil des tours tant qu\'aucun dégât n\'est reçu', () => {
+    it("ne s'use jamais au fil des tours", () => {
         const god = godState('zeus');
         const { player, state } = soloState(god);
-        // Même en demandant une durée, la pétrification doit persister : seuls des dégâts
-        // (ou un cleanse) la retirent.
+        // Même en demandant une durée, la marque doit persister : seul un nettoyage la retire.
         addStatus(god, 'petrify', 1, 1);
 
         tickStatusEffects(player, state);
@@ -154,10 +173,10 @@ describe('Pétrification', () => {
         tickStatusEffects(player, state);
 
         expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
-        expect(hit(god, 1).petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
+        expect(hit(god, 1).markBonus).toBe(PETRIFY_DAMAGE_BONUS);
     });
 
-    it('n\'est PAS consommée par le saignement : la marque attend une attaque', () => {
+    it("n'amplifie PAS le saignement : les marques servent les sorts, pas les ticks", () => {
         const god = godState('zeus');
         const { player, state } = soloState(god);
         addStatus(god, 'petrify', 1);
@@ -166,14 +185,12 @@ describe('Pétrification', () => {
 
         tickStatusEffects(player, state);
 
-        // Le saignement inflige ses 2 dégâts sans profiter du +2 ni gaspiller la marque.
+        // 2 dégâts de saignement, sans le +1. Sinon saignement et marques s'emballeraient.
         expect(god.currentHealth).toBe(before - 2);
         expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
-        // Elle reste donc disponible pour la vraie attaque.
-        expect(hit(god, 3).petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
     });
 
-    it('n\'est PAS consommée par un coup que le bouclier absorbe entièrement', () => {
+    it('creuse le bouclier même quand le coup est entièrement absorbé', () => {
         const god = godState('zeus');
         addStatus(god, 'petrify', 1);
         addShield(god, 10);
@@ -181,24 +198,12 @@ describe('Pétrification', () => {
 
         const blocked = hit(god, 4);
 
-        expect(blocked.petrifyBonus).toBe(0);
+        // Rien n'est consommé, donc rien n'est gaspillé : le bonus s'ajoute et le bouclier
+        // encaisse 5 au lieu de 4.
+        expect(blocked.markBonus).toBe(PETRIFY_DAMAGE_BONUS);
         expect(god.currentHealth).toBe(before);
-        // Le bouclier n'absorbe que le coup lui-même, jamais le bonus non appliqué.
-        expect(god.statusEffects.find(s => s.type === 'shield')?.stacks).toBe(6);
+        expect(god.statusEffects.find(s => s.type === 'shield')?.stacks).toBe(10 - 4 - PETRIFY_DAMAGE_BONUS);
         expect(god.statusEffects.find(s => s.type === 'petrify')?.stacks).toBe(1);
-    });
-
-    it('est consommée dès qu\'un coup traverse le bouclier', () => {
-        const god = godState('zeus');
-        addStatus(god, 'petrify', 1);
-        addShield(god, 2);
-
-        const through = hit(god, 4);
-
-        expect(through.petrifyBonus).toBe(PETRIFY_DAMAGE_BONUS);
-        // 4 + 2 de bonus = 6, dont 2 absorbés par le bouclier.
-        expect(through.healthLost).toBe(4);
-        expect(god.statusEffects.find(s => s.type === 'petrify')).toBeUndefined();
     });
 
     it('est retirée par un cleanse (façon Aphrodite), qui ne garde que le bouclier', () => {
@@ -209,7 +214,79 @@ describe('Pétrification', () => {
         // Réplique de l'effet `cleanse` : tout saute sauf le bouclier.
         god.statusEffects = god.statusEffects.filter(s => s.type === 'shield');
 
-        expect(hit(god, 3).petrifyBonus).toBe(0);
+        expect(hit(god, 3).markBonus).toBe(0);
+    });
+});
+
+describe('Brûlure', () => {
+    /** Un coup d'un élément donné, pour distinguer le feu du reste. */
+    const hit = (god: GodState, raw: number, element?: 'fire' | 'water') => {
+        const { player, state } = soloState(god);
+        return dealDamage(god, raw, player, state, { element, ignoreWeakness: true });
+    };
+
+    it('ajoute +1 dégât par marque à un sort de FEU', () => {
+        const god = godState('zeus');
+        addStatus(god, 'burn', 2);
+
+        const result = hit(god, 3, 'fire');
+
+        expect(result.markBonus).toBe(2 * BURN_DAMAGE_BONUS);
+        expect(result.healthLost).toBe(3 + 2 * BURN_DAMAGE_BONUS);
+    });
+
+    it("n'aide PAS un sort d'un autre élément : c'est toute sa différence avec la pierre", () => {
+        const god = godState('zeus');
+        addStatus(god, 'burn', 2);
+
+        expect(hit(god, 3, 'water').markBonus).toBe(0);
+        // Ni un coup sans élément du tout.
+        expect(hit(god, 3).markBonus).toBe(0);
+    });
+
+    it('ne cause aucun dégât par elle-même', () => {
+        const god = godState('zeus');
+        const { player, state } = soloState(god);
+        addStatus(god, 'burn', 3);
+        const before = god.currentHealth;
+
+        tickStatusEffects(player, state);
+
+        // Ce n'est pas un second saignement : la brûlure ne fait que rendre vulnérable.
+        expect(god.currentHealth).toBe(before);
+        expect(god.statusEffects.find(s => s.type === 'burn')?.stacks).toBe(3);
+    });
+
+    it("s'empile sans plafond, contrairement au saignement", () => {
+        const god = godState('zeus');
+        addStatus(god, 'burn', 3);
+        addStatus(god, 'burn', 4);
+        expect(god.statusEffects.find(s => s.type === 'burn')?.stacks).toBe(7);
+
+        const bleeder = godState('zeus');
+        addStatus(bleeder, 'bleed', 5);
+        expect(bleeder.statusEffects.find(s => s.type === 'bleed')?.stacks).toBe(2);
+    });
+
+    it('est éteinte par un soin, marque par point de soin', () => {
+        const god = godState('zeus');
+        god.currentHealth = 10;
+        addStatus(god, 'burn', 4);
+
+        healGod(god, 3);
+
+        expect(god.statusEffects.find(s => s.type === 'burn')?.stacks).toBe(1);
+    });
+
+    it("ne s'use jamais au fil des tours", () => {
+        const god = godState('zeus');
+        const { player, state } = soloState(god);
+        addStatus(god, 'burn', 2, 1);
+
+        tickStatusEffects(player, state);
+        tickStatusEffects(player, state);
+
+        expect(god.statusEffects.find(s => s.type === 'burn')?.stacks).toBe(2);
     });
 });
 

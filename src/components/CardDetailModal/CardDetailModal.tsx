@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { SpellCard } from '@/types/cards';
 import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
 import { ALL_GODS } from '@/data/gods';
+import { STATUS_LABELS } from '@/data/spellDescriptions';
 import styles from './CardDetailModal.module.css';
 
 interface CardDetailModalProps {
@@ -88,19 +89,15 @@ const getExplicitDescription = (card: SpellCard): string => {
             case 'discard':
                 descriptions.push(`L'adversaire défausse ${value} carte(s)`);
                 break;
-            case 'status':
-                const statusNames: Record<string, string> = {
-                    'poison': 'Poison',
-                    'burn': 'Brûlure',
-                    'stun': 'Étourdissement',
-                    'lightning_mark': 'Marque Foudre',
-                    'provocation': 'Provocation',
-                    'confusion': 'Confusion',
-                    'weakness': 'Faiblesse'
-                };
-                const statusName = effect.status ? statusNames[effect.status] || effect.status : 'effet';
+            case 'status': {
+                // Table partagée avec spellDescriptions plutôt que recopiée ici. La copie
+                // locale avait divergé : elle nommait encore `lightning_mark` et `confusion`,
+                // deux statuts que le moteur ne connaît pas, et ignorait le saignement, la
+                // pétrification et le bouclier — qui s'affichaient donc en anglais brut.
+                const statusName = effect.status ? STATUS_LABELS[effect.status] : 'effet';
                 descriptions.push(`Applique ${value || 1}x ${statusName}`);
                 break;
+            }
             case 'draw':
                 descriptions.push(`Pioche ${value} carte(s)`);
                 break;

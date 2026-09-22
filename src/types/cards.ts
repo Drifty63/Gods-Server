@@ -24,23 +24,35 @@ export type StatusEffect =
     | 'weakness_immunity' // Immunité aux faiblesses
     | 'regen'       // Régénération (soin par tour)
     | 'untargetable' // Inciblable (ne peut pas être ciblé)
-    // Saignement : dégâts en FIN DE TOUR, qui IGNORENT le bouclier. Plafonné à 2 marques
-    // (StatusSystem.STATUS_STACK_CAPS), et un soin en retire autant de marques que de points
-    // rendus — soigner referme les plaies.
+    /*
+     * Saignement : dégâts en FIN DE TOUR, qui IGNORENT le bouclier — un dieu terré derrière
+     * son bouclier saigne quand même. 1 marque = 1 dégât, 2 marques = 2 dégâts.
+     *
+     * Plafonné à 2 marques (StatusSystem.STATUS_STACK_CAPS) : au-delà, une cible focalisée
+     * mourait du saignement seul sans que l'adversaire puisse rien y faire. Un soin en retire
+     * autant de marques que de points rendus.
+     */
     | 'bleed'
     /*
-     * Pétrification : la cible ne peut plus AGIR, et le prochain coup qu'elle encaisse fait
-     * +2 dégâts par marque (DamageSystem.PETRIFY_DAMAGE_BONUS) avant de consommer la marque.
+     * Pétrification : chaque marque ajoute +1 dégât à TOUT sort offensif reçu, quel qu'en
+     * soit le lanceur — la pierre encaisse mal. Poser la marque étourdit aussi la cible pour
+     * un tour (voir StatusSystem.addStatus).
      *
-     * Elle n'expire JAMAIS au fil des tours : elle attend le coup. Seuls des dégâts reçus ou
-     * un nettoyage la retirent.
-     *
-     * Ce commentaire affirmait aussi qu'une cible pétrifiée « ne peut pas être soignée ».
-     * C'est FAUX : `healGod` ne regarde que `isDead`. La description a été corrigée plutôt
-     * que le moteur, parce que la règle réellement appliquée — une vulnérabilité qui attend
-     * le prochain coup — se tient toute seule. À trancher si une carte a besoin du blocage.
+     * La marque n'est JAMAIS consommée et n'expire jamais : elle amplifie chaque coup jusqu'à
+     * ce qu'un nettoyage d'effets négatifs la retire. Un soin n'y peut rien — on ne soigne
+     * pas de la pierre.
      */
-    | 'petrify';
+    | 'petrify'
+    /*
+     * Brûlure : chaque marque ajoute +1 dégât, mais UNIQUEMENT aux sorts de FEU.
+     *
+     * C'est toute la différence avec la pétrification, qui aide n'importe quel attaquant :
+     * la brûlure récompense une équipe bâtie autour du feu. Elle ne cause aucun dégât par
+     * elle-même — ce n'est pas un second saignement, c'est une vulnérabilité ciblée.
+     *
+     * Sans plafond de cumul, mais un soin l'éteint marque par marque.
+     */
+    | 'burn';
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi

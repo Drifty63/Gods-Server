@@ -194,6 +194,28 @@ export default function RulesPage() {
                             <strong>Stun</strong>
                             <p>Le dieu ne peut pas lancer de sorts pendant la durée</p>
                         </div>
+                        {/*
+                          * Saignement, pétrification et brûlure avaient été retirés de cette page
+                          * en septembre : le moteur les connaissait, mais aucune carte ne les
+                          * posait, et décrire une mécanique que le joueur ne rencontre jamais est
+                          * pire que de la taire. Les unités en préparation les emploient — ils
+                          * reviennent donc, avec leurs règles exactes.
+                          */}
+                        <div className={styles.statusCard}>
+                            <span className={styles.statusIcon}>🩸</span>
+                            <strong>Saignement</strong>
+                            <p>1 dégât par marque en fin de tour, qui ignore le bouclier. 2 marques au maximum, et un soin le referme</p>
+                        </div>
+                        <div className={styles.statusCard}>
+                            <span className={styles.statusIcon}>🗿</span>
+                            <strong>Pétrification</strong>
+                            <p>Étourdit un tour, puis chaque marque ajoute +1 dégât à tous les sorts reçus. Ne s&apos;efface jamais seule : seul un nettoyage la retire</p>
+                        </div>
+                        <div className={styles.statusCard}>
+                            <span className={styles.statusIcon}>🔥</span>
+                            <strong>Brûlure</strong>
+                            <p>+1 dégât par marque, mais uniquement pour les sorts de feu. Sans limite de cumul, et un soin l&apos;éteint</p>
+                        </div>
                     </div>
                 </section>
 
