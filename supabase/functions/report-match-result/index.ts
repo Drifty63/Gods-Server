@@ -83,6 +83,36 @@ Deno.serve(async (req: Request) => {
             if (error) console.error('report-match-result: bump_god_play_counts failed:', error.message, gameId, userId);
         }
 
+        /*
+         * Trace analytique de la partie, pour les createurs.
+         *
+         * Ecrite ICI et pas ailleurs parce que c'est le seul endroit ou les deux equipes sont
+         * encore lisibles : `cleanup_stale_multiplayer_data()` purge la ligne de `games` une
+         * heure apres la fin, et `match_history` ne garde aucune carte. Sans cette insertion,
+         * les taux de victoire par dieu et les equipes les plus jouees sont perdus pour
+         * toujours -- y compris retroactivement.
+         *
+         * Contrairement a `apply_match_result`, on enregistre AUSSI les parties non classees :
+         * une composition d'equipe reste une donnee de jeu, qu'il y ait de la ferveur en jeu
+         * ou non.
+         */
+        {
+            const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
+            const { error } = await admin.from('match_records').insert({
+                game_id: gameId,
+                host_user_id: game.host_user_id,
+                guest_user_id: game.guest_user_id,
+                host_team: teamIds(game.host_gods),
+                guest_team: teamIds(game.guest_gods),
+                winner_user_id: winnerUserId ?? null,
+                winner_side: winnerSide,
+                is_ranked: Boolean(game.is_ranked),
+                is_private: Boolean(game.is_private),
+            });
+            // Jamais bloquant : une statistique perdue vaut mieux qu'une fin de partie ratee.
+            if (error) console.error('report-match-result: match_records insert failed:', error.message, gameId);
+        }
+
         if (game.is_ranked && game.host_user_id && game.guest_user_id) {
             const winnerUserId = winnerSide === 'host' ? game.host_user_id : game.guest_user_id;
             const { error } = await admin.rpc('apply_match_result', { p_game_id: gameId, p_winner_user_id: winnerUserId });

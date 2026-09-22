@@ -26,6 +26,24 @@ Deno.serve(async (req: Request) => {
         if (error) return jsonResponse({ error: error.message }, 500);
 
         const result = data as { success: boolean; message: string; gods_added: string[] };
+
+        /*
+         * Journal d'achat, uniquement si le coffret est reellement parti.
+         *
+         * `purchase_coffret` renvoie `success: false` quand l'ambroisie manque ou que tout le
+         * contenu est deja possede : dans ces cas rien n'a ete debite, et il n'y a pas d'achat
+         * a enregistrer.
+         */
+        if (result.success) {
+            const { error: logErr } = await admin.from('purchases').insert({
+                user_id: user.id,
+                kind: 'coffret',
+                item_id: coffretId,
+                price: COFFRET_PRICE,
+            });
+            if (logErr) console.error('purchase-coffret: purchases insert failed:', logErr.message, coffretId);
+        }
+
         return jsonResponse({
             success: result.success,
             message: result.message,

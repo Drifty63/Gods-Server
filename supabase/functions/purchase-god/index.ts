@@ -45,6 +45,22 @@ Deno.serve(async (req: Request) => {
             return jsonResponse({ success: false, message: 'Achat concurrent détecté, réessayez' });
         }
 
+        /*
+         * Journal d'achat.
+         *
+         * `profiles.gods_owned` melange ce qui a ete achete, offert dans un pack de depart et
+         * gagne en recompense : il ne dira jamais ce qui se VEND. Cette ligne-ci le dira.
+         *
+         * Apres l'update et jamais avant : on n'enregistre que des achats reellement debites.
+         */
+        const { error: logErr } = await admin.from('purchases').insert({
+            user_id: user.id,
+            kind: 'god',
+            item_id: godId,
+            price,
+        });
+        if (logErr) console.error('purchase-god: purchases insert failed:', logErr.message, godId);
+
         return jsonResponse({ success: true, message: 'Dieu acheté avec succès !' });
     } catch (e) {
         return jsonResponse({ error: (e as Error).message }, 400);
