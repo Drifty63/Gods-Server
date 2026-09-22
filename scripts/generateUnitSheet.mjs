@@ -8,12 +8,9 @@
  * une ligne par sort, les valeurs déductibles déjà posées, et seulement les cases qui
  * demandent une décision laissées vides.
  *
- * Ce qui est pré-rempli, et pourquoi :
- *  - l'unité, son dieu et sa catégorie, lus dans le bestiaire cible ;
- *  - les PV et le coût en Duel, standards par catégorie (voir STATS) ;
- *  - les cinq rôles de sort, parce que TOUTES les unités existantes en ont exactement cinq :
- *    deux générateurs, deux compétences, un utilitaire ;
- *  - les coûts et gains d'énergie habituels de chaque rôle.
+ * Ce qui est pré-rempli : l'unité, son dieu, sa catégorie, ses PV et son coût en Duel, les
+ * cinq rôles de sort et leurs coûts d'énergie habituels — parce que TOUTES les unités déjà
+ * publiées suivent le même moule : exactement cinq sorts, dans le même ordre.
  *
  * Ce qui reste à remplir : l'élément, la faiblesse, le nom de chaque sort, et son effet en
  * français simple.
@@ -29,89 +26,50 @@
  *
  * Tout ce qui sort de cette liste est un effet « custom » : faisable, mais il demande du code
  * de moteur écrit à la main pour cette carte-là. À signaler dans la colonne Effet, pas à
- * éviter — plusieurs cartes existantes en vivent.
+ * éviter — 51 effets existants sont déjà de ce type.
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { MISSING, ROLES, STATS, toCsv } from './_units.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const out = process.argv[2] ?? 'unites-mecaniques.csv';
+const FORCE = process.argv.includes('--force');
+const dest = path.join(ROOT, out);
 
 /**
- * Bestiaire cible, deux unités par dieu.
+ * GARDE-FOU : ne jamais écraser un tableur déjà rempli.
  *
- * `servant` est l'unité de troupe — celle qui tire sa force du nombre ; `creature` est la bête
- * ou le héros nommé. C'est la répartition qu'ont déjà les six unités publiées : Soldats d'Arès
- * et Chevaliers d'Athéna côté serviteurs, Dragon de Thèbes et Arachné côté créatures.
- *
- * `done: true` = déjà en jeu, la ligne n'est pas émise.
+ * Ce script écrit un fichier que l'auteur remplit ensuite à la main, parfois sur plusieurs
+ * jours. Le relancer par réflexe effacerait tout sans prévenir. On regarde donc si une seule
+ * des colonnes à remplir porte déjà quelque chose ; si oui, on refuse et on explique.
  */
-const BESTIARY = [
-    ['Arès', 'Soldats d\'Arès', 'servant', true],
-    ['Arès', 'Dragon de Thèbes', 'creature', true],
-    ['Athéna', 'Chevaliers d\'Athéna', 'servant', true],
-    ['Athéna', 'Arachné', 'creature', true],
-    ['Hestia', 'Ulysse', 'creature', true],
-    ['Hestia', 'Feu follet', 'servant', false],
-    ['Poséidon', 'Cyclopes', 'servant', false],
-    ['Poséidon', 'Méduse', 'creature', false],
-    ['Hadès', 'Démons du Tartare', 'servant', false],
-    ['Hadès', 'Cerbère', 'creature', false],
-    ['Aphrodite', 'Serviteurs d\'Aphrodite', 'servant', false],
-    ['Aphrodite', 'Achille', 'creature', false],
-    ['Apollon', 'Oracle de Delphes', 'servant', false],
-    ['Apollon', 'Python', 'creature', false],
-    ['Dionysos', 'Satyres', 'servant', false],
-    ['Dionysos', 'Chiron', 'creature', false],
-    ['Zeus', 'Garde céleste', 'servant', false],
-    ['Zeus', 'Harpies', 'creature', false],
-    ['Artémis', 'Chiens de chasse', 'servant', false],
-    ['Artémis', 'Actéon', 'creature', false],
-    ['Nyx', 'Occultiste', 'servant', false],
-    ['Nyx', 'Les Érinyes', 'creature', false],
-    ['Déméter', 'Sirènes', 'servant', false],
-    ['Déméter', 'Minotaure', 'creature', false],
-];
+if (fs.existsSync(dest) && !FORCE) {
+    const lines = fs.readFileSync(dest, 'utf8').replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
+    const filled = lines.slice(1).filter(line => {
+        const c = line.split('";"').map(v => v.replace(/^"|"$/g, '').trim());
+        // Élément, faiblesse, nom du sort, effet : les quatre colonnes de l'auteur.
+        return [c[5], c[6], c[8], c[11]].some(Boolean);
+    }).length;
 
-/**
- * Valeurs de départ par catégorie, relevées sur les unités existantes.
- *
- * 16 PV / 2 points pour un serviteur : c'est exactement le Soldat d'Arès, le Chevalier
- * d'Athéna et l'Araignée Géante. Les créatures vont de 21 à 26 PV pour 3 points — le Dragon
- * de Thèbes est à 26, Arachné à 22. La valeur posée ici est un POINT DE DÉPART à corriger.
- */
-const STATS = {
-    servant: { hp: 16, cost: 2 },
-    creature: { hp: 22, cost: 3 },
-};
-
-/**
- * Les cinq rôles de sort, dans l'ordre où toutes les unités existantes les déclarent.
- *
- * Les générateurs ne coûtent rien et rapportent l'énergie ; les compétences la dépensent ;
- * l'utilitaire protège ou manipule. Les coûts posés ici sont les plus fréquents, pas une règle.
- */
-const ROLES = [
-    ['Générateur 1', 0, 1, 'Frappe faible et large — souvent 1 dégât à tous les ennemis'],
-    ['Générateur 2', 0, 1, 'Frappe simple et ciblée — souvent 3 dégâts à un ennemi'],
-    ['Compétence 1', 1, 0, 'Le coup signature, bon marché'],
-    ['Compétence 2', 3, 0, 'Le coup lourd, celui qui coûte cher'],
-    ['Utilitaire', 1, 0, 'Bouclier, provocation, soin, état — ce qui n\'est pas de l\'attaque'],
-];
+    if (filled > 0) {
+        console.error(`${out} contient déjà ${filled} ligne(s) remplie(s).`);
+        console.error('Le régénérer les effacerait. Relancer avec --force si c\'est voulu.');
+        process.exit(1);
+    }
+}
 
 const rows = [];
-for (const [god, unit, category, done] of BESTIARY) {
-    if (done) continue;
-    const s = STATS[category];
-    const label = category === 'servant' ? 'serviteur' : 'créature';
-    for (const [role, cost, gain, hint] of ROLES) {
+for (const unit of MISSING) {
+    const s = STATS[unit.category];
+    for (const role of ROLES) {
         rows.push([
-            unit, god, label, s.hp, s.cost,
-            '', '',          // élément, faiblesse — à remplir
-            role, '',        // nom du sort — à remplir
-            cost, gain,
-            '',              // effet — à remplir
-            hint,
+            unit.name, unit.god, s.label, s.hp, s.cost,
+            '', '',              // élément, faiblesse — à remplir
+            role.label, '',      // nom du sort — à remplir
+            role.cost, role.gain,
+            '',                  // effet — à remplir
+            role.hint,
         ]);
     }
 }
@@ -123,15 +81,11 @@ const header = [
     'Effet (en français simple)', 'Indication',
 ];
 
-const esc = v => `"${String(v).replace(/"/g, '""')}"`;
-const csv = [header, ...rows].map(r => r.map(esc).join(';')).join('\r\n');
-fs.writeFileSync(path.join(ROOT, out), '﻿' + csv, 'utf8');
+fs.writeFileSync(dest, toCsv([header, ...rows]), 'utf8');
 
-const units = new Set(rows.map(r => r[0]));
-console.log(`${units.size} unités à créer, ${rows.length} sorts à décrire`);
+console.log(`${MISSING.length} unités à créer, ${rows.length} sorts à décrire`);
 console.log(`écrit dans ${out}`);
 console.log('');
-for (const [god, unit, category, done] of BESTIARY) {
-    if (done) continue;
-    console.log(`  ${god.padEnd(10)} ${unit.padEnd(24)} ${category === 'servant' ? 'serviteur' : 'créature'}`);
+for (const u of MISSING) {
+    console.log(`  ${u.god.padEnd(10)} ${u.name.padEnd(24)} ${STATS[u.category].label}`);
 }
