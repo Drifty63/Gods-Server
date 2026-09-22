@@ -19,6 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+import { readCsvRows, looksMisencoded } from './_csv.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 /**
@@ -59,11 +60,27 @@ if (!csvArg) {
     process.exit(2);
 }
 
-const raw = fs.readFileSync(path.resolve(ROOT, csvArg), 'utf8').replace(/^﻿/, '');
-const rows = raw.split(/\r?\n/).filter(l => l.trim()).slice(1)
-    .map(l => l.split('";"').map(c => c.replace(/^"|"$/g, '')))
-    .map(c => ({ src: c[0].trim(), dest: c[1].trim(), nom: c[4], size: c[5] ?? '' }))
-    .filter(r => !SKIP.has(r.dest));
+/*
+ * Lecture via `parseCsv`, qui suit la vraie grammaire CSV.
+ *
+ * Le découpage naïf sur `";"` qui était là tenait tant que la feuille sortait du générateur,
+ * qui guillemette tout. Mais elle est remplie à la main dans un tableur, et celui-ci décide
+ * seul de ce qu'il guillemette au ré-enregistrement. Une cellule nue décalait alors TOUTES les
+ * colonnes d'un cran — et comme la colonne 1 est la destination, les images atterrissaient sur
+ * les mauvaises cartes en silence. Un chemin de fichier Windows contient en plus des
+ * antislashs et parfois des virgules, qu'un tableur adore guillemetter.
+ */
+const csvPath = path.resolve(ROOT, csvArg);
+const rawText = fs.readFileSync(csvPath, 'utf8');
+if (looksMisencoded(rawText)) {
+    console.error(`ATTENTION : ${csvArg} ne semble pas être en UTF-8 — les accents sont abîmés.`);
+    console.error('Rouvrez-le dans le tableur et ré-enregistrez en Unicode (UTF-8).');
+    console.error('');
+}
+
+const rows = readCsvRows(fs, csvPath)
+    .map(c => ({ src: (c[0] ?? '').trim(), dest: (c[1] ?? '').trim(), nom: c[4] ?? '', size: c[5] ?? '' }))
+    .filter(r => r.src && r.dest && !SKIP.has(r.dest));
 
 /** Bandes uniformes collées à un bord, mesurées en pixels. */
 function deadBorders(data, W, H, C) {

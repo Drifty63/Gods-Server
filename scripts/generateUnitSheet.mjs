@@ -31,6 +31,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { MISSING, ROLES, STATS, toCsv } from './_units.mjs';
+import { readCsvRows } from './_csv.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const out = process.argv[2] ?? 'unites-mecaniques.csv';
@@ -45,12 +46,8 @@ const dest = path.join(ROOT, out);
  * des colonnes à remplir porte déjà quelque chose ; si oui, on refuse et on explique.
  */
 if (fs.existsSync(dest) && !FORCE) {
-    const lines = fs.readFileSync(dest, 'utf8').replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
-    const filled = lines.slice(1).filter(line => {
-        const c = line.split('";"').map(v => v.replace(/^"|"$/g, '').trim());
-        // Élément, faiblesse, nom du sort, effet : les quatre colonnes de l'auteur.
-        return [c[5], c[6], c[8], c[11]].some(Boolean);
-    }).length;
+    // Élément, faiblesse, nom du sort, effet : les quatre colonnes que remplit l'auteur.
+    const filled = readCsvRows(fs, dest).filter(c => [c[5], c[6], c[8], c[11]].some(Boolean)).length;
 
     if (filled > 0) {
         console.error(`${out} contient déjà ${filled} ligne(s) remplie(s).`);
