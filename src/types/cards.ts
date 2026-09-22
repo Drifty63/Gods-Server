@@ -24,8 +24,23 @@ export type StatusEffect =
     | 'weakness_immunity' // Immunité aux faiblesses
     | 'regen'       // Régénération (soin par tour)
     | 'untargetable' // Inciblable (ne peut pas être ciblé)
-    | 'bleed'       // Saignement : dégâts en FIN DE TOUR, ignorent le bouclier
-    | 'petrify';    // Pétrification : ne peut ni agir ni être soigné
+    // Saignement : dégâts en FIN DE TOUR, qui IGNORENT le bouclier. Plafonné à 2 marques
+    // (StatusSystem.STATUS_STACK_CAPS), et un soin en retire autant de marques que de points
+    // rendus — soigner referme les plaies.
+    | 'bleed'
+    /*
+     * Pétrification : la cible ne peut plus AGIR, et le prochain coup qu'elle encaisse fait
+     * +2 dégâts par marque (DamageSystem.PETRIFY_DAMAGE_BONUS) avant de consommer la marque.
+     *
+     * Elle n'expire JAMAIS au fil des tours : elle attend le coup. Seuls des dégâts reçus ou
+     * un nettoyage la retirent.
+     *
+     * Ce commentaire affirmait aussi qu'une cible pétrifiée « ne peut pas être soignée ».
+     * C'est FAUX : `healGod` ne regarde que `isDead`. La description a été corrigée plutôt
+     * que le moteur, parce que la règle réellement appliquée — une vulnérabilité qui attend
+     * le prochain coup — se tient toute seule. À trancher si une carte a besoin du blocage.
+     */
+    | 'petrify';
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi
