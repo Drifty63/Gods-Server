@@ -2420,10 +2420,14 @@ export const ALL_SPELLS: SpellCard[] = [
         energyGain: 0,
         effects: [
             { type: 'damage', value: 2, target: 'all_enemies' },
-            { type: 'status', status: 'untargetable', value: 1, statusDuration: 1, target: 'self' }
+            // Équilibrage : l'insaisissabilité passe de 1 à 2 tours. À 3 d'énergie, le sort
+            // coûtait le prix d'un ultime pour 2 dégâts de zone et un seul tour de répit —
+            // Ulysse redevenait ciblable avant d'avoir pu rentabiliser sa dépense. Deux tours
+            // couvrent deux tours adverses au lieu d'un, ce qui double réellement l'abri.
+            { type: 'status', status: 'untargetable', value: 1, statusDuration: 2, target: 'self' }
         ],
         imageUrl: '/cards/spells/spell_ulysses_tidal_wave.png',
-        description: '2🩸 → ALL⚔️ | +🚫1⏳🔄',
+        description: '2🩸 → ALL⚔️ | +🚫2⏳🔄',
     },
 
     // =====================================================
