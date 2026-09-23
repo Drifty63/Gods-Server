@@ -20,6 +20,7 @@ export const STATUS_ICONS: Record<StatusEffect, string> = {
     petrify: '🗿',
     burn: '🔥',
     fear: '😨',
+    silence: '🔇',
 };
 
 export function getStatusIcon(status: StatusEffect): string {

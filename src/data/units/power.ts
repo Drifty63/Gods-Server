@@ -26,6 +26,10 @@ const STATUS_WEIGHT: Record<StatusEffect, number> = {
     // L'effroi vaut moins que l'inciblable (2) dont il est une version partielle : il ne
     // ferme que le ciblage mono-cible, la zone passe, et il s'efface d'une marque par tour.
     fear: 1.5,
+    // Le silence ne ferme que les 2 competences des 5 cartes d un dieu, la ou l etourdissement
+    // (3) les ferme toutes les cinq pour le meme prix. Il vaut donc nettement moins, sans
+    // tomber au niveau d une simple marque : ce sont les cartes offensives qu il coupe.
+    silence: 2,
     weakness: 1.5,
     weakness_immunity: 1,
     regen: 1.2,

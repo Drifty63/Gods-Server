@@ -62,6 +62,10 @@ const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
         name: 'Étourdissement',
         text: 'Le dieu ne peut lancer aucun sort pendant la durée',
     },
+    silence: {
+        name: 'Silence',
+        text: 'Le dieu ne peut plus jouer ses cartes Compétence pendant la durée. Ses générateurs et son utilitaire restent jouables',
+    },
     untargetable: {
         name: 'Inciblable',
         text: 'L\'adversaire ne peut plus le désigner, et les attaques de zone ne l\'atteignent pas. Ses alliés peuvent toujours le soigner',

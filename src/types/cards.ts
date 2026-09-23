@@ -68,7 +68,21 @@ export type StatusEffect =
      * Sans plafond. Un soin ne la retire pas, un nettoyage si (règle de la pétrification).
      * Aucun dégât par elle-même, et elle ne bloque rien d'autre que ce ciblage.
      */
-    | 'fear';
+    | 'fear'
+    /*
+     * Silence : le dieu ne peut plus jouer ses cartes COMPÉTENCE. Générateurs et utilitaire
+     * restent jouables.
+     *
+     * Le filtre porte sur le TYPE de carte, et surtout pas sur « les cartes qui infligent des
+     * dégâts » : 56 des 60 générateurs du jeu en infligent au passage. Cette seconde règle
+     * aurait bloqué deux cartes sur trois et coupé la production d'énergie du dieu — un
+     * étourdissement déguisé, pas un sceau. Le type, lui, est imprimé sur la carte : le
+     * joueur voit d'un coup d'œil ce qui est scellé.
+     *
+     * Reste volontairement plus faible que l'étourdissement, qui ferme les cinq cartes pour
+     * le même prix (Stun divin : 1 énergie, 2 tours).
+     */
+    | 'silence';
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi

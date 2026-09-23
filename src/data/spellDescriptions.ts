@@ -31,6 +31,7 @@ export const STATUS_LABELS: Record<StatusEffect, string> = {
     petrify: 'Pétrification',
     burn: 'Brûlure',
     fear: 'Effroi',
+    silence: 'Silence',
 };
 
 function targetSuffix(target: TargetType | undefined, count: number, kind: 'ennemi' | 'allié'): string {
