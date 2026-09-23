@@ -58,6 +58,26 @@ function targetMultiplier(effect: SpellEffect): number {
     }
 }
 
+/**
+ * Un statut qui dure deux tours vaut plus qu'un statut qui dure un tour.
+ *
+ * `statusDuration` n'etait lu NULLE PART dans cette mesure : un silence de 2 tours sur les
+ * quatre dieux adverses pesait exactement autant qu'un silence d'un tour sur un seul. Le
+ * bestiaire genere automatiquement ne s'appuyait guere sur le controle, donc l'angle mort ne se
+ * voyait pas ; les unites ecrites a la main, elles, en vivent.
+ *
+ * Croissance VOLONTAIREMENT sous-lineaire : doubler la duree ne double pas la valeur. Un tour
+ * supplementaire vaut moins que le premier, parce que la cible a d'autres dieux a jouer entre
+ * temps -- consequence directe de la regle d'une carte par tour.
+ *
+ * Les marques permanentes (petrification, brulure, effroi) n'ont pas de duree : leur poids est
+ * deja fixe en consequence dans STATUS_WEIGHT.
+ */
+function durationFactor(e: SpellEffect): number {
+    const d = e.statusDuration ?? 1;
+    return d <= 1 ? 1 : 1 + (d - 1) * 0.5;
+}
+
 function effectPower(e: SpellEffect): number {
     const m = targetMultiplier(e);
     const v = e.value ?? 0;
@@ -65,7 +85,7 @@ function effectPower(e: SpellEffect): number {
         case 'damage': return v * m;
         case 'heal': return v * 0.8 * m;
         case 'shield': return v * 0.8 * m;
-        case 'status': return v * (e.status ? STATUS_WEIGHT[e.status] : 1) * m;
+        case 'status': return v * (e.status ? STATUS_WEIGHT[e.status] : 1) * m * durationFactor(e);
         case 'remove_status': return 1;
         case 'draw': return v * 1.5;
         case 'energy': return v * 1.5;

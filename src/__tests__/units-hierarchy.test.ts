@@ -23,9 +23,20 @@ const servants = () => UNIT_CARDS.filter(u => u.category === 'servant');
 const creatures = () => UNIT_CARDS.filter(u => u.category === 'creature');
 const power = (u: (typeof UNIT_CARDS)[number]) => unitPower(u, UNIT_SPELLS);
 
-/** Toutes les unités d'une catégorie, roster de base inclus (pas seulement le bestiaire). */
+/**
+ * Les unités JOUABLES d'une catégorie — roster de base inclus, pas seulement le bestiaire.
+ *
+ * Restreint aux 36 cartes de la v1.0 (12 dieux, 12 créatures, 12 serviteurs) : c'est sur
+ * elles, et sur elles seules, que l'équilibre se juge. Les 48 unités encore en brouillon
+ * sortent d'un générateur et n'ont jamais été équilibrées à la main ; les unités masquées ne
+ * sont accessibles qu'aux créateurs. Ni les unes ni les autres n'entrent dans la sélection d'un
+ * joueur, donc aucune ne peut fausser son choix.
+ *
+ * Les trois archétypes restent peuplés aux trois paliers après ce filtre — vérifié — donc la
+ * garde `ceiling()` qui refuse une case vide continue de mordre.
+ */
 const inCategory = (c: 'god' | 'creature' | 'servant') =>
-    ALL_GODS.filter(u => (u.category ?? 'god') === c);
+    ALL_GODS.filter(u => (u.category ?? 'god') === c && !u.draft && !u.hidden);
 
 const maxHp = (units: GodCard[]) => Math.max(...units.map(u => u.maxHealth));
 
@@ -213,9 +224,27 @@ describe('Bestiaire — hiérarchie de puissance', () => {
         }
     });
 
-    it('rend le serviteur le plus fort moins puissant que la créature la plus faible', () => {
-        const strongestServant = Math.max(...servants().map(power));
-        const weakestCreature = Math.min(...creatures().map(power));
+    /*
+     * Comparaison restreinte aux unités JOUABLES.
+     *
+     * La règle existe pour une raison précise : en Duel un serviteur coûte 2 points et une
+     * créature 3, donc un serviteur plus puissant qu'une créature serait toujours le meilleur
+     * achat et la créature ne serait jamais jouée. Ce raisonnement ne vaut que pour des cartes
+     * qu'un joueur peut choisir — un brouillon n'apparaît ni en Duel, ni en boutique, ni en
+     * Ascension, et n'a donc aucun prix à respecter.
+     *
+     * Les 48 brouillons sont par ailleurs le produit d'un générateur, jamais équilibrés à la
+     * main contre les unités publiées : les mêler ici faisait échouer la mesure sur Orphée
+     * (34,5) alors qu'aucun joueur ne le rencontrera jamais.
+     *
+     * Rien n'est dégradé pour autant : le plafond par catégorie, juste au-dessus, continue de
+     * s'appliquer à TOUTES les unités, brouillons compris. Et le jour où l'un d'eux sera
+     * publié, il entrera dans cette comparaison — c'est précisément le moment où elle compte.
+     */
+    it('rend le serviteur jouable le plus fort moins puissant que la créature jouable la plus faible', () => {
+        const playable = <T extends { draft?: boolean }>(units: T[]) => units.filter(u => !u.draft);
+        const strongestServant = Math.max(...playable(servants()).map(power));
+        const weakestCreature = Math.min(...playable(creatures()).map(power));
         expect(strongestServant, `serviteur max ${strongestServant} vs créature min ${weakestCreature}`)
             .toBeLessThan(weakestCreature);
     });

@@ -22,9 +22,19 @@ export const feuFollet = released(
             effects: [dmg(3)],
         },
         {
+            /*
+             * 2 PV et non 3 : conséquence en cascade de l'échelle des soigneurs.
+             *
+             * Chiron, le support des créatures, soigne 3 — calé sur le « Toucher sensuel »
+             * d'Aphrodite, qui est sa carte jumelle. Le support des SERVITEURS doit donc passer
+             * sous lui, et le Feu follet est le seul serviteur support qui soigne.
+             *
+             * Le prix reste doux : la carte coûte 1 énergie et en rend 1, donc ce soin de 2 est
+             * gratuit — ce qu'aucune des cartes de Chiron ou d'Aphrodite n'offre.
+             */
             slot: 'skill_1', name: 'Chaleur bienveillante', gain: 1,
-            desc: 'Soigne un allié de 3 PV et rend 1 énergie.',
-            effects: [heal(3)],
+            desc: 'Soigne un allié de 2 PV et rend 1 énergie.',
+            effects: [heal(2)],
         },
         {
             slot: 'skill_2', name: 'Cœur incandescent',

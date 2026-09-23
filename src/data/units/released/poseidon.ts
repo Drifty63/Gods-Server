@@ -11,19 +11,16 @@ import { released, dmg, shield, status } from '../builders';
 export const cyclopes = released(
     {
         /*
-         * 15 PV et non les 18 du tableur. C'est le seul chiffre de l'auteur qui ait bougé, avec
-         * ceux de la Harpie, et voici pourquoi : à 18 PV le Cyclope pesait 36,9 de budget
-         * contre 32 à la Harpie — un SERVITEUR plus fort qu'une CRÉATURE, alors qu'il coûte
-         * 2 points en Duel contre 3. Le joueur n'aurait jamais eu de raison de payer la créature.
+         * 18 PV, comme au tableur : le Cyclope reste le serviteur le plus résistant du jeu.
          *
-         * La cause de fond n'est pas les PV : c'est « Étreinte du colosse », qui donne 4 dégâts
-         * ET un étourdissement pour 1 énergie, là où le Loup d'Artémis paie 3 pour la même
-         * chose. Corriger le coût serait plus juste, mais c'est une décision d'auteur — les PV
-         * sont le seul bouton qu'on puisse tourner sans réécrire une carte.
+         * Il avait d'abord été descendu à 15, parce qu'à 18 il pesait plus lourd qu'une
+         * créature tout en coûtant 2 points en Duel contre 3 — personne n'aurait payé la
+         * créature. Mais raboter des PV traitait le symptôme : le déséquilibre venait
+         * d'« Étreinte du colosse », corrigée ci-dessous. L'auteur a tranché pour la cause.
          */
         kind: 'servant', id: 'cyclopes', name: 'Cyclope',
-        element: 'earth', hp: 15, god: 'poseidon', arch: 'tank',
-        flavor: "« Ma caverne, mon troupeau, ma montagne. Tourne les talons. » — Il frappe comme une créature et disparaît derrière son rocher quand on riposte.",
+        element: 'earth', hp: 18, god: 'poseidon', arch: 'tank',
+        flavor: "« Ma caverne, mon troupeau, ma montagne. Tourne les talons. » — Le serviteur le plus résistant du jeu, et le seul qui puisse disparaître derrière son rocher.",
     },
     [
         {
@@ -37,9 +34,23 @@ export const cyclopes = released(
             effects: [dmg(3)],
         },
         {
+            /*
+             * 3 dégâts : à mi-chemin entre les 4 d'origine et les 2 d'un premier correctif.
+             *
+             * À 4, la carte donnait pour 1 énergie ce que la « Morsure tenace » du Loup
+             * d'Artémis fait payer 3 — mêmes dégâts, même étourdissement.
+             *
+             * À 2, on la comparait au « Cœur Brisé » d'Aphrodite. Le rapprochement était faux :
+             * le Cœur Brisé est un GÉNÉRATEUR (coût 1, gain 1), donc gratuit. Cette étreinte-ci
+             * coûte une vraie énergie et doit rendre davantage.
+             *
+             * Le coût aurait aussi pu passer à 3, mais les emplacements nomment les fichiers
+             * d'images : intervertir skill_1 et skill_2 aurait mis l'illustration de l'étreinte
+             * sur le jet de rocher.
+             */
             slot: 'skill_1', name: 'Étreinte du colosse',
-            desc: '4 dégâts à une cible et l\'étourdit 1 tour.',
-            effects: [dmg(4), status('stun', 1, 'same', 1)],
+            desc: '3 dégâts à une cible et l\'étourdit 1 tour.',
+            effects: [dmg(3), status('stun', 1, 'same', 1)],
         },
         {
             slot: 'skill_2', name: 'Jet de rocher',

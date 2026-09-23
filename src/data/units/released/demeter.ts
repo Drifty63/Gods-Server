@@ -6,8 +6,19 @@ import { released, dmg, heal, shield, status, custom, pierce, cleanse } from '..
 
 export const sirenes = released(
     {
+        /*
+         * Pas d'archétype : la Sirène est POLYVALENTE, et c'est une correction.
+         *
+         * Elle avait d'abord été rangée chez les supports à cause de son seul soin. Mais son kit
+         * est celui d'une contrôleuse — étourdir deux cibles, vider l'énergie adverse, se rendre
+         * inciblable — et le soin n'en est que la cinquième carte. La classer support faisait
+         * d'elle la meilleure soigneuse des serviteurs devant le Feu follet, dont c'est pourtant
+         * toute l'identité, et elle dépassait alors Chiron au palier supérieur.
+         *
+         * L'archétype ne décrit pas ce qu'une unité SAIT faire, mais ce qu'elle EST.
+         */
         kind: 'servant', id: 'sirenes', name: 'Sirène',
-        element: 'air', hp: 14, god: 'demeter', arch: 'support',
+        element: 'air', hp: 14, god: 'demeter',
         flavor: "« Approche. Le récif ne fait jamais de bruit. » — Elle fige deux ennemis d'un même chant, vide leurs réserves et se dérobe avant la riposte.",
     },
     [

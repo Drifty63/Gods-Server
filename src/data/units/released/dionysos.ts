@@ -85,6 +85,18 @@ export const chiron = released(
             ],
         },
         {
+            /*
+             * 3 PV, la valeur du tableur — et c'est le bon chiffre, pour une raison qui n'est
+             * visible qu'en comparant les cartes plutôt que les unités.
+             *
+             * Cette carte est mot pour mot le « Toucher sensuel » d'Aphrodite : 1 énergie, purge
+             * et soin. Une créature ne doit pas soigner plus qu'une déesse sur une carte
+             * identique, donc c'est Aphrodite qu'on a remontée à 4 (voir spells.ts) et Chiron
+             * qui reste à 3.
+             *
+             * L'échelle des supports tient alors sur les trois paliers : Feu follet 2,
+             * Chiron 3, Aphrodite 4 sur cette carte (12 au total) et Déméter 6.
+             */
             slot: 'utility_1', name: 'Baume des montagnes',
             desc: 'Soigne un allié de 3 PV et le purge de ses effets négatifs.',
             effects: [

@@ -43,13 +43,18 @@ export const gardeCeleste = released(
 
 export const harpies = released(
     {
-        // 24 PV et non les 20 du tableur : la Harpie était la créature la plus faible du
-        // bestiaire (32 de budget contre 37,5 de médiane), au point qu'un serviteur la
-        // dépassait. Son kit est volontairement léger — saignement et fuite — donc c'est aux
-        // PV de la ramener dans sa catégorie. Voir la note du Cyclope, l'autre moitié du même
-        // ajustement.
+        /*
+         * 22 PV et non les 20 du tableur : la Harpie était la seule créature sous la barre des
+         * 22, et elle passait sous un SERVITEUR — le Cyclope, qui coûte pourtant 2 points en
+         * Duel contre ses 3. Personne n'aurait eu de raison de la payer.
+         *
+         * Le vrai correctif n'est pas là : il est sur « Cri déchirant » (voir plus bas). Ses
+         * cartes de base sont au niveau de ses pairs — « Serres lacérantes » est mot pour mot
+         * le « Tir anatomique » de Chiron et le « Coup de crocs » du Loup — mais son ultime
+         * était le plus faible des douze créatures.
+         */
         kind: 'creature', id: 'harpies', name: 'Harpie',
-        element: 'air', hp: 24, god: 'zeus',
+        element: 'air', hp: 22, god: 'zeus',
         flavor: "« Ce qui monte finit toujours par tomber. Nous, jamais. » — Elle ouvre des plaies qui saignent à travers les boucliers, puis disparaît hors de portée.",
     },
     [
@@ -69,9 +74,21 @@ export const harpies = released(
             effects: [dmg(2), status('bleed', 1, 'same')],
         },
         {
+            /*
+             * 2 marques de saignement et non 1.
+             *
+             * À 1 marque, cet ultime pesait 1,75 — le plus faible des douze créatures, quand le
+             * « Jardin des condamnés » de Méduse pèse 6,75 pour le même coût. C'était la vraie
+             * faiblesse de la Harpie, pas ses points de vie.
+             *
+             * 2 est le PLAFOND du saignement (STATUS_STACK_CAPS) : la carte pose donc le
+             * maximum d'un coup, sans qu'aucune règle nouvelle soit à expliquer au joueur. Et
+             * le saignement ignore le bouclier — c'est ce qui fait de la Harpie la réponse aux
+             * équipes qui se terrent derrière leurs protections.
+             */
             slot: 'skill_2', name: 'Cri déchirant',
-            desc: '1 dégât à tous les ennemis et 1 saignement à chacun.',
-            effects: [dmg(1, 'all_enemies'), status('bleed', 1, 'all_enemies')],
+            desc: '1 dégât à tous les ennemis et 2 saignements à chacun.',
+            effects: [dmg(1, 'all_enemies'), status('bleed', 2, 'all_enemies')],
         },
         {
             slot: 'utility_1', name: 'Refuge escarpé',

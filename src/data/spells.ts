@@ -976,12 +976,18 @@ export const ALL_SPELLS: SpellCard[] = [
         type: 'competence',
         energyCost: 1,
         energyGain: 0,
+        /*
+         * 4 PV et non 3. « Baume des montagnes » de Chiron est mot pour mot cette carte — même
+         * coût, purge et soin — et une CRÉATURE ne doit pas soigner mieux qu'une déesse sur une
+         * carte identique. C'est la déesse qu'on remonte, pas la créature qu'on rabote : le
+         * palier supérieur doit rendre davantage.
+         */
         effects: [
             { type: 'custom', customEffectId: 'cleanse', description: 'Enlève tous les effets négatifs' },
-            { type: 'heal', value: 3, target: 'ally_god' }
+            { type: 'heal', value: 4, target: 'ally_god' }
         ],
         imageUrl: '/cards/spells/spell_aphrodite_toucher.png',
-        description: '➖🟠 +3💚 → 👤',
+        description: '➖🟠 +4💚 → 👤',
     },
     {
         id: 'aphrodite_skill_2',

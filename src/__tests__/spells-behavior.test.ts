@@ -1071,13 +1071,16 @@ describe('Statut untargetable (Ruse d\'Ulysse)', () => {
         expect(engine.getValidTargets('ally_god').some(g => g.card.id === 'ulysses')).toBe(true);
 
         engine.getCurrentPlayer().energy = 10;
-        addCardToHand(engine, 'aphrodite_skill_1'); // heal: 3, target: ally_god
+        addCardToHand(engine, 'aphrodite_skill_1'); // « Toucher sensuel » : purge + soin de 4
 
         engine.executeAction({
             type: 'play_card', playerId: 'player1', cardId: 'aphrodite_skill_1', targetGodId: 'ulysses',
         });
 
-        expect(ulysses.currentHealth).toBe(4);
+        // 1 PV + 4 soignés. Le soin est passé de 3 à 4 en même temps que l'arrivée de Chiron :
+        // sa carte est le jumeau exact de celle-ci, et une créature ne doit pas soigner plus
+        // qu'une déesse à coût égal.
+        expect(ulysses.currentHealth).toBe(5);
     });
 });
 
