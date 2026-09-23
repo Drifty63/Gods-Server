@@ -150,13 +150,24 @@ describe('Bestiaire — intégrité des unités', () => {
         }
     });
 
-    it('ne fait produire de l\'énergie qu\'aux générateurs, jamais aux cartes payantes', () => {
+    /*
+     * Un générateur DOIT produire de l'énergie -- c'est ce qui le définit. En revanche une carte
+     * payante a le droit d'en rendre une partie.
+     *
+     * Cette seconde moitié était interdite jusqu'ici, et c'était un reste de l'époque où le
+     * bestiaire sortait d'un générateur au gabarit uniforme. Deux raisons de la lever :
+     * le roster la viole depuis toujours (l'Envolée Lyrique d'Apollon coûte 3 et en rend 1), et
+     * surtout `spellPower` FACTURE déjà l'énergie produite (`+ energyGain * 1.5`), donc
+     * POWER_CEILING continue d'attraper une unité qui s'en servirait pour dépasser son budget.
+     * Ce n'était donc pas un garde-fou d'équilibrage, seulement une uniformité de gabarit.
+     *
+     * Le vrai piège de l'énergie reste gardé par le test suivant : déclarer à la fois
+     * `energyGain` et un effet `energy` la double en silence.
+     */
+    it('fait produire de l\'énergie à tous les générateurs', () => {
         for (const s of UNIT_SPELLS) {
-            if (s.type === 'generator') {
-                expect(s.energyGain, `${s.id} devrait produire de l'énergie`).toBeGreaterThan(0);
-            } else {
-                expect(s.energyGain, `${s.id} ne devrait pas produire d'énergie`).toBe(0);
-            }
+            if (s.type !== 'generator') continue;
+            expect(s.energyGain, `${s.id} devrait produire de l'énergie`).toBeGreaterThan(0);
         }
     });
 
