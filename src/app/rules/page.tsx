@@ -4,7 +4,73 @@ import Link from 'next/link';
 import BackButton from '@/components/BackButton/BackButton';
 import styles from './page.module.css';
 import { ELEMENT_SYMBOLS, ELEMENT_NAMES, ELEMENT_COLORS } from '@/game-engine/ElementSystem';
-import { Element } from '@/types/cards';
+import { Element, StatusEffect } from '@/types/cards';
+import { STATUS_ICONS } from '@/data/statusIcons';
+
+/**
+ * Ce que chaque statut fait, en français de joueur.
+ *
+ * L'ICÔNE ne vient PAS d'ici : elle est lue dans STATUS_ICONS, la table qu'utilise le plateau
+ * de combat. Cette page en avait recopié trois à la main, et elles avaient divergé depuis : le
+ * poison y montrait 🧪 quand le combat montre ☠️, la provocation 😤 contre 🎯,
+ * l'étourdissement 😵 contre 💫. La page censée APPRENDRE les symboles en enseignait trois faux.
+ * Elle faisait déjà bien ce travail pour les éléments (ELEMENT_SYMBOLS) — elle le fait
+ * maintenant aussi pour les statuts.
+ *
+ * Le type `Record<StatusEffect, …>` est l'autre moitié du garde-fou : ajouter un statut à
+ * l'union casse la compilation tant qu'il n'est pas décrit ici. Saignement, pétrification et
+ * brûlure étaient restés des mois sans documentation, faute exactement de ce rappel.
+ */
+const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
+    poison: {
+        name: 'Poison',
+        text: 'Avant chaque sort, le dieu subit des dégâts égaux à ses marques de poison. Un dieu qui n\'agit pas ne les paie jamais',
+    },
+    bleed: {
+        name: 'Saignement',
+        text: '1 dégât par marque en fin de tour, qui ignore le bouclier. 2 marques au maximum, et un soin le referme',
+    },
+    petrify: {
+        name: 'Pétrification',
+        text: 'Étourdit un tour, puis chaque marque ajoute +1 dégât à tous les sorts reçus. Ne s\'efface jamais seule : seul un nettoyage la retire',
+    },
+    burn: {
+        name: 'Brûlure',
+        text: '+1 dégât par marque, mais uniquement pour les sorts de feu. Sans limite de cumul, et un soin l\'éteint',
+    },
+    lightning: {
+        name: 'Foudre',
+        text: '+2 dégâts par marque de foudre au moment où elles sont retirées',
+    },
+    shield: {
+        name: 'Bouclier',
+        text: 'Absorbe les dégâts avant qu\'ils ne touchent les points de vie. Plusieurs boucliers s\'additionnent',
+    },
+    regen: {
+        name: 'Régénération',
+        text: 'Rend en fin de tour autant de points de vie que de marques. En s\'appliquant, elle retire le poison',
+    },
+    provocation: {
+        name: 'Provocation',
+        text: 'Force les attaques mono-cibles adverses à cibler ce dieu',
+    },
+    stun: {
+        name: 'Étourdissement',
+        text: 'Le dieu ne peut lancer aucun sort pendant la durée',
+    },
+    untargetable: {
+        name: 'Inciblable',
+        text: 'L\'adversaire ne peut plus le désigner, et les attaques de zone ne l\'atteignent pas. Ses alliés peuvent toujours le soigner',
+    },
+    weakness: {
+        name: 'Faiblesse',
+        text: 'Ajoute une seconde faiblesse élémentaire, en plus de celle du dieu, pendant la durée',
+    },
+    weakness_immunity: {
+        name: 'Immunité',
+        text: 'Le dieu n\'a plus aucune faiblesse élémentaire pendant la durée',
+    },
+};
 
 export default function RulesPage() {
     const elements: Element[] = ['fire', 'air', 'earth', 'lightning', 'water', 'light', 'darkness'];
@@ -169,53 +235,13 @@ export default function RulesPage() {
                 <section className={styles.section}>
                     <h2>✨ Effets de Statut</h2>
                     <div className={styles.statusGrid}>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>🧪</span>
-                            <strong>Poison</strong>
-                            <p>Avant chaque sort, le dieu subit des dégâts égaux aux marques de poison</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>⚡</span>
-                            <strong>Foudre</strong>
-                            <p>+2 dégâts par marque de foudre quand elles sont retirées</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>🛡️</span>
-                            <strong>Bouclier</strong>
-                            <p>Absorbe les dégâts avant qu&apos;ils ne touchent les points de vie</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>😤</span>
-                            <strong>Provocation</strong>
-                            <p>Force les attaques mono-cibles à cibler ce dieu</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>😵</span>
-                            <strong>Stun</strong>
-                            <p>Le dieu ne peut pas lancer de sorts pendant la durée</p>
-                        </div>
-                        {/*
-                          * Saignement, pétrification et brûlure avaient été retirés de cette page
-                          * en septembre : le moteur les connaissait, mais aucune carte ne les
-                          * posait, et décrire une mécanique que le joueur ne rencontre jamais est
-                          * pire que de la taire. Les unités en préparation les emploient — ils
-                          * reviennent donc, avec leurs règles exactes.
-                          */}
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>🩸</span>
-                            <strong>Saignement</strong>
-                            <p>1 dégât par marque en fin de tour, qui ignore le bouclier. 2 marques au maximum, et un soin le referme</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>🗿</span>
-                            <strong>Pétrification</strong>
-                            <p>Étourdit un tour, puis chaque marque ajoute +1 dégât à tous les sorts reçus. Ne s&apos;efface jamais seule : seul un nettoyage la retire</p>
-                        </div>
-                        <div className={styles.statusCard}>
-                            <span className={styles.statusIcon}>🔥</span>
-                            <strong>Brûlure</strong>
-                            <p>+1 dégât par marque, mais uniquement pour les sorts de feu. Sans limite de cumul, et un soin l&apos;éteint</p>
-                        </div>
+                        {(Object.keys(STATUS_RULES) as StatusEffect[]).map(key => (
+                            <div key={key} className={styles.statusCard}>
+                                <span className={styles.statusIcon}>{STATUS_ICONS[key]}</span>
+                                <strong>{STATUS_RULES[key].name}</strong>
+                                <p>{STATUS_RULES[key].text}</p>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
