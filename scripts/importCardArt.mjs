@@ -99,6 +99,44 @@ function deadBorders(data, W, H, C) {
     return { left, right, top, bottom };
 }
 
+/**
+ * Toutes les destinations qu'une carte référence, lues dans les sources.
+ *
+ * Le contrôle portait jusqu'ici sur l'EXISTENCE du fichier dans `public/`, ce qui n'était qu'un
+ * approximation de la vraie question — « une carte pointe-t-elle là ? ». Tant qu'on ne livrait
+ * que des remplacements, les deux se confondaient. Pour une unité NEUVE, le fichier n'existe
+ * évidemment pas encore, et l'ancien contrôle rejetait la livraison entière.
+ *
+ * On lit donc les `imageUrl` des sources. Ce sont des littéraux : une expression régulière
+ * suffit, et c'est plus sûr que le disque puisqu'une faute de frappe dans le nom du fichier est
+ * maintenant détectée au lieu de créer un fichier orphelin que rien n'affichera.
+ */
+function referencedDestinations() {
+    const set = new Set();
+    const walk = dir => {
+        for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+            const p = path.join(dir, e.name);
+            if (e.isDirectory()) walk(p);
+            else if (/\.tsx?$/.test(e.name)) {
+                const text = fs.readFileSync(p, 'utf8');
+                for (const m of text.matchAll(/imageUrl:\s*[`'"]([^`'"]+)[`'"]/g)) set.add(m[1]);
+                // Les fabriques du bestiaire composent le chemin : `/cards/gods/${u.id}.png`.
+                // On les reconstruit à partir des identifiants déclarés dans le même fichier.
+                for (const m of text.matchAll(/id:\s*'([a-z0-9_]+)'/g)) {
+                    set.add(`/cards/gods/${m[1]}.png`);
+                    for (const slot of ['generator_1', 'generator_2', 'skill_1', 'skill_2', 'utility_1']) {
+                        set.add(`/cards/spells/spell_${m[1]}_${slot}.png`);
+                    }
+                }
+            }
+        }
+    };
+    walk(path.join(ROOT, 'src', 'data'));
+    return set;
+}
+
+const REFERENCED = referencedDestinations();
+
 const problems = [];
 const trimmed = [];
 let written = 0, bytesIn = 0, bytesOut = 0;
@@ -106,7 +144,11 @@ let written = 0, bytesIn = 0, bytesOut = 0;
 for (const r of rows) {
     if (!fs.existsSync(r.src)) { problems.push('source introuvable : ' + r.src); continue; }
     const destAbs = path.join(ROOT, 'public', r.dest.replace(/^\//, ''));
-    if (!fs.existsSync(destAbs)) { problems.push('destination inattendue (aucune carte ne la référence) : ' + r.dest); continue; }
+    if (!fs.existsSync(destAbs) && !REFERENCED.has(r.dest)) {
+        problems.push('destination inattendue (aucune carte ne la référence) : ' + r.dest);
+        continue;
+    }
+    fs.mkdirSync(path.dirname(destAbs), { recursive: true });
 
     const buf = fs.readFileSync(r.src);
     bytesIn += buf.length;

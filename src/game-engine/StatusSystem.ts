@@ -65,8 +65,17 @@ export function addStatus(
      * Ce sont des vulnérabilités qui pèsent jusqu'à ce qu'on s'en occupe — un nettoyage
      * d'effets négatifs pour la pierre, un soin pour le feu. Leur donner une durée les ferait
      * disparaître toutes seules et viderait de leur sens les cartes bâties autour.
+     *
+     * Trois autres les rejoignent, pour des raisons distinctes :
+     *  - `fear` s'efface bien, mais UNE MARQUE PAR TOUR, pas d'un bloc à l'expiration d'une
+     *    durée (voir tickStatusEffects). Lui donner une durée la supprimerait entièrement d'un
+     *    coup, ce qui n'est pas la règle.
+     *  - `dreaded` dure ce que dure son porteur : on n'oublie pas celui qui vous a terrifié.
+     *  - `empowered` ATTEND sa cible. Une durée le ferait expirer avant que son porteur ait eu
+     *    l'occasion de frapper — or il ne se consomme que sur une attaque mono-cible.
      */
-    const permanent = status === 'petrify' || status === 'burn';
+    const permanent = status === 'petrify' || status === 'burn'
+        || status === 'fear' || status === 'dreaded' || status === 'empowered';
     const effectiveDuration = permanent ? undefined : duration;
 
     const cap = STATUS_STACK_CAPS[status];
@@ -118,6 +127,33 @@ export function canGodAct(god: GodState): boolean {
     return !god.isDead && !god.statusEffects.some(s => s.type === 'stun');
 }
 
+/**
+ * Un dieu réduit au silence ne peut plus jouer ses cartes COMPÉTENCE. Ses générateurs et son
+ * utilitaire restent jouables — c'est toute la différence avec l'étourdissement, qui ferme les
+ * cinq cartes.
+ *
+ * Le filtre porte sur le TYPE de carte et non sur « les cartes qui infligent des dégâts » :
+ * 56 des 60 générateurs du jeu en infligent au passage, si bien que la seconde formulation
+ * aurait fermé deux cartes sur trois et coupé la production d'énergie du dieu. Le type, lui,
+ * est imprimé sur la carte : le joueur voit d'un coup d'œil ce qui est scellé.
+ */
+export function isSilenced(god: GodState): boolean {
+    return god.statusEffects.some(s => s.type === 'silence');
+}
+
+/**
+ * Un dieu qui porte de l'effroi n'ose plus viser celui qui le lui a inspiré, tant qu'il s'agit
+ * d'une attaque MONO-CIBLE. Les attaques de zone l'atteignent normalement.
+ *
+ * C'est ce qui sépare l'effroi de `untargetable`, lequel ferme aussi la zone : la protection
+ * se contourne en frappant large, au prix de la précision.
+ */
+export function isShieldedByFear(caster: GodState | undefined, target: GodState): boolean {
+    if (!caster) return false;
+    const afraid = caster.statusEffects.some(s => s.type === 'fear' && s.stacks > 0);
+    return afraid && target.statusEffects.some(s => s.type === 'dreaded' && s.stacks > 0);
+}
+
 // ─────────────────────────────────────────────
 // Tick de fin de tour
 // ─────────────────────────────────────────────
@@ -156,6 +192,24 @@ export function tickStatusEffects(player: PlayerState, state: GameState): void {
             if (god.currentHealth <= 0) {
                 handleGodDeath(player, god, state);
             }
+        }
+
+        /*
+         * 2bis. EFFROI : une marque s'efface, pas le statut entier.
+         *
+         * C'est la seule décroissance de ce type dans le jeu, et elle est le garde-fou de toute
+         * la mécanique. Sans elle, un joueur poserait une marque sur chaque ennemi et Actéon
+         * ne serait plus jamais mono-ciblable de la partie. Avec elle, entretenir la protection
+         * coûte une carte par tour — donc TOUT le tour d'Actéon, qui ne frappe alors jamais.
+         *
+         * Comme le reste du tick, ça n'a lieu qu'à la fin du tour du camp qui PORTE la marque :
+         * une marque posée pendant le tour d'Actéon reste donc vivante tout le tour adverse
+         * suivant, et deux marques couvrent deux tours.
+         */
+        const fearEffect = god.statusEffects.find(s => s.type === 'fear');
+        if (fearEffect && fearEffect.appliedTurn !== state.turnSequence) {
+            fearEffect.stacks -= 1;
+            if (fearEffect.stacks <= 0) removeStatus(god, 'fear');
         }
 
         // 3. Décrémenter les durées

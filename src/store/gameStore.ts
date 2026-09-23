@@ -643,9 +643,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     getValidEnemyTargets: (isMultiTarget: boolean = false): GodState[] => {
-        const { engine } = get();
+        const { engine, gameState, selectedCard, playerId } = get();
         if (!engine) return [];
-        return engine.getValidTargets('enemy_god', isMultiTarget);
+        // Le dieu qui lance décide de ce qu'il PEUT viser : sous l'effroi, la source de sa
+        // peur disparaît de la liste. Sans ce paramètre l'interface la proposerait encore, et
+        // le sort se résoudrait dans le vide après le clic.
+        const caster = selectedCard
+            ? gameState?.players.find(p => p.id === playerId)?.gods.find(g => g.card.id === selectedCard.godId && !g.isDead)
+            : undefined;
+        return engine.getValidTargets('enemy_god', isMultiTarget, caster);
     },
 
     getRequiredEnemyTargets: (): GodState[] => {
@@ -1535,6 +1541,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             s => s.type === 'stun'
         );
         if (isStunned) return false;
+
+        // Le silence ne ferme que les compétences : générateurs et utilitaire restent jouables.
+        // Mêmes règles que l'engine (GameEngine.playCard), pour que la carte soit grisée au
+        // lieu d'être refusée après le clic.
+        if (card.type === 'competence' && god.statusEffects.some(s => s.type === 'silence')) return false;
 
         return true;
     },

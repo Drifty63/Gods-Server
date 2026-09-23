@@ -51,26 +51,6 @@ const charon = kit(
     },
 );
 
-const cerbere = kit(
-    creature({
-        id: 'cerbere', name: 'Cerbère', element: 'fire', hp: 25, god: 'hades', arch: 'tank',
-        flavor: '"Trois gueules pour la même faim. On entre par moi, on ne sort jamais."',
-    }),
-    {
-        generators: [
-            { id: 'grondement', name: 'Grondement', gain: 2, desc: '+2 énergie et 1 dégât.', effects: [dmg(1)] },
-            { id: 'crocs_vifs', name: 'Crocs Vifs', gain: 2, desc: '+2 énergie et 2 dégâts.', effects: [dmg(2)] },
-        ],
-        competences: [
-            { id: 'garde_porte', name: 'Garde de la Porte', desc: 'Provocation sur soi 2 tours et bouclier 4.', effects: [status('provocation', 1, 'self', 2), shield(4)] },
-            { id: 'morsure', name: 'Morsure Tenace', desc: '3 dégâts et 2 saignements.', effects: [dmg(3), status('bleed', 2, 'same')] },
-        ],
-        utility: {
-            id: 'trois_gueules', name: 'Trois Gueules', desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')],
-        },
-    },
-);
-
 const alecto = kit(
     creature({
         id: 'alecto', name: 'Alecto, l\'Implacable', element: 'darkness', hp: 22, god: 'hades',
@@ -91,4 +71,4 @@ const alecto = kit(
     },
 );
 
-export const hadesBestiary = mergeKits(ombre, charon, cerbere, alecto);
+export const hadesBestiary = mergeKits(ombre, charon, alecto);

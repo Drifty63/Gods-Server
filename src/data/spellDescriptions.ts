@@ -32,6 +32,9 @@ export const STATUS_LABELS: Record<StatusEffect, string> = {
     burn: 'Brûlure',
     fear: 'Effroi',
     silence: 'Silence',
+    dreaded: 'Redouté',
+    empowered: 'Galvanisé',
+    blunted: 'Émoussé',
 };
 
 function targetSuffix(target: TargetType | undefined, count: number, kind: 'ennemi' | 'allié'): string {

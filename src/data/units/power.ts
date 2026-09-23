@@ -30,6 +30,14 @@ const STATUS_WEIGHT: Record<StatusEffect, number> = {
     // (3) les ferme toutes les cinq pour le meme prix. Il vaut donc nettement moins, sans
     // tomber au niveau d une simple marque : ce sont les cartes offensives qu il coupe.
     silence: 2,
+    // « Redoute » ne fait rien par lui-meme : c est la peur d en face qui travaille, et elle
+    // est deja facturee. Le compter une seconde fois doublerait le prix de la meme mecanique.
+    dreaded: 0,
+    // Galvanise porte des degats ET un etourdissement, mais sur UNE cible et une seule fois.
+    // Emousse retire des degats a chaque effet de la carte suivante : moins spectaculaire,
+    // plus sur.
+    empowered: 2.5,
+    blunted: 2,
     weakness: 1.5,
     weakness_immunity: 1,
     regen: 1.2,

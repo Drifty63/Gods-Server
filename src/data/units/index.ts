@@ -13,6 +13,7 @@ import { demeterBestiary } from './demeter';
 import { dionysosBestiary } from './dionysos';
 import { apollonBestiary } from './apollon';
 import { aphroditeBestiary } from './aphrodite';
+import { RELEASED_BESTIARY } from './released';
 
 /**
  * Bestiaire complet : 2 serviteurs et 2 créatures rattachés à chacun des 12 dieux du roster.
@@ -33,6 +34,9 @@ const BESTIARIES: Bestiary[] = [
     dionysosBestiary,
     apollonBestiary,
     aphroditeBestiary,
+    // Les 19 unités écrites à la main, seules visibles par le joueur : tout ce qui précède est
+    // en brouillon. Voir ./released/index.ts.
+    RELEASED_BESTIARY,
 ];
 
 export const UNIT_CARDS: GodCard[] = BESTIARIES.flatMap(b => b.units);

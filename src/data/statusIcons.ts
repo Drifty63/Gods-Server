@@ -21,6 +21,9 @@ export const STATUS_ICONS: Record<StatusEffect, string> = {
     burn: '🔥',
     fear: '😨',
     silence: '🔇',
+    dreaded: '😱',
+    empowered: '💪',
+    blunted: '🥀',
 };
 
 export function getStatusIcon(status: StatusEffect): string {

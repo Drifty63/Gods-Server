@@ -82,7 +82,40 @@ export type StatusEffect =
      * Reste volontairement plus faible que l'étourdissement, qui ferme les cinq cartes pour
      * le même prix (Stun divin : 1 énergie, 2 tours).
      */
-    | 'silence';
+    | 'silence'
+    /*
+     * Redouté : porté par celui qui INSPIRE l'effroi, jamais par celui qui le subit.
+     *
+     * C'est la moitié visible de la règle de l'effroi. Plutôt que de mémoriser sur chaque
+     * marque de peur QUI l'a posée — un champ de plus dans l'état, à synchroniser dans le
+     * jsonb des parties en ligne — on marque la source. La règle devient alors purement
+     * locale : un dieu qui porte de la peur ne peut pas mono-cibler un dieu qui porte ceci.
+     *
+     * Permanent : une fois qu'Actéon a terrifié quelqu'un, il reste celui qu'on n'ose plus
+     * regarder. Ce qui s'efface, c'est la peur de l'autre côté.
+     */
+    | 'dreaded'
+    /*
+     * Galvanisé : la PROCHAINE attaque mono-cible de ce dieu inflige `stacks` dégâts de plus
+     * et étourdit sa cible un tour. Le bonus attend : une attaque de zone ne le déclenche pas
+     * et ne le consomme pas.
+     *
+     * Première amplification CÔTÉ LANCEUR du jeu — pétrification et brûlure amplifient depuis
+     * la cible, et `dealDamage` ne reçoit même pas le lanceur. Le bonus se lit donc au point
+     * d'application des dégâts dans GameEngine, pas dans DamageSystem.
+     *
+     * La clause mono-cible ne borne pas les dégâts, elle borne l'ÉTOURDISSEMENT : sur une
+     * attaque de zone il gèlerait les quatre ennemis d'un coup.
+     */
+    | 'empowered'
+    /*
+     * Émoussé : ce dieu inflige `stacks` dégâts de moins, sur CHAQUE effet de dégât des cartes
+     * qu'il joue — une carte qui frappe deux fois perd donc deux fois.
+     *
+     * Le miroir exact de `empowered`, au même point d'application. À ne pas confondre avec
+     * `weakness`, qui est une faiblesse ÉLÉMENTAIRE et double les dégâts REÇUS.
+     */
+    | 'blunted';
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi
@@ -139,6 +172,14 @@ export interface SpellEffect {
     status?: StatusEffect;
     statusDuration?: number;
     customEffectId?: string; // Pour les effets spéciaux uniques
+    /**
+     * Ces dégâts traversent le bouclier sans l'entamer : la cible perd ses PV, son bouclier
+     * reste intact (12 PV + 2 boucliers, frappée de 3, finit à 9 PV + 2 boucliers).
+     *
+     * `dealDamage` savait déjà le faire, mais seul le saignement s'en servait — aucun sort ne
+     * pouvait le demander, faute de ce champ.
+     */
+    ignoreShield?: boolean;
     description?: string;
 }
 

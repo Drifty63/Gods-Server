@@ -1,96 +1,97 @@
 Unité;Dieu;Catégorie;PV;Coût Duel;Élément;Faiblesse;Rôle du sort;Nom du sort;Coût énergie;Gain énergie;Effet (en français simple);Indication
-Feu follet;Hestia;serviteur;14;2;Feu;Eau;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Feu follet;Hestia;serviteur;14;2;Feu;Eau;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Feu follet;Hestia;serviteur;14;2;Feu;Eau;Compétence 1;;1;0;;Le coup signature, bon marché
-Feu follet;Hestia;serviteur;14;2;Feu;Eau;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Feu follet;Hestia;serviteur;14;2;Feu;Eau;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Cyclope;Poséidon;serviteur;18;2;Terre;Air;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Cyclope;Poséidon;serviteur;18;2;Terre;Air;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Cyclope;Poséidon;serviteur;18;2;Terre;Air;Compétence 1;;1;0;;Le coup signature, bon marché
-Cyclope;Poséidon;serviteur;18;2;Terre;Air;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Cyclope;Poséidon;serviteur;18;2;Terre;Air;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Méduse;Poséidon;créature;22;3;Terre;Air;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Méduse;Poséidon;créature;22;3;Terre;Air;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Méduse;Poséidon;créature;22;3;Terre;Air;Compétence 1;;1;0;;Le coup signature, bon marché
-Méduse;Poséidon;créature;22;3;Terre;Air;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Méduse;Poséidon;créature;22;3;Terre;Air;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Compétence 1;;1;0;;Le coup signature, bon marché
-Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Compétence 1;;1;0;;Le coup signature, bon marché
-Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Compétence 1;;1;0;;Le coup signature, bon marché
-Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Achille;Aphrodite;créature;20;3;Air;Feu;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Achille;Aphrodite;créature;20;3;Air;Feu;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Achille;Aphrodite;créature;20;3;Air;Feu;Compétence 1;;1;0;;Le coup signature, bon marché
-Achille;Aphrodite;créature;20;3;Air;Feu;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Achille;Aphrodite;créature;20;3;Air;Feu;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Compétence 1;;1;0;;Le coup signature, bon marché
-Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Python;Apollon;créature;24;3;Terre;Air;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Python;Apollon;créature;24;3;Terre;Air;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Python;Apollon;créature;24;3;Terre;Air;Compétence 1;;1;0;;Le coup signature, bon marché
-Python;Apollon;créature;24;3;Terre;Air;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Python;Apollon;créature;24;3;Terre;Air;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Satyre;Dionysos;serviteur;14;2;Terre;Air;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Satyre;Dionysos;serviteur;14;2;Terre;Air;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Satyre;Dionysos;serviteur;14;2;Terre;Air;Compétence 1;;1;0;;Le coup signature, bon marché
-Satyre;Dionysos;serviteur;14;2;Terre;Air;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Satyre;Dionysos;serviteur;14;2;Terre;Air;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Chiron;Dionysos;créature;22;3;Terre;Air;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Chiron;Dionysos;créature;22;3;Terre;Air;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Chiron;Dionysos;créature;22;3;Terre;Air;Compétence 1;;1;0;;Le coup signature, bon marché
-Chiron;Dionysos;créature;22;3;Terre;Air;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Chiron;Dionysos;créature;22;3;Terre;Air;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Compétence 1;;1;0;;Le coup signature, bon marché
-Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Harpie;Zeus;créature;20;3;Air;Feu;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Harpie;Zeus;créature;20;3;Air;Feu;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Harpie;Zeus;créature;20;3;Air;Feu;Compétence 1;;1;0;;Le coup signature, bon marché
-Harpie;Zeus;créature;20;3;Air;Feu;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Harpie;Zeus;créature;20;3;Air;Feu;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Compétence 1;;1;0;;Le coup signature, bon marché
-Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Compétence 1;;1;0;;Le coup signature, bon marché
-Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Occultiste;Nyx;serviteur;16;2;Ténèbres;Lumière;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Occultiste;Nyx;serviteur;16;2;Ténèbres;Lumière;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Occultiste;Nyx;serviteur;16;2;Ténèbres;Lumière;Compétence 1;;1;0;;Le coup signature, bon marché
-Occultiste;Nyx;serviteur;16;2;Ténèbres;Lumière;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Occultiste;Nyx;serviteur;16;2;Ténèbres;Lumière;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Érinye;Nyx;créature;22;3;Feu;Eau;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Érinye;Nyx;créature;22;3;Feu;Eau;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Érinye;Nyx;créature;22;3;Feu;Eau;Compétence 1;;1;0;;Le coup signature, bon marché
-Érinye;Nyx;créature;22;3;Feu;Eau;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Érinye;Nyx;créature;22;3;Feu;Eau;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Sirène;Déméter;serviteur;14;2;Air;Feu;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Sirène;Déméter;serviteur;14;2;Air;Feu;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Sirène;Déméter;serviteur;14;2;Air;Feu;Compétence 1;;1;0;;Le coup signature, bon marché
-Sirène;Déméter;serviteur;14;2;Air;Feu;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Sirène;Déméter;serviteur;14;2;Air;Feu;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
-Minotaure;Déméter;créature;24;3;Terre;Air;Générateur 1;;0;1;;Frappe faible et large — souvent 1 dégât à tous les ennemis
-Minotaure;Déméter;créature;24;3;Terre;Air;Générateur 2;;0;1;;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
-Minotaure;Déméter;créature;24;3;Terre;Air;Compétence 1;;1;0;;Le coup signature, bon marché
-Minotaure;Déméter;créature;24;3;Terre;Air;Compétence 2;;3;0;;Le coup lourd, celui qui coûte cher
-Minotaure;Déméter;créature;24;3;Terre;Air;Utilitaire;;1;0;;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Feu follet;Hestia;serviteur;14;2;Feu;Eau;Générateur 1;Danse des étincelles;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Feu follet;Hestia;serviteur;14;2;Feu;Eau;Générateur 2;Flammèche vive;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Feu follet;Hestia;serviteur;14;2;Feu;Eau;Compétence 1;Chaleur bienveillante;1;1;soigne un allié de 3 PV;Le coup signature, bon marché
+Feu follet;Hestia;serviteur;14;2;Feu;Eau;Compétence 2;Cœur incandescent;3;0;1 dégâts à tous les ennemis et leurs applique une marque de brûlure;Le coup lourd, celui qui coûte cher
+Feu follet;Hestia;serviteur;14;2;Feu;Eau;Utilitaire;Morsure de braise;1;0;applique une marque de brûlure a 2 cible;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Cyclope;Poséidon;serviteur;18;2;Terre;Air;Générateur 1;éboulement furieux;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Cyclope;Poséidon;serviteur;18;2;Terre;Air;Générateur 2;Coup de gourdin;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Cyclope;Poséidon;serviteur;18;2;Terre;Air;Compétence 1;étreinte du colosse;1;0;4 dégâts à une cible et la stun 1 tour;Le coup signature, bon marché
+Cyclope;Poséidon;serviteur;18;2;Terre;Air;Compétence 2;Jet de rocher;3;0;4 dégâts à 2 cible;Le coup lourd, celui qui coûte cher
+Cyclope;Poséidon;serviteur;18;2;Terre;Air;Utilitaire;Abri du berger;1;0;Gagne 3 bouclier et devient inciblable 1 tour;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Méduse;Poséidon;créature;22;3;Terre;Air;Générateur 1;Regard perçant;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Méduse;Poséidon;créature;22;3;Terre;Air;Générateur 2;Toucher de la Gorgone;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Méduse;Poséidon;créature;22;3;Terre;Air;Compétence 1;Crocs des vipères;1;0;Inflige 2 dégâts à 2 cible et leurs applique 1 poison;Le coup signature, bon marché
+Méduse;Poséidon;créature;22;3;Terre;Air;Compétence 2;Jardin des condamnés;3;0;1 dégâts à tous les ennemis et leurs applique une marque de pétrification;Le coup lourd, celui qui coûte cher
+Méduse;Poséidon;créature;22;3;Terre;Air;Utilitaire;Pétrification;1;0;applique une marque de pétrification a 2 cible;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Générateur 1;Chaîne brûlante;0;1;1 dégâts à tous les ennemi;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Générateur 2;Griffe d'obsidienne;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Compétence 1;étreinte du Tartare;1;0;Stun 1 cible un tour et lui applique une marque de brûlure;Le coup signature, bon marché
+Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Compétence 2;Fournaise abyssale;3;0;1 dégâts à tous les ennemis et leurs applique une marque de brûlure;Le coup lourd, celui qui coûte cher
+Démon du Tartare;Hadès;serviteur;16;2;Feu;Eau;Utilitaire;Peau de basalte;1;1;gagne 3 bouclier et génère 1 énergie;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Générateur 1;Hurlement du gardien;0;1;1 dégâts à tous les ennemi;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Générateur 2;Griffe du seuil;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Compétence 1;Traqueur intransigeant;1;1;Soigne 2 PV à vous-même génère 1 énergie;Le coup signature, bon marché
+Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Compétence 2;Triple morsure;3;0;3 dégâts à 3 cible;Le coup lourd, celui qui coûte cher
+Cerbère;Hadès;créature;25;3;Ténèbres;Lumière;Utilitaire;Vigilance maximal;1;0;Gagne 3 bouclier et provoque pour 2 tours;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Générateur 1;Regard hypnotique;0;1;1 dégâts à tous les ennemi;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Générateur 2;Poing du dévoué;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Compétence 1;étreinte envoûtante;1;0;Stun 1 cible un tour;Le coup signature, bon marché
+Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Compétence 2;Dévotion sans faille;3;0;Le serviteur se sacrifie : il meurt, et donne la moitié de ses PV actuels à un dieu allié. Effet sur mesure;Le coup lourd, celui qui coûte cher
+Serviteur d'Aphrodite;Aphrodite;serviteur;14;2;Lumière;Ténèbres;Utilitaire;Geste protecteur;1;0;Donne 3 bouclier à un allié et provoque pour 1 tour;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Achille;Aphrodite;créature;20;3;Air;Feu;Générateur 1;Course héroïque;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Achille;Aphrodite;créature;20;3;Air;Feu;Générateur 2;Estocade myrmidone;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Achille;Aphrodite;créature;20;3;Air;Feu;Compétence 1;Revers du bouclier;1;0;Inflige 2 dégâts a 2 cibles et gagne 2 de bouclier;Le coup signature, bon marché
+Achille;Aphrodite;créature;20;3;Air;Feu;Compétence 2;Fureur de Troie;3;0;6 dégâts à une cible et applique faiblesse d'un élément voulu;Le coup lourd, celui qui coûte cher
+Achille;Aphrodite;créature;20;3;Air;Feu;Utilitaire;Garde impénétrable;1;0;enlève et purge tout ses effets négatifs;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Générateur 1;Braise sacrée;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Générateur 2;Tir prémonitoire;0;1;3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Compétence 1;Soin providentiel;1;1;Soigne 2 PV à vous-même génère 1 énergie;Le coup signature, bon marché
+Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Compétence 2;Destin contrarié;3;0;"le joueur prédit l'action adverse (générateur / compétence / utilitaire / défausse). Si l'adversaire la fait, elle est annulée ; +2 bouclier sur chaque allié vivant et +1 énergie. Sur mesure";Le coup lourd, celui qui coûte cher
+Oracle de Delphes;Apollon;serviteur;16;2;Lumière;Ténèbres;Utilitaire;Lecture des présages;1;0;révèle 2 cartes de la main adverse pendant 3 secondes. Sur mesure;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Python de Delphes;Apollon;créature;24;3;Terre;Air;Générateur 1;Balayage caudal;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Python de Delphes;Apollon;créature;24;3;Terre;Air;Générateur 2;Crochets venimeux;0;1;Inflige 2 dégâts à une cible et lui applique 1 poison;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Python de Delphes;Apollon;créature;24;3;Terre;Air;Compétence 1;Constriction monstrueuse;1;0;Inflige 3 dégâts à une cible et la stun 1 tour;Le coup signature, bon marché
+Python de Delphes;Apollon;créature;24;3;Terre;Air;Compétence 2;Souffle méphitique;3;0;1 dégât à tous les ennemis, +1 par marque de poison sur chacun. Sur mesure;Le coup lourd, celui qui coûte cher
+Python de Delphes;Apollon;créature;24;3;Terre;Air;Utilitaire;Mue écailleuse;1;0;se purge de tout effets négatifs et gagne 2 pv;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Satyre;Dionysos;serviteur;14;2;Terre;Air;Générateur 1;Air espiègle;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Satyre;Dionysos;serviteur;14;2;Terre;Air;Générateur 2;Coup de corne;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Satyre;Dionysos;serviteur;14;2;Terre;Air;Compétence 1;Tir de sarbacane;1;0;Inflige 3 dégâts à une cible et lui applique 1 poison;Le coup signature, bon marché
+Satyre;Dionysos;serviteur;14;2;Terre;Air;Compétence 2;Ronces enivrantes;3;0;Inflige 1 dégâts à tous les ennemis et les stun pour 1 tour;Le coup lourd, celui qui coûte cher
+Satyre;Dionysos;serviteur;14;2;Terre;Air;Utilitaire;Fête enivrante;1;0;Gagne 3 PV;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Chiron;Dionysos;créature;22;3;Terre;Air;Générateur 1;Ruade maîtrisée;0;1;1 dégâts a tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Chiron;Dionysos;créature;22;3;Terre;Air;Générateur 2;Flèche du mentor;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Chiron;Dionysos;créature;22;3;Terre;Air;Compétence 1;Tir anatomique;1;0;Inflige 2 dégâts à une cible et lui applique 1 saignement;Le coup signature, bon marché
+Chiron;Dionysos;créature;22;3;Terre;Air;Compétence 2;Leçon du héro;3;1;"un allié gagne 3 boucliers ; sa prochaine attaque mono-cible fait +3 dégâts et étourdit la cible 1 tour. Sur mesure";Le coup lourd, celui qui coûte cher
+Chiron;Dionysos;créature;22;3;Terre;Air;Utilitaire;Baume des montagnes;1;0;Soigne 3 PV à un allié et lui purge ses effets négatifs;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Générateur 1;Phalange de l'olympe;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Générateur 2;Pointe olympienne;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Compétence 1;Heurt du rempart;1;0;Inflige 2 dégâts à un ennemi et lui applique une marque de foudre;Le coup signature, bon marché
+Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Compétence 2;Sentence du sommet;3;0;Inflige 4 dégâts à une cible et lui retire ses marques de foudres + 2 dégâts par marque retiré;Le coup lourd, celui qui coûte cher
+Garde céleste;Zeus;serviteur;16;2;Foudre;Terre;Utilitaire;Relève céleste;1;0;Gagne 3 bouclier et provoque pour 2 tours;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Harpie;Zeus;créature;20;3;Air;Feu;Générateur 1;Battement brutal;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Harpie;Zeus;créature;20;3;Air;Feu;Générateur 2;Rapt aérien;0;1;3 dégâts à une cible;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Harpie;Zeus;créature;20;3;Air;Feu;Compétence 1;Serres lacérantes;1;0;Inflige 2 dégâts à une cible et lui applique 1 saignement;Le coup signature, bon marché
+Harpie;Zeus;créature;20;3;Air;Feu;Compétence 2;Cri déchirant ;3;0;inflige 1 dégâts à tous les ennemis et leurs applique 1 saignement;Le coup lourd, celui qui coûte cher
+Harpie;Zeus;créature;20;3;Air;Feu;Utilitaire;Refuge escarpé;1;0;Devient inciblable pour 2 tours;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Générateur 1;Attaque en meute;0;1;Inflige 1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Générateur 2;Bond prédateur;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Compétence 1;Coup de crocs;1;0;Inflige 2 dégâts à une cible et lui applique 1 saignement;Le coup signature, bon marché
+Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Compétence 2;Morsure tenace;3;0;Inflige 4 dégâts à une cible et la stun pour 1 tour;Le coup lourd, celui qui coûte cher
+Loup d'Artémis;Artémis;serviteur;14;2;Terre;Air;Utilitaire;Pas de velours;1;0;Devient inciblable pour 2 tours;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Générateur 1;Coup d'andouiller;0;1;1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Générateur 2;Griffes maudites;0;1;3 dégâts à 1 cible;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Compétence 1;"Charge de la malédiction
+";1;0; 2 dégâts sur une cible + 2 marques de peur. Sur mesure.;Le coup signature, bon marché
+Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Compétence 2;Brame de terreur;3;0;"2 dégâts à tous les ennemis, retire toutes les marques de peur ; ceux qui en portaient infligent −2 dégâts pendant 1 tour. Sur mesure.";Le coup lourd, celui qui coûte cher
+Actéon;Artémis;créature;24;3;Ténèbres;Lumière;Utilitaire;Refuge d'effroi;1;0; 2 marques de peur sur 2 cibles. Sur mesure.;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Occultiste de Nyx;Nyx;serviteur;16;2;Ténèbres;Lumière;Générateur 1;Murmure nocturne;0;1;Inflige 1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Occultiste de Nyx;Nyx;serviteur;16;2;Ténèbres;Lumière;Générateur 2;étincelle obscure;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Occultiste de Nyx;Nyx;serviteur;16;2;Ténèbres;Lumière;Compétence 1;Offrande à la nuit;1;3;Inflige 4 dégâts à vous même génère 3 énergie;Le coup signature, bon marché
+Occultiste de Nyx;Nyx;serviteur;16;2;Ténèbres;Lumière;Compétence 2;Voile rituel;3;1;Tout les alliées (sauf vous) devenez inciblable pour 1 tour génère 1 d'énergie;Le coup lourd, celui qui coûte cher
+Occultiste de Nyx;Nyx;serviteur;16;2;Ténèbres;Lumière;Utilitaire;Sceau du silence;1;0;Un dieu ennemi ne peut plus jouer ses cartes Compétence pendant 2 tours. Sur mesure.;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Érinye;Nyx;créature;22;3;Feu;Eau;Générateur 1;Lanière vengeresse;0;1;Inflige 1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Érinye;Nyx;créature;22;3;Feu;Eau;Générateur 2;Morsure du remords;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Érinye;Nyx;créature;22;3;Feu;Eau;Compétence 1;Châtiment inexorable;1;0;Inflige 3 dégâts à un ennemi et lui applique 1 brûlure;Le coup signature, bon marché
+Érinye;Nyx;créature;22;3;Feu;Eau;Compétence 2;Tribunal des furies;3;0;Tout les ennemis sont réduis au silence pour 2 tours;Le coup lourd, celui qui coûte cher
+Érinye;Nyx;créature;22;3;Feu;Eau;Utilitaire;Piste du coupable;1;0;Applique 1 saignement à 2 cibles;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Sirène;Déméter;serviteur;14;2;Air;Feu;Générateur 1;Note obsédante;0;1;Inflige 1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Sirène;Déméter;serviteur;14;2;Air;Feu;Générateur 2;Serres du récif;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Sirène;Déméter;serviteur;14;2;Air;Feu;Compétence 1;Mélodie fatale;1;0;Stun 2 cibles pour un tour;Le coup signature, bon marché
+Sirène;Déméter;serviteur;14;2;Air;Feu;Compétence 2;chœur des égarés;3;0;fait perdre 2 énergies à l'adversaire et devient inciblable pour 2 tours;Le coup lourd, celui qui coûte cher
+Sirène;Déméter;serviteur;14;2;Air;Feu;Utilitaire;Chant réparateur;1;0;Soigne 4 PV à un alliée;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque
+Minotaure;Déméter;créature;24;3;Terre;Air;Générateur 1;Charge écrasante;0;1;Inflige 1 dégâts à tous les ennemis;Frappe faible et large — souvent 1 dégât à tous les ennemis
+Minotaure;Déméter;créature;24;3;Terre;Air;Générateur 2;Taillade de bronze;0;1;Inflige 3 dégâts à un ennemi;Frappe simple et ciblée — souvent 3 dégâts à un ennemi
+Minotaure;Déméter;créature;24;3;Terre;Air;Compétence 1;Coup de boule;1;0;3 dégâts à deux cibles différentes, en ignorant le bouclier. Sur mesure.;Le coup signature, bon marché
+Minotaure;Déméter;créature;24;3;Terre;Air;Compétence 2;Piège sans issue;3;0;détruit tout le bouclier d'une cible, puis 6 dégâts. Sur mesure.;Le coup lourd, celui qui coûte cher
+Minotaure;Déméter;créature;24;3;Terre;Air;Utilitaire;Maître du dédale;1;0;Gagne 3 bouclier et devient inciblable 1 tour;Bouclier, provocation, soin, état — ce qui n'est pas de l'attaque

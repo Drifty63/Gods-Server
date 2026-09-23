@@ -54,26 +54,6 @@ const chouette = kit(
     },
 );
 
-const meduse = kit(
-    creature({
-        id: 'meduse', name: 'Méduse', element: 'darkness', hp: 22, god: 'athena',
-        flavor: '"Regarde-moi. Je te ferai le cadeau que la déesse m\'a fait : l\'éternité, immobile."',
-    }),
-    {
-        generators: [
-            { id: 'sifflement', name: 'Sifflement des Serpents', gain: 2, desc: '+2 énergie et 1 dégât.', effects: [dmg(1)] },
-            { id: 'chevelure', name: 'Chevelure Grouillante', gain: 2, desc: '+2 énergie, 1 dégât et 1 poison.', effects: [dmg(1), status('poison', 1)] },
-        ],
-        competences: [
-            { id: 'gorgone', name: 'Face de Gorgone', desc: 'Inflige 5 dégâts.', effects: [dmg(5)] },
-            { id: 'morsure', name: 'Morsure Venimeuse', desc: '2 dégâts et 3 poisons.', effects: [dmg(2), status('poison', 3, 'same')] },
-        ],
-        utility: {
-            id: 'regard', name: 'Regard Pétrifiant', desc: 'Pétrifie un ennemi : le prochain coup qu\'il subit infligera +2 dégâts.', effects: [status('petrify', 1, 'enemy_god')],
-        },
-    },
-);
-
 const persee = kit(
     creature({
         id: 'persee', name: 'Persée', element: 'light', hp: 23, god: 'athena', arch: 'glass_cannon',
@@ -94,4 +74,4 @@ const persee = kit(
     },
 );
 
-export const athenaBestiary = mergeKits(hoplite, chouette, meduse, persee);
+export const athenaBestiary = mergeKits(hoplite, chouette, persee);

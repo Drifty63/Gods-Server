@@ -54,26 +54,6 @@ const etendard = kit(
     },
 );
 
-const minotaure = kit(
-    creature({
-        id: 'minotaure', name: 'Minotaure', element: 'earth', hp: 25, god: 'ares', arch: 'tank',
-        flavor: '"Le Labyrinthe n\'a jamais été ma prison. C\'était mon garde-manger."',
-    }),
-    {
-        generators: [
-            { id: 'souffle', name: 'Souffle du Labyrinthe', gain: 2, desc: '+2 énergie et 1 dégât.', effects: [dmg(1)] },
-            { id: 'grattement', name: 'Sabot Gratteur', gain: 2, desc: '+2 énergie et 2 dégâts.', effects: [dmg(2)] },
-        ],
-        competences: [
-            { id: 'encornade', name: 'Encornade', desc: '3 dégâts et 2 saignements.', effects: [dmg(3), status('bleed', 2, 'same')] },
-            { id: 'rage', name: 'Rage Bestiale', desc: 'Bouclier 5 sur soi.', effects: [shield(5)] },
-        ],
-        utility: {
-            id: 'pietinement', name: 'Piétinement', desc: '3 dégâts à tous les ennemis.', effects: [dmg(3, 'all_enemies')],
-        },
-    },
-);
-
 const chimere = kit(
     creature({
         id: 'chimere', name: 'Chimère', element: 'fire', hp: 22, god: 'ares',
@@ -94,4 +74,4 @@ const chimere = kit(
     },
 );
 
-export const aresBestiary = mergeKits(berserker, etendard, minotaure, chimere);
+export const aresBestiary = mergeKits(berserker, etendard, chimere);

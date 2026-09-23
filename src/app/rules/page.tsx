@@ -66,6 +66,18 @@ const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
         name: 'Silence',
         text: 'Le dieu ne peut plus jouer ses cartes Compétence pendant la durée. Ses générateurs et son utilitaire restent jouables',
     },
+    dreaded: {
+        name: 'Redouté',
+        text: 'Porté par celui qui inspire l\'effroi : les dieux effrayés ne peuvent plus le viser avec une attaque mono-cible',
+    },
+    empowered: {
+        name: 'Galvanisé',
+        text: 'Sa prochaine attaque mono-cible inflige des dégâts supplémentaires et étourdit la cible 1 tour. Une attaque de zone ne le consomme pas : le bonus attend',
+    },
+    blunted: {
+        name: 'Émoussé',
+        text: 'Le dieu inflige moins de dégâts sur chacun des coups qu\'il porte, pendant la durée',
+    },
     untargetable: {
         name: 'Inciblable',
         text: 'L\'adversaire ne peut plus le désigner, et les attaques de zone ne l\'atteignent pas. Ses alliés peuvent toujours le soigner',

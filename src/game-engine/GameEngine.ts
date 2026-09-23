@@ -23,7 +23,7 @@ import {
 import type { Element, GameInitOptions } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
 import { dealDamage, healGod, handleGodDeath, addShield } from './DamageSystem';
-import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects, applyPoisonOnCast } from './StatusSystem';
+import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects, applyPoisonOnCast, isSilenced, isShieldedByFear } from './StatusSystem';
 import { GAME_CONFIG } from '@/data/gameRules';
 
 // ─────────────────────────────────────────────
@@ -608,6 +608,107 @@ registerEffect('temp_resurrect', (ctx) => {
     deadGod.statusEffects = [];
 });
 
+// === BESTIAIRE ===
+
+/**
+ * Garde céleste — « Sentence du sommet ». Retire toutes les marques de foudre de la cible et
+ * inflige 2 dégâts par marque retirée.
+ *
+ * Distinct de `lightning_toggle`, qui POSE une marque quand la cible n'en porte aucune et
+ * demande donc un choix au joueur. Ici la carte ne promet qu'une chose : faire payer ce qui est
+ * déjà en place. Sans marque, elle ne fait rien de plus que ses dégâts de base.
+ */
+registerEffect('lightning_detonate', (ctx) => {
+    for (const target of ctx.targets) {
+        const stacks = getStatusStacks(target, 'lightning');
+        if (stacks <= 0) continue;
+        removeStatus(target, 'lightning');
+        dealDamage(target, stacks * 2, findOwner(target, ctx), ctx.engine.getState(), { element: 'lightning' as Element });
+    }
+});
+
+/**
+ * Serviteur d'Aphrodite — « Dévotion sans faille ». Le serviteur se sacrifie et lègue la moitié
+ * de ses PV actuels, arrondie vers le bas, à un AUTRE dieu allié.
+ *
+ * Trois points qui se sont révélés à l'écriture :
+ *  - soigner AVANT de tuer. `handleGodDeath` remet les PV à zéro : l'ordre inverse ne
+ *    transmettrait rien.
+ *  - le surplus au-delà du maximum est perdu, comme pour tout soin — `healGod` borne déjà.
+ *  - sans allié vivant autre que lui, la carte ne fait RIEN et le serviteur survit. Mourir pour
+ *    personne serait un suicide pur, que rien sur la carte n'annonce.
+ */
+registerEffect('sacrifice_half_hp', (ctx) => {
+    const self = ctx.castingGod;
+    if (!self || self.isDead) return;
+
+    const beneficiary = ctx.targetGodId
+        ? ctx.player.gods.find(g => g.card.id === ctx.targetGodId && !g.isDead && g !== self)
+        : ctx.player.gods.find(g => !g.isDead && g !== self);
+    if (!beneficiary) return;
+
+    healGod(beneficiary, Math.floor(self.currentHealth / 2));
+    self.currentHealth = 0;
+    handleGodDeath(ctx.player, self, ctx.engine.getState());
+});
+
+/**
+ * Python de Delphes — « Souffle méphitique ». 1 dégât à tous les ennemis, +1 par marque de
+ * poison portée par CHACUN d'eux. Les marques ne sont pas consommées.
+ *
+ * Ce que ça répare : le poison de GODS ne frappe qu'au moment où un dieu LANCE un sort
+ * (applyPoisonOnCast), jamais en fin de tour. Un ennemi empoisonné qui se terre ne paie donc
+ * jamais ses marques — c'est la seule pression du jeu qu'on esquive en ne jouant pas. Ce sort
+ * les encaisse de force.
+ */
+registerEffect('poison_scaled_aoe', (ctx) => {
+    for (const target of ctx.opponent.gods) {
+        if (target.isDead || isUntargetable(target)) continue;
+        const marks = getStatusStacks(target, 'poison');
+        dealDamage(target, 1 + marks, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+    }
+});
+
+/**
+ * Actéon — « Brame de terreur ». 2 dégâts à tous les ennemis, retire TOUTES les marques
+ * d'effroi, et chaque ennemi qui en portait inflige 2 dégâts de moins pendant 1 tour.
+ *
+ * L'ordre compte : on relève qui portait de l'effroi AVANT de frapper, sinon un ennemi tué par
+ * les dégâts fausserait le relevé — et surtout, les marques doivent être lues avant d'être
+ * retirées.
+ *
+ * Effet de bord voulu : la carte efface aussi la protection d'Actéon, puisque celle-ci tient à
+ * l'effroi d'en face. Il sort de l'ombre pour frapper et redevient mono-ciblable.
+ */
+registerEffect('terror_bray', (ctx) => {
+    const afraid = ctx.opponent.gods.filter(g => !g.isDead && getStatusStacks(g, 'fear') > 0);
+
+    for (const target of ctx.opponent.gods) {
+        if (target.isDead || isUntargetable(target)) continue;
+        dealDamage(target, 2, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
+    }
+
+    for (const g of afraid) {
+        removeStatus(g, 'fear');
+        if (!g.isDead) addStatus(g, 'blunted', 2, 1, ctx.engine.getState().turnSequence);
+    }
+});
+
+/**
+ * Occultiste de Nyx — « Voile rituel ». Tous les alliés SAUF le lanceur deviennent inciblables
+ * un tour.
+ *
+ * Passe par un effet sur mesure faute de type de ciblage qui exclue le lanceur : `all_allies`
+ * l'inclut toujours. L'occultiste couvre les autres et reste, lui, à découvert.
+ */
+registerEffect('allies_except_self_untargetable', (ctx) => {
+    const self = ctx.castingGod;
+    for (const ally of ctx.player.gods) {
+        if (ally.isDead || ally === self) continue;
+        addStatus(ally, 'untargetable', 1, 1, ctx.engine.getState().turnSequence);
+    }
+});
+
 // ─────────────────────────────────────────────
 // Utilitaires module
 // ─────────────────────────────────────────────
@@ -735,6 +836,13 @@ export class GameEngine {
         if (!canGodAct(castingGod)) {
             const reason = castingGod.statusEffects.some(s => s.type === 'petrify') ? 'pétrifié' : 'étourdi';
             return { success: false, message: `${castingGod.card.name} est ${reason} et ne peut pas lancer de sort` };
+        }
+
+        // Le silence ne ferme QUE les compétences : générateurs et utilitaire restent jouables.
+        // Vérifié ici et non seulement côté interface, comme l'étourdissement et le poison --
+        // l'engine doit rester la seule autorité sur ce qui est jouable.
+        if (card.type === 'competence' && isSilenced(castingGod)) {
+            return { success: false, message: `${castingGod.card.name} est réduit au silence et ne peut pas jouer de compétence` };
         }
 
         // Payer et gagner l'énergie (plafonnée)
@@ -1130,13 +1238,14 @@ export class GameEngine {
     ): void {
         const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
-        const targets = this.resolveTargets(effect.target, player, opponent, targetGodId, targetGodIds, sameSideIsAlly);
+        const castingGod = player.gods.find(g => g.card.id === card.godId && !g.isDead);
+        const targets = this.resolveTargets(effect.target, player, opponent, targetGodId, targetGodIds, sameSideIsAlly, castingGod);
 
         const ctx: EffectContext = {
             engine: this,
             player,
             opponent,
-            castingGod: player.gods.find(g => g.card.id === card.godId && !g.isDead),
+            castingGod,
             card,
             targets,
             targetGodId,
@@ -1150,17 +1259,56 @@ export class GameEngine {
         };
 
         switch (effect.type) {
-            case 'damage':
+            /*
+             * Les dégâts sont le seul endroit du moteur où le LANCEUR peut modifier le coup.
+             *
+             * `dealDamage` ne reçoit que la cible : pétrification et brûlure amplifient depuis
+             * celle-ci. « Galvanisé » et « Émoussé » font l'inverse — ils appartiennent au dieu
+             * qui frappe — et se lisent donc ici, avant l'appel.
+             */
+            case 'damage': {
+                const caster = ctx.castingGod;
+                const blunted = caster?.statusEffects.find(s => s.type === 'blunted')?.stacks ?? 0;
+
+                /*
+                 * « Prochaine attaque MONO-CIBLE » se juge sur la CARTE, pas sur cet effet.
+                 *
+                 * Une carte qui porte deux effets de dégâts frappe deux ennemis différents :
+                 * chaque effet ne voit qu'une cible, et un test local croirait à tort à une
+                 * attaque simple. On regarde donc la carte entière.
+                 */
+                const damageEffects = card.effects.filter(e => e.type === 'damage');
+                const isMonoTarget = damageEffects.length === 1
+                    && !String(damageEffects[0].target ?? '').startsWith('all_');
+                const empowered = isMonoTarget
+                    ? caster?.statusEffects.find(s => s.type === 'empowered')
+                    : undefined;
+                const bonus = empowered?.stacks ?? 0;
+
                 for (const target of targets) {
-                    const result = dealDamage(target, effect.value || 0,
+                    // Un malus ne rend jamais le coup soignant : `dealDamage` ignore déjà les
+                    // valeurs nulles ou négatives, on borne ici pour que ce soit explicite.
+                    const raw = Math.max(0, (effect.value || 0) + bonus - blunted);
+                    const result = dealDamage(target, raw,
                         player.gods.includes(target) ? player : opponent,
                         this.state,
-                        { element: card.element }
+                        { element: card.element, ignoreShield: effect.ignoreShield }
                     );
                     // Seuls les PV perdus comptent : le bouclier absorbé n'est pas une blessure.
                     this.castHealthLost += result.healthLost;
+
+                    // L'étourdissement est l'autre moitié de « Galvanisé ». Il suit le coup et
+                    // ne s'applique donc qu'à la cible réellement frappée.
+                    if (empowered && !target.isDead) {
+                        addStatus(target, 'stun', 1, 1, this.state.turnSequence);
+                    }
                 }
+
+                // Consommé une seule fois, et seulement s'il a servi : une attaque de zone
+                // laisse le bonus en place pour la prochaine occasion.
+                if (empowered && caster) removeStatus(caster, 'empowered');
                 break;
+            }
 
             case 'heal':
                 for (const target of targets) {
@@ -1264,11 +1412,16 @@ export class GameEngine {
         targetGodIds?: string[],
         /** Camp de la cible précédente, pour `target: 'same'`. */
         sameSideIsAlly?: boolean,
+        /** Dieu qui lance le sort, pour l'effroi : un dieu terrifié n'ose pas viser sa source. */
+        caster?: GodState,
     ): GodState[] {
         switch (targetType) {
             case 'enemy_god':
                 if (targetGodId) {
                     const t = opponent.gods.find(g => g.card.id === targetGodId && !g.isDead && !isUntargetable(g));
+                    // L'effroi ne ferme QUE cette branche, jamais `all_enemies` : la zone
+                    // atteint sa source, le coup précis ne l'ose plus.
+                    if (t && isShieldedByFear(caster, t)) return [];
                     return t ? [t] : [];
                 }
                 return [];
@@ -1365,12 +1518,21 @@ export class GameEngine {
         handleGodDeath(player, god, this.state);
     }
 
-    getValidTargets(targetType: SpellCard['effects'][0]['target'], isMultiTarget: boolean = false): GodState[] {
+    /**
+     * Cibles proposées au joueur. `caster` sert à l'effroi : un dieu terrifié ne doit pas se
+     * voir offrir une cible que `resolveTargets` refusera ensuite en silence.
+     */
+    getValidTargets(
+        targetType: SpellCard['effects'][0]['target'],
+        isMultiTarget: boolean = false,
+        caster?: GodState,
+    ): GodState[] {
         const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
+        const visible = (g: GodState) => !g.isDead && !isUntargetable(g) && !isShieldedByFear(caster, g);
 
         const provokers = opponent.gods.filter(
-            g => !g.isDead && !isUntargetable(g) && g.statusEffects.some(s => s.type === 'provocation')
+            g => visible(g) && g.statusEffects.some(s => s.type === 'provocation')
         );
 
         if (provokers.length > 0 && targetType === 'enemy_god') {
@@ -1380,19 +1542,17 @@ export class GameEngine {
             // Plusieurs cibles : les autres ennemis restent visables, mais les provocateurs
             // passent en tête. Tout consommateur qui prend les N premières cibles — l'IA, au
             // premier chef — les inclut donc naturellement, comme on l'exige du joueur.
-            const others = opponent.gods.filter(
-                g => !g.isDead && !isUntargetable(g) && !provokers.includes(g)
-            );
+            const others = opponent.gods.filter(g => visible(g) && !provokers.includes(g));
             return [...provokers, ...others];
         }
 
         switch (targetType) {
-            case 'enemy_god': return opponent.gods.filter(g => !g.isDead && !isUntargetable(g));
+            case 'enemy_god': return opponent.gods.filter(visible);
             case 'ally_god': return player.gods.filter(g => !g.isDead);
             case 'dead_ally_god': return player.gods.filter(g => g.isDead);
             case 'any_god': return [
                 ...player.gods.filter(g => !g.isDead),
-                ...opponent.gods.filter(g => !g.isDead && !isUntargetable(g)),
+                ...opponent.gods.filter(visible),
             ];
             default: return [];
         }

@@ -81,7 +81,11 @@ describe('mode Duel', () => {
         const { creatures, servants } = getDuelCards(['ares', 'athena', 'hestia'], false);
         // L'Araignée Géante est un SERVITEUR : c'est une progéniture d'Arachné, pas une
         // créature à part entière. Voir le commentaire de conception dans gods.ts.
-        expect(servants.map(s => s.id).sort()).toEqual(['athena_knight', 'giant_spider_1', 'soldier_ares_1']);
+        //
+        // Le Feu follet a rejoint la liste avec les 19 unités écrites à la main : c'est le
+        // serviteur d'Hestia. La liste est volontairement figée plutôt que dérivée du contenu —
+        // une unité qui apparaîtrait ici sans qu'on l'ait voulu doit faire échouer ce test.
+        expect(servants.map(s => s.id).sort()).toEqual(['athena_knight', 'feu_follet', 'giant_spider_1', 'soldier_ares_1']);
         expect(creatures.map(c => c.id).sort()).toEqual(['arachne', 'dragon_thebes', 'ulysses']);
     });
 
