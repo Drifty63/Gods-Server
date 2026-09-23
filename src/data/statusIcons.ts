@@ -19,6 +19,7 @@ export const STATUS_ICONS: Record<StatusEffect, string> = {
     bleed: '🩸',
     petrify: '🗿',
     burn: '🔥',
+    fear: '😨',
 };
 
 export function getStatusIcon(status: StatusEffect): string {

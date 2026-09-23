@@ -52,7 +52,23 @@ export type StatusEffect =
      *
      * Sans plafond de cumul, mais un soin l'éteint marque par marque.
      */
-    | 'burn';
+    | 'burn'
+    /*
+     * Effroi : un dieu qui en porte au moins une marque ne peut pas cibler Actéon avec une
+     * compétence MONO-CIBLE. Les attaques de zone l'atteignent normalement.
+     *
+     * C'est ce qui sépare l'effroi du statut `untargetable`, lequel bloque aussi la zone :
+     * la protection se contourne en frappant large, au prix de la précision. Sans ça, un
+     * Actéon qui entretient l'effroi deviendrait intouchable pour le reste de la partie.
+     *
+     * Les marques s'effacent UNE PAR UNE, une par tour, quoi qu'il arrive — c'est la seule
+     * décroissance de ce type dans le jeu, et c'est elle qui interdit la boucle ci-dessus :
+     * entretenir la protection coûte une carte par tour, donc tout le tour d'Actéon.
+     *
+     * Sans plafond. Un soin ne la retire pas, un nettoyage si (règle de la pétrification).
+     * Aucun dégât par elle-même, et elle ne bloque rien d'autre que ce ciblage.
+     */
+    | 'fear';
 
 export type TargetType =
     | 'enemy_god'        // Un dieu ennemi

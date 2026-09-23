@@ -38,6 +38,10 @@ const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
         name: 'Brûlure',
         text: '+1 dégât par marque, mais uniquement pour les sorts de feu. Sans limite de cumul, et un soin l\'éteint',
     },
+    fear: {
+        name: 'Effroi',
+        text: 'Un dieu effrayé ne peut plus viser celui qui lui a fait peur avec une attaque mono-cible ; les attaques de zone passent. Une marque disparaît à chaque tour',
+    },
     lightning: {
         name: 'Foudre',
         text: '+2 dégâts par marque de foudre au moment où elles sont retirées',

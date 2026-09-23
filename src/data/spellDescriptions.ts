@@ -30,6 +30,7 @@ export const STATUS_LABELS: Record<StatusEffect, string> = {
     bleed: 'Saignement',
     petrify: 'Pétrification',
     burn: 'Brûlure',
+    fear: 'Effroi',
 };
 
 function targetSuffix(target: TargetType | undefined, count: number, kind: 'ennemi' | 'allié'): string {

@@ -23,6 +23,9 @@ const STATUS_WEIGHT: Record<StatusEffect, number> = {
     // sa valeur depend de l equipe qui la pose.
     petrify: 3.5,
     burn: 1.5,
+    // L'effroi vaut moins que l'inciblable (2) dont il est une version partielle : il ne
+    // ferme que le ciblage mono-cible, la zone passe, et il s'efface d'une marque par tour.
+    fear: 1.5,
     weakness: 1.5,
     weakness_immunity: 1,
     regen: 1.2,
