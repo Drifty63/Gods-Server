@@ -32,9 +32,14 @@ export interface AchievementProfile {
     god_play_counts: Record<string, number>;
     /** Chapitres du mode Histoire terminés, lus depuis le magasin local. */
     completedChapters?: string[];
+    /**
+     * Nombre d'amis acceptés. Absent tant que la liste n'a pas été chargée — les hauts faits
+     * sociaux restent alors verrouillés au lieu de se croire mérités à zéro ami.
+     */
+    friendCount?: number;
 }
 
-export type AchievementFamily = 'collection' | 'combat' | 'ascension' | 'histoire' | 'classement';
+export type AchievementFamily = 'collection' | 'combat' | 'ascension' | 'histoire' | 'classement' | 'social';
 
 export interface Achievement {
     /** Identifiant persistant. Ne jamais renommer. */
@@ -192,6 +197,62 @@ export const ACHIEVEMENTS: Achievement[] = [
         family: 'histoire',
         isUnlocked: p => (p.completedChapters ?? []).includes('chapter2'),
     },
+    {
+        id: 'story_chapter_3',
+        name: 'Le cap Ténare',
+        description: 'Terminer le chapitre 3.',
+        icon: '⛵',
+        family: 'histoire',
+        isUnlocked: p => (p.completedChapters ?? []).includes('chapter3'),
+    },
+    {
+        id: 'story_chapter_4',
+        name: 'La reprise de l\'Olympe',
+        description: 'Terminer le chapitre 4.',
+        icon: '⚡',
+        family: 'histoire',
+        isUnlocked: p => (p.completedChapters ?? []).includes('chapter4'),
+    },
+
+    // -------------------------------------------------------------------- Social
+    /*
+     * `friendCount` est ABSENT tant que la liste d'amis n'est pas chargée, et `?? -1` verrouille
+     * alors ces quatre hauts faits. Avec `?? 0`, « Première poignée de main » resterait verrouillé
+     * à juste titre, mais n'importe quel seuil à 0 se serait débloqué tout seul — et un haut fait
+     * ne se reverrouille jamais.
+     */
+    {
+        id: 'social_friend_1',
+        name: 'Première poignée de main',
+        description: 'Compter 1 ami.',
+        icon: '🤝',
+        family: 'social',
+        isUnlocked: p => (p.friendCount ?? -1) >= 1,
+    },
+    {
+        id: 'social_friend_5',
+        name: 'Cercle proche',
+        description: 'Compter 5 amis.',
+        icon: '👥',
+        family: 'social',
+        isUnlocked: p => (p.friendCount ?? -1) >= 5,
+    },
+    {
+        id: 'social_friend_10',
+        name: 'Assemblée',
+        description: 'Compter 10 amis.',
+        icon: '🏛️',
+        family: 'social',
+        isUnlocked: p => (p.friendCount ?? -1) >= 10,
+    },
+    {
+        id: 'social_friend_25',
+        name: 'Panthéon d\'alliés',
+        description: 'Compter 25 amis.',
+        icon: '🌟',
+        family: 'social',
+        isUnlocked: p => (p.friendCount ?? -1) >= 25,
+    },
 
     // ---------------------------------------------------------------- Classement
     {
@@ -218,6 +279,7 @@ export const FAMILY_LABELS: Record<AchievementFamily, string> = {
     ascension: 'Ascension',
     histoire: 'Histoire',
     classement: 'Classement',
+    social: 'Social',
 };
 
 /**

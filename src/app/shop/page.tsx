@@ -7,6 +7,8 @@ import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
 import Ambroisie from '@/components/Ambroisie/Ambroisie';
 import { getVisibleGods, getGodById } from '@/data/gods';
+import { ELEMENT_SYMBOLS } from '@/game-engine/ElementSystem';
+import type { Element } from '@/types/cards';
 import { purchaseGod, purchaseCoffret, GOD_PRICE, GOD_PROMO_PRICE, COFFRET_PRICE, STARTER_PACKS } from '@/services/supabase-profile';
 
 // Cycle annuel des dieux en promo
@@ -83,24 +85,18 @@ export default function ShopPage() {
         }
     };
 
-    // Fonction pour obtenir le symbole d'élément
-    const getElementSymbol = (element: string) => {
-        switch (element) {
-            case 'water': return '💧';
-            case 'lightning': return '⚡';
-            case 'darkness': return '💀';
-            case 'fire': return '🔥';
-            case 'earth': return '🌿';
-            case 'light': return '☀️';
-            case 'nature': return '🌿';
-            case 'wind': return '💨';
-            case 'love': return '💕';
-            case 'wine': return '🍷';
-            case 'hunt': return '🏹';
-            case 'war': return '⚔️';
-            default: return '✨';
-        }
-    };
+    /*
+     * Symbole d'élément, lu dans la table PARTAGÉE.
+     *
+     * Il y avait ici une seconde table, recopiée à la main, où `air` manquait purement et
+     * simplement — les clés présentes étaient `wind`, `nature`, `love`, `wine`, `hunt` et `war`,
+     * qui ne sont pas des éléments du jeu. Apollon et Artémis, tous deux d'AIR, tombaient donc
+     * sur le cas par défaut et s'affichaient avec une étincelle au lieu de leur symbole.
+     *
+     * Le type `Element` ferme la porte : ajouter un élément casse la compilation ici tant que
+     * ELEMENT_SYMBOLS ne le nomme pas, et il n'y a plus de branche par défaut où se perdre.
+     */
+    const getElementSymbol = (element: Element) => ELEMENT_SYMBOLS[element];
 
     // Fonction pour obtenir le type de jeu par dieu
     const getGodPlaystyle = (godId: string) => {

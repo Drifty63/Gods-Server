@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMostPlayedGod, getMatchHistory, isUsernameTaken, unlockAchievements, type MatchHistoryEntry } from '@/services/supabase-profile';
+import { getMostPlayedGod, getMatchHistory, isUsernameTaken, unlockAchievements, getFriendsList, type MatchHistoryEntry } from '@/services/supabase-profile';
 import { useStoryStore } from '@/store/storyStore';
 import { ACHIEVEMENTS, FAMILY_LABELS, newlyUnlocked, type Achievement, type AchievementFamily } from '@/data/achievements';
 import { toast } from '@/lib/toast';
 import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
-import { getRankByFerveur, getRankProgress, getLadder } from '@/data/ranks';
+import { getRankByFerveur, getRankProgress, getLadder, RANKS } from '@/data/ranks';
 import styles from './page.module.css';
 
 function formatMatchDate(iso: string): string {
@@ -37,6 +37,20 @@ export default function ProfilePage() {
     /** Haut fait dont la fiche est ouverte. `null` = aucune. */
     const [openAchievement, setOpenAchievement] = useState<Achievement | null>(null);
     const completedChapters = useStoryStore(s => s.progress.completedChapters);
+    /**
+     * Nombre d'amis, pour les hauts faits sociaux. `undefined` tant que la liste n'est pas
+     * revenue : les prédicats les laissent alors verrouillés plutôt que de les évaluer à zéro.
+     */
+    const [friendCount, setFriendCount] = useState<number | undefined>(undefined);
+
+    useEffect(() => {
+        if (!profile) return;
+        let cancelled = false;
+        getFriendsList()
+            .then(list => { if (!cancelled) setFriendCount(list.length); })
+            .catch(err => console.error('Hauts faits sociaux : liste d\'amis indisponible', err));
+        return () => { cancelled = true; };
+    }, [profile]);
 
     /**
      * Évaluation des hauts faits à l'ouverture du profil.
@@ -51,7 +65,7 @@ export default function ProfilePage() {
      */
     useEffect(() => {
         if (!profile) return;
-        const pending = newlyUnlocked({ ...profile, completedChapters }, profile.achievements);
+        const pending = newlyUnlocked({ ...profile, completedChapters, friendCount }, profile.achievements);
         if (pending.length === 0) return;
 
         let cancelled = false;
@@ -69,7 +83,7 @@ export default function ProfilePage() {
             .catch(err => console.error('Hauts faits : enregistrement impossible', err));
 
         return () => { cancelled = true; };
-    }, [profile, completedChapters, refreshProfile]);
+    }, [profile, completedChapters, friendCount, refreshProfile]);
 
     useEffect(() => {
         // Rafraîchir le profil au chargement si user existe mais pas de profil
@@ -179,9 +193,20 @@ export default function ProfilePage() {
         );
     }
 
+    /*
+     * Le rang du profil est celui du classement CLASSÉ, et d'aucun autre.
+     *
+     * La base tient trois ferveurs courantes — `ferveur` (classé), `ferveur_duel13` et
+     * `ferveur_duel_open` — mais le profil n'en montrait qu'une, sans dire laquelle. On ne
+     * pouvait donc pas savoir si ce rang était le meilleur des trois, un niveau de compte, ou
+     * autre chose. Il est maintenant nommé.
+     */
     const userFerveur = profile.ferveur;
     const userRank = getRankByFerveur(userFerveur);
     const rankProgress = getRankProgress(userFerveur);
+    const rankedLadder = getLadder('ranked');
+    /** Rang suivant, s'il existe : c'est le seuil que la barre vise. */
+    const nextRank = RANKS[RANKS.findIndex(r => r.id === userRank.id) + 1];
     const winRate = profile.stats.totalGames > 0
         ? ((profile.stats.victories / profile.stats.totalGames) * 100).toFixed(1)
         : '0.0';
@@ -267,10 +292,17 @@ export default function ProfilePage() {
                             <div className={styles.progressContainer}>
                                 <div className={styles.progressBar}>
                                     <div className={styles.progressFill} style={{ width: `${rankProgress}%`, background: userRank.gradient }} />
-                                    <span className={styles.progressFerveur}>{userFerveur} 🔥</span>
+                                    {/* Le chiffre seul laissait croire à une ferveur maximale.
+                                        Avec le seuil visé, il devient lisible sans légende. */}
+                                    <span className={styles.progressFerveur}>
+                                        {nextRank ? `${userFerveur} / ${nextRank.minFerveur}` : `${userFerveur}`} 🔥
+                                    </span>
                                 </div>
                             </div>
-                            <span className={styles.progressText}>Progression vers le prochain rang</span>
+                            <span className={styles.progressText}>
+                                {rankedLadder.icon} {rankedLadder.label}
+                                {nextRank ? ` — vers ${nextRank.icon} ${nextRank.name}` : ' — rang maximal atteint'}
+                            </span>
                         </div>
                     </div>
                 </section>

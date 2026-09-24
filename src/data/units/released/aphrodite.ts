@@ -7,7 +7,7 @@ import { released, dmg, shield, status, custom } from '../builders';
 export const serviteursAphrodite = released(
     {
         kind: 'servant', id: 'serviteurs_aphrodite', name: 'Serviteur d\'Aphrodite',
-        element: 'light', hp: 14, god: 'aphrodite', arch: 'support',
+        element: 'light', hp: 15, god: 'aphrodite', arch: 'support',
         flavor: "« Ma vie ne m'appartient pas. Elle lui appartient. » — Il protège, il charme, et le moment venu il se vide de son sang pour qu'un autre tienne debout.",
     },
     [
@@ -23,8 +23,8 @@ export const serviteursAphrodite = released(
         },
         {
             slot: 'skill_1', name: 'Étreinte envoûtante',
-            desc: 'Étourdit une cible 1 tour.',
-            effects: [status('stun', 1, 'enemy_god', 1)],
+            desc: '2 dégâts à une cible et l\'étourdit 1 tour.',
+            effects: [dmg(2), status('stun', 1, 'same', 1)],
         },
         {
             /*

@@ -21,7 +21,16 @@ import { STATUS_ICONS } from '@/data/statusIcons';
  * l'union casse la compilation tant qu'il n'est pas décrit ici. Saignement, pétrification et
  * brûlure étaient restés des mois sans documentation, faute exactement de ce rappel.
  */
-const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
+/*
+ * `silent: true` — statut connu du moteur mais qu'AUCUNE carte jouable ne pose aujourd'hui, ou
+ * dont la règle est déjà expliquée dans une autre fiche.
+ *
+ * La clé reste dans la table : c'est elle qui fait échouer la compilation tant qu'un nouveau
+ * statut n'est pas décrit, et c'est ce garde-fou qui a manqué des mois durant au saignement, à
+ * la pétrification et à la brûlure. Mais la fiche n'est pas rendue — décrire au joueur une
+ * mécanique qu'il ne rencontrera jamais est pire que de la taire.
+ */
+const STATUS_RULES: Record<StatusEffect, { name: string; text: string; silent?: true }> = {
     poison: {
         name: 'Poison',
         text: 'Avant chaque sort, le dieu subit des dégâts égaux à ses marques de poison. Un dieu qui n\'agit pas ne les paie jamais',
@@ -40,7 +49,7 @@ const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
     },
     fear: {
         name: 'Effroi',
-        text: 'Un dieu effrayé ne peut plus viser celui qui lui a fait peur avec une attaque mono-cible ; les attaques de zone passent. Une marque disparaît à chaque tour',
+        text: 'Celui qui inspire l\'effroi porte 😱 Redouté. Un dieu effrayé ne peut plus le viser avec une attaque mono-cible ; les attaques de zone l\'atteignent toujours. Une marque d\'effroi disparaît à chaque tour',
     },
     lightning: {
         name: 'Foudre',
@@ -50,9 +59,12 @@ const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
         name: 'Bouclier',
         text: 'Absorbe les dégâts avant qu\'ils ne touchent les points de vie. Plusieurs boucliers s\'additionnent',
     },
+    // Aucune carte JOUABLE ne pose de régénération : les sept qui le font appartiennent à des
+    // unités en brouillon ou masquées. Silencieuse tant que c'est le cas.
     regen: {
         name: 'Régénération',
         text: 'Rend en fin de tour autant de points de vie que de marques. En s\'appliquant, elle retire le poison',
+        silent: true,
     },
     provocation: {
         name: 'Provocation',
@@ -66,17 +78,20 @@ const STATUS_RULES: Record<StatusEffect, { name: string; text: string }> = {
         name: 'Silence',
         text: 'Le dieu ne peut plus jouer ses cartes Compétence pendant la durée. Ses générateurs et son utilitaire restent jouables',
     },
+    // Redouté est l'autre moitié de l'Effroi et ne se rencontre jamais seul : sa règle est
+    // écrite dans la fiche de l'Effroi, là où le joueur la cherchera.
     dreaded: {
         name: 'Redouté',
-        text: 'Porté par celui qui inspire l\'effroi : les dieux effrayés ne peuvent plus le viser avec une attaque mono-cible',
+        text: 'Marque celui qui inspire l\'effroi. Voir Effroi',
+        silent: true,
     },
     empowered: {
         name: 'Galvanisé',
-        text: 'Sa prochaine attaque mono-cible inflige des dégâts supplémentaires et étourdit la cible 1 tour. Une attaque de zone ne le consomme pas : le bonus attend',
+        text: 'L\'effet reste jusqu\'à ce qu\'une attaque mono-cible le consomme : elle inflige alors +3 dégâts et étourdit sa cible 1 tour. Une attaque de zone ne le déclenche pas et ne l\'use pas',
     },
     blunted: {
         name: 'Émoussé',
-        text: 'Le dieu inflige moins de dégâts sur chacun des coups qu\'il porte, pendant la durée',
+        text: 'L\'effet reste jusqu\'à ce qu\'une attaque mono-cible le consomme : elle inflige alors 2 dégâts de moins. Miroir exact de Galvanisé — une attaque de zone ne le déclenche pas et ne l\'use pas',
     },
     untargetable: {
         name: 'Inciblable',
@@ -255,7 +270,7 @@ export default function RulesPage() {
                 <section className={styles.section}>
                     <h2>✨ Effets de Statut</h2>
                     <div className={styles.statusGrid}>
-                        {(Object.keys(STATUS_RULES) as StatusEffect[]).map(key => (
+                        {(Object.keys(STATUS_RULES) as StatusEffect[]).filter(key => !STATUS_RULES[key].silent).map(key => (
                             <div key={key} className={styles.statusCard}>
                                 <span className={styles.statusIcon}>{STATUS_ICONS[key]}</span>
                                 <strong>{STATUS_RULES[key].name}</strong>

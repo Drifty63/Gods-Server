@@ -74,8 +74,12 @@ function describeGroup({ count, effect }: GroupedEffect): string {
     const value = effect.value ?? 0;
 
     switch (effect.type) {
-        case 'damage':
-            return `Inflige ${value} dégât${value > 1 ? 's' : ''}${targetSuffix(effect.target, count, 'ennemi')}.`;
+        case 'damage': {
+            // Le perce-bouclier doit se lire sur la carte : sans mention, le joueur voit des
+            // dégâts ordinaires et ne comprend pas pourquoi le bouclier adverse n'a pas bougé.
+            const pierce = effect.ignoreShield ? ', en ignorant le bouclier' : '';
+            return `Inflige ${value} dégât${value > 1 ? 's' : ''}${targetSuffix(effect.target, count, 'ennemi')}${pierce}.`;
+        }
 
         case 'heal':
             return `Soigne ${value} PV${targetSuffix(effect.target, count, 'allié')}.`;
@@ -109,8 +113,17 @@ function describeGroup({ count, effect }: GroupedEffect): string {
         }
 
         case 'remove_status': {
+            /*
+             * Le camp se DÉDUIT de la cible ; il était codé en dur sur « allié ».
+             *
+             * Tant que seul le nettoyage d'Aphrodite existait, les deux se confondaient. Le
+             * « Piège sans issue » du Minotaure arrache le bouclier d'un ENNEMI avant de le
+             * frapper, et la carte annonçait « Retire Bouclier à un allié » — l'inverse exact
+             * de ce qu'elle fait.
+             */
             const label = effect.status ? STATUS_LABELS[effect.status] : 'un effet';
-            return `Retire ${label}${targetSuffix(effect.target, count, 'allié')}.`;
+            const foe = effect.target === 'enemy_god' || effect.target === 'all_enemies';
+            return `Retire ${label}${targetSuffix(effect.target, count, foe ? 'ennemi' : 'allié')}.`;
         }
 
         case 'custom': {

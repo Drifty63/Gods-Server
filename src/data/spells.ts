@@ -1986,14 +1986,17 @@ export const ALL_SPELLS: SpellCard[] = [
         type: 'competence',
         energyCost: 1,
         energyGain: 0,
+        // 2 dégâts et non 3. À 3, cette carte infligeait 6 dégâts ET deux étourdissements pour
+        // 1 énergie — le meilleur rapport du roster, sur une créature qui n'est même pas un
+        // frappeur déclaré.
         effects: [
-            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' },
-            { type: 'damage', value: 3, target: 'enemy_god' },
+            { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
         imageUrl: '/cards/spells/spell_dragon_griffes.png',
-        description: '3🩸 → ⚔️⚔️ | +❄️1⏳',
+        description: '2🩸 → ⚔️⚔️ | +❄️1⏳',
     },
     // Compétence 2 (Ultime) : 2 dégâts à tous + 3 bouclier
     {

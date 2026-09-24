@@ -33,10 +33,19 @@ const STATUS_WEIGHT: Record<StatusEffect, number> = {
     // « Redoute » ne fait rien par lui-meme : c est la peur d en face qui travaille, et elle
     // est deja facturee. Le compter une seconde fois doublerait le prix de la meme mecanique.
     dreaded: 0,
-    // Galvanise porte des degats ET un etourdissement, mais sur UNE cible et une seule fois.
-    // Emousse retire des degats a chaque effet de la carte suivante : moins spectaculaire,
-    // plus sur.
-    empowered: 2.5,
+    /*
+     * Ces deux-la ne s'empilent JAMAIS : ils valent toujours une marque, et leur effet est une
+     * constante du moteur (EMPOWERED_DAMAGE_BONUS, BLUNTED_DAMAGE_MALUS). Leur poids porte donc
+     * l'effet ENTIER, pas une part par marque comme la petrification ou la brulure.
+     *
+     * Galvanise vaut ses 3 degats supplementaires PLUS l'etourdissement d'un tour qu'il ajoute
+     * (poids 3), d'ou 6. Emousse ne retire que 2 degats, sans rien d'autre.
+     *
+     * Ce poids etait a 2,5 quand le bonus vivait dans le nombre de marques : la mesure lisait
+     * alors 3 marques et tombait juste par accident. En passant a une constante, elle ne voyait
+     * plus rien -- Chiron a perdu 2,5 de budget sans qu'aucune de ses cartes ne change.
+     */
+    empowered: 6,
     blunted: 2,
     weakness: 1.5,
     weakness_immunity: 1,

@@ -22,7 +22,7 @@ import {
 } from '@/types/cards';
 import type { Element, GameInitOptions } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
-import { dealDamage, healGod, handleGodDeath, addShield } from './DamageSystem';
+import { dealDamage, healGod, handleGodDeath, addShield, EMPOWERED_DAMAGE_BONUS, BLUNTED_DAMAGE_MALUS } from './DamageSystem';
 import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects, applyPoisonOnCast, isSilenced, isShieldedByFear } from './StatusSystem';
 import { GAME_CONFIG } from '@/data/gameRules';
 
@@ -688,9 +688,11 @@ registerEffect('terror_bray', (ctx) => {
         dealDamage(target, 2, ctx.opponent, ctx.engine.getState(), { element: ctx.card.element });
     }
 
+    // UNE marque, sans durée : le malus est une constante (BLUNTED_DAMAGE_MALUS) et l'état
+    // attend, comme « Galvanisé », la prochaine attaque mono-cible de celui qui le porte.
     for (const g of afraid) {
         removeStatus(g, 'fear');
-        if (!g.isDead) addStatus(g, 'blunted', 2, 1, ctx.engine.getState().turnSequence);
+        if (!g.isDead) addStatus(g, 'blunted', 1, undefined, ctx.engine.getState().turnSequence);
     }
 });
 
@@ -1268,7 +1270,6 @@ export class GameEngine {
              */
             case 'damage': {
                 const caster = ctx.castingGod;
-                const blunted = caster?.statusEffects.find(s => s.type === 'blunted')?.stacks ?? 0;
 
                 /*
                  * « Prochaine attaque MONO-CIBLE » se juge sur la CARTE, pas sur cet effet.
@@ -1280,15 +1281,25 @@ export class GameEngine {
                 const damageEffects = card.effects.filter(e => e.type === 'damage');
                 const isMonoTarget = damageEffects.length === 1
                     && !String(damageEffects[0].target ?? '').startsWith('all_');
+
+                /*
+                 * Galvanisé et Émoussé fonctionnent EN MIROIR : même déclencheur, même
+                 * consommation, signes opposés. Tous deux attendent une attaque mono-cible ;
+                 * une attaque de zone ne les déclenche pas et ne les use pas.
+                 */
                 const empowered = isMonoTarget
                     ? caster?.statusEffects.find(s => s.type === 'empowered')
                     : undefined;
-                const bonus = empowered?.stacks ?? 0;
+                const blunted = isMonoTarget
+                    ? caster?.statusEffects.find(s => s.type === 'blunted')
+                    : undefined;
+                const bonus = empowered ? EMPOWERED_DAMAGE_BONUS : 0;
+                const malus = blunted ? BLUNTED_DAMAGE_MALUS : 0;
 
                 for (const target of targets) {
                     // Un malus ne rend jamais le coup soignant : `dealDamage` ignore déjà les
                     // valeurs nulles ou négatives, on borne ici pour que ce soit explicite.
-                    const raw = Math.max(0, (effect.value || 0) + bonus - blunted);
+                    const raw = Math.max(0, (effect.value || 0) + bonus - malus);
                     const result = dealDamage(target, raw,
                         player.gods.includes(target) ? player : opponent,
                         this.state,
@@ -1304,9 +1315,12 @@ export class GameEngine {
                     }
                 }
 
-                // Consommé une seule fois, et seulement s'il a servi : une attaque de zone
-                // laisse le bonus en place pour la prochaine occasion.
-                if (empowered && caster) removeStatus(caster, 'empowered');
+                // Consommés une seule fois, et seulement s'ils ont servi : une attaque de zone
+                // les laisse en place pour la prochaine occasion.
+                if (caster) {
+                    if (empowered) removeStatus(caster, 'empowered');
+                    if (blunted) removeStatus(caster, 'blunted');
+                }
                 break;
             }
 

@@ -71,11 +71,13 @@ export function addStatus(
      *    durée (voir tickStatusEffects). Lui donner une durée la supprimerait entièrement d'un
      *    coup, ce qui n'est pas la règle.
      *  - `dreaded` dure ce que dure son porteur : on n'oublie pas celui qui vous a terrifié.
-     *  - `empowered` ATTEND sa cible. Une durée le ferait expirer avant que son porteur ait eu
-     *    l'occasion de frapper — or il ne se consomme que sur une attaque mono-cible.
+     *  - `empowered` et `blunted` ATTENDENT leur cible. Une durée les ferait expirer avant que
+     *    leur porteur ait eu l'occasion de frapper — or ils ne se consomment que sur une
+     *    attaque mono-cible. Les deux fonctionnent en miroir, donc ils vivent à l'identique.
      */
     const permanent = status === 'petrify' || status === 'burn'
-        || status === 'fear' || status === 'dreaded' || status === 'empowered';
+        || status === 'fear' || status === 'dreaded'
+        || status === 'empowered' || status === 'blunted';
     const effectiveDuration = permanent ? undefined : duration;
 
     const cap = STATUS_STACK_CAPS[status];

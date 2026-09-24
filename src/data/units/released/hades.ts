@@ -23,8 +23,8 @@ export const demonsTartare = released(
         },
         {
             slot: 'skill_1', name: 'Étreinte du Tartare',
-            desc: 'Étourdit une cible 1 tour et lui applique une marque de brûlure.',
-            effects: [status('stun', 1, 'enemy_god', 1), status('burn', 1, 'same')],
+            desc: '2 dégâts à une cible, l\'étourdit 1 tour et lui applique une marque de brûlure.',
+            effects: [dmg(2), status('stun', 1, 'same', 1), status('burn', 1, 'same')],
         },
         {
             slot: 'skill_2', name: 'Fournaise abyssale',

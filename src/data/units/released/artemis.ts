@@ -73,18 +73,22 @@ export const acteon = released(
         },
         {
             slot: 'skill_1', name: 'Charge de la malédiction',
-            desc: '2 dégâts à une cible et 2 marques d\'effroi. Tant qu\'un ennemi a peur, il ne peut plus viser Actéon avec une attaque mono-cible.',
-            effects: [dmg(2), status('fear', 2, 'same'), status('dreaded', 1, 'self')],
+            desc: '2 dégâts et 2 marques d\'effroi à 2 cibles différentes. Un dieu effrayé ne peut plus viser Actéon avec une attaque mono-cible.',
+            effects: [
+                dmg(2), status('fear', 2, 'same'),
+                dmg(2), status('fear', 2, 'same'),
+                status('dreaded', 1, 'self'),
+            ],
         },
         {
             slot: 'skill_2', name: 'Brame de terreur',
-            desc: '2 dégâts à tous les ennemis et retire toutes les marques d\'effroi. Ceux qui en portaient infligent 2 dégâts de moins pendant 1 tour.',
-            effects: [custom('terror_bray', 'Encaisse l\'effroi accumulé et émousse ceux qui en portaient')],
+            desc: '2 dégâts à tous les ennemis et retire toutes les marques d\'effroi. Ceux qui en portaient deviennent Émoussés : leur prochaine attaque mono-cible inflige 2 dégâts de moins.',
+            effects: [custom('terror_bray', '2 dégâts à tous les ennemis, encaisse l\'effroi accumulé et émousse ceux qui en portaient')],
         },
         {
             slot: 'utility_1', name: 'Refuge d\'effroi',
-            desc: '2 marques d\'effroi à 2 cibles.',
-            effects: [status('fear', 2), status('fear', 2), status('dreaded', 1, 'self')],
+            desc: '3 marques d\'effroi à 2 cibles.',
+            effects: [status('fear', 3), status('fear', 3), status('dreaded', 1, 'self')],
         },
     ],
 );

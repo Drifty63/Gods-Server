@@ -39,6 +39,24 @@ export const PETRIFY_DAMAGE_BONUS = 1;
  */
 export const BURN_DAMAGE_BONUS = 1;
 
+/*
+ * GALVANISÉ et ÉMOUSSÉ — les deux modificateurs portés par le LANCEUR.
+ *
+ * Leur valeur est une CONSTANTE et non le nombre de marques du statut, contrairement à la
+ * pétrification et à la brûlure. Deux raisons, et la seconde est la plus importante :
+ *
+ *  - ce ne sont pas des marques qui s'empilent. On est galvanisé ou on ne l'est pas ; porter
+ *    « Galvanisé x3 » n'a aucun sens à la lecture, ni sur la carte qui l'applique, ni sur la
+ *    pastille du dieu qui le porte.
+ *  - le statut vaut donc 1 marque, et l'interface n'affiche un nombre qu'au-delà de 1. Le
+ *    joueur voit une icône nette, sans chiffre parasite.
+ *
+ * Les deux se consomment de la même façon : à la PROCHAINE attaque mono-cible du porteur. Une
+ * attaque de zone ne les déclenche pas et ne les consomme pas — l'effet attend.
+ */
+export const EMPOWERED_DAMAGE_BONUS = 3;
+export const BLUNTED_DAMAGE_MALUS = 2;
+
 // ─────────────────────────────────────────────
 // Fonctions publiques
 // ─────────────────────────────────────────────

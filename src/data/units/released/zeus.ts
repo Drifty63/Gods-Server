@@ -23,8 +23,11 @@ export const gardeCeleste = released(
         },
         {
             slot: 'skill_1', name: 'Heurt du rempart',
-            desc: '2 dégâts à un ennemi et lui applique une marque de foudre.',
-            effects: [dmg(2), status('lightning', 1, 'same')],
+            desc: '1 dégât et une marque de foudre à 2 cibles différentes.',
+            effects: [
+                dmg(1), status('lightning', 1, 'same'),
+                dmg(1), status('lightning', 1, 'same'),
+            ],
         },
         {
             // `lightning_detonate` et non `lightning_toggle` : celui-ci POSERAIT une marque sur
@@ -70,25 +73,16 @@ export const harpies = released(
         },
         {
             slot: 'skill_1', name: 'Serres lacérantes',
-            desc: '2 dégâts à une cible et lui applique 1 saignement.',
-            effects: [dmg(2), status('bleed', 1, 'same')],
+            desc: '3 dégâts à une cible et lui applique 1 saignement.',
+            effects: [dmg(3), status('bleed', 1, 'same')],
         },
         {
-            /*
-             * 2 marques de saignement et non 1.
-             *
-             * À 1 marque, cet ultime pesait 1,75 — le plus faible des douze créatures, quand le
-             * « Jardin des condamnés » de Méduse pèse 6,75 pour le même coût. C'était la vraie
-             * faiblesse de la Harpie, pas ses points de vie.
-             *
-             * 2 est le PLAFOND du saignement (STATUS_STACK_CAPS) : la carte pose donc le
-             * maximum d'un coup, sans qu'aucune règle nouvelle soit à expliquer au joueur. Et
-             * le saignement ignore le bouclier — c'est ce qui fait de la Harpie la réponse aux
-             * équipes qui se terrent derrière leurs protections.
-             */
+            // 1 marque de saignement : c'est « Serres lacérantes » qui a été remontée à 3 dégâts
+            // pour redresser la Harpie, pas cet ultime. Le saignement ignore le bouclier — c'est
+            // ce qui fait d'elle la réponse aux équipes qui se terrent derrière leurs protections.
             slot: 'skill_2', name: 'Cri déchirant',
-            desc: '1 dégât à tous les ennemis et 2 saignements à chacun.',
-            effects: [dmg(1, 'all_enemies'), status('bleed', 2, 'all_enemies')],
+            desc: '1 dégât à tous les ennemis et 1 saignement à chacun.',
+            effects: [dmg(1, 'all_enemies'), status('bleed', 1, 'all_enemies')],
         },
         {
             slot: 'utility_1', name: 'Refuge escarpé',

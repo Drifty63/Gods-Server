@@ -78,10 +78,13 @@ export const chiron = released(
              * les quatre ennemis d'un coup.
              */
             slot: 'skill_2', name: 'Leçon du héros', gain: 1,
-            desc: 'Un allié gagne 3 boucliers ; sa prochaine attaque mono-cible inflige +3 dégâts et étourdit sa cible 1 tour. Rend 1 énergie.',
+            desc: 'Un allié gagne 3 boucliers et devient Galvanisé : sa prochaine attaque mono-cible inflige +3 dégâts et étourdit sa cible 1 tour. Rend 1 énergie.',
             effects: [
                 { type: 'shield', value: 3, target: 'ally_god' },
-                status('empowered', 3, 'same'),
+                // UNE marque, jamais trois : le bonus de dégâts est une constante du moteur
+                // (EMPOWERED_DAMAGE_BONUS), pas un empilement. « Galvanisé x3 » ne voulait rien
+                // dire à la lecture, ni sur cette carte ni sur la pastille du dieu galvanisé.
+                status('empowered', 1, 'same'),
             ],
         },
         {

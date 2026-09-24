@@ -39,10 +39,10 @@ export const sirenes = released(
         },
         {
             slot: 'skill_2', name: 'Chœur des égarés',
-            desc: 'Fait perdre 2 énergies à l\'adversaire et devient inciblable pendant 2 tours.',
+            desc: 'Fait perdre 2 énergies à l\'adversaire et devient inciblable pendant 1 tour.',
             effects: [
                 custom('remove_energy_2', 'Fait perdre 2 énergies à l\'adversaire'),
-                status('untargetable', 1, 'self', 2),
+                status('untargetable', 1, 'self', 1),
             ],
         },
         {
