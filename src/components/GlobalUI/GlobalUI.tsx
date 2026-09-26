@@ -33,6 +33,22 @@ function getQuestDisplayName(quest: DailyQuest): string {
     }
     return quest.name;
 }
+
+/**
+ * Ce qu'il faut FAIRE pour valider la quête.
+ *
+ * Le titre seul ne suffit pas : « Fidèles au poste » ou « Faveur des dieux » ne disent rien de
+ * l'objectif. La description existait pourtant déjà dans les données, écrite dans le vivier
+ * SQL -- elle n'était simplement jamais affichée.
+ *
+ * Toujours visible, jamais derrière un clic : c'est l'information dont le joueur a besoin pour
+ * décider quoi jouer, elle ne doit pas se mériter. La quête propre à un dieu fait exception,
+ * son titre reconstitué portant déjà la consigne en entier.
+ */
+function getQuestHint(quest: DailyQuest): string | null {
+    if (quest.godId) return null;
+    return quest.description || null;
+}
 import styles from './GlobalUI.module.css';
 
 // Bien en dessous de la fenêtre de 2 min utilisée par get_friends_list() pour dériver le
@@ -754,6 +770,9 @@ export default function GlobalUI() {
                                     <div key={quest.id} className={`${styles.questItem} ${quest.claimed ? styles.questCompleted : ''}`}>
                                         <div className={styles.questInfo}>
                                             <span className={styles.questName}>{getQuestDisplayName(quest)}</span>
+                                            {getQuestHint(quest) && (
+                                                <span className={styles.questHint}>{getQuestHint(quest)}</span>
+                                            )}
                                             <div className={styles.questProgressContainer}>
                                                 <div className={styles.questProgressBar}>
                                                     <div

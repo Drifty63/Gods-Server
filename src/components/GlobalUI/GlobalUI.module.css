@@ -547,6 +547,16 @@
     font-weight: 500;
 }
 
+/* Consigne de la quête, sous son titre. Volontairement plus petite et plus sourde : elle se
+   lit quand on la cherche, sans disputer la vedette au titre ni à la barre de progression. */
+.questHint {
+    display: block;
+    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.78rem;
+    line-height: 1.3;
+}
+
 .questProgressContainer {
     display: flex;
     align-items: center;
