@@ -69,6 +69,28 @@ export interface UserProfile {
     ferveur_max: number;
     ferveur_max_duel13: number;
     ferveur_max_duel_open: number;
+    /**
+     * Ferveur COURANTE des deux classements de Duel. `ferveur` ci-dessus est celle du Classé.
+     *
+     * Les colonnes existent en base depuis les classements par mode, et `select('*')` les
+     * rapportait déjà — elles n'étaient simplement pas déclarées ici, donc invisibles pour le
+     * reste du code. Le profil affichait de ce fait le rang du Classé en le faisant passer pour
+     * celui du joueur.
+     *
+     * Optionnelles : un profil créé avant cette migration ne les porte pas.
+     */
+    ferveur_duel13?: number;
+    ferveur_duel_open?: number;
+    /**
+     * Total de la ferveur GAGNÉE depuis la création du compte, tous classements confondus.
+     *
+     * Ne redescend jamais : une défaite n'y touche pas, une fin de saison non plus. C'est ce
+     * qui le distingue de `ferveur` (le niveau du moment) et de `ferveur_max` (le sommet). Il
+     * mesure l'activité, là où les deux autres mesurent le niveau.
+     *
+     * Optionnel : absent tant que `20260926130000_ferveur_earned.sql` n'est pas appliquée.
+     */
+    ferveur_earned?: number;
     /** Meilleur étage atteint en mode Ascension (écrit uniquement côté serveur). */
     ascension_best_floor: number;
     created_at: string;
@@ -163,6 +185,22 @@ export type StarterPackId = keyof typeof STARTER_PACKS;
 export const GOD_PRICE = 3000;
 export const GOD_PROMO_PRICE = 2000;
 export const COFFRET_PRICE = 10000;
+
+/**
+ * Nombre maximal d'amis.
+ *
+ * L'écran social annonçait « / 25 max » alors qu'aucune limite n'existait nulle part — ni dans
+ * le code, ni en base. Elle est désormais réelle, et portée par une seule constante plutôt que
+ * par un nombre écrit en dur dans le rendu.
+ *
+ * 50 et non 25 : un joueur régulier s'ajoute du monde après une bonne partie et remplissait 25
+ * en quelques semaines, au point de devoir supprimer quelqu'un pour ajouter un autre. 50 reste
+ * parcourable au pouce sans recherche ni tri — au-delà, la liste demanderait un filtre.
+ *
+ * ATTENTION : ce plafond n'est tenu que côté client. Le serveur accepte encore une demande
+ * au-delà ; la vraie garde appartient à `send_friend_request` et `respond_friend_request`.
+ */
+export const MAX_FRIENDS = 50;
 
 // =====================================
 // VÉRIFICATIONS

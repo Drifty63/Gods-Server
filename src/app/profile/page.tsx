@@ -10,7 +10,7 @@ import { useStoryStore } from '@/store/storyStore';
 import { ACHIEVEMENTS, FAMILY_LABELS, newlyUnlocked, type Achievement, type AchievementFamily } from '@/data/achievements';
 import { toast } from '@/lib/toast';
 import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
-import { getRankByFerveur, getRankProgress, getLadder, RANKS } from '@/data/ranks';
+import { getRankByFerveur, getRankProgress, getLadder, RANKS, LADDERS } from '@/data/ranks';
 import styles from './page.module.css';
 
 function formatMatchDate(iso: string): string {
@@ -194,19 +194,41 @@ export default function ProfilePage() {
     }
 
     /*
-     * Le rang du profil est celui du classement CLASSÉ, et d'aucun autre.
+     * Le rang affiché est le MEILLEUR des trois classements, et il dit lequel.
      *
-     * La base tient trois ferveurs courantes — `ferveur` (classé), `ferveur_duel13` et
-     * `ferveur_duel_open` — mais le profil n'en montrait qu'une, sans dire laquelle. On ne
-     * pouvait donc pas savoir si ce rang était le meilleur des trois, un niveau de compte, ou
-     * autre chose. Il est maintenant nommé.
+     * La base tient trois ferveurs courantes — Classé, Duel 13, Duel illimité — et le profil
+     * n'en montrait qu'une, celle du Classé, sans le préciser. Impossible alors de savoir s'il
+     * s'agissait du meilleur des trois, d'un niveau de compte, ou d'autre chose.
+     *
+     * Le meilleur plutôt qu'un choix laissé au joueur : un sélecteur se règle une fois puis
+     * s'oublie, et laisse quelqu'un afficher un rang inférieur à celui qu'il a vraiment atteint.
      */
-    const userFerveur = profile.ferveur;
+    const bestLadder = LADDERS
+        .map(l => ({
+            ladder: l,
+            ferveur: l.mode === 'duel13' ? (profile.ferveur_duel13 ?? 0)
+                : l.mode === 'duel_open' ? (profile.ferveur_duel_open ?? 0)
+                    : profile.ferveur,
+            // Le sommet du MÊME classement que le rang affiché. Lire celui du Classé pendant
+            // que le rang vient du Duel 13 donnerait deux chiffres qui se contredisent.
+            peak: l.mode === 'duel13' ? (profile.ferveur_max_duel13 ?? 0)
+                : l.mode === 'duel_open' ? (profile.ferveur_max_duel_open ?? 0)
+                    : (profile.ferveur_max ?? 0),
+        }))
+        .reduce((best, cur) => (cur.ferveur > best.ferveur ? cur : best));
+
+    const userFerveur = bestLadder.ferveur;
     const userRank = getRankByFerveur(userFerveur);
     const rankProgress = getRankProgress(userFerveur);
-    const rankedLadder = getLadder('ranked');
-    /** Rang suivant, s'il existe : c'est le seuil que la barre vise. */
+    /** Rang suivant, s'il existe : c'est lui que la barre vise. */
     const nextRank = RANKS[RANKS.findIndex(r => r.id === userRank.id) + 1];
+    /**
+     * Ce qui MANQUE pour le rang suivant, et non le seuil lui-même.
+     *
+     * La barre affichait « 120 / 250 », que l'on prend pour un plafond alors que la ferveur
+     * monte et descend sans limite. Un reste à parcourir ne peut pas se lire ainsi.
+     */
+    const ferveurToNext = nextRank ? Math.max(0, nextRank.minFerveur - userFerveur) : 0;
     const winRate = profile.stats.totalGames > 0
         ? ((profile.stats.victories / profile.stats.totalGames) * 100).toFixed(1)
         : '0.0';
@@ -292,16 +314,14 @@ export default function ProfilePage() {
                             <div className={styles.progressContainer}>
                                 <div className={styles.progressBar}>
                                     <div className={styles.progressFill} style={{ width: `${rankProgress}%`, background: userRank.gradient }} />
-                                    {/* Le chiffre seul laissait croire à une ferveur maximale.
-                                        Avec le seuil visé, il devient lisible sans légende. */}
-                                    <span className={styles.progressFerveur}>
-                                        {nextRank ? `${userFerveur} / ${nextRank.minFerveur}` : `${userFerveur}`} 🔥
-                                    </span>
+                                    <span className={styles.progressFerveur}>{userFerveur} 🔥</span>
                                 </div>
                             </div>
                             <span className={styles.progressText}>
-                                {rankedLadder.icon} {rankedLadder.label}
-                                {nextRank ? ` — vers ${nextRank.icon} ${nextRank.name}` : ' — rang maximal atteint'}
+                                {bestLadder.ladder.icon} {bestLadder.ladder.label}
+                                {nextRank
+                                    ? ` — encore ${ferveurToNext} 🔥 avant ${nextRank.icon} ${nextRank.name}`
+                                    : ' — rang maximal atteint'}
                             </span>
                         </div>
                     </div>
@@ -342,17 +362,20 @@ export default function ProfilePage() {
                         </div>
                         <div className={styles.statsRow}>
                             <div className={styles.statItem}>
-                                {/* Sommet historique, et non la ferveur du moment : les deux
-                                    chiffres lisaient la même valeur et étaient donc toujours
-                                    identiques. Il survit aux remises à zéro de fin de saison. */}
+                                {/* Sommet du classement affiché au-dessus, et non la ferveur du
+                                    moment. Il survit aux remises à zéro de fin de saison. */}
                                 <span className={styles.statValue}>
-                                    {Math.max(profile.ferveur_max ?? 0, userFerveur)}
+                                    {Math.max(bestLadder.peak, userFerveur)}
                                 </span>
                                 <span className={styles.statLabel}>🔥 Ferveur max</span>
                             </div>
+                            {/* « Ferveur obtenue » et non « actuelle » : celle du moment est
+                                déjà dans la barre sous le pseudo, à quelques centimètres d'ici.
+                                Ce total-ci ne redescend jamais — il mesure l'activité, quand
+                                les deux autres mesurent le niveau. */}
                             <div className={styles.statItem}>
-                                <span className={styles.statValue}>{userFerveur}</span>
-                                <span className={styles.statLabel}>🔥 Ferveur actuelle</span>
+                                <span className={styles.statValue}>{profile.ferveur_earned ?? 0}</span>
+                                <span className={styles.statLabel}>🔥 Ferveur obtenue</span>
                             </div>
                         </div>
                         <div className={styles.statsRow}>

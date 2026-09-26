@@ -22,6 +22,7 @@ import {
     removeFriendship,
     blockUser,
     toggleFavoriteFriend,
+    MAX_FRIENDS,
     type FriendEntry,
     type PendingRequestEntry,
     type LeaderboardEntry,
@@ -195,6 +196,13 @@ function SocialContent() {
 
     const handleSendRequest = async (username: string) => {
         setActionMessage(null);
+        // Le plafond était annoncé à l'écran sans être tenu nulle part : on pouvait dépasser
+        // « 25 max » sans que rien ne s'y oppose. Il compte les amis RÉELS, pas la liste filtrée
+        // par la recherche — sinon une recherche en cours aurait rouvert le quota.
+        if (friends.length >= MAX_FRIENDS) {
+            setActionMessage(`Vous avez atteint la limite de ${MAX_FRIENDS} amis.`);
+            return;
+        }
         try {
             const res = await sendFriendRequest(username);
             setActionMessage(res.message);
@@ -345,9 +353,12 @@ function SocialContent() {
                             </div>
                         )}
 
+                        {/* Le total compte les amis RÉELS. Il affichait `filteredFriends`, donc
+                            une recherche en cours faisait chuter le compte annoncé — et le
+                            joueur croyait avoir de la place. */}
                         <div className={styles.friendsCount}>
-                            {filteredFriends.length} ami{filteredFriends.length > 1 ? 's' : ''}
-                            <span className={styles.maxFriends}> / 25 max</span>
+                            {friends.length} ami{friends.length > 1 ? 's' : ''}
+                            <span className={styles.maxFriends}> / {MAX_FRIENDS} max</span>
                         </div>
 
                         <div className={styles.friendsList}>

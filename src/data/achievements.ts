@@ -247,11 +247,26 @@ export const ACHIEVEMENTS: Achievement[] = [
     },
     {
         id: 'social_friend_25',
-        name: 'Panthéon d\'alliés',
+        name: 'Grande maisonnée',
         description: 'Compter 25 amis.',
-        icon: '🌟',
+        icon: '🏺',
         family: 'social',
         isUnlocked: p => (p.friendCount ?? -1) >= 25,
+    },
+    {
+        /*
+         * Le dernier palier suit le plafond réel de la liste d'amis (MAX_FRIENDS), et non un
+         * chiffre rond choisi à part : un haut fait « le maximum » qui ne serait pas celui du
+         * jeu deviendrait faux au premier changement de limite. Il n'importe pas la constante
+         * pour autant — ce fichier doit rester sans dépendance, chaque prédicat étant une
+         * fonction pure sur le profil.
+         */
+        id: 'social_friend_50',
+        name: 'Panthéon d\'alliés',
+        description: 'Compter 50 amis, le maximum.',
+        icon: '🌟',
+        family: 'social',
+        isUnlocked: p => (p.friendCount ?? -1) >= 50,
     },
 
     // ---------------------------------------------------------------- Classement

@@ -50,7 +50,7 @@ describe('catalogue des hauts faits', () => {
             ascension_best_floor: 15,
             god_play_counts: { zeus: 50 },
             completedChapters: ['chapter1', 'chapter2', 'chapter3', 'chapter4'],
-            friendCount: 25,
+            friendCount: 50,
         });
         for (const a of ACHIEVEMENTS) {
             expect(a.isUnlocked(complete), `${a.id} devrait se déclencher`).toBe(true);
