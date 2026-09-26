@@ -40,8 +40,11 @@ create table if not exists public.match_records (
     winner_user_id uuid references public.profiles(id) on delete set null,
     winner_side text check (winner_side in ('host', 'guest')),
     is_ranked boolean not null default false,
-    -- Pas de colonne `ladder` : le classement choisi ne vit que côté client, il n'est jamais
-    -- écrit sur `games`. Une colonne toujours vide serait un mensonge dans le schéma.
+    -- CE COMMENTAIRE ÉTAIT FAUX, corrigé le 26 septembre 2026 : il affirmait que le classement
+    -- ne vivait que côté client et n'était jamais écrit sur `games`. La colonne `games.mode`
+    -- existe depuis les classements par mode, et `apply_match_result` la lit déjà. La colonne
+    -- manquante a été ajoutée par 20260926140000_match_records_mode.sql, qui la remplit par
+    -- déclencheur — et les parties disputées entre-temps resteront à jamais sans classement.
     is_private boolean not null default false,
     finished_at timestamptz not null default now()
 );
