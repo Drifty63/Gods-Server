@@ -463,8 +463,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
     },
 
-    // Synchronise l'état du jeu depuis l'adversaire (ne touche pas aux états UI locaux)
+    /**
+     * Synchronise l'état du jeu depuis l'adversaire (ne touche pas aux états UI locaux).
+     *
+     * REFUSE UN ÉTAT PLUS ANCIEN QUE LE SIEN. Cette fonction remplace le moteur ENTIER : un
+     * état périmé qui passe efface tout ce que le joueur vient de faire. C'est ce qui rendait
+     * une seconde action possible dans un tour — pourtant interdit par les règles et refusé par
+     * le moteur : la carte était bien jouée, puis un message entrant remettait `hasPlayedCard`
+     * à faux, et le joueur pouvait rejouer.
+     *
+     * Deux garde-fous, du plus général au plus fin :
+     *  - un demi-tour antérieur est toujours périmé ;
+     *  - à demi-tour égal, un état qui prétend que le joueur courant n'a pas encore joué alors
+     *    qu'il a joué localement est forcément en retard — l'inverse n'arrive jamais, puisque
+     *    jouer une carte est irréversible dans un tour.
+     */
     syncGameState: (state: GameState) => {
+        const local = get().gameState;
+        if (local) {
+            const remoteSeq = state.turnSequence ?? 0;
+            const localSeq = local.turnSequence ?? 0;
+            if (remoteSeq < localSeq) return;
+
+            if (remoteSeq === localSeq && state.currentPlayerId === local.currentPlayerId) {
+                const played = (s: GameState) =>
+                    s.players.find(p => p.id === s.currentPlayerId)?.hasPlayedCard ?? false;
+                if (played(local) && !played(state)) return;
+            }
+        }
+
         const engine = new GameEngine(state);
         set({
             gameState: state,
@@ -566,7 +593,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
             )?.target;
             if (targetType) {
                 const isMultiTarget = requiredTargets > 1;
-                const validTargets = engine.getValidTargets(targetType, isMultiTarget);
+                /*
+                 * Le LANCEUR doit être transmis, sinon le filtre d'effroi ne peut pas
+                 * s'appliquer : c'est lui qui porte la peur.
+                 *
+                 * Sans ce troisième argument, l'interface proposait Actéon à un dieu terrifié.
+                 * Le moteur refusait bien la cible au moment de résoudre le sort, mais trop
+                 * tard : la carte était déjà dépensée et ne faisait rien, sans le moindre
+                 * message. Un refus silencieux est pire qu'un refus visible.
+                 */
+                const caster = get().gameState?.players
+                    .find(p => p.id === get().playerId)?.gods
+                    .find(g => g.card.id === selectedCard.godId && !g.isDead);
+                const validTargets = engine.getValidTargets(targetType, isMultiTarget, caster);
                 const isAlreadySelectedTarget = selectedTargetGods.some(g => g.card.id === god.card.id);
                 // On laisse toujours désélectionner une cible déjà choisie, même si elle ne
                 // serait plus valide entre-temps ; seul l'AJOUT d'une nouvelle cible est filtré.
@@ -629,7 +668,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // comportement d'origine plutôt que de risquer de bloquer un autre sort par erreur.
         if (!targetType) return nominal;
         const isMultiTarget = nominal > 1;
-        const valid = engine.getValidTargets(targetType, isMultiTarget);
+        // Le lanceur, là aussi : sans lui le compte inclurait des cibles que l'effroi interdit,
+        // et la carte attendrait une seconde désignation impossible à satisfaire.
+        const caster = get().gameState?.players
+            .find(p => p.id === get().playerId)?.gods
+            .find(g => g.card.id === card.godId && !g.isDead);
+        const valid = engine.getValidTargets(targetType, isMultiTarget, caster);
         return Math.min(nominal, valid.length);
     },
 
@@ -1283,7 +1327,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
 
         if (result.success) {
+            /*
+             * `ALL_MODALS_CLOSED` en tête : un drapeau de modale oublié bloquait la fin de tour
+             * automatique POUR LE RESTE DE LA PARTIE.
+             *
+             * Ce chemin est le chemin GÉNÉRIQUE — celui des cartes qui n'ouvrent aucune modale.
+             * Toutes celles qui en ouvrent une sont interceptées plus haut et repartent avec un
+             * `return`. Une modale encore marquée ouverte ici est donc forcément un reliquat, et
+             * le garde `hasActiveModal` du minuteur ci-dessous la prenait au sérieux : le tour ne
+             * se terminait plus, sans le moindre message, et le joueur pouvait enchaîner.
+             */
             set({
+                ...ALL_MODALS_CLOSED,
                 gameState: cloneGameState(engine.getState()),
                 selectedCard: null,
                 selectedTargetGod: null,

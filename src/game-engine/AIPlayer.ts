@@ -311,7 +311,11 @@ export class AIPlayer {
         let deadAllyTargets: GodState[] = [];
 
         if (needsEnemyTarget) {
-            enemyTargets = engine.getValidTargets('enemy_god');
+            // Le lanceur conditionne les cibles : un dieu terrifié ne peut pas viser celui qui
+            // lui a fait peur. Sans ce paramètre, l'IA choisissait une cible que le moteur
+            // refusait ensuite — elle dépensait sa carte pour rien, sans jamais s'en apercevoir.
+            const caster = player.gods.find(g => g.card.id === card.godId && !g.isDead);
+            enemyTargets = engine.getValidTargets('enemy_god', false, caster);
             // Trier par PV croissant (priorité aux cibles faibles)
             enemyTargets.sort((a, b) => a.currentHealth - b.currentHealth);
         }
