@@ -216,6 +216,20 @@ function SocialContent() {
     };
 
     const handleAccept = async (friendshipId: string) => {
+        /*
+         * Accepter une demande AJOUTE un ami, exactement comme en envoyer une.
+         *
+         * Seul l'envoi était borné : un joueur à 50 ne pouvait plus demander personne, mais
+         * pouvait accepter autant de demandes reçues qu'il voulait et dépasser le plafond par
+         * la porte de derrière. Les demandes en attente, elles, peuvent s'accumuler sans
+         * limite — c'est voulu : elles ne coûtent rien tant qu'elles ne sont pas acceptées, et
+         * elles attendent qu'une place se libère.
+         */
+        if (friends.length >= MAX_FRIENDS) {
+            setActionMessage(`Vous avez ${MAX_FRIENDS} amis : retirez-en un pour accepter cette demande.`);
+            return;
+        }
+        setActionMessage(null);
         await respondFriendRequest(friendshipId, true);
         loadFriendsData();
     };
