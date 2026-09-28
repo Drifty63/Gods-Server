@@ -264,11 +264,36 @@ export interface GameLogEntry {
 }
 
 // État de la partie
+/** Les quatre actions qu'une prophétie de l'Oracle peut prédire. */
+export type ProphecyAction = 'generator' | 'competence' | 'utility' | 'discard';
+
+/**
+ * Prophétie en cours — le SEUL effet du jeu qui survive au tour qui l'a posé.
+ *
+ * Tous les autres se résolvent immédiatement. Celle-ci est posée pendant le tour de l'Oracle et
+ * ne se juge qu'au tour SUIVANT, celui de l'adversaire : d'où ce champ dans l'état de partie,
+ * et non dans un statut porté par un dieu.
+ *
+ * `choice` voyage dans l'état partagé des parties en ligne, donc techniquement lisible par
+ * l'adversaire qui inspecterait les données. Le jeu ne le lui montre jamais — même contrat que
+ * `isHiddenFromOwner` sur les cartes de Nyx, qui vit déjà avec cette limite.
+ */
+export interface ProphecyState {
+    /** Joueur qui l'a lancée : c'est lui qui encaisse la récompense si elle se réalise. */
+    casterPlayerId: string;
+    /** Action prédite. JAMAIS affichée à l'adversaire. */
+    choice: ProphecyAction;
+    /** Demi-tour où elle a été posée, pour ne juger que celui d'après. */
+    appliedTurn: number;
+}
+
 export interface GameState {
     id: string;
     status: 'waiting' | 'playing' | 'finished';
     currentPlayerId: string;
     turnNumber: number;
+    /** Prophétie en attente de vérification. Voir ProphecyState. */
+    prophecy?: ProphecyState;
     maxTurns?: number;              // Limite de tours (50 pour online, undefined sinon)
     /**
      * Compteur de DEMI-tours : incrémenté à chaque fin de tour, quel que soit le joueur.
@@ -310,6 +335,8 @@ export interface GameAction {
     selectedCardIds?: string[];      // Pour le recyclage (Hestia) ou le placement en bas du deck (Nyx)
     healDistribution?: { godId: string, amount: number }[]; // Pour la distribution de soin (Déméter)
     selectedPlayerTarget?: 'self' | 'opponent'; // Pour le choix de joueur (Zéphyr - free_recycle)
+    /** Action prédite par la prophétie de l'Oracle, choisie dans une modale à quatre entrées. */
+    prophecyChoice?: ProphecyAction;
     /**
      * Si true, les effets custom qui nécessitent un choix du joueur (voir DEFERRED_CUSTOM_EFFECTS
      * dans GameEngine.ts) ne sont PAS résolus par playCard : la carte est bien jouée (coût payé,

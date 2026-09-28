@@ -20,7 +20,7 @@ import {
     GameAction,
     GodCard
 } from '@/types/cards';
-import type { Element, GameInitOptions } from '@/types/cards';
+import type { Element, GameInitOptions, ProphecyAction } from '@/types/cards';
 import { calculateDamageWithDualWeakness } from './ElementSystem';
 import { dealDamage, healGod, handleGodDeath, addShield, EMPOWERED_DAMAGE_BONUS, BLUNTED_DAMAGE_MALUS } from './DamageSystem';
 import { addStatus, removeStatus, getStatusStacks, canGodAct, tickStatusEffects, applyPoisonOnCast, isSilenced, isShieldedByFear } from './StatusSystem';
@@ -66,6 +66,8 @@ export interface EffectContext {
     selectedElement?: Element;
     lightningAction?: 'apply' | 'remove';
     selectedPlayerTarget?: 'self' | 'opponent';
+    /** Action predite par la prophetie de l'Oracle. */
+    prophecyChoice?: ProphecyAction;
 }
 
 // ─────────────────────────────────────────────
@@ -80,6 +82,8 @@ export interface EffectContext {
 export const DEFERRED_CUSTOM_EFFECTS = new Set<string>([
     'free_recycle',
     'temp_resurrect',
+    // La prophétie attend que le joueur ait désigné l'action qu'il prédit, parmi quatre.
+    'oracle_prophecy',
     // revive_god a besoin du dieu mort choisi par le joueur. Sans ce report, il s'exécutait dès
     // la pose de la carte, alors que targetGodId était encore inconnu : le handler sortait
     // immédiatement et la carte était consommée sans rien ressusciter.
@@ -608,6 +612,46 @@ registerEffect('temp_resurrect', (ctx) => {
     deadGod.statusEffects = [];
 });
 
+// === ORACLE DE DELPHES ===
+
+/** Boucliers posés sur chaque allié vivant quand une prophétie se réalise. */
+export const PROPHECY_SHIELD = 2;
+
+/**
+ * « Destin contrarié » — la prophétie.
+ *
+ * Ne fait RIEN au moment où elle est jouée : elle inscrit seulement la prédiction dans l'état
+ * de partie. Tout se joue au tour suivant, dans `playCard` et `discardForEnergy` côté
+ * adversaire — c'est ce qui en fait le seul effet du jeu qui survive à son propre tour.
+ *
+ * Différé (DEFERRED_CUSTOM_EFFECTS) : le choix vient d'une modale à quatre entrées, donc le
+ * handler ne tourne qu'une fois ce choix connu. Sans ce report il s'exécuterait d'abord avec
+ * une valeur par défaut, puis une seconde fois avec le vrai choix.
+ */
+registerEffect('oracle_prophecy', (ctx) => {
+    if (!ctx.prophecyChoice) return;
+    const state = ctx.engine.getState();
+    state.prophecy = {
+        casterPlayerId: ctx.player.id,
+        choice: ctx.prophecyChoice,
+        appliedTurn: state.turnSequence ?? 0,
+    };
+});
+
+/**
+ * « Lecture des présages » — la vision.
+ *
+ * Aucun effet sur l'état de jeu : elle ne fait que MONTRER. Tout se passe donc côté interface,
+ * qui ouvre la main adverse quelques secondes. Le handler existe quand même, pour que l'effet
+ * soit déclaré comme les autres et qu'un futur lecteur le trouve là où il le cherche.
+ *
+ * Deux cartes, prises au hasard : laisser le joueur choisir lesquelles regarder n'aurait aucun
+ * sens puisqu'il ne voit que des dos de cartes.
+ */
+registerEffect('oracle_vision', () => {
+    /* Rien à changer dans l'état : voir le commentaire ci-dessus. */
+});
+
 // === BESTIAIRE ===
 
 /**
@@ -847,6 +891,30 @@ export class GameEngine {
             return { success: false, message: `${castingGod.card.name} est réduit au silence et ne peut pas jouer de compétence` };
         }
 
+        /*
+         * PROPHÉTIE — la carte annoncée est annulée.
+         *
+         * Placée après les contrôles de légalité et avant tout le reste : la carte est bien
+         * dépensée, mais elle ne produit RIEN. Le coût est payé, le gain d'énergie ne l'est pas,
+         * aucun effet ne se résout, et le poison ne frappe pas — le sort n'a jamais quitté la
+         * main.
+         *
+         * C'est la punition de l'adversaire, et elle est déjà lourde. La récompense du lanceur,
+         * elle, est séparée (voir fulfilProphecy) : l'un perd son tour, l'autre gagne des
+         * boucliers. Deux choses distinctes, portées par deux camps distincts.
+         */
+        if (this.prophecyCatches(player.id, card.type)) {
+            player.hand.splice(cardIndex, 1);
+            cleanBlindCard(card);
+            player.discard.push(card);
+            player.energy = Math.max(0, player.energy - card.energyCost);
+            player.hasPlayedCard = true;
+            player.afkTurns = 0;
+            logAction(this.state, player, `${card.name} est annulée par la prophétie`);
+            this.fulfilProphecy();
+            return { success: true, message: `${card.name} est annulée par la prophétie !` };
+        }
+
         // Payer et gagner l'énergie (plafonnée)
         player.energy = Math.min(player.energy - card.energyCost + card.energyGain, MAX_ENERGY);
 
@@ -991,6 +1059,7 @@ export class GameEngine {
             selectedElement?: Element;
             lightningAction?: 'apply' | 'remove';
             selectedPlayerTarget?: 'self' | 'opponent';
+            prophecyChoice?: ProphecyAction;
         }
     ): { success: boolean; message: string } {
         const player = this.getCurrentPlayer();
@@ -1006,13 +1075,48 @@ export class GameEngine {
             effect, card,
             extra.targetGodId, extra.selectedElement, extra.lightningAction,
             extra.targetGodIds, extra.selectedCardIds, extra.healDistribution, extra.optionalChoice,
-            extra.selectedPlayerTarget
+            extra.selectedPlayerTarget, undefined, extra.prophecyChoice,
         );
 
         return { success: true, message: `${card.name} résolu` };
     }
 
     // ─── Défausser pour énergie ────────────
+
+    /**
+     * Cette action tombe-t-elle sous le coup d'une prophétie en cours ?
+     *
+     * Deux conditions, et la seconde est la moins évidente : le joueur ne doit pas être celui
+     * qui a lancé la prophétie. Sans ce garde, l'Oracle s'annulerait lui-même à son propre tour
+     * suivant — il a parié sur l'adversaire, pas sur lui.
+     */
+    private prophecyCatches(playerId: string, action: ProphecyAction): boolean {
+        const p = this.state.prophecy;
+        return !!p && p.casterPlayerId !== playerId && p.choice === action;
+    }
+
+    /**
+     * Le pari est gagné : chaque dieu encore vivant du lanceur gagne un bouclier, et il récupère
+     * une énergie.
+     *
+     * Chaque dieu VIVANT, donc : la carte vaut 8 boucliers avec une équipe intacte et 2 quand il
+     * ne reste qu'un dieu. Elle est forte quand on mène et faible quand on est acculé — c'est un
+     * pari, pas une bouée, et c'est voulu.
+     */
+    private fulfilProphecy(): void {
+        const p = this.state.prophecy;
+        if (!p) return;
+
+        const caster = this.state.players.find(x => x.id === p.casterPlayerId);
+        if (caster) {
+            for (const god of caster.gods) {
+                if (!god.isDead) addShield(god, PROPHECY_SHIELD);
+            }
+            caster.energy = Math.min(caster.energy + 1, MAX_ENERGY);
+            logAction(this.state, caster, 'la prophétie se réalise : +2 boucliers sur chaque dieu, +1 énergie');
+        }
+        this.state.prophecy = undefined;
+    }
 
     private discardForEnergy(action: GameAction): { success: boolean; message: string } {
         const player = this.getCurrentPlayer();
@@ -1026,6 +1130,16 @@ export class GameEngine {
         cleanBlindCard(card);
         player.discard.push(card);
         player.afkTurns = 0;
+
+        // La défausse contre énergie est la QUATRIÈME action prédictible : la carte part quand
+        // même, mais l'énergie n'arrive pas. Le drapeau est tout de même posé, sinon le joueur
+        // réessaierait avec une autre carte et finirait par toucher son énergie.
+        if (this.prophecyCatches(player.id, 'discard')) {
+            player.hasDiscardedForEnergy = true;
+            logAction(this.state, player, `défausse de ${card.name} annulée par la prophétie`);
+            this.fulfilProphecy();
+            return { success: true, message: 'Défausse annulée par la prophétie !' };
+        }
 
         if (!player.hasDiscardedForEnergy) {
             player.energy = Math.min(player.energy + 1, MAX_ENERGY);
@@ -1133,6 +1247,19 @@ export class GameEngine {
 
         const previousPlayer = this.getCurrentPlayer();
 
+        /*
+         * Une prophétie ne vaut QUE pour le tour suivant sa pose.
+         *
+         * Elle expire donc à la fin du tour de celui qu'elle visait, qu'elle se soit réalisée ou
+         * non — si elle s'était réalisée, `fulfilProphecy` l'a déjà effacée. Le cas qui compte
+         * ici est l'échec : l'adversaire a fait autre chose, ou n'a rien pu faire du tout et a
+         * passé son tour. Dans ce dernier cas la prophétie échoue, comme convenu : on ne
+         * récompense pas un pari que l'autre n'avait aucun moyen de tenir.
+         */
+        if (this.state.prophecy && this.state.prophecy.casterPlayerId !== previousPlayer.id) {
+            this.state.prophecy = undefined;
+        }
+
         // Tick des effets de statut (regen, poison, durées)
         tickStatusEffects(previousPlayer, this.state);
 
@@ -1237,6 +1364,8 @@ export class GameEngine {
         optionalChoice?: boolean,
         selectedPlayerTarget?: 'self' | 'opponent',
         sameSideIsAlly?: boolean,
+        /** Choix de la prophetie, transmis par resolveDeferredEffect uniquement. */
+        prophecyChoice?: ProphecyAction,
     ): void {
         const player = this.getCurrentPlayer();
         const opponent = this.getOpponent();
@@ -1257,7 +1386,8 @@ export class GameEngine {
             selectedCardIds,
             healDistribution,
             optionalChoice,
-            selectedPlayerTarget
+            selectedPlayerTarget,
+            prophecyChoice,
         };
 
         switch (effect.type) {

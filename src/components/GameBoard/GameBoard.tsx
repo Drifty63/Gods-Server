@@ -27,6 +27,8 @@ import styles from './GameBoard.module.css';
 import CardSelectionModal from '@/components/CardSelectionModal/CardSelectionModal';
 import OptionalChoiceModal from '@/components/OptionalChoiceModal/OptionalChoiceModal';
 import ElementSelectionModal from '@/components/ElementSelectionModal/ElementSelectionModal';
+import ProphecyChoiceModal from '@/components/ProphecyModal/ProphecyChoiceModal';
+import VisionModal from '@/components/ProphecyModal/VisionModal';
 import LightningActionModal from '@/components/LightningActionModal/LightningActionModal';
 import PlayerSelectionModal from '@/components/PlayerSelectionModal/PlayerSelectionModal';
 import DeadGodSelectionModal from '@/components/DeadGodSelectionModal/DeadGodSelectionModal';
@@ -111,6 +113,11 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
         cancelCardSelection,
         
         isShowingOptionalChoice,
+        isChoosingProphecy,
+        confirmProphecyChoice,
+        cancelProphecyChoice,
+        visionCards,
+        closeVision,
         optionalChoiceTitle,
         optionalChoiceDescription,
         pendingOptionalEffect,
@@ -713,6 +720,22 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                 </div>
             )}
 
+            {/*
+              * PROPHÉTIE EN COURS — visible uniquement par CELUI QUI LA SUBIT.
+              *
+              * L'adversaire doit savoir qu'un pari le vise, sans jamais connaître lequel : c'est
+              * ce qui transforme la carte en dilemme plutôt qu'en coup de dé. Sans cet
+              * avertissement, il se ferait annuler une action sans comprendre pourquoi, et la
+              * mécanique passerait pour un bug.
+              *
+              * Le lanceur, lui, n'a pas besoin du rappel : il vient de faire le choix.
+              */}
+            {gameState.prophecy && gameState.prophecy.casterPlayerId !== playerId && (
+                <div className={styles.prophecyWarning} role="status" aria-live="polite">
+                    🔮 Une prophétie vous vise — son objet vous est inconnu
+                </div>
+            )}
+
             {/* ERROR TOAST */}
             {errorMsg && (
                 <div
@@ -1043,6 +1066,20 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                 {...(pendingOptionalEffect === 'cascade_heal_choice' || pendingOptionalEffect?.startsWith('copy_cascade_heal:')
                     ? { acceptLabel: '⬅️ Gauche (Ouest)', declineLabel: 'Droite (Est) ➡️' }
                     : {})}
+            />
+
+            <ProphecyChoiceModal
+                isOpen={isChoosingProphecy}
+                onSelect={confirmProphecyChoice}
+                onCancel={cancelProphecyChoice}
+            />
+
+            {/* La clé remonte le composant à chaque nouvelle vision : c'est elle qui remet le
+                décompte à trois secondes, sans réinitialiser d'état depuis un effet. */}
+            <VisionModal
+                key={visionCards?.map(c => c.id).join('|') ?? 'none'}
+                cards={visionCards}
+                onClose={closeVision}
             />
 
             <ElementSelectionModal

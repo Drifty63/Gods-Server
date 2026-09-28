@@ -35,6 +35,23 @@ interface GameStore {
     isDistributingHeal: boolean;
     healDistributionTotal: number;
 
+    /**
+     * Modale à quatre entrées de la prophétie de l'Oracle.
+     *
+     * Séparée de `isShowingOptionalChoice`, qui ne sait poser qu'une question binaire : ici le
+     * joueur choisit parmi quatre actions, et le choix n'est pas un « oui/non » déguisé.
+     */
+    isChoosingProphecy: boolean;
+
+    /**
+     * Cartes adverses révélées par « Lecture des présages ». `null` = aucune vision en cours.
+     *
+     * Une COPIE, pas une référence : ce qui est montré doit être ce que l'adversaire avait en
+     * main au moment du sort, même s'il joue entre-temps.
+     */
+    visionCards: import('@/types/cards').SpellCard[] | null;
+    closeVision: () => void;
+
     // État pour confirmation optionnelle (optional_mill_boost)
     isShowingOptionalChoice: boolean;
     optionalChoiceTitle: string;
@@ -149,6 +166,10 @@ interface GameStore {
     confirmOptionalChoice: (accepted: boolean) => void;
     cancelOptionalChoice: () => void;
 
+    // Prophétie de l'Oracle : quatre actions possibles, une seule prédiction.
+    confirmProphecyChoice: (choice: import('@/types/cards').ProphecyAction) => void;
+    cancelProphecyChoice: () => void;
+
     // Actions pour choix de joueur (Zéphyr - free_recycle)
     startPlayerSelection: (title: string, effectId: string) => void;
     confirmPlayerSelection: (targetSelf: boolean) => void;
@@ -216,6 +237,9 @@ const ALL_MODALS_CLOSED = {
     enemyCardSelectionCount: 0,
     enemyCardSelectionTitle: '',
     pendingEnemyCardEffect: null as string | null,
+
+    isChoosingProphecy: false,
+    visionCards: null as import('@/types/cards').SpellCard[] | null,
 
     isShowingOptionalChoice: false,
     optionalChoiceTitle: '',
@@ -376,6 +400,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     pendingEnemyCardEffect: null,
 
     // État initial pour confirmation optionnelle (optional_mill_boost)
+    isChoosingProphecy: false,
+    visionCards: null as import('@/types/cards').SpellCard[] | null,
+
     isShowingOptionalChoice: false,
     optionalChoiceTitle: '',
     optionalChoiceDescription: '',
@@ -1293,6 +1320,66 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 return playResult;
             }
 
+            /*
+             * PROPHÉTIE — la carte part d'abord, le choix vient ensuite.
+             *
+             * `deferCustomEffect` fait payer le coût et défausser la carte sans résoudre
+             * l'effet : la prédiction ne s'inscrit dans l'état qu'une fois la modale refermée.
+             * Sans ce report, le handler tournerait une première fois sans choix (donc pour
+             * rien) puis une seconde avec le vrai, et poserait deux prophéties.
+             */
+            const hasProphecy = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'oracle_prophecy');
+            if (hasProphecy) {
+                const playResult = engine.executeAction({
+                    type: 'play_card', playerId, cardId, deferCustomEffect: true,
+                });
+                if (playResult.success) {
+                    set({
+                        ...ALL_MODALS_CLOSED,
+                        gameState: cloneGameState(engine.getState()),
+                        pendingEffectCardId: cardId,
+                        isChoosingProphecy: true,
+                        selectedCard: null,
+                        selectedTargetGods: [],
+                        requiredTargets: 0,
+                        isSelectingTarget: false,
+                    });
+                }
+                return playResult;
+            }
+
+            /*
+             * VISION — la carte se joue normalement, puis on MONTRE.
+             *
+             * Pas d'effet différé ici : la vision ne change rien à l'état de jeu, donc il n'y a
+             * rien à résoudre après coup. Les deux cartes sont tirées au hasard — laisser le
+             * joueur choisir lesquelles regarder n'aurait aucun sens, il ne voit que des dos.
+             *
+             * Elles sont COPIÉES : l'adversaire jouera peut-être l'une d'elles avant la fin du
+             * décompte, et la modale doit montrer sa main telle qu'elle était au moment du sort.
+             */
+            const hasVision = cardToCheck.effects.some(e => e.type === 'custom' && e.customEffectId === 'oracle_vision');
+            if (hasVision) {
+                const playResult = engine.executeAction({ type: 'play_card', playerId, cardId });
+                if (playResult.success) {
+                    const foe = engine.getState().players.find(p => p.id !== playerId);
+                    const revealed = [...(foe?.hand ?? [])]
+                        .sort(() => Math.random() - 0.5)
+                        .slice(0, 2)
+                        .map(c => ({ ...c }));
+                    set({
+                        ...ALL_MODALS_CLOSED,
+                        gameState: cloneGameState(engine.getState()),
+                        visionCards: revealed,
+                        selectedCard: null,
+                        selectedTargetGods: [],
+                        requiredTargets: 0,
+                        isSelectingTarget: false,
+                    });
+                }
+                return playResult;
+            }
+
             const hasEnemyCardSelect = cardToCheck.effects.some(e => e.type === 'custom' && (e.customEffectId === 'choose_discard_enemy' || e.customEffectId === 'choose_hand_to_deck'));
             if (hasEnemyCardSelect) {
                 const effectId = cardToCheck.effects.find(e => e.type === 'custom' && (e.customEffectId === 'choose_discard_enemy' || e.customEffectId === 'choose_hand_to_deck'))?.customEffectId || '';
@@ -1376,7 +1463,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
                             currentStoreState.isSelectingPlayer ||
                             currentStoreState.isSelectingDeadGod ||
                             currentStoreState.isSelectingGod ||
-                            currentStoreState.isShowingZombieDamage;
+                            currentStoreState.isShowingZombieDamage ||
+                            currentStoreState.isChoosingProphecy ||
+                            currentStoreState.visionCards !== null;
 
                         if (hasActiveModal) {
                             // Un modal est ouvert, ne pas finir le tour
@@ -1674,6 +1763,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
             pendingOptionalTargetGodIds: [],
             pendingEffectCardId: null,
         });
+    },
+
+    // === PROPHÉTIE DE L'ORACLE ===
+
+    confirmProphecyChoice: (choice) => {
+        const { engine, pendingEffectCardId } = get();
+        if (!engine || !pendingEffectCardId) return;
+
+        engine.resolveDeferredEffect(pendingEffectCardId, { prophecyChoice: choice });
+
+        set({
+            gameState: cloneGameState(engine.getState()),
+            isChoosingProphecy: false,
+            pendingEffectCardId: null,
+        });
+
+        get().finishTurnAfterResolution();
+    },
+
+    /*
+     * Annuler ne rend PAS la carte : elle a déjà été jouée, son coût payé, et elle est dans la
+     * défausse. Le joueur qui referme la modale sans choisir a simplement gaspillé sa prophétie
+     * — même contrat que les autres effets différés, qu'aucun d'eux ne permet de rembourser.
+     * Le tour se termine quand même, sinon il resterait bloqué.
+     */
+    cancelProphecyChoice: () => {
+        set({ isChoosingProphecy: false, pendingEffectCardId: null });
+        get().finishTurnAfterResolution();
+    },
+
+    closeVision: () => {
+        set({ visionCards: null });
+        get().finishTurnAfterResolution();
     },
 
     // === ACTIONS POUR CHOIX DE JOUEUR (free_recycle) ===

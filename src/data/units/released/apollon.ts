@@ -5,22 +5,19 @@ import { released, dmg, heal, status, custom } from '../builders';
  */
 
 /*
- * L'ORACLE RESTE EN BROUILLON, seule unité des dix-neuf dans ce cas.
+ * L'ORACLE EST SORTIE DU BROUILLON le 29 septembre 2026, ses deux effets étant écrits.
  *
- * Sa prophétie est le premier effet du jeu qui SURVIVRAIT à son propre tour : le joueur prédit
- * l'action adverse, et c'est au tour suivant qu'on sait s'il avait raison. Tous les autres
- * effets sur mesure se résolvent immédiatement. Celui-ci demande un champ persistant dans
- * `GameState`, synchronisé dans le jsonb des parties en ligne, et une interception dans
- * `playCard` — la fonction la plus sensible du moteur.
- *
- * Plutôt que de livrer une carte dont le texte promet ce que le code ne fait pas, l'unité
- * attend. Le drapeau `draft` la rend invisible en Duel, en boutique et en Ascension ; il suffira
- * de le retirer quand les deux effets seront écrits.
+ * Sa prophétie reste le seul effet du jeu qui SURVIT à son propre tour : le joueur prédit
+ * l'action adverse, et c'est au tour suivant qu'on sait s'il avait raison. Tous les autres se
+ * résolvent immédiatement. Elle vit donc dans un champ de `GameState` (synchronisé dans le
+ * jsonb des parties en ligne) et s'intercepte dans `playCard` et `discardForEnergy` — les deux
+ * fonctions les plus sensibles du moteur. Voir src/__tests__/prophecy.test.ts, qui en couvre
+ * les huit cas.
  */
 export const oracleDelphes = released(
     {
         kind: 'servant', id: 'oracle_delphes', name: 'Oracle de Delphes',
-        element: 'light', hp: 16, god: 'apollon', arch: 'support', draft: true,
+        element: 'light', hp: 16, god: 'apollon', arch: 'support',
         flavor: "« J'ai vu ce que tu vas faire. Fais-le quand même, si tu l'oses. » — Elle ne frappe pas : elle lit la main adverse et parie sur le coup suivant.",
     },
     [
@@ -40,9 +37,6 @@ export const oracleDelphes = released(
             effects: [heal(2, 'self')],
         },
         {
-            // `oracle_prophecy` et `oracle_vision` n'ont PAS de handler enregistré : c'est la
-            // raison d'être du drapeau `draft` ci-dessus. Un effet custom sans handler ne fait
-            // rien, en silence — inoffensif tant que l'unité reste hors du jeu.
             slot: 'skill_2', name: 'Destin contrarié',
             desc: 'Prédit l\'action adverse. Si l\'adversaire la joue, elle est annulée : +2 boucliers sur chaque allié vivant et 1 énergie.',
             effects: [custom('oracle_prophecy', 'Prédit l\'action adverse et l\'annule')],

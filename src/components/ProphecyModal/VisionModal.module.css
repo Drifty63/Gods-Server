@@ -1,0 +1,77 @@
+.title {
+    margin: 0 0 8px;
+    font-family: var(--font-title);
+    font-weight: var(--weight-title);
+    font-size: 1.25rem;
+    color: #c084fc;
+    text-align: center;
+}
+
+.description {
+    margin: 0 0 16px;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.72);
+    text-align: center;
+}
+
+/* Une colonne : deux cartes côte à côte sur un écran de téléphone rendraient leur texte
+   illisible, or c'est précisément ce texte qu'il s'agit de mémoriser en trois secondes. */
+.cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card {
+    padding: 12px 14px;
+    border: 1px solid rgba(192, 132, 252, 0.35);
+    border-radius: 12px;
+    background: rgba(192, 132, 252, 0.08);
+}
+
+.cardName {
+    font-family: var(--font-title);
+    font-weight: var(--weight-title);
+    font-size: 0.95rem;
+    color: #e9d5ff;
+}
+
+.cardCost {
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.cardText {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.timer {
+    margin: 14px 0 10px;
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    color: #c084fc;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.closeButton {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px;
+    border: 1px solid rgba(192, 132, 252, 0.4);
+    border-radius: 10px;
+    background: rgba(192, 132, 252, 0.12);
+    color: #e9d5ff;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.closeButton:hover,
+.closeButton:focus-visible {
+    background: rgba(192, 132, 252, 0.22);
+}

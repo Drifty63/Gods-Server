@@ -587,6 +587,38 @@
  * Rien n'annonçait la reprise de la main : on pouvait fixer l'écran sans savoir si l'adversaire
  * réfléchissait encore. La bannière traverse l'écran puis disparaît, sans bloquer le jeu.
  */
+/*
+ * Avertissement de prophétie, porté par celui qui la SUBIT.
+ *
+ * Ancré en haut et centré, sous la zone des dieux adverses : il doit rester lisible pendant
+ * tout le tour sans masquer une carte ni un bouton, puisqu'il informe d'une contrainte qui pèse
+ * précisément sur le choix en cours. `pointer-events: none` garantit qu'il n'intercepte jamais
+ * un geste destiné au plateau.
+ */
+.prophecyWarning {
+  position: absolute;
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 880;
+
+  max-width: 92vw;
+  padding: 6px 14px;
+  border: 1px solid rgba(192, 132, 252, 0.55);
+  border-radius: 999px;
+  background: rgba(30, 12, 48, 0.9);
+
+  color: #e9d5ff;
+  font-size: 0.74rem;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  pointer-events: none;
+}
+
 .turnBanner {
   position: absolute;
   top: 50%;
