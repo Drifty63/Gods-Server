@@ -69,36 +69,62 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
         }
     }, [currentDialogue]);
 
-    // Effet de machine à écrire
+    /** Millisecondes entre deux caractères de la machine à écrire. */
+    const TYPING_SPEED_MS = 30;
+
+    /**
+     * Le minuteur de frappe, tenu dans une référence pour pouvoir l'ARRÊTER depuis le clic.
+     *
+     * C'est toute l'origine de deux bugs qui n'en faisaient qu'un : le clic forçait le texte
+     * complet mais laissait le minuteur tourner. Celui-ci réécrivait aussitôt une portion du
+     * texte par-dessus, puis une portion un peu plus longue, etc. — d'où le scintillement. Et
+     * comme `isTyping` était déjà repassé à faux, le deuxième appui croyait le dialogue terminé
+     * et le sautait alors qu'il s'écrivait encore sous les yeux du joueur.
+     */
+    const typingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const stopTyping = useCallback(() => {
+        if (typingTimerRef.current !== null) {
+            clearInterval(typingTimerRef.current);
+            typingTimerRef.current = null;
+        }
+    }, []);
+
+    // Effet de machine à écrire.
+    //
+    // Les dépendances sont l'INDICE et le TEXTE, deux valeurs primitives, et non l'objet
+    // `currentDialogue` : si le parent venait à reconstruire son tableau de dialogues à chaque
+    // rendu, l'objet changerait d'identité et la frappe repartirait de zéro en boucle.
+    const dialogueText = currentDialogue?.text ?? '';
     useEffect(() => {
-        if (!currentDialogue) return;
+        if (!dialogueText) return;
 
         setDisplayedText('');
         setIsTyping(true);
         setShowContinue(false);
 
-        const text = currentDialogue.text;
         let charIndex = 0;
-
-        const typingInterval = setInterval(() => {
-            if (charIndex < text.length) {
-                setDisplayedText(text.substring(0, charIndex + 1));
-                charIndex++;
-            } else {
+        stopTyping();
+        typingTimerRef.current = setInterval(() => {
+            charIndex++;
+            setDisplayedText(dialogueText.slice(0, charIndex));
+            if (charIndex >= dialogueText.length) {
+                stopTyping();
                 setIsTyping(false);
                 setShowContinue(true);
-                clearInterval(typingInterval);
             }
-        }, 30); // Vitesse de frappe
+        }, TYPING_SPEED_MS);
 
-        return () => clearInterval(typingInterval);
-    }, [currentDialogue, currentIndex]);
+        return stopTyping;
+    }, [currentIndex, dialogueText, stopTyping]);
 
     // Gestion du clic / touche
     const handleClick = useCallback(() => {
         if (isTyping) {
-            // Skip l'animation et affiche tout le texte
-            setDisplayedText(currentDialogue.text);
+            // ARRÊTER le minuteur avant d'afficher le texte entier : sans cette ligne, il le
+            // recouvre au tick suivant et l'affichage se met à osciller.
+            stopTyping();
+            setDisplayedText(dialogueText);
             setIsTyping(false);
             setShowContinue(true);
         } else if (isLastDialogue) {
@@ -106,7 +132,7 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
         } else {
             onAdvance();
         }
-    }, [isTyping, isLastDialogue, currentDialogue, onAdvance, onComplete]);
+    }, [isTyping, isLastDialogue, dialogueText, stopTyping, onAdvance, onComplete]);
 
     // Écouter les touches clavier
     useEffect(() => {

@@ -291,20 +291,9 @@ function StoryBattleContent() {
                 applyBattleConditions(localBattleConfig);
             }, 100);
 
+            // L'intro N'AVANCE PLUS TOUTE SEULE au bout de 3 secondes : elle attend le joueur.
+            // Voir l'effet `phase === 'intro'` plus bas, et startPlaying().
             setPhase('intro');
-
-            // Passer à la phase de jeu après un délai
-            setTimeout(() => {
-                const updatedState = useGameStore.getState();
-                setPhase('playing');
-
-                // Si l'IA commence, lancer son tour maintenant que l'intro est finie
-                if (!playerGoesFirst && updatedState.isSoloMode) {
-                    setTimeout(() => {
-                        useGameStore.getState().playAITurn();
-                    }, 500);
-                }
-            }, 3000);
 
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erreur lors de l\'initialisation du combat');
@@ -317,6 +306,41 @@ function StoryBattleContent() {
             initBattle();
         }
     }, [phase, initBattle]);
+
+    /*
+     * L'ÉCRAN D'INTRODUCTION ATTEND LE JOUEUR.
+     *
+     * Il passait au combat au bout de 3 secondes, quoi qu'il arrive. C'est trop court pour lire
+     * le titre, la description ET l'avertissement de condition spéciale, qui est précisément
+     * l'information dont le joueur a besoin AVANT de jouer son premier tour — pas après l'avoir
+     * perdu. Le combat ne commence donc plus que lorsqu'il le décide.
+     *
+     * Deux garde-fous encadrent cette attente :
+     *  - un DÉLAI MINIMAL avant que l'écran ne devienne cliquable, sinon un doigt encore posé
+     *    depuis l'écran précédent le balaierait sans que rien n'ait été lu ;
+     *  - un départ AUTOMATIQUE au bout de vingt secondes, pour que le jeu ne reste pas figé si
+     *    le joueur pose son téléphone.
+     */
+    const INTRO_MIN_MS = 1200;
+    const INTRO_AUTO_MS = 20000;
+    const [introReady, setIntroReady] = useState(false);
+
+    const startPlaying = useCallback(() => {
+        setPhase('playing');
+        // En mode Histoire l'ennemi ouvre toujours (attaque surprise) : son tour se déclenche
+        // donc dès que l'intro se referme, et non au chargement.
+        if (useGameStore.getState().isSoloMode) {
+            setTimeout(() => useGameStore.getState().playAITurn(), 500);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (phase !== 'intro') { setIntroReady(false); return; }
+
+        const ready = setTimeout(() => setIntroReady(true), INTRO_MIN_MS);
+        const auto = setTimeout(startPlaying, INTRO_AUTO_MS);
+        return () => { clearTimeout(ready); clearTimeout(auto); };
+    }, [phase, startPlaying]);
 
     // Surveiller la fin du combat
     useEffect(() => {
@@ -637,7 +661,15 @@ function StoryBattleContent() {
                 >
                     <div className={styles.backgroundOverlay} />
                 </div>
-                <div className={styles.introScreen}>
+                <div
+                    className={styles.introScreen}
+                    onClick={introReady ? startPlaying : undefined}
+                    role={introReady ? 'button' : undefined}
+                    tabIndex={introReady ? 0 : undefined}
+                    onKeyDown={introReady ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startPlaying(); }
+                    } : undefined}
+                >
                     <div className={styles.introContent}>
                         <h1 className={styles.battleTitle}>{currentBattleConfig?.name}</h1>
                         <p className={styles.battleDescription}>{currentBattleConfig?.description}</p>
@@ -673,7 +705,12 @@ function StoryBattleContent() {
                             </div>
                         </div>
 
-                        <p className={styles.preparingText}>Le combat commence...</p>
+                        {/* Le texte ne ment plus : il annonçait « Le combat commence... » alors
+                            que rien n'attendait le joueur. Il dit maintenant ce qu'il faut faire,
+                            et seulement une fois que l'écran accepte réellement le geste. */}
+                        <p className={styles.preparingText}>
+                            {introReady ? '▶ Appuyez pour commencer' : 'Préparation...'}
+                        </p>
                     </div>
                 </div>
             </main>
