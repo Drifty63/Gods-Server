@@ -10,7 +10,7 @@ import { useStoryStore } from '@/store/storyStore';
 import { ACHIEVEMENTS, FAMILY_LABELS, newlyUnlocked, type Achievement, type AchievementFamily } from '@/data/achievements';
 import { toast } from '@/lib/toast';
 import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
-import { getRankByFerveur, getRankProgress, getLadder, RANKS, LADDERS } from '@/data/ranks';
+import { getRankByFerveur, getRankProgress, getLadder, getBestLadder, RANKS } from '@/data/ranks';
 import styles from './page.module.css';
 
 function formatMatchDate(iso: string): string {
@@ -203,19 +203,7 @@ export default function ProfilePage() {
      * Le meilleur plutôt qu'un choix laissé au joueur : un sélecteur se règle une fois puis
      * s'oublie, et laisse quelqu'un afficher un rang inférieur à celui qu'il a vraiment atteint.
      */
-    const bestLadder = LADDERS
-        .map(l => ({
-            ladder: l,
-            ferveur: l.mode === 'duel13' ? (profile.ferveur_duel13 ?? 0)
-                : l.mode === 'duel_open' ? (profile.ferveur_duel_open ?? 0)
-                    : profile.ferveur,
-            // Le sommet du MÊME classement que le rang affiché. Lire celui du Classé pendant
-            // que le rang vient du Duel 13 donnerait deux chiffres qui se contredisent.
-            peak: l.mode === 'duel13' ? (profile.ferveur_max_duel13 ?? 0)
-                : l.mode === 'duel_open' ? (profile.ferveur_max_duel_open ?? 0)
-                    : (profile.ferveur_max ?? 0),
-        }))
-        .reduce((best, cur) => (cur.ferveur > best.ferveur ? cur : best));
+    const bestLadder = getBestLadder(profile);
 
     const userFerveur = bestLadder.ferveur;
     const userRank = getRankByFerveur(userFerveur);

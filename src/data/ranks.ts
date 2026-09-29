@@ -215,3 +215,40 @@ export function getLadder(mode: LadderMode): LadderInfo {
 
 /** Matchs à jouer avant d'apparaître au classement. Doit rester aligné sur placement_matches() en base. */
 export const PLACEMENT_MATCHES = 5;
+
+/** Les six colonnes de ferveur d'un profil, seule chose dont `getBestLadder` a besoin. */
+export interface LadderFerveurs {
+    ferveur: number;
+    ferveur_duel13?: number | null;
+    ferveur_duel_open?: number | null;
+    ferveur_max?: number | null;
+    ferveur_max_duel13?: number | null;
+    ferveur_max_duel_open?: number | null;
+}
+
+/**
+ * Le classement où le joueur se montre au mieux.
+ *
+ * Un joueur peut très bien être Olympien en Duel 13 et n'avoir jamais touché au Classé. Afficher
+ * systématiquement la ferveur du Classé lui donnerait le rang le plus bas des trois, ce qu'on
+ * n'oublie jamais de lui faire remarquer.
+ *
+ * Le sommet renvoyé est celui du MÊME classement que la ferveur : lire le sommet du Classé
+ * pendant que le rang vient du Duel donnerait deux chiffres qui se contredisent.
+ *
+ * Défini ici, et pas dans un écran : la page de profil personnelle et celle qu'on consulte d'un
+ * ami doivent donner le même rang au même joueur.
+ */
+export function getBestLadder(p: LadderFerveurs): { ladder: LadderInfo; ferveur: number; peak: number } {
+    return LADDERS
+        .map(l => ({
+            ladder: l,
+            ferveur: l.mode === 'duel13' ? (p.ferveur_duel13 ?? 0)
+                : l.mode === 'duel_open' ? (p.ferveur_duel_open ?? 0)
+                    : p.ferveur,
+            peak: l.mode === 'duel13' ? (p.ferveur_max_duel13 ?? 0)
+                : l.mode === 'duel_open' ? (p.ferveur_max_duel_open ?? 0)
+                    : (p.ferveur_max ?? 0),
+        }))
+        .reduce((best, cur) => (cur.ferveur > best.ferveur ? cur : best));
+}

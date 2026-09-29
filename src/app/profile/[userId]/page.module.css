@@ -201,3 +201,56 @@
     font-size: 2.6rem;
     line-height: 1;
 }
+
+/*
+ * Dieu de prédilection.
+ *
+ * Placé entre la barre de rang et la grille de chiffres : c'est la seule chose de cette page qui
+ * dise quelque chose du STYLE de jeu de la personne, et non de son niveau.
+ */
+.favoriteGod {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+}
+
+.favoriteGodImage {
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.favoriteGodInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.favoriteGodLabel {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.favoriteGodName {
+    font-family: var(--font-title);
+    font-size: 0.95rem;
+    color: var(--gold-divine);
+    /* Les noms complets ("Artémis, Déesse de la chasse") dépassent la largeur d'un iPhone mini :
+       sans cette coupe, la tuile élargit la page et fait apparaître un défilement horizontal. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.favoriteGodCount {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.6);
+}

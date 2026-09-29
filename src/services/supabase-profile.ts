@@ -134,12 +134,27 @@ export interface UserSearchResult {
     relationship: 'none' | 'pending' | 'accepted' | 'blocked';
 }
 
+/**
+ * Ce qu'un joueur montre de lui aux autres.
+ *
+ * Volontairement calqué sur `UserProfile` pour les champs concernés : la page d'un ami affiche
+ * les mêmes statistiques que la sienne, et les deux écrans partagent donc les mêmes calculs.
+ * `level` a disparu — la colonne vaut 1 par défaut et n'est mise à jour nulle part.
+ */
 export interface PublicProfile {
     id: string;
     username: string;
     avatar: string;
     ferveur: number;
-    level: number;
+    ferveur_duel13: number;
+    ferveur_duel_open: number;
+    ferveur_max: number;
+    ferveur_max_duel13: number;
+    ferveur_max_duel_open: number;
+    ferveur_earned: number;
+    god_play_counts: Record<string, number>;
+    gods_owned: string[];
+    achievements: string[];
     stats: UserProfile['stats'];
 }
 

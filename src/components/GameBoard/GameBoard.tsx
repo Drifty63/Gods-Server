@@ -201,6 +201,21 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
     const [viewingDiscard, setViewingDiscard] = useState<SpellCard[] | null>(null);
     const [zoomedDiscardCard, setZoomedDiscardCard] = useState<SpellCard | null>(null);
     const [isLogOpen, setIsLogOpen] = useState(false);
+    /**
+     * Fermeture de la corbeille, en un seul endroit.
+     *
+     * Elle se ferme par DEUX chemins (le voile et le bouton « Fermer ») qui portaient la même
+     * paire d'appels recopiée. Le didacticiel ajoute un troisième effet à ce geste : recopier
+     * une troisième ligne aurait garanti qu'un des deux chemins finisse par diverger.
+     */
+    // Quel camp est affiché : l'étape du didacticiel porte sur SA corbeille, et refermer celle de
+    // l'adversaire ne doit pas la valider.
+    const viewingOwnDiscard = useRef(false);
+    const closeDiscard = useCallback(() => {
+        setViewingDiscard(null);
+        setZoomedDiscardCard(null);
+        if (viewingOwnDiscard.current) emitTutorialUi('discard-closed');
+    }, []);
     const [hoveredCard, setHoveredCard] = useState<SpellCard | null>(null);
     /** Carte examinée en plein écran via un appui long (n'engage aucune action de jeu). */
     const [inspectedCard, setInspectedCard] = useState<SpellCard | null>(null);
@@ -900,11 +915,11 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
             <DeckAndDiscard 
                 player={opponent} 
                 isOpponent={true} 
-                onClickDiscard={() => setViewingDiscard(opponent.discard)}
+                onClickDiscard={() => { viewingOwnDiscard.current = false; setViewingDiscard(opponent.discard); }}
             />
             <DeckAndDiscard 
                 player={player} 
-                onClickDiscard={() => { setViewingDiscard(player.discard); emitTutorialUi('discard-opened'); }}
+                onClickDiscard={() => { viewingOwnDiscard.current = true; setViewingDiscard(player.discard); }}
             />
 
             {/* OPPONENT HAND */}
@@ -944,7 +959,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                 myTurn={myTurn}
                 turnNumber={gameState.turnNumber}
                 canTargetDead={canTargetDead}
-                onOpenLog={() => { setIsLogOpen(true); emitTutorialUi('log-opened'); }}
+                onOpenLog={() => setIsLogOpen(true)}
                 onEndTurn={() => {
                     if (myTurn) {
                         const result = endTurn();
@@ -999,7 +1014,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                     backgroundColor: 'rgba(0, 0, 0, 0.85)', zIndex: 2000,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '16px', boxSizing: 'border-box'
-                }} onClick={() => { setViewingDiscard(null); setZoomedDiscardCard(null); }}>
+                }} onClick={closeDiscard}>
                     <h2 style={{ color: 'white', marginBottom: '14px', fontFamily: 'var(--font-logo)', fontSize: 'clamp(1rem, 4vw, 1.3rem)' }}>Contenu de la Corbeille</h2>
 
                     {viewingDiscard.length === 0 ? (
@@ -1044,7 +1059,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                             ))}
                         </div>
                     )}
-                    <button className={styles.btnPremium} style={{ marginTop: '16px' }} onClick={() => { setViewingDiscard(null); setZoomedDiscardCard(null); }}>Fermer</button>
+                    <button className={styles.btnPremium} style={{ marginTop: '16px' }} onClick={closeDiscard}>Fermer</button>
                 </div>
             )}
 
@@ -1150,7 +1165,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                 isOpen={isLogOpen}
                 log={gameState.log || []}
                 myPlayerId={playerId}
-                onClose={() => setIsLogOpen(false)}
+                onClose={() => { setIsLogOpen(false); emitTutorialUi('log-closed'); }}
             />
         </div>
     );

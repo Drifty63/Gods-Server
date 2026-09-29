@@ -91,12 +91,16 @@ export interface TutorialStep {
      * Ouvrir la corbeille ou le journal de combat ne change rien à `GameState` : aucun prédicat
      * ne peut donc les capter. Ces deux étapes désignaient pourtant un bouton sans permettre de
      * le toucher — le halo invitait à un clic qui ne menait nulle part.
+     *
+     * L'étape se franchit à la FERMETURE de la modale, et non à son ouverture : sinon l'étape
+     * suivante s'affiche derrière la modale encore ouverte, et le joueur la découvre à moitié
+     * masquée, sur un fond grisé.
      */
     awaitUi?: TutorialUiAction;
 }
 
 /** Geste d'interface qu'une étape peut attendre. */
-export type TutorialUiAction = 'discard-opened' | 'log-opened';
+export type TutorialUiAction = 'discard-closed' | 'log-closed';
 
 /**
  * Événement émis par le plateau quand un de ces gestes est fait.
@@ -173,15 +177,15 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'energy',
         title: "Votre énergie",
-        text: "Ce cadre affiche votre énergie, vos cartes restantes en pioche, et votre corbeille. Touchez la corbeille 🗑️ pour voir ce qui a déjà été joué — elle s'ouvre à tout moment.",
+        text: "Ce cadre affiche votre énergie, vos cartes restantes en pioche, et votre corbeille. Ouvrez la corbeille 🗑️ pour voir ce qui a déjà été joué, puis refermez-la.",
         // Le geste porte sur la corbeille ; le cadre entier reste éclairé pour qu'on voie de quoi
         // elle fait partie.
         spotlight: ['player-energy', 'player-discard'],
         // Une corbeille vide n'apprend rien : on y met quelques cartes avant de la montrer.
         script: 'seed-discard',
-        awaitUi: 'discard-opened',
+        awaitUi: 'discard-closed',
         advance: 'next',
-        waitingLabel: 'Ouvrez la corbeille',
+        waitingLabel: 'Ouvrez, puis refermez la corbeille',
     },
     {
         id: 'hand',
@@ -236,11 +240,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'combat-log',
         title: 'Le journal de combat',
-        text: "Ce bouton ouvre l'historique de la partie : toutes les cartes jouées, par vous comme par l'adversaire. Touchez-le pour voir ce qui s'est passé jusqu'ici.",
+        text: "Ce bouton ouvre l'historique de la partie : toutes les cartes jouées, par vous comme par l'adversaire. Ouvrez-le pour voir ce qui s'est passé jusqu'ici, puis refermez-le.",
         spotlight: 'combat-log',
-        awaitUi: 'log-opened',
+        awaitUi: 'log-closed',
         advance: 'next',
-        waitingLabel: 'Ouvrez le journal',
+        waitingLabel: 'Ouvrez, puis refermez le journal',
     },
     {
         id: 'deck-empty',

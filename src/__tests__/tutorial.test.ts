@@ -222,3 +222,13 @@ describe('étapes qui attendent un geste d’interface', () => {
         expect(stepById('energy').script).toBe('seed-discard');
     });
 });
+
+describe('le geste attendu est une FERMETURE', () => {
+    it('ne franchit pas l’étape à l’ouverture de la modale', () => {
+        // À l'ouverture, l'étape suivante s'affichait derrière la corbeille encore ouverte : le
+        // joueur la découvrait à moitié masquée, sur fond grisé.
+        for (const step of TUTORIAL_STEPS.filter(s => s.awaitUi)) {
+            expect(step.awaitUi).toMatch(/-closed$/);
+        }
+    });
+});
