@@ -3556,7 +3556,7 @@ export const CHAPTER2_BATTLE4_TEMPLE: DialogueLine[] = [
     {
         speakerId: 'athena',
         speakerName: 'Athéna',
-        text: "Je sais aussi que vous avez affronté le Minotaure, puis Méduse, et récemment Arachné.",
+        text: "Je sais aussi que vous avez affronté Arès et ses soldats, puis le dragon de Thèbes, et récemment Arachné.",
         emotion: 'neutral'
     },
     {
@@ -3854,7 +3854,7 @@ export const CHAPTER2_BATTLE4_CONFRONTATION: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*sourire fier* Très bien, Artémis. Toi et moi, contre ma fille et son mortel.",
+        text: "*sourire fier* Très bien, Artémis. Toi et moi, contre ta sœur et son mortel.",
         emotion: 'determined'
     },
     {
@@ -3924,7 +3924,7 @@ export const CHAPTER2_BATTLE4_WIN: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*soupire* J'ai perdu... c'est indéniable. Et je suis un dieu de parole.",
+        text: "*soupire* J'ai gagné ce combat, dans les faits. Mais j'avais tort, et un roi qui ne le reconnaît pas n'est plus qu'un tyran. Alors disons que je l'ai perdu.",
         emotion: 'neutral'
     },
     {
@@ -3960,14 +3960,14 @@ export const CHAPTER2_BATTLE4_WIN: DialogueLine[] = [
     {
         speakerId: 'athena',
         speakerName: 'Athéna',
-        text: "Direction : l'île des Cyclopes d'abord. Puis le domaine de Poséidon.",
+        text: "Direction : le cap Ténare. Mais le voyage risque d'être mouvementé...",
         emotion: 'determined'
     },
     {
         speakerId: 'artemis',
         speakerName: 'Artémis',
-        text: "*sourit* Poséidon ne sait pas ce qui l'attend.",
-        emotion: 'happy'
+        text: "*ajuste son arc* Nous avons intérêt à être vigilants.",
+        emotion: 'neutral'
     },
     {
         speakerId: 'zeus',

@@ -32,6 +32,7 @@ import {
     CHAPTER2_BATTLE4_LOSE
 } from '@/data/story/dialogues';
 import styles from './page.module.css';
+import { getSpeakerColor } from '@/data/story/speakerColors';
 
 type BattlePhase = 'loading' | 'team_selection' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
 
@@ -44,21 +45,6 @@ interface PostBattleDialogue {
 }
 
 // Mapping des IDs de dieux vers leurs couleurs
-const GOD_COLORS: Record<string, string> = {
-    zeus: '#ffd700',
-    hestia: '#ff6b35',
-    aphrodite: '#ff69b4',
-    dionysos: '#9b59b6',
-    hades: '#4a0080',
-    nyx: '#1a1a2e',
-    apollon: '#87ceeb',
-    ares: '#dc143c',
-    poseidon: '#00bfff',
-    athena: '#f0e68c',
-    demeter: '#228b22',
-    artemis: '#c0c0c0',
-};
-
 export default function StoryBattlePage() {
     return (
         <RequireAuth>
@@ -787,7 +773,7 @@ function StoryBattleContent() {
         const dialogue = postBattleDialogues[postBattleIndex];
         if (!dialogue) return null;
 
-        const glowColor = GOD_COLORS[dialogue.speaker] || '#ffd700';
+        const glowColor = getSpeakerColor(dialogue.speaker);
 
         // Utiliser l'image de fond appropriée selon le combat
         let backgroundImage: string;

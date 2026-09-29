@@ -5,6 +5,7 @@ import Image from 'next/image';
 import styles from './DialogueBox.module.css';
 import { DialogueLine } from '@/types/story';
 import { getCardImage } from '@/data/gods';
+import { getSpeakerColor } from '@/data/story/speakerColors';
 
 /**
  * Le narrateur n'est pas une carte : son portrait n'existe que pour le mode Histoire, et sert
@@ -20,23 +21,6 @@ interface DialogueBoxProps {
 }
 
 // Couleurs par dieu pour l'effet de glow
-const GOD_COLORS: Record<string, string> = {
-    narrator: '#d4a574',  // Parchemin doré
-    zeus: '#ffd700',      // Or/Foudre
-    hestia: '#ff6b35',    // Orange/Feu
-    aphrodite: '#ff69b4', // Rose
-    dionysos: '#9b59b6',  // Violet
-    hades: '#4a0080',     // Violet sombre
-    nyx: '#1a1a2e',       // Bleu très sombre
-    apollon: '#87ceeb',   // Bleu ciel
-    ares: '#dc143c',      // Rouge sang
-    poseidon: '#00bfff',  // Bleu océan
-    athena: '#f0e68c',    // Jaune doré
-    demeter: '#228b22',   // Vert forêt
-    artemis: '#c0c0c0',   // Argent
-    arachne: '#8b0000',   // Rouge sombre (araignée)
-};
-
 export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComplete }: DialogueBoxProps) {
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(true);
@@ -157,7 +141,7 @@ export default function DialogueBox({ dialogues, currentIndex, onAdvance, onComp
     const portraitUrl = currentDialogue.speakerId === 'narrator'
         ? NARRATOR_PORTRAIT
         : getCardImage(currentDialogue.speakerId) ?? NARRATOR_PORTRAIT;
-    const glowColor = GOD_COLORS[currentDialogue.speakerId] || '#ffd700';
+    const glowColor = getSpeakerColor(currentDialogue.speakerId);
 
     // #7 - Classes dynamiques pour les animations
     const portraitClasses = `${styles.portrait} ${isNewSpeaker ? styles.portraitEnter : styles.portraitIdle}`;
