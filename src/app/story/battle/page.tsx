@@ -99,6 +99,17 @@ function StoryBattleContent() {
         getCurrentEvent
     } = useStoryStore();
 
+    /**
+     * La configuration du combat à AFFICHER, locale d'abord.
+     *
+     * `currentBattleConfig` vit dans le magasin d'histoire, qui ne persiste que la progression :
+     * un rechargement de page le remet à `null`. `initBattle` le sait et retombe alors sur
+     * l'événement courant — mais il rangeait le résultat dans un état local que rien n'affichait.
+     * Toute la mise en scène lisait le magasin, d'où un titre de combat réduit à « Combat » et
+     * une introduction sans texte, alors que la configuration était bien là, à côté.
+     */
+    const shownConfig = battleConfig ?? currentBattleConfig;
+
     // Appliquer les conditions de combat (ex: 50% PV)
     const applyBattleConditions = useCallback((battleConfig: NonNullable<typeof currentBattleConfig>) => {
         if (!battleConfig?.playerCondition) return;
@@ -557,7 +568,7 @@ function StoryBattleContent() {
                     <div className={styles.loadingContent}>
                         <div className={styles.spinner}></div>
                         <h2>Préparation du combat...</h2>
-                        <p>{currentBattleConfig?.name || 'Chargement...'}</p>
+                        <p>{shownConfig?.name || 'Chargement...'}</p>
                     </div>
                 </div>
             </main>
@@ -691,8 +702,8 @@ function StoryBattleContent() {
          */
         const playerTeam = activeTeam.length > 0
             ? activeTeam
-            : (currentBattleConfig?.playerTeam || getPlayerTeam());
-        const enemyTeam = currentBattleConfig?.enemyTeam || [];
+            : (shownConfig?.playerTeam || getPlayerTeam());
+        const enemyTeam = shownConfig?.enemyTeam || [];
 
         // Récupérer l'image de fond depuis l'événement actuel (si disponible)
         const currentEvent = getCurrentEvent();
@@ -716,12 +727,12 @@ function StoryBattleContent() {
                     } : undefined}
                 >
                     <div className={styles.introContent}>
-                        <h1 className={styles.battleTitle}>{currentBattleConfig?.name}</h1>
-                        <p className={styles.battleDescription}>{currentBattleConfig?.description}</p>
+                        <h1 className={styles.battleTitle}>{shownConfig?.name}</h1>
+                        <p className={styles.battleDescription}>{shownConfig?.description}</p>
 
-                        {currentBattleConfig?.playerCondition && (
+                        {shownConfig?.playerCondition && (
                             <div className={styles.conditionWarning}>
-                                ⚠️ {currentBattleConfig.playerCondition.description}
+                                ⚠️ {shownConfig.playerCondition.description}
                             </div>
                         )}
 
@@ -963,10 +974,10 @@ function StoryBattleContent() {
                         <h1>VICTOIRE !</h1>
                         <p>Vous avez remporté le combat !</p>
 
-                        {currentBattleConfig?.rewards && currentBattleConfig.rewards.length > 0 && (
+                        {shownConfig?.rewards && shownConfig.rewards.length > 0 && (
                             <div className={styles.rewards}>
                                 <h3>Récompenses :</h3>
-                                {currentBattleConfig.rewards.map((reward, idx) => (
+                                {shownConfig.rewards.map((reward, idx) => (
                                     <div key={idx} className={styles.rewardItem}>
                                         {reward.description}
                                     </div>
@@ -1030,14 +1041,14 @@ function StoryBattleContent() {
             {/* Header du mode histoire */}
             <header className={styles.header}>
                 <div className={styles.headerSpacer} />
-                <h1 className={styles.title}>{currentBattleConfig?.name || 'Combat'}</h1>
+                <h1 className={styles.title}>{shownConfig?.name || 'Combat'}</h1>
                 <div className={styles.headerSpacer} />
             </header>
 
             {/* Condition de combat affichée */}
-            {currentBattleConfig?.playerCondition && (
+            {shownConfig?.playerCondition && (
                 <div className={styles.conditionBanner}>
-                    ⚠️ {currentBattleConfig.playerCondition.description}
+                    ⚠️ {shownConfig.playerCondition.description}
                 </div>
             )}
 

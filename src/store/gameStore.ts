@@ -195,11 +195,28 @@ interface GameStore {
     cancelZombieDamage: () => void;
 }
 
-// Fonction helper pour créer une copie profonde du gameState
-// Cela force React à détecter le changement et déclencher un re-render
-const cloneGameState = (state: GameState): GameState => {
-    return JSON.parse(JSON.stringify(state));
-};
+/**
+ * Copie profonde de l'état de partie, pour que React voie le changement et redessine.
+ *
+ * `structuredClone` plutôt que l'aller-retour `JSON.parse(JSON.stringify(...))`, pour deux
+ * raisons dont la seconde est un vrai défaut :
+ *
+ *  - LA VITESSE. Cette fonction est appelée à chaque action, et l'état n'est pas petit : deux
+ *    joueurs, huit dieux avec leurs statuts, trois piles de cartes portant chacune leurs effets,
+ *    et un journal de combat qui monte à 200 entrées. Sérialiser puis réanalyser tout cela en
+ *    texte coûte cher, et de plus en plus cher à mesure que la partie avance — ce qui se sent
+ *    sur un téléphone après quelques duels d'affilée. `structuredClone` copie les structures
+ *    directement, sans passer par du texte.
+ *  - LA FIDÉLITÉ. Le passage par JSON transforme `createdAt` et `updatedAt`, qui sont des
+ *    `Date`, en chaînes de caractères — l'état reconstruit ne correspondait donc plus tout à
+ *    fait à son type. `structuredClone` les préserve.
+ *
+ * Repli conservé pour les navigateurs sans `structuredClone` (Safari d'avant mars 2022).
+ */
+const cloneGameState = (state: GameState): GameState =>
+    typeof structuredClone === 'function'
+        ? structuredClone(state)
+        : JSON.parse(JSON.stringify(state));
 
 /** Laisse le joueur voir le résultat de son sort avant que la main ne passe. */
 const TURN_END_DELAY_MS = 700;

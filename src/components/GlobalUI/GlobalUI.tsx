@@ -753,6 +753,20 @@ export default function GlobalUI() {
                             <span>Réinitialisation dans {timeUntilReset}</span>
                         </div>
 
+                        {/*
+                          * Le périmètre est écrit noir sur blanc : la progression ne vient que
+                          * des parties en ligne en matchmaking ALÉATOIRE, classées ou amicales
+                          * (report-match-result et leave-game, sous la garde `!is_private`).
+                          * Rien ne le disait, et un joueur pouvait enchaîner les entraînements
+                          * ou les défis entre amis en se demandant pourquoi les barres ne
+                          * bougeaient pas.
+                          */}
+                        <p className={styles.questsScopeNote}>
+                            Seules les parties en ligne font avancer les quêtes — classées ou
+                            amicales. Les défis privés entre amis, l’Entraînement, l’Ascension et
+                            l’Histoire ne comptent pas.
+                        </p>
+
                         {!user ? (
                             <div className={styles.questsNotLoggedIn}>
                                 <p>🔒 Connectez-vous pour accéder aux quêtes journalières !</p>
