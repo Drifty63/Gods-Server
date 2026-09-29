@@ -84,6 +84,8 @@ function StoryBattleContent() {
 
     // État pour la sélection d'équipe
     const [selectedGods, setSelectedGods] = useState<string[]>([]);
+    /** Équipe réellement alignée, une fois la composition faite. Voir startBattleWithTeam. */
+    const [activeTeam, setActiveTeam] = useState<string[]>([]);
     const [availableGods, setAvailableGods] = useState<string[]>([]);
     const [requiredCount, setRequiredCount] = useState(0);
     const [fixedGods, setFixedGods] = useState<string[]>([]);
@@ -216,6 +218,18 @@ function StoryBattleContent() {
     // Lancer le combat avec une équipe définie
     const startBattleWithTeam = useCallback((localBattleConfig: NonNullable<typeof currentBattleConfig>, playerTeamIds: string[]) => {
         try {
+            /*
+             * L'équipe RÉELLEMENT alignée, retenue pour l'écran d'introduction.
+             *
+             * Celui-ci lisait `battleConfig.playerTeam`, qui ne porte que les dieux IMPOSÉS par
+             * le combat — Zeus seul, pour l'embuscade d'Arachné. Les trois compagnons choisis
+             * par le joueur n'y figurent pas, d'où un « VS » où il ne se voyait qu'un portrait.
+             *
+             * L'équipe complète est pourtant connue ici, puisqu'elle arrive en paramètre : il
+             * suffisait de la garder.
+             */
+            setActiveTeam(playerTeamIds);
+
             const playerGods = playerTeamIds.map(id => getGodById(id)).filter(Boolean) as typeof ALL_GODS;
 
             // Équipe ennemie
@@ -668,8 +682,16 @@ function StoryBattleContent() {
 
     // Phase: Introduction du combat
     if (phase === 'intro') {
-        // Pour le 1v1, on affiche seulement le premier dieu de chaque équipe
-        const playerTeam = currentBattleConfig?.playerTeam || getPlayerTeam();
+        /*
+         * L'équipe RÉELLEMENT alignée d'abord, et seulement ensuite les valeurs de repli.
+         *
+         * `currentBattleConfig.playerTeam` ne porte que les dieux imposés par le combat : pour
+         * l'embuscade d'Arachné, Zeus seul. Les trois compagnons choisis n'y sont pas, d'où un
+         * « VS » réduit à un portrait alors que quatre dieux entrent en lice.
+         */
+        const playerTeam = activeTeam.length > 0
+            ? activeTeam
+            : (currentBattleConfig?.playerTeam || getPlayerTeam());
         const enemyTeam = currentBattleConfig?.enemyTeam || [];
 
         // Récupérer l'image de fond depuis l'événement actuel (si disponible)
@@ -706,8 +728,17 @@ function StoryBattleContent() {
                         <div className={styles.vsContainer}>
                             <div className={styles.teamPreview}>
                                 <div className={styles.teamIcons}>
-                                    {/* Afficher seulement les dieux du combat (1v1 = 1 dieu) */}
-                                    {playerTeam.slice(0, currentBattleConfig?.playerTeam?.length || 1).map(id => (
+                                    {/*
+                                      * Toute l'équipe, sans découpe.
+                                      *
+                                      * Elle était tronquée à la longueur de `playerTeam` de la
+                                      * configuration, c'est-à-dire aux seuls dieux IMPOSÉS. Sur
+                                      * un combat à composition libre cela n'en laissait qu'un,
+                                      * alors que quatre entrent en lice. `playerTeam` porte
+                                      * désormais l'équipe réellement alignée : il n'y a plus
+                                      * rien à retrancher.
+                                      */}
+                                    {playerTeam.map(id => (
                                         <div key={id} className={styles.godIcon}>
                                             <img src={getCardImage(id)} alt={getGodById(id)?.name ?? ''} />
                                         </div>

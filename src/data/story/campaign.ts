@@ -627,7 +627,9 @@ const chapter2Battle3Events: StoryEvent[] = [
         battle: {
             id: 'battle_arachne',
             name: "L'Embuscade d'Arachné",
-            description: "Arachné et ses araignées géantes attaquent ! Choisissez votre équipe !",
+            // La description s'affiche sur l'écran d'INTRODUCTION, c'est-à-dire APRÈS que le
+            // joueur a composé son équipe. Elle y demandait de choisir une équipe déjà choisie.
+            description: "Arachné et ses araignées géantes surgissent de toutes parts.",
             playerTeam: ['zeus'],  // Zeus obligatoire, 3 autres au choix
             playerTeamChoices: ['hestia', 'demeter', 'artemis', 'aphrodite', 'apollon', 'dionysos'],
             requiredPlayerTeamSize: 4,

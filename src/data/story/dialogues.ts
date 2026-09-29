@@ -3203,7 +3203,7 @@ export const CHAPTER2_BATTLE3_ARACHNE_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'arachne',
         speakerName: 'Arachné',
-        text: "*crache de venin* ATHÉNA m'a maudite ! Transformée en MONSTRE ! Et vous, vous protégez SES intérêts !",
+        text: "*crache du venin* ATHÉNA m'a maudite ! Transformée en MONSTRE ! Et vous, vous protégez SES intérêts !",
         emotion: 'angry'
     },
     {
