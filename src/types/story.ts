@@ -60,6 +60,15 @@ export interface ChapterBattle {
     firstEventId: string;          // Premier événement de ce combat
     unlocked: boolean;             // Débloqué par défaut ?
     requiresBattleId?: string;     // ID du combat à compléter pour débloquer
+    /**
+     * Combat annoncé mais pas encore écrit.
+     *
+     * Il s'affiche dans la liste du chapitre — le joueur doit savoir combien de combats l'attendent
+     * — mais reste inaccessible, et ne débloque rien derrière lui. Sans ce drapeau, le combat
+     * suivant celui qu'on vient de gagner s'ouvrirait sur une séquence sans événements, et
+     * l'écran se figerait.
+     */
+    comingSoon?: boolean;
 }
 
 /**

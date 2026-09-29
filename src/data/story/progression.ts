@@ -51,6 +51,9 @@ export function isBattleCleared(
     battle: ChapterBattle,
     results: BattleResult[],
 ): boolean {
+    // Un combat pas encore écrit ne peut pas être franchi — et ne débloque donc rien derrière lui.
+    if (battle.comingSoon) return false;
+
     const event = findBattleEvent(chapter, battle);
     // Données incomplètes : on ne verrouille pas faute d'avoir su relier le combat.
     if (!event) return true;
@@ -67,6 +70,8 @@ export function isBattleUnlocked(
     battle: ChapterBattle,
     results: BattleResult[],
 ): boolean {
+    // Prioritaire sur `unlocked` : un combat à venir reste fermé quoi qu'annoncent ses données.
+    if (battle.comingSoon) return false;
     if (battle.unlocked) return true;
     if (!battle.requiresBattleId) return true;
 

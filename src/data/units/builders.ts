@@ -328,3 +328,43 @@ export const custom = (id: string, desc: string, target?: TargetType): SpellEffe
 /** Dégâts qui traversent le bouclier sans l'entamer. */
 export const pierce = (value: number, target: TargetType = 'enemy_god'): SpellEffect =>
     ({ type: 'damage', value, target, ignoreShield: true });
+
+/**
+ * JUMELLE d'une unité, pour les affrontements de groupe du mode Histoire.
+ *
+ * Le moteur identifie une cible par `card.id` — `gods.find(g => g.card.id === targetGodId)`, une
+ * cinquantaine de fois dans GameEngine. Deux cartes de MÊME identifiant dans une équipe rendent
+ * donc le ciblage ambigu : la première répond pour les deux, et la seconde est intouchable
+ * jusqu'à ce que sa jumelle meure. Un combat contre « deux Harpies » serait injouable.
+ *
+ * Le chapitre 2 avait déjà réglé le problème à la main, avec `giant_spider_2` et `_3` recopiés
+ * mot pour mot dans gods.ts et dix sorts recopiés dans spells.ts. Cette fonction fait la même
+ * chose sans la recopie — et sans réclamer de nouvelles illustrations : la jumelle garde CELLES
+ * de l'originale, puisqu'elle représente la même créature.
+ *
+ * Elle est `hidden` par construction : une jumelle n'a rien à faire en Collection, en Duel ni en
+ * Ascension, où elle n'apparaîtrait que comme un doublon inexplicable.
+ */
+export function twin(source: Bestiary, suffix: string, name?: string): Bestiary {
+    if (source.units.length !== 1) {
+        throw new Error('[units] twin(): la source doit être une unité unique');
+    }
+    const original = source.units[0];
+    const id = `${original.id}_${suffix}`;
+
+    return {
+        units: [{
+            ...original,
+            id,
+            name: name ?? original.name,
+            hidden: true,
+            // Pas de `draft` : la jumelle d'une unité publiée est jouable en Histoire, et une
+            // unité en brouillon n'a pas de jumelle à produire.
+        }],
+        spells: source.spells.map(s => ({
+            ...s,
+            id: s.id.replace(original.id, id),
+            godId: id,
+        })),
+    };
+}

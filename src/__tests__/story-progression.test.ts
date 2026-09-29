@@ -10,7 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { ZEUS_CAMPAIGN } from '@/data/story/campaign';
 import {
-    findBattleEvent, defeatAdvancesStory, isBattleUnlocked, isChapterFinished,
+    findBattleEvent, defeatAdvancesStory, isBattleCleared, isBattleUnlocked, isChapterFinished,
 } from '@/data/story/progression';
 import type { BattleResult, Chapter } from '@/types/story';
 
@@ -27,11 +27,50 @@ describe('Progression — reliage des combats', () => {
         for (const chapter of ZEUS_CAMPAIGN.chapters) {
             if (chapter.comingSoon) continue;
             for (const battle of chapter.battles ?? []) {
+                // Un combat annoncé mais pas encore écrit n'a pas d'événement : c'est justement
+                // ce que `comingSoon` déclare, et ce qui l'empêche de se débloquer.
+                if (battle.comingSoon) continue;
                 const event = findBattleEvent(chapter, battle);
                 expect(event, `${chapter.id} / ${battle.id} : combat introuvable`).not.toBeNull();
                 expect(event!.type).toBe('battle');
             }
         }
+    });
+
+    /*
+     * Le garde-fou qui compte : `isBattleCleared` renvoie `true` quand elle ne retrouve pas
+     * l'événement d'un combat, pour ne pas verrouiller un chapitre sur une erreur de données. Un
+     * combat à venir, dont l'événement n'existe PAS encore, tomberait donc dans cette branche et
+     * débloquerait tout ce qui le suit.
+     */
+    it('un combat à venir reste fermé et ne débloque rien derrière lui', () => {
+        const chapter3 = ZEUS_CAMPAIGN.chapters.find(c => c.number === 3)!;
+        const pending = (chapter3.battles ?? []).filter(b => b.comingSoon);
+        expect(pending.length).toBeGreaterThan(0);
+
+        // Même en ayant gagné tout ce qui existe, rien de ce qui reste à écrire ne s'ouvre.
+        const battle1 = chapter3.battles!.find(b => b.id === 'battle1')!;
+        const allWon = [won(findBattleEvent(chapter3, battle1)!.id)];
+
+        for (const battle of pending) {
+            expect(isBattleCleared(chapter3, battle, allWon), `${battle.id} franchi`).toBe(false);
+            expect(isBattleUnlocked(chapter3, battle, allWon), `${battle.id} ouvert`).toBe(false);
+        }
+    });
+
+    it('ne considère pas le chapitre 3 comme terminé tant que son dernier combat n’existe pas', () => {
+        const chapter3 = ZEUS_CAMPAIGN.chapters.find(c => c.number === 3)!;
+        const battle1 = chapter3.battles!.find(b => b.id === 'battle1')!;
+        const allWon = [won(findBattleEvent(chapter3, battle1)!.id)];
+        expect(isChapterFinished(chapter3, allWon)).toBe(false);
+    });
+
+    it('ouvre bien le premier combat du chapitre 3', () => {
+        const chapter3 = ZEUS_CAMPAIGN.chapters.find(c => c.number === 3)!;
+        const battle1 = chapter3.battles!.find(b => b.id === 'battle1')!;
+        expect(chapter3.comingSoon).toBeFalsy();
+        expect(isBattleUnlocked(chapter3, battle1, [])).toBe(true);
+        expect(findBattleEvent(chapter3, battle1)!.battle!.enemyTeam).toHaveLength(4);
     });
 });
 

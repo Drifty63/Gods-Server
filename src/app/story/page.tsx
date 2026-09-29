@@ -327,10 +327,13 @@ function StoryContent() {
                                         <h3 className={styles.battleName}>{battle.name}</h3>
                                         <p className={styles.battleDescription}>{battle.description}</p>
 
+                                        {/* Deux raisons de rester fermé, et le joueur a besoin de
+                                            savoir laquelle : recommencer le combat précédent, ou
+                                            attendre que le combat soit écrit. */}
                                         {!unlocked && (
                                             <div className={styles.battleLockOverlay}>
-                                                <span className={styles.lockIcon}>🔒</span>
-                                                <span>Terminez le combat précédent</span>
+                                                <span className={styles.lockIcon}>{battle.comingSoon ? '⏳' : '🔒'}</span>
+                                                <span>{battle.comingSoon ? 'Bientôt disponible' : 'Terminez le combat précédent'}</span>
                                             </div>
                                         )}
                                     </div>

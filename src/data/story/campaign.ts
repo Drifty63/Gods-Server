@@ -55,8 +55,14 @@ import {
     CHAPTER2_BATTLE4_WIN,
     CHAPTER2_BATTLE4_LOSE,
     // Chapitre 3 (dialogues gardés mais combats supprimés)
-    CHAPTER3_INTRO,
-    CHAPTER3_EPILOGUE
+    CH3_BATTLE1_DEPARTURE,
+    CH3_BATTLE1_BRIEFING,
+    CH3_BATTLE1_EVENING,
+    CH3_BATTLE1_ROCKY_ISLES,
+    CH3_BATTLE1_NARROWS,
+    CH3_BATTLE1_AMBUSH,
+    CH3_BATTLE1_WIN,
+    CH3_BATTLE1_LOSE
 } from './dialogues';
 
 // ===========================================
@@ -799,35 +805,175 @@ const CHAPTER_2: Chapter = {
 };
 
 // ===========================================
-// CHAPITRE 3 - LA RECONQUÊTE (À COMPLÉTER)
-// Note: Les combats seront ajoutés dans une future mise à jour
+// CHAPITRE 3 - L'EXPÉDITION
+// Combat 1 : Ulysse + Athéna + Artémis vs 2 Harpies + 2 Sirènes
 // ===========================================
-const chapter3Events: StoryEvent[] = [
-    // Introduction - Placeholder
+
+/*
+ * ILLUSTRATIONS EN ATTENTE.
+ *
+ * Aucune scène ne porte encore de `backgroundImage` : les images du combat 1 seront fournies
+ * plus tard. En leur absence, le mode Histoire retombe sur le fond du narrateur, ce qui est
+ * lisible — alors qu'un chemin pointant vers un fichier absent afficherait un cadre vide.
+ *
+ * Les huit fichiers attendus, dans /public/story/chapter3/ :
+ *   combat1_departure.png   — le quai du Pirée à l'aube, le navire, les neuf sur le quai
+ *   combat1_briefing.png    — le pont, la carte déroulée sur un tonneau
+ *   combat1_evening.png     — le pont au coucher du soleil, repas et lyre
+ *   combat1_rocky_isles.png — les récifs noirs au loin dans la brume du matin
+ *   combat1_narrows.png     — le passage étroit entre deux falaises écrasantes
+ *   combat1_ambush.png      — sirènes dans l'eau, harpies dans le ciel, Zeus contre le mât
+ *   combat1_victory.png     — la mer redevenue large, la sphère de feu éteinte
+ *   combat1_defeat.png      — le navire fuyant les récifs, la coque ouverte
+ */
+const chapter3Battle1Events: StoryEvent[] = [
+    // Scène 1 : l'embarquement au Pirée
     {
-        id: 'ch3_intro',
-        type: 'dialogue',
-        dialogues: CHAPTER3_INTRO,
-        nextEventId: 'ch3_epilogue'
+        id: 'ch3_battle1_departure',
+        type: 'cutscene',
+        dialogues: CH3_BATTLE1_DEPARTURE,
+        nextEventId: 'ch3_battle1_briefing'
     },
-    // Épilogue (temporaire)
+    // Scène 2 : Ulysse détaille l'itinéraire sur le pont
     {
-        id: 'ch3_epilogue',
+        id: 'ch3_battle1_briefing',
         type: 'dialogue',
-        dialogues: CHAPTER3_EPILOGUE,
+        dialogues: CH3_BATTLE1_BRIEFING,
+        nextEventId: 'ch3_battle1_evening'
+    },
+    // Scène 3 : transition du soir — le calme avant la tempête
+    {
+        id: 'ch3_battle1_evening',
+        type: 'dialogue',
+        dialogues: CH3_BATTLE1_EVENING,
+        nextEventId: 'ch3_battle1_rocky_isles'
+    },
+    // Scène 4 : au petit matin, les îles rocheuses
+    {
+        id: 'ch3_battle1_rocky_isles',
+        type: 'cutscene',
+        dialogues: CH3_BATTLE1_ROCKY_ISLES,
+        nextEventId: 'ch3_battle1_narrows'
+    },
+    // Scène 5 : la navigation dans le passage étroit
+    {
+        id: 'ch3_battle1_narrows',
+        type: 'dialogue',
+        dialogues: CH3_BATTLE1_NARROWS,
+        nextEventId: 'ch3_battle1_ambush'
+    },
+    // Scène 6 : l'embuscade
+    {
+        id: 'ch3_battle1_ambush',
+        type: 'dialogue',
+        dialogues: CH3_BATTLE1_AMBUSH,
+        nextEventId: 'ch3_battle1_fight'
+    },
+    /*
+     * Le combat.
+     *
+     * Trois contre quatre, et c'est voulu : le chant a mis cinq des neuf hors d'état, et Hestia
+     * tient la sphère. Ne restent que les trois personnages que le récit désigne — Athéna (la
+     * raison), Artémis (la chasse) et Ulysse (la cire).
+     *
+     * Les adversaires portent des identifiants DISTINCTS (`harpies_2`, `sirenes_2`) bien qu'ils
+     * représentent la même créature : le moteur résout une cible par `card.id`, donc deux cartes
+     * de même identifiant dans une équipe rendraient la seconde intouchable jusqu'à la mort de
+     * la première. Voir `twin()` dans data/units/builders.ts.
+     */
+    {
+        id: 'ch3_battle1_fight',
+        type: 'battle',
+        dialogues: [],
+        battle: {
+            id: 'battle_rocky_isles',
+            name: "Le Chant des Récifs",
+            description: "Athéna, Artémis et Ulysse — les seuls que le chant n'atteint pas — contre deux sirènes et deux harpies alliées.",
+            playerTeam: ['athena', 'artemis', 'ulysses'],
+            enemyTeam: ['sirenes', 'sirenes_2', 'harpies', 'harpies_2'],
+            deckMultiplier: 2,
+            enemyDeckMultiplier: 1,
+            continueOnDefeat: false
+        },
+        nextEventOnWin: 'ch3_battle1_win',
+        nextEventOnLose: 'ch3_battle1_lose'
+    },
+    // Victoire : les récifs sont franchis, le combat 2 s'ouvre
+    {
+        id: 'ch3_battle1_win',
+        type: 'dialogue',
+        dialogues: CH3_BATTLE1_WIN,
         nextEventId: undefined
+    },
+    // Défaite : le navire recule, il faut recommencer
+    {
+        id: 'ch3_battle1_lose',
+        type: 'dialogue',
+        dialogues: CH3_BATTLE1_LOSE,
+        nextEventId: undefined
+    }
+];
+
+const chapter3Events: StoryEvent[] = [
+    ...chapter3Battle1Events
+];
+
+/*
+ * Quatre combats annoncés, un seul écrit.
+ *
+ * Les trois suivants portent `comingSoon` plutôt que d'être absents : le chapitre en compte
+ * quatre, le joueur doit le voir, et une entrée manquante donnerait l'impression d'un chapitre
+ * plus court qu'il ne sera. Sans ce drapeau, gagner le combat 1 débloquerait un combat 2 sans
+ * événements, qui figerait l'écran.
+ */
+export const CHAPTER_3_BATTLES = [
+    {
+        id: 'battle1',
+        name: "Le Chant des Récifs",
+        description: "Aux îles rocheuses, sirènes et harpies attaquent ensemble — ce qui n'était jamais arrivé",
+        firstEventId: 'ch3_battle1_departure',
+        unlocked: true,
+        requiresBattleId: undefined
+    },
+    {
+        id: 'battle2',
+        name: "Le Pays des Cyclopes",
+        description: "Sur les îles sauvages, il faudra s'en prendre aux fils de Poséidon pour le faire venir",
+        firstEventId: 'ch3_battle2_arrival',
+        unlocked: false,
+        requiresBattleId: 'battle1',
+        comingSoon: true
+    },
+    {
+        id: 'battle3',
+        name: "La Colère de Poséidon",
+        description: "Le dieu des mers transgresse la loi divine pour s'en prendre lui-même à Ulysse",
+        firstEventId: 'ch3_battle3_storm',
+        unlocked: false,
+        requiresBattleId: 'battle2',
+        comingSoon: true
+    },
+    {
+        id: 'battle4',
+        name: "Le Cap Ténare",
+        description: "À la porte des Enfers, ce qui garde le passage vers l'Olympe",
+        firstEventId: 'ch3_battle4_gate',
+        unlocked: false,
+        requiresBattleId: 'battle3',
+        comingSoon: true
     }
 ];
 
 const CHAPTER_3: Chapter = {
     id: 'chapter_3',
     number: 3,
-    title: 'La Reconquête',
-    subtitle: 'À venir...',
-    description: "L'heure de la confrontation finale approche. (Chapitre en cours de développement)",
+    title: "L'Expédition",
+    subtitle: 'Rallier Poséidon',
+    description: "Pour espérer trouver un passage des Enfers jusqu'à l'Olympe, les dieux doivent rallier Poséidon à leur cause. Le trouver demande de traverser la mer entière, et de nombreuses épreuves les attendent avant de l'affronter.",
     difficulty: 'hard',
     events: chapter3Events,
-    comingSoon: true
+    battles: CHAPTER_3_BATTLES,
+    comingSoon: false
 };
 
 // ===========================================

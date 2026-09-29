@@ -1,4 +1,4 @@
-import { mergeKits, type Bestiary } from '../builders';
+import { mergeKits, twin, type Bestiary } from '../builders';
 
 import { feuFollet } from './hestia';
 import { cyclopes, meduse } from './poseidon';
@@ -10,6 +10,10 @@ import { gardeCeleste, harpies } from './zeus';
 import { chiensChasse, acteon } from './artemis';
 import { occultiste, erinyes } from './nyx';
 import { sirenes, minotaure } from './demeter';
+
+/** Deuxième harpie et deuxième sirène, pour les combats de groupe du mode Histoire. */
+export const harpieSeconde = twin(harpies, '2');
+export const sireneSeconde = twin(sirenes, '2');
 
 /**
  * Les 19 unités écrites à la main — mécaniques conçues carte par carte, illustrations livrées.
@@ -32,4 +36,16 @@ export const RELEASED_BESTIARY: Bestiary = mergeKits(
     chiensChasse, acteon,
     occultiste, erinyes,
     sirenes, minotaure,
+
+    /*
+     * Jumelles réservées au mode Histoire.
+     *
+     * Le premier combat du chapitre 3 oppose les dieux à DEUX harpies et DEUX sirènes. Le moteur
+     * résolvant une cible par `card.id`, deux cartes de même identifiant dans une équipe
+     * rendraient la seconde intouchable : il faut donc une jumelle distincte, qui garde les
+     * illustrations et les sorts de l'originale.
+     *
+     * Elles sont `hidden` : invisibles en Collection, en Duel et en Ascension.
+     */
+    harpieSeconde, sireneSeconde,
 );

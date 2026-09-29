@@ -1,6 +1,14 @@
 // Dialogues du mode histoire - Campagne Zeus
 import { DialogueLine } from '@/types/story';
 
+/*
+ * Le chapitre 3 vit dans son propre fichier — il comptera quatre combats, et ce fichier dépasse
+ * déjà les 4 000 lignes. Le réexport n'est pas cosmétique : les tests qui vérifient que chaque
+ * personnage a un portrait et une couleur balaient `Object.values` de CE module, et ne verraient
+ * pas un fichier qui n'y passe pas.
+ */
+export * from './chapter3Dialogues';
+
 // ===========================================
 // CHAPITRE 1 - PROLOGUE : LA TRAHISON
 // ===========================================
