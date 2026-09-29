@@ -456,9 +456,25 @@
             rgba(5, 5, 16, 0.15),
             rgba(5, 5, 16, 0.7));
     z-index: 1;
+    /* Voir .backgroundOverlayNarrator : les deux voiles se répondent, donc ils s'animent de la
+       même façon quand on passe de l'un à l'autre. */
+    transition: background 0.8s ease-in-out;
 }
 
-/* Overlay plus sombre pour le narrateur */
+/*
+ * VOILE DU NARRATEUR — la scène se retire derrière un rideau chaud et sourd.
+ *
+ * Il portait déjà des teintes brunes, mais si peu appuyées qu'elles ne se voyaient plus. La
+ * raison est ailleurs que dans ces valeurs : le narrateur avait AUSSI un fond dédié
+ * (`narrator_backdrop.png`), et celui-ci n'est utilisé que faute d'image propre à l'événement.
+ * Or la campagne en compte désormais une par événement — ce fond n'apparaît donc plus jamais,
+ * et le voile restait seul à porter la distinction, avec un écart d'opacité imperceptible sur
+ * une illustration colorée.
+ *
+ * Il l'assume maintenant franchement : nettement plus dense et nettement plus chaud que le
+ * voile ordinaire, qui est bleu-noir. Le contraste doit se lire en un instant, puisqu'il dit au
+ * joueur que la voix qu'il entend est EXTÉRIEURE à la scène qu'il regarde.
+ */
 .backgroundOverlayNarrator {
     position: absolute;
     top: 0;
@@ -466,10 +482,13 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom,
-            rgba(15, 10, 5, 0.5),
-            rgba(20, 15, 10, 0.3),
-            rgba(10, 5, 0, 0.75));
+            rgba(46, 30, 8, 0.68),
+            rgba(38, 26, 10, 0.54),
+            rgba(14, 8, 0, 0.86));
     z-index: 1;
+    /* Même durée que la transition de fond : le passage narrateur/personnage doit se sentir
+       comme un seul mouvement, pas comme deux effets décalés. */
+    transition: background 0.8s ease-in-out;
 }
 
 /* Animation de transition entre scènes */
