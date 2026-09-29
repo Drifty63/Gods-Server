@@ -62,6 +62,19 @@ export interface ChapterBattle {
     requiresBattleId?: string;     // ID du combat à compléter pour débloquer
 }
 
+/**
+ * Résultat d'un combat, indexé par l'identifiant de son ÉVÉNEMENT (et non celui de l'entrée de
+ * menu, qui désigne une séquence entière).
+ *
+ * Nommé plutôt qu'écrit en ligne dans `StoryProgress` : les règles de progression le lisent
+ * désormais depuis un module à part, et un type anonyme les aurait obligées à le recopier.
+ */
+export interface BattleResult {
+    eventId: string;
+    won: boolean;
+    attempts: number;
+}
+
 export interface Chapter {
     id: string;
     number: number;
@@ -80,11 +93,7 @@ export interface StoryProgress {
     currentEventIndex: number;
     completedChapters: string[];
     completedEvents: string[];
-    battleResults: {
-        eventId: string;
-        won: boolean;
-        attempts: number;
-    }[];
+    battleResults: BattleResult[];
     totalPlayTime: number;         // En secondes
     lastPlayedAt: string;          // ISO date string
 }

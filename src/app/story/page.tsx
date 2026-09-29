@@ -9,7 +9,8 @@ import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useStoryStore } from '@/store/storyStore';
 import { ZEUS_CAMPAIGN } from '@/data/story/campaign';
 import DialogueBox from '@/components/StoryMode/DialogueBox';
-import { Chapter, ChapterBattle, StoryEvent } from '@/types/story';
+import { Chapter, ChapterBattle } from '@/types/story';
+import { isBattleUnlocked as isBattleUnlockedRule } from '@/data/story/progression';
 
 export default function StoryPage() {
     return (
@@ -136,69 +137,13 @@ function StoryContent() {
     };
 
     /**
-     * L'événement de COMBAT contenu dans une entrée de menu.
-     *
-     * `firstEventId` désigne le début d'une séquence (une narration, le plus souvent) ; on suit
-     * la chaîne jusqu'à tomber sur l'affrontement lui-même. L'ensemble `seen` protège d'une
-     * boucle de données, qui figerait la page au lieu de signaler l'erreur.
-     */
-    const findBattleEvent = (chapter: Chapter, battle: ChapterBattle): StoryEvent | null => {
-        const byId = new Map(chapter.events.map(e => [e.id, e]));
-        const seen = new Set<string>();
-        let id: string | undefined = battle.firstEventId;
-
-        while (id && !seen.has(id)) {
-            seen.add(id);
-            const event: StoryEvent | undefined = byId.get(id);
-            if (!event) return null;
-            if (event.type === 'battle') return event;
-            id = event.nextEventId ?? event.nextEventOnWin;
-        }
-        return null;
-    };
-
-    /**
-     * Une défaite fait-elle AVANCER l'histoire, ou faut-il recommencer ?
-     *
-     * La question se lit dans les données, sans identifiant codé en dur : si la branche de
-     * défaite mène quelque part, la défaite était écrite — c'est le cas du combat 1, perdu ou
-     * gagné, après lequel Hadès prend le trône de toute façon. Si elle ne mène nulle part, le
-     * joueur doit réessayer, exactement comme le disait le commentaire de `ch1_battle2_lose`.
-     */
-    const defeatAdvancesStory = (chapter: Chapter, battleEvent: StoryEvent): boolean => {
-        if (!battleEvent.nextEventOnLose) return false;
-        const afterDefeat = chapter.events.find(e => e.id === battleEvent.nextEventOnLose);
-        return !!afterDefeat?.nextEventId;
-    };
-
-    /**
      * Un combat est-il débloqué ?
      *
-     * Il l'était dès que le combat requis avait été JOUÉ, gagné ou perdu : `completeBattle`
-     * enregistrait l'événement quelle qu'en soit l'issue, et cette fonction ne regardait que
-     * cette liste. Perdre le combat 2 ouvrait donc le combat 3.
-     *
-     * Elle lit maintenant `battleResults`, qui porte le résultat, et n'accepte une défaite que
-     * lorsque l'histoire l'a prévue. Les identifiants codés en dur ont disparu au passage : ils
-     * ne couvraient que le chapitre 1, si bien que les combats du chapitre 2 étaient vérifiés
-     * contre les événements du premier.
+     * La règle vit dans `@/data/story/progression`, avec celles qui décident de la fin d'un
+     * chapitre : elles se répondent, et les tenir séparées avait déjà produit deux bugs.
      */
-    const isBattleUnlocked = (chapter: Chapter, battle: ChapterBattle): boolean => {
-        if (battle.unlocked) return true;
-        if (!battle.requiresBattleId) return true;
-
-        const requiredBattle = chapter.battles?.find(b => b.id === battle.requiresBattleId);
-        if (!requiredBattle) return true;
-
-        const battleEvent = findBattleEvent(chapter, requiredBattle);
-        // Données incomplètes : on ne verrouille pas un combat faute d'avoir su le relier.
-        if (!battleEvent) return true;
-
-        const result = progress.battleResults.find(r => r.eventId === battleEvent.id);
-        if (!result) return false;
-
-        return result.won || defeatAdvancesStory(chapter, battleEvent);
-    };
+    const isBattleUnlocked = (chapter: Chapter, battle: ChapterBattle): boolean =>
+        isBattleUnlockedRule(chapter, battle, progress.battleResults);
 
     // Fermer la modal
     const handleCloseBattleSelect = () => {

@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { StoryProgress, StoryEvent, DialogueLine } from '@/types/story';
 import { ZEUS_CAMPAIGN, getChapterById, getEventById, getNextEvent, getFirstEvent } from '@/data/story/campaign';
+import { isChapterFinished } from '@/data/story/progression';
 import { claimStoryChapterReward } from '@/services/supabase-profile';
 
 interface StoryState {
@@ -156,9 +157,18 @@ export const useStoryStore = create<StoryState>()(
                 const nextEvent = getNextEvent(progress.currentChapterId, progress.currentEventId, won);
 
                 if (!nextEvent) {
-                    // Fin du chapitre
+                    /*
+                     * Plus de suite ne veut PAS dire fin du chapitre.
+                     *
+                     * La séquence de chaque combat s'achève ainsi : le dialogue de victoire du
+                     * troisième ne mène nulle part, exactement comme celui du dernier. Conclure
+                     * ici à la fin du chapitre ouvrait donc le chapitre suivant dès le premier
+                     * combat remporté, et en réclamait la récompense.
+                     *
+                     * `isChapterFinished` tranche sur le DERNIER combat, et exige une victoire.
+                     */
                     const chapter = getChapterById(progress.currentChapterId);
-                    if (chapter) {
+                    if (chapter && isChapterFinished(chapter, progress.battleResults)) {
                         // Dédoublonné : le mode est rejouable, et sans ce filtre le même
                         // chapitre s'ajoutait une fois de plus à chaque traversée.
                         const completedChapters = progress.completedChapters.includes(chapter.id)
