@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { getPublicProfile, type PublicProfile } from '@/services/supabase-profile';
-import { getRankByFerveur, getRankProgress } from '@/data/ranks';
+import { getRankByFerveur, getRankProgress, getLadder, RANKS } from '@/data/ranks';
 import styles from './page.module.css';
 
 export default function PublicProfilePage() {
@@ -60,6 +60,16 @@ function PublicProfileContent() {
 
     const rank = getRankByFerveur(profile.ferveur);
     const progress = getRankProgress(profile.ferveur);
+    /*
+     * Le rang public est celui du CLASSÉ, et rien d'autre.
+     *
+     * Contrairement au profil personnel, qui affiche le meilleur des trois classements, la
+     * fonction `get_public_profile` ne renvoie que `ferveur`. Plutôt que de laisser croire à un
+     * rang global, l'écran nomme le classement dont il parle.
+     */
+    const rankedLadder = getLadder('ranked');
+    const nextRank = RANKS[RANKS.findIndex(r => r.id === rank.id) + 1];
+    const ferveurToNext = nextRank ? Math.max(0, nextRank.minFerveur - profile.ferveur) : 0;
     const winRate = profile.stats.totalGames > 0
         ? ((profile.stats.victories / profile.stats.totalGames) * 100).toFixed(1)
         : '0.0';
@@ -100,7 +110,15 @@ function PublicProfileContent() {
                     <div className={styles.progressBar}>
                         <div className={styles.progressFill} style={{ width: `${progress}%`, background: rank.gradient }} />
                     </div>
-                    <p className={styles.progressText}>{profile.ferveur} 🔥 Ferveur</p>
+                    {/* Même lecture que sur son propre profil : le classement est nommé, et la
+                        barre annonce ce qui RESTE à parcourir plutôt qu'un total qu'on prend
+                        pour un plafond. */}
+                    <p className={styles.progressText}>
+                        {rankedLadder.icon} {rankedLadder.label} — {profile.ferveur} 🔥
+                        {nextRank
+                            ? ` · encore ${ferveurToNext} avant ${nextRank.icon} ${nextRank.name}`
+                            : ' · rang maximal'}
+                    </p>
 
                     <div className={styles.statsGrid}>
                         <div className={styles.statItem}>
@@ -109,15 +127,21 @@ function PublicProfileContent() {
                         </div>
                         <div className={styles.statItem}>
                             <span className={styles.statValue}>{winRate}%</span>
-                            <span className={styles.statLabel}>Victoires</span>
+                            <span className={styles.statLabel}>Taux de victoire</span>
                         </div>
                         <div className={styles.statItem}>
                             <span className={styles.statValue}>{profile.stats.bestStreak}</span>
                             <span className={styles.statLabel}>Meilleure série</span>
                         </div>
+                        {/*
+                          * « Victoires » remplace « Niveau », qui ne voulait rien dire : la
+                          * colonne `level` existe en base avec une valeur par défaut de 1 et
+                          * n'est mise à jour NULLE PART. Tous les profils affichaient donc
+                          * « Niveau 1 », à vie.
+                          */}
                         <div className={styles.statItem}>
-                            <span className={styles.statValue}>{profile.level}</span>
-                            <span className={styles.statLabel}>Niveau</span>
+                            <span className={styles.statValue}>{profile.stats.victories}</span>
+                            <span className={styles.statLabel}>Victoires</span>
                         </div>
                     </div>
                 </section>

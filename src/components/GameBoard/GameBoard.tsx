@@ -36,6 +36,7 @@ import ZombieDamageModal from '@/components/ZombieDamageModal/ZombieDamageModal'
 import HealDistributionModal from '@/components/HealDistributionModal/HealDistributionModal';
 import GodSelectionModal from '@/components/GodSelectionModal/GodSelectionModal';
 import CombatLogModal from '@/components/CombatLogModal/CombatLogModal';
+import { emitTutorialUi } from '@/data/tutorial';
 
 interface GameBoardProps {
     isOnlineMode?: boolean;
@@ -903,7 +904,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
             />
             <DeckAndDiscard 
                 player={player} 
-                onClickDiscard={() => setViewingDiscard(player.discard)}
+                onClickDiscard={() => { setViewingDiscard(player.discard); emitTutorialUi('discard-opened'); }}
             />
 
             {/* OPPONENT HAND */}
@@ -943,7 +944,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                 myTurn={myTurn}
                 turnNumber={gameState.turnNumber}
                 canTargetDead={canTargetDead}
-                onOpenLog={() => setIsLogOpen(true)}
+                onOpenLog={() => { setIsLogOpen(true); emitTutorialUi('log-opened'); }}
                 onEndTurn={() => {
                     if (myTurn) {
                         const result = endTurn();

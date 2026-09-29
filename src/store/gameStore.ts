@@ -130,6 +130,7 @@ interface GameStore {
     timeoutTurn: () => { success: boolean; message: string };
     /** Didacticiel uniquement : vide la pioche pour montrer la fatigue en action. */
     scriptTutorialFatigue: () => void;
+    scriptTutorialSeedDiscard: () => void;
 
     // Getters
     getCurrentPlayer: () => PlayerState | null;
@@ -326,6 +327,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (me.hand.length >= 5) me.discard.push(...me.hand.splice(0, 1));
         me.discard.push(...me.deck.splice(0));
         engine.drawToHandLimit(me);
+
+        set({ gameState: cloneGameState(engine.getState()) });
+    },
+
+    /**
+     * Garnit la corbeille, réservé au didacticiel.
+     *
+     * L'étape qui présente la corbeille demande maintenant de l'OUVRIR. Au cinquième message,
+     * aucune carte n'a encore été jouée : le joueur aurait touché le 🗑️ pour tomber sur une
+     * liste vide, ce qui lui apprend le contraire de ce qu'on veut lui montrer.
+     *
+     * Les cartes viennent de la PIOCHE et non de la main : la main est l'outil des étapes
+     * suivantes, on n'y touche pas. Ces cartes reviendront de toute façon au premier recyclage.
+     */
+    scriptTutorialSeedDiscard: () => {
+        const { engine } = get();
+        if (!engine) return;
+
+        const state = engine.getState();
+        if (state.status !== 'playing') return;
+
+        const me = state.players[0];
+        // Idempotent : l'effet qui déclenche la mise en scène peut se rejouer, et une corbeille
+        // qui se remplit à chaque rendu finirait par vider la pioche.
+        if (me.discard.length > 0) return;
+        me.discard.push(...me.deck.splice(0, Math.min(3, Math.max(0, me.deck.length - 2))));
 
         set({ gameState: cloneGameState(engine.getState()) });
     },

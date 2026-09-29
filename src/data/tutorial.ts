@@ -84,7 +84,32 @@ export interface TutorialStep {
      * Mise en scène jouée à l'entrée de l'étape (voir /tutorial/page.tsx). Certaines règles se
      * comprennent bien mieux en les VOYANT se produire.
      */
-    script?: 'fatigue';
+    script?: 'fatigue' | 'seed-discard';
+    /**
+     * Geste d'INTERFACE attendu, par opposition à `advance` qui décrit un état de la partie.
+     *
+     * Ouvrir la corbeille ou le journal de combat ne change rien à `GameState` : aucun prédicat
+     * ne peut donc les capter. Ces deux étapes désignaient pourtant un bouton sans permettre de
+     * le toucher — le halo invitait à un clic qui ne menait nulle part.
+     */
+    awaitUi?: TutorialUiAction;
+}
+
+/** Geste d'interface qu'une étape peut attendre. */
+export type TutorialUiAction = 'discard-opened' | 'log-opened';
+
+/**
+ * Événement émis par le plateau quand un de ces gestes est fait.
+ *
+ * Passer par un événement de fenêtre plutôt que par le store : ces deux modales sont un état
+ * LOCAL de `GameBoard`, et les remonter dans le store pour le seul didacticiel ferait payer à
+ * tous les modes de jeu le prix d'une leçon.
+ */
+export const TUTORIAL_UI_EVENT = 'gods-tutorial-ui';
+
+export function emitTutorialUi(action: TutorialUiAction) {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent(TUTORIAL_UI_EVENT, { detail: action }));
 }
 
 
@@ -132,7 +157,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'god-anatomy',
         title: 'Lire une carte de dieu',
-        text: "La COULEUR du cadre indique l'élément du dieu : Zeus est encadré de Foudre, Athéna de Lumière. C'est l'élément de ses propres attaques.",
+        text: "La COULEUR du cadre indique l'élément du dieu : Zeus est encadré de Foudre, Artémis d'Air. C'est l'élément de ses propres attaques.",
         spotlight: 'player-gods',
         advance: 'next',
         blocking: true,
@@ -148,15 +173,20 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'energy',
         title: "Votre énergie",
-        text: "Ce cadre affiche votre énergie, vos cartes restantes en pioche, et votre corbeille — que vous pouvez ouvrir à tout moment pour revoir ce qui a été joué.",
-        spotlight: 'player-energy',
+        text: "Ce cadre affiche votre énergie, vos cartes restantes en pioche, et votre corbeille. Touchez la corbeille 🗑️ pour voir ce qui a déjà été joué — elle s'ouvre à tout moment.",
+        // Le geste porte sur la corbeille ; le cadre entier reste éclairé pour qu'on voie de quoi
+        // elle fait partie.
+        spotlight: ['player-energy', 'player-discard'],
+        // Une corbeille vide n'apprend rien : on y met quelques cartes avant de la montrer.
+        script: 'seed-discard',
+        awaitUi: 'discard-opened',
         advance: 'next',
-        blocking: true,
+        waitingLabel: 'Ouvrez la corbeille',
     },
     {
         id: 'hand',
         title: 'Votre main',
-        text: "Voici vos cartes. Le chiffre en haut à gauche de chacune est son COÛT en énergie. Une carte trop chère apparaît grisée. Maintenez le doigt sur une carte pour l'examiner sans la jouer.",
+        text: "Voici vos cartes. Le chiffre en haut à gauche de chacune est son COÛT en énergie. Une carte trop chère apparaît grisée.",
         spotlight: 'hand',
         advance: 'next',
         blocking: true,
@@ -206,10 +236,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'combat-log',
         title: 'Le journal de combat',
-        text: "Ce bouton ouvre l'historique de la partie : toutes les cartes jouées, par vous comme par l'adversaire. Utile si vous avez manqué une action.",
+        text: "Ce bouton ouvre l'historique de la partie : toutes les cartes jouées, par vous comme par l'adversaire. Touchez-le pour voir ce qui s'est passé jusqu'ici.",
         spotlight: 'combat-log',
+        awaitUi: 'log-opened',
         advance: 'next',
-        blocking: true,
+        waitingLabel: 'Ouvrez le journal',
     },
     {
         id: 'deck-empty',

@@ -987,3 +987,90 @@
 .bugTextarea::placeholder {
     color: rgba(255, 255, 255, 0.35);
 }
+
+/*
+ * Vider la boîte à cadeaux.
+ *
+ * Le bouton est volontairement discret : c'est du rangement, pas une action de jeu. Il ne doit
+ * jamais tirer l'œil plus que « Tout récupérer », qui lui rapporte de l'ambroisie.
+ */
+.clearClaimedButton {
+    width: 100%;
+    margin-top: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clearClaimedButton:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+}
+
+/* La confirmation, elle, se distingue nettement : rouge sombre, on ne la traverse pas par
+   inadvertance. */
+.clearConfirm {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(180, 40, 40, 0.12);
+    border: 1px solid rgba(220, 70, 70, 0.35);
+}
+
+.clearConfirmText {
+    margin: 0 0 12px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.clearConfirmActions {
+    display: flex;
+    gap: 10px;
+}
+
+.clearCancelButton,
+.clearConfirmButton {
+    flex: 1;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clearCancelButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.clearCancelButton:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: white;
+}
+
+.clearConfirmButton {
+    background: linear-gradient(145deg, #c0392b, #8e2419);
+    border: none;
+    color: #fff;
+    font-weight: 700;
+}
+
+.clearConfirmButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(192, 57, 43, 0.4);
+}
+
+.clearCancelButton:disabled,
+.clearConfirmButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

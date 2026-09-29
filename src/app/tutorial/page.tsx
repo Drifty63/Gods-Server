@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import GameBoard from '@/components/GameBoard/GameBoard';
 import TutorialOverlay from '@/components/Tutorial/TutorialOverlay';
-import { TUTORIAL_STEPS, TUTORIAL_OUTRO, TUTORIAL_DONE_KEY, shouldAdvance } from '@/data/tutorial';
+import { TUTORIAL_STEPS, TUTORIAL_OUTRO, TUTORIAL_DONE_KEY, TUTORIAL_UI_EVENT, shouldAdvance } from '@/data/tutorial';
+import type { TutorialUiAction } from '@/data/tutorial';
 import { getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import { playSfx } from '@/lib/sfx';
@@ -16,13 +17,13 @@ import styles from './page.module.css';
 /**
  * Combat d'entraînement scripté.
  *
- * Zeus (Foudre, 25 PV) et Athéna (Lumière, 30 PV) contre un unique Soldat d'Arès (Terre, 16 PV).
+ * Zeus (Foudre, 25 PV) et Artémis (Air, 20 PV) contre un unique Soldat d'Arès (Terre, 16 PV).
  * Rien n'est laissé au hasard :
  *
  *  - la Terre est faible à la Foudre, donc le joueur découvre le coup critique ×2 dès son
  *    premier sort, sans qu'on ait à le lui faire chercher ;
  *  - un seul adversaire, peu de PV : la leçon ne peut pas se solder par une défaite ;
- *  - DEUX dieux, et non un seul, pour deux raisons. Leurs cadres — Foudre et Lumière — sont
+ *  - DEUX dieux, et non un seul, pour deux raisons. Leurs cadres — Foudre et Air — sont
  *    franchement différents, ce qui donne sa matière à l'étape « la couleur du cadre indique
  *    l'élément ». Et surtout, un seul dieu ne fournissait que 5 cartes pour une main de 5 : la
  *    pioche était vide dès le premier tour, le joueur encaissait des dégâts de fatigue en
@@ -30,14 +31,14 @@ import styles from './page.module.css';
  *    invariablement 0. Avec dix cartes, la pioche existe et la fatigue ne survient que
  *    lorsqu'on la met en scène.
  */
-const PLAYER_GODS = ['zeus', 'athena'];
+const PLAYER_GODS = ['zeus', 'artemis'];
 const ENEMY_GODS = ['soldier_ares_1'];
 
 type Phase = 'intro' | 'playing' | 'done';
 
 export default function TutorialPage() {
     const router = useRouter();
-    const { initGame, resetGame, scriptTutorialFatigue } = useGameStore();
+    const { initGame, resetGame, scriptTutorialFatigue, scriptTutorialSeedDiscard } = useGameStore();
 
     const [phase, setPhase] = useState<Phase>('intro');
     const [stepIndex, setStepIndex] = useState(0);
@@ -106,9 +107,30 @@ export default function TutorialPage() {
         // rendu en cascade (react-hooks/set-state-in-effect).
         const id = setTimeout(() => {
             if (step.script === 'fatigue') scriptTutorialFatigue();
+            else if (step.script === 'seed-discard') scriptTutorialSeedDiscard();
         }, 0);
         return () => clearTimeout(id);
-    }, [phase, step, scriptTutorialFatigue]);
+    }, [phase, step, scriptTutorialFatigue, scriptTutorialSeedDiscard]);
+
+    /**
+     * Étapes qui attendent un geste d'INTERFACE (ouvrir la corbeille, ouvrir le journal).
+     *
+     * Ces deux modales sont un état local de `GameBoard` : aucun prédicat sur `GameState` ne peut
+     * les voir passer. Le plateau émet donc un événement, et l'étape ne se franchit que si le
+     * geste correspond à celui qu'elle demande — sinon ouvrir le journal ferait passer l'étape de
+     * la corbeille.
+     */
+    useEffect(() => {
+        if (phase !== 'playing' || !step?.awaitUi) return;
+        const wanted = step.awaitUi;
+        const onUi = (e: Event) => {
+            if ((e as CustomEvent<TutorialUiAction>).detail !== wanted) return;
+            advancedFrom.current = step.id;
+            setStepIndex(i => Math.min(i + 1, TUTORIAL_STEPS.length - 1));
+        };
+        window.addEventListener(TUTORIAL_UI_EVENT, onUi);
+        return () => window.removeEventListener(TUTORIAL_UI_EVENT, onUi);
+    }, [phase, step]);
 
     /**
      * Avance dès que la condition de l'étape est remplie.
@@ -201,7 +223,9 @@ export default function TutorialPage() {
                     total={TUTORIAL_STEPS.length}
                     // Bouton « Suivant » réservé aux étapes explicatives : sur une étape d'action,
                     // il permettrait de sauter le geste qu'on veut justement faire apprendre.
-                    onNext={step.advance === 'next'
+                    // `awaitUi` exclut le bouton au même titre qu'une étape d'action : offrir
+                    // « Suivant » permettrait de sauter le geste qu'on demande d'apprendre.
+                    onNext={step.advance === 'next' && !step.awaitUi
                         ? () => { if (!isLast) setStepIndex(i => i + 1); else finish(); }
                         : undefined}
                     onSkip={skip}

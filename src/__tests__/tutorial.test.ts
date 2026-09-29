@@ -179,14 +179,14 @@ describe('mise en place du combat scripté', () => {
         // Avec un seul dieu, le deck comptait 5 cartes pour une main de 5 : la pioche était vide
         // dès le premier tour, la fatigue se déclenchait toute seule dès le tour 2, et l'étape
         // qui montre « vos cartes restantes en pioche » affichait invariablement 0.
-        const deck = createDeck(['zeus', 'athena']);
+        const deck = createDeck(['zeus', 'artemis']);
         expect(deck.length).toBeGreaterThan(GAME_CONFIG.MAX_HAND_SIZE);
     });
 
     it('laisse une pioche non vide après la distribution initiale', () => {
         const engine = new GameEngine(GameEngine.createInitialState(
             'player1', 'Vous',
-            ['zeus', 'athena'].map(g => getGodById(g)!), createDeck(['zeus', 'athena']),
+            ['zeus', 'artemis'].map(g => getGodById(g)!), createDeck(['zeus', 'artemis']),
             'player2', 'Adversaire',
             [getGodById('soldier_ares_1')!], createDeck(['soldier_ares_1']),
             'player1',
@@ -196,5 +196,29 @@ describe('mise en place du combat scripté', () => {
         expect(me.hand.length).toBe(GAME_CONFIG.MAX_HAND_SIZE);
         expect(me.deck.length).toBeGreaterThan(0);
         expect(me.fatigueCounter).toBe(0);
+    });
+});
+
+describe('étapes qui attendent un geste d’interface', () => {
+    const uiSteps = TUTORIAL_STEPS.filter(s => s.awaitUi);
+
+    it('en compte deux : la corbeille et le journal de combat', () => {
+        expect(uiSteps.map(s => s.id)).toEqual(['energy', 'combat-log']);
+    });
+
+    it('ne gèle jamais le plateau', () => {
+        // C'était tout le défaut : le halo désignait un bouton que `blocking` rendait
+        // intouchable. Une étape qui demande un clic ne peut pas bloquer les clics.
+        for (const step of uiSteps) expect(step.blocking).toBeFalsy();
+    });
+
+    it('éclaire l’élément qu’il faut toucher', () => {
+        expect(spotlightOf(stepById('energy'))).toContain('player-discard');
+        expect(spotlightOf(stepById('combat-log'))).toContain('combat-log');
+    });
+
+    it('garnit la corbeille avant de demander de l’ouvrir', () => {
+        // Une corbeille vide apprend le contraire de ce que l'étape veut montrer.
+        expect(stepById('energy').script).toBe('seed-discard');
     });
 });

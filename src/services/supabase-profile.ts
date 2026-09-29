@@ -614,6 +614,22 @@ export async function claimMailboxReward(rewardId: string): Promise<{ success: b
     return rows[0] ?? { success: false, message: 'Erreur inconnue', ambroisie_reward: 0 };
 }
 
+/**
+ * Efface les récompenses DÉJÀ RÉCUPÉRÉES, pour faire de la place dans la boîte.
+ *
+ * Passe par une fonction dédiée plutôt que par une suppression directe : la table n'accorde
+ * que la lecture de ses propres lignes, et la fonction ne peut toucher que celles déjà
+ * réclamées de l'appelant. Une récompense en attente ne peut donc pas disparaître par erreur —
+ * ce serait de l'ambroisie perdue.
+ */
+export async function clearClaimedMailboxRewards(): Promise<number> {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.rpc('clear_claimed_mailbox_rewards');
+    if (error) throw error;
+    const rows = (data ?? []) as { deleted: number }[];
+    return rows[0]?.deleted ?? 0;
+}
+
 export async function claimAllMailboxRewards(): Promise<{ success: boolean; total_ambroisie: number }> {
     const supabase = getSupabaseClient();
     const { data, error } = await supabase.rpc('claim_all_mailbox_rewards');

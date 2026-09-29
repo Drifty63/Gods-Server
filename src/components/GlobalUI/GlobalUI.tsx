@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Ambroisie from '@/components/Ambroisie/Ambroisie';
 import {
     getDailyQuests, claimQuestReward, claimAllQuestRewards, DailyQuest,
-    getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, MailboxReward,
+    getMailboxRewards, claimMailboxReward, claimAllMailboxRewards, clearClaimedMailboxRewards, MailboxReward,
     markWelcomeSeen, pingLastActive, submitBugReport,
 } from '@/services/supabase-profile';
 import { getGodById } from '@/data/gods';
@@ -84,6 +84,8 @@ export default function GlobalUI() {
 
     // États pour la boîte de récompenses
     const [mailboxRewards, setMailboxRewards] = useState<MailboxReward[]>([]);
+    const [clearingRewards, setClearingRewards] = useState(false);
+    const [confirmClearRewards, setConfirmClearRewards] = useState(false);
     const [rewardsLoading, setRewardsLoading] = useState(false);
     const [claimingReward, setClaimingReward] = useState<string | null>(null);
 
@@ -258,6 +260,26 @@ export default function GlobalUI() {
         }
     };
 
+    /**
+     * Efface les récompenses déjà reçues. Sans effet sur celles qui attendent.
+     *
+     * La liste est retirée LOCALEMENT plutôt que rechargée depuis le serveur : la suppression
+     * est déjà confirmée à ce point, et relire la boîte ferait clignoter la modale pour rien.
+     */
+    const handleClearClaimedRewards = async () => {
+        if (!user || clearingRewards) return;
+        setClearingRewards(true);
+        try {
+            await clearClaimedMailboxRewards();
+            setMailboxRewards(prev => prev.filter(r => !r.claimed));
+            setConfirmClearRewards(false);
+        } catch (error) {
+            console.error('Erreur nettoyage des récompenses:', error);
+        } finally {
+            setClearingRewards(false);
+        }
+    };
+
     // Réclamer toutes les récompenses de la boîte
     const handleClaimAllMailboxRewards = async () => {
         if (!user || claimingReward) return;
@@ -413,6 +435,9 @@ export default function GlobalUI() {
 
     const closeRewardsModal = () => {
         setShowRewardsModal(false);
+        // La demande de confirmation ne survit pas à la fermeture : rouvrir la boîte ne doit
+        // pas remettre le joueur devant un « Êtes-vous sûr ? » qu'il avait laissé de côté.
+        setConfirmClearRewards(false);
     };
 
     const openRulesModal = () => {
@@ -722,6 +747,52 @@ export default function GlobalUI() {
                                 ))
                             )}
                         </div>
+
+                        {/*
+                          * FAIRE LE MÉNAGE. Une récompense réclamée reste dans la boîte
+                          * indéfiniment, sous les nouvelles : au bout de quelques chapitres et
+                          * de quelques ascensions, il faut faire défiler d'anciens cadeaux pour
+                          * trouver celui qui attend. Le bouton n'apparaît que s'il y a
+                          * réellement quelque chose à effacer, et ne touche JAMAIS aux
+                          * récompenses en attente.
+                          *
+                          * Une suppression ne se rattrape pas, et le doigt qui vise « Accepter »
+                          * peut manquer sa cible : le bouton demande confirmation, et la phrase
+                          * de confirmation redit ce qui part et ce qui reste.
+                          */}
+                        {mailboxRewards.some(r => r.claimed) && (
+                            confirmClearRewards ? (
+                                <div className={styles.clearConfirm}>
+                                    <p className={styles.clearConfirmText}>
+                                        Vider la boîte à cadeaux ? Les récompenses déjà reçues seront
+                                        effacées. Celles qui attendent sont conservées.
+                                    </p>
+                                    <div className={styles.clearConfirmActions}>
+                                        <button
+                                            className={styles.clearCancelButton}
+                                            onClick={() => setConfirmClearRewards(false)}
+                                            disabled={clearingRewards}
+                                        >
+                                            Annuler
+                                        </button>
+                                        <button
+                                            className={styles.clearConfirmButton}
+                                            onClick={handleClearClaimedRewards}
+                                            disabled={clearingRewards}
+                                        >
+                                            {clearingRewards ? 'Nettoyage...' : 'Vider'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    className={styles.clearClaimedButton}
+                                    onClick={() => setConfirmClearRewards(true)}
+                                >
+                                    🧹 Vider la boîte à cadeaux
+                                </button>
+                            )
+                        )}
 
                         <div className={styles.rewardsFooter}>
                             <button className={styles.closeButton} onClick={closeRewardsModal}>
