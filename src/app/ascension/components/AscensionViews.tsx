@@ -10,7 +10,16 @@ import type { GodCard } from '@/types/cards';
 import styles from '../page.module.css';
 
 /** Écran d'accueil : règles du mode et aperçu de la tour. */
-export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onStart: () => void }) {
+export function AscensionMenu({
+    bestFloor, onStart, savedFloor, onResume, onDiscard,
+}: {
+    bestFloor: number;
+    onStart: () => void;
+    /** Étage de l'ascension sauvegardée, s'il y en a une. */
+    savedFloor?: number;
+    onResume?: () => void;
+    onDiscard?: () => void;
+}) {
     return (
         <section className={styles.menuSection}>
             <div className={styles.ascensionIcon}>🏔️</div>
@@ -18,6 +27,31 @@ export function AscensionMenu({ bestFloor, onStart }: { bestFloor: number; onSta
             <p className={styles.menuDesc}>
                 Enchaînez {TOTAL_FLOORS} étages. Grimpez le plus haut possible.
             </p>
+
+            {/*
+              * REPRISE — proposée AVANT tout le reste, et jamais automatique.
+              *
+              * Reprendre sans demander serait présomptueux : un joueur peut vouloir repartir de
+              * zéro avec une autre équipe. Mais l'ordre des deux boutons dit quelle est l'issue
+              * attendue, et abandonner exige un second geste, parce que c'est irréversible.
+              */}
+            {savedFloor !== undefined && onResume && (
+                <div className={styles.resumeBox}>
+                    <h3>⏸️ Ascension en cours</h3>
+                    <p>
+                        Vous en étiez à l’<strong>étage {savedFloor}</strong>. Elle a été
+                        sauvegardée lorsque vous avez quitté le jeu, combat compris.
+                    </p>
+                    <button className={styles.resumeButton} onClick={onResume}>
+                        ▶ Reprendre l’ascension
+                    </button>
+                    {onDiscard && (
+                        <button className={styles.discardButton} onClick={onDiscard}>
+                            Abandonner et recommencer
+                        </button>
+                    )}
+                </div>
+            )}
 
             <div className={styles.floorsPreview}>
                 <div className={styles.floorRange} style={{ borderColor: TIER_LABELS.servant.color }}>

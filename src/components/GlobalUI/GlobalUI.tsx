@@ -762,9 +762,9 @@ export default function GlobalUI() {
                           * bougeaient pas.
                           */}
                         <p className={styles.questsScopeNote}>
-                            Seules les parties en ligne font avancer les quêtes — classées ou
-                            amicales. Les défis privés entre amis, l’Entraînement, l’Ascension et
-                            l’Histoire ne comptent pas.
+                            Les quêtes avancent en <strong>En ligne</strong> et en <strong>Duel</strong>,
+                            classé comme amical. Les parties privées entre amis, l’Entraînement,
+                            l’Ascension et l’Histoire ne comptent pas.
                         </p>
 
                         {!user ? (

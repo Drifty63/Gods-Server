@@ -1,11 +1,15 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import { generateAscensionRun, TOTAL_FLOORS, isTierBoundary, type AscensionFloor } from '@/data/ascension';
 import type { GodCard } from '@/types/cards';
+import {
+    loadRun, saveRun, clearRun,
+    subscribeRun, getRunSnapshot, getRunServerSnapshot,
+} from './runStorage';
 
 /**
  * `abandoned` est distinct de `run_over`, et l'écart compte.
@@ -152,11 +156,132 @@ export function useAscensionRun() {
     /** Remet l'ascension à zéro et revient au menu. Ne remonte rien : tout l'a déjà été. */
     const abandonRun = useCallback(() => {
         resetGame();
+        clearRun();
         setPhase('idle');
         setCurrentFloor(1);
         setReward(0);
         setCarry({ health: {}, energy: 0, aliveGodIds: [] });
     }, [resetGame]);
+
+    /*
+     * ─── SAUVEGARDE ET REPRISE ───────────────────────────────────────────────────────────
+     *
+     * Une ascension dure quinze combats. Fermer l'application en effaçait toute trace : un
+     * joueur parvenu au dixième étage perdait tout pour avoir répondu au téléphone.
+     */
+
+    /** Y a-t-il une ascension à reprendre ? Lue comme une source extérieure à React. */
+    const savedRun = useSyncExternalStore(subscribeRun, getRunSnapshot, getRunServerSnapshot);
+
+    /**
+     * Écrit l'ascension en cours, combat compris.
+     *
+     * Dans une référence plutôt qu'une simple fonction : elle est appelée depuis des écouteurs
+     * d'événements posés une fois pour toutes, qui capteraient sinon les valeurs du premier
+     * rendu et sauvegarderaient éternellement l'étage 1.
+     */
+    const persistRef = useRef<() => void>(() => undefined);
+
+    /*
+     * La référence est mise à jour dans un EFFET, jamais pendant le rendu : y écrire pendant le
+     * rendu rend un composant impropre au rendu concurrent, et React le signale.
+     *
+     * Effet sans tableau de dépendances, donc rejoué après chaque rendu : c'est ce qui garde la
+     * fonction à jour. Déclaré AVANT les effets qui l'appellent, pour qu'ils voient toujours la
+     * dernière version — les effets s'exécutent dans leur ordre d'écriture.
+     */
+    useEffect(() => {
+        persistRef.current = () => {
+            if (phase === 'idle' || phase === 'run_over' || phase === 'victory' || phase === 'abandoned') return;
+            saveRun({
+                floors,
+                currentFloor,
+                reward,
+                carry,
+                // L'état du combat n'est retenu qu'en plein affrontement : c'est lui qui permet
+                // de reprendre au milieu, et donc de ne pas offrir de seconde chance à qui ferme
+                // l'application en train de perdre.
+                gameState: phase === 'fighting' ? (useGameStore.getState().gameState ?? null) : null,
+            });
+        };
+    });
+
+    /*
+     * On sauvegarde quand l'application DISPARAÎT, et non à chaque action.
+     *
+     * `visibilitychange` et `pagehide` sont les deux seuls signaux qu'iOS envoie de façon fiable
+     * avant de suspendre ou de fermer une application ajoutée à l'écran d'accueil ; `beforeunload`
+     * n'y est pas tenu. Écrire à chaque coup joué aurait coûté une sérialisation complète de
+     * l'état par carte jouée — exactement la dépense qu'on vient de supprimer ailleurs.
+     */
+    useEffect(() => {
+        const persist = () => persistRef.current();
+        const onVisibility = () => { if (document.visibilityState === 'hidden') persist(); };
+
+        document.addEventListener('visibilitychange', onVisibility);
+        window.addEventListener('pagehide', persist);
+        return () => {
+            document.removeEventListener('visibilitychange', onVisibility);
+            window.removeEventListener('pagehide', persist);
+            /*
+             * QUITTER LA PAGE compte aussi, et les deux écouteurs ci-dessus ne le voient pas :
+             * un retour à l'accueil par la roue des paramètres est une navigation INTERNE,
+             * l'application ne disparaît ni ne se masque. Seul le démontage du composant le
+             * signale. Sans cette ligne, la sauvegarde ne couvrait que la fermeture du
+             * téléphone, pas la sortie volontaire — le cas le plus courant.
+             */
+            persist();
+        };
+    }, []);
+
+    /*
+     * Point de reprise à chaque changement de phase : filet de sécurité pour les fermetures
+     * brutales, qui n'envoient aucun signal. Rare, donc sans coût sensible.
+     */
+    useEffect(() => { persistRef.current(); }, [phase, currentFloor]);
+
+    /** Efface la sauvegarde dès que l'ascension est finie, de quelque manière que ce soit. */
+    useEffect(() => {
+        if (phase === 'run_over' || phase === 'victory' || phase === 'abandoned') clearRun();
+    }, [phase]);
+
+    /** Reprend l'ascension sauvegardée, exactement où elle s'était arrêtée. */
+    const resumeRun = useCallback(() => {
+        const saved = loadRun();
+        if (!saved) return;
+
+        setFloors(saved.floors);
+        setCurrentFloor(saved.currentFloor);
+        setReward(saved.reward);
+        setCarry(saved.carry);
+        // La sauvegarde n'est PAS effacée en reprenant : elle doit survivre à une seconde
+        // sortie. Elle disparaît de l'écran toute seule, la proposition de reprise ne
+        // s'affichant qu'au menu.
+
+        if (saved.gameState) {
+            // En plein combat : on remonte le moteur ET l'adversaire artificiel.
+            useGameStore.getState().restoreSoloState(saved.gameState);
+            setPhase('fighting');
+
+            /*
+             * Si la main était à l'IA au moment de la sortie, il faut la lui redonner.
+             *
+             * Son tour se déclenche d'ordinaire à la fin de celui du joueur ; une reprise ne
+             * passe par aucune fin de tour, donc personne ne le lancerait et la partie
+             * resterait figée sur un adversaire qui ne joue jamais. Le délai laisse le plateau
+             * se dessiner avant que les cartes ne se mettent à bouger.
+             */
+            if (saved.gameState.currentPlayerId !== 'player1') {
+                setTimeout(() => useGameStore.getState().playAITurn(), 800);
+            }
+        } else {
+            // Entre deux étages : l'écran d'entre-deux se réaffiche tel quel.
+            setPhase('floor_cleared');
+        }
+    }, []);
+
+    /** Écarte la sauvegarde pour repartir de zéro. `clearRun` prévient les abonnés. */
+    const discardSavedRun = useCallback(() => clearRun(), []);
 
     return {
         phase,
@@ -170,5 +295,8 @@ export function useAscensionRun() {
         climbNext,
         abandonRun,
         stopRun,
+        savedRun,
+        resumeRun,
+        discardSavedRun,
     };
 }

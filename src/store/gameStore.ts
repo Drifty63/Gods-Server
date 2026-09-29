@@ -90,6 +90,15 @@ interface GameStore {
 
     initWithState: (state: GameState, myPlayerId: string) => void;
 
+    /**
+     * Reprend une partie SOLO à partir d'un état sauvegardé, adversaire artificiel compris.
+     *
+     * Distincte d'`initWithState`, qui sert au multijoueur et met délibérément `isSoloMode` à
+     * faux avec aucune IA : l'invité y reçoit l'état de l'hôte, personne n'a d'adversaire à
+     * piloter. Une ascension reprise en plein combat a besoin de l'inverse — le moteur ET l'IA.
+     */
+    restoreSoloState: (state: GameState) => void;
+
     // Synchronise l'état du jeu (pour le multijoueur : met à jour depuis l'état reçu)
     syncGameState: (state: GameState) => void;
 
@@ -488,6 +497,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // NOTE: On ne lance plus playAITurn ici pour laisser le temps à l'UI d'afficher les intros
         // C'est à la page de combat de déclencher le premier tour IA si besoin
+    },
+
+    restoreSoloState: (state: GameState) => {
+        const engine = new GameEngine(state);
+        set({
+            ...ALL_MODALS_CLOSED,
+            gameState: cloneGameState(state),
+            engine,
+            aiPlayer: new AIPlayer('medium'),
+            playerId: 'player1',
+            isSoloMode: true,
+            isAIPlaying: false,
+            selectedCard: null,
+            selectedTargetGod: null,
+            selectedTargetGods: [],
+            requiredTargets: 0,
+            isSelectingTarget: false,
+        });
     },
 
     // Initialiser le jeu avec un état spécifique (pour le multijoueur : l'invité reçoit l'état de l'hôte)

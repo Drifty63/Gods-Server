@@ -128,7 +128,13 @@ function AscensionContent() {
 
             <div className={styles.content}>
                 {run.phase === 'idle' && !picking && (
-                    <AscensionMenu bestFloor={bestFloor} onStart={() => setPicking(true)} />
+                    <AscensionMenu
+                        bestFloor={bestFloor}
+                        onStart={() => setPicking(true)}
+                        savedFloor={run.savedRun?.currentFloor}
+                        onResume={run.resumeRun}
+                        onDiscard={run.discardSavedRun}
+                    />
                 )}
 
                 {run.phase === 'idle' && picking && (
