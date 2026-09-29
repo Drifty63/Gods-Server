@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TUTORIAL_STEPS, shouldAdvance, type SpotlightTarget, type TutorialStep } from '@/data/tutorial';
+import { TUTORIAL_STEPS, shouldAdvance, openingOf, type SpotlightTarget, type TutorialStep } from '@/data/tutorial';
 import { getSpellsByGodId, createDeck } from '@/data/spells';
 import { GAME_CONFIG } from '@/data/gameRules';
 import { GameEngine } from '@/game-engine/GameEngine';
@@ -224,6 +224,14 @@ describe('étapes qui attendent un geste d’interface', () => {
 });
 
 describe('le geste attendu est une FERMETURE', () => {
+    it('sait retrouver l’ouverture correspondante', () => {
+        // Le guidage doit s'effacer À L'OUVERTURE : son voile est au-dessus de la corbeille
+        // (z-index 4000 contre 2000), et laissait le joueur devant un contenu assombri.
+        for (const step of TUTORIAL_STEPS.filter(s => s.awaitUi)) {
+            expect(openingOf(step.awaitUi!)).toBe(step.awaitUi!.replace('-closed', '-opened'));
+        }
+    });
+
     it('ne franchit pas l’étape à l’ouverture de la modale', () => {
         // À l'ouverture, l'étape suivante s'affichait derrière la corbeille encore ouverte : le
         // joueur la découvrait à moitié masquée, sur fond grisé.

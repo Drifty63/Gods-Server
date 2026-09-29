@@ -99,8 +99,22 @@ export interface TutorialStep {
     awaitUi?: TutorialUiAction;
 }
 
-/** Geste d'interface qu'une étape peut attendre. */
-export type TutorialUiAction = 'discard-closed' | 'log-closed';
+/**
+ * Geste d'interface observé par le didacticiel.
+ *
+ * L'ouverture compte autant que la fermeture, pour une raison d'affichage : le voile du guidage
+ * est à `z-index: 4000`, la corbeille à 2000. Tant que le guidage reste affiché, la corbeille
+ * qu'on vient de demander d'ouvrir apparaît assombrie et quasi illisible. Le guidage s'efface
+ * donc le temps que la modale est ouverte — à ce moment-là, la modale EST la leçon.
+ */
+export type TutorialUiAction =
+    | 'discard-opened' | 'discard-closed'
+    | 'log-opened' | 'log-closed';
+
+/** L'ouverture correspondant à une fermeture attendue. */
+export function openingOf(closing: TutorialUiAction): TutorialUiAction {
+    return closing.replace('-closed', '-opened') as TutorialUiAction;
+}
 
 /**
  * Événement émis par le plateau quand un de ces gestes est fait.

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import GameBoard from '@/components/GameBoard/GameBoard';
 import TutorialOverlay from '@/components/Tutorial/TutorialOverlay';
-import { TUTORIAL_STEPS, TUTORIAL_OUTRO, TUTORIAL_DONE_KEY, TUTORIAL_UI_EVENT, shouldAdvance } from '@/data/tutorial';
+import { TUTORIAL_STEPS, TUTORIAL_OUTRO, TUTORIAL_DONE_KEY, TUTORIAL_UI_EVENT, openingOf, shouldAdvance } from '@/data/tutorial';
 import type { TutorialUiAction } from '@/data/tutorial';
 import { getGodById } from '@/data/gods';
 import { createDeck } from '@/data/spells';
@@ -44,6 +44,13 @@ export default function TutorialPage() {
     const [stepIndex, setStepIndex] = useState(0);
     /** Étape `dismissible` refermée par le joueur : le guidage disparaît, la partie continue. */
     const [guideDismissed, setGuideDismissed] = useState(false);
+    /**
+     * Étape dont la modale est ouverte en ce moment — le guidage s'efface le temps qu'elle dure.
+     *
+     * On mémorise l'ID de l'ÉTAPE plutôt qu'un simple booléen : au franchissement, l'étape change
+     * et la comparaison redevient fausse toute seule. Pas de remise à zéro à ne pas oublier.
+     */
+    const [modalOpenFor, setModalOpenFor] = useState<string | null>(null);
 
     const step = TUTORIAL_STEPS[stepIndex];
     const isLast = stepIndex >= TUTORIAL_STEPS.length - 1;
@@ -122,9 +129,17 @@ export default function TutorialPage() {
      */
     useEffect(() => {
         if (phase !== 'playing' || !step?.awaitUi) return;
-        const wanted = step.awaitUi;
+        const closing = step.awaitUi;
+        const opening = openingOf(closing);
         const onUi = (e: Event) => {
-            if ((e as CustomEvent<TutorialUiAction>).detail !== wanted) return;
+            const action = (e as CustomEvent<TutorialUiAction>).detail;
+            // La modale s'ouvre : le guidage s'efface, sinon son voile assombrit ce qu'on vient
+            // justement de demander de regarder.
+            if (action === opening) { setModalOpenFor(step.id); return; }
+            if (action !== closing) return;
+            setModalOpenFor(null);
+            // Idempotent, comme le garde des étapes de jeu : un geste peut émettre deux fois.
+            if (advancedFrom.current === step.id) return;
             advancedFrom.current = step.id;
             setStepIndex(i => Math.min(i + 1, TUTORIAL_STEPS.length - 1));
         };
@@ -216,7 +231,7 @@ export default function TutorialPage() {
     return (
         <>
             <GameBoard />
-            {step && !guideDismissed && (
+            {step && !guideDismissed && modalOpenFor !== step.id && (
                 <TutorialOverlay
                     step={step}
                     index={stepIndex}

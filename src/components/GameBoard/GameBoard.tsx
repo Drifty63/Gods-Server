@@ -214,7 +214,12 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
     const closeDiscard = useCallback(() => {
         setViewingDiscard(null);
         setZoomedDiscardCard(null);
-        if (viewingOwnDiscard.current) emitTutorialUi('discard-closed');
+        // `viewingOwnDiscard` sert aussi de garde contre le DOUBLE signal : le bouton « Fermer »
+        // est à l'intérieur du voile, donc un clic dessus remonte et déclenche `closeDiscard`
+        // deux fois. Le didacticiel franchissait alors deux étapes d'un coup — de la 5 à la 7.
+        if (!viewingOwnDiscard.current) return;
+        viewingOwnDiscard.current = false;
+        emitTutorialUi('discard-closed');
     }, []);
     const [hoveredCard, setHoveredCard] = useState<SpellCard | null>(null);
     /** Carte examinée en plein écran via un appui long (n'engage aucune action de jeu). */
@@ -919,7 +924,11 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
             />
             <DeckAndDiscard 
                 player={player} 
-                onClickDiscard={() => { viewingOwnDiscard.current = true; setViewingDiscard(player.discard); }}
+                onClickDiscard={() => {
+                    viewingOwnDiscard.current = true;
+                    setViewingDiscard(player.discard);
+                    emitTutorialUi('discard-opened');
+                }}
             />
 
             {/* OPPONENT HAND */}
@@ -959,7 +968,7 @@ export default function GameBoard({ isOnlineMode = false, onAction, onExit }: Ga
                 myTurn={myTurn}
                 turnNumber={gameState.turnNumber}
                 canTargetDead={canTargetDead}
-                onOpenLog={() => setIsLogOpen(true)}
+                onOpenLog={() => { setIsLogOpen(true); emitTutorialUi('log-opened'); }}
                 onEndTurn={() => {
                     if (myTurn) {
                         const result = endTurn();
