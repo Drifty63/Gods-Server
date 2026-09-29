@@ -19,11 +19,11 @@
     color: #c084fc;
 }
 
-/* Deux colonnes : les quatre choix tiennent alors dans un pouce sur un écran de téléphone,
-   sans que la modale ne dépasse la hauteur visible. */
+/* Une colonne depuis le passage à trois choix : côte à côte, trois cases laissaient une place
+   vide et rendaient chaque libellé trop étroit pour se lire d'un coup d'œil. */
 .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 10px;
 }
 

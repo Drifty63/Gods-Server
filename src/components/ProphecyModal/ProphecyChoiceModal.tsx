@@ -12,17 +12,18 @@ interface ProphecyChoiceModalProps {
 }
 
 /**
- * Les quatre actions prédictibles — c'est-à-dire TOUT ce qu'un joueur peut faire de son tour.
+ * Les trois actions prédictibles — c'est-à-dire TOUT ce qu'un joueur peut faire de son tour,
+ * sans recouvrement : il joue une carte, il en défausse une, ou il ne fait rien.
  *
- * L'énumération est exhaustive à dessein : le pari doit être un vrai choix entre des options
- * qui couvrent le champ des possibles, sinon prédire reviendrait à cocher la seule case
- * plausible. Les trois types de carte, plus la défausse contre énergie.
+ * Elles étaient quatre, découpées par TYPE de carte. Il fallait alors deviner non seulement ce
+ * que l'adversaire ferait, mais avec quelle sorte de carte — un pari à une chance sur quatre
+ * que presque personne ne gagnait. Trois options font du pari une lecture de l'adversaire
+ * plutôt qu'un tirage au sort.
  */
 const CHOICES: { id: ProphecyAction; icon: string; name: string; hint: string }[] = [
-    { id: 'generator', icon: '🟢', name: 'Générateur', hint: 'Une carte qui produit de l’énergie' },
-    { id: 'competence', icon: '⚔️', name: 'Compétence', hint: 'Une attaque ou un effet offensif' },
-    { id: 'utility', icon: '🛡️', name: 'Utilitaire', hint: 'Bouclier, soin, provocation…' },
-    { id: 'discard', icon: '♻️', name: 'Défausse', hint: 'Jeter une carte pour gagner 1 énergie' },
+    { id: 'play', icon: '🃏', name: 'Jouer une carte', hint: 'N’importe laquelle, quel qu’en soit le type' },
+    { id: 'discard', icon: '♻️', name: 'Défausser', hint: 'Jeter une carte pour gagner 1 énergie' },
+    { id: 'pass', icon: '⏭️', name: 'Passer son tour', hint: 'Ne rien faire du tout' },
 ];
 
 export default function ProphecyChoiceModal({ isOpen, onSelect, onCancel }: ProphecyChoiceModalProps) {

@@ -903,7 +903,7 @@ export class GameEngine {
          * elle, est séparée (voir fulfilProphecy) : l'un perd son tour, l'autre gagne des
          * boucliers. Deux choses distinctes, portées par deux camps distincts.
          */
-        if (this.prophecyCatches(player.id, card.type)) {
+        if (this.prophecyCatches(player.id, 'play')) {
             player.hand.splice(cardIndex, 1);
             cleanBlindCard(card);
             player.discard.push(card);
@@ -1248,16 +1248,24 @@ export class GameEngine {
         const previousPlayer = this.getCurrentPlayer();
 
         /*
-         * Une prophétie ne vaut QUE pour le tour suivant sa pose.
+         * Une prophétie ne vaut QUE pour le tour suivant sa pose, et c'est ici qu'elle se
+         * dénoue — dans les deux sens.
          *
-         * Elle expire donc à la fin du tour de celui qu'elle visait, qu'elle se soit réalisée ou
-         * non — si elle s'était réalisée, `fulfilProphecy` l'a déjà effacée. Le cas qui compte
-         * ici est l'échec : l'adversaire a fait autre chose, ou n'a rien pu faire du tout et a
-         * passé son tour. Dans ce dernier cas la prophétie échoue, comme convenu : on ne
-         * récompense pas un pari que l'autre n'avait aucun moyen de tenir.
+         * PASSER SON TOUR est l'une des trois actions prédictibles. Un adversaire qui n'a ni
+         * joué ni défaussé a passé, et si c'était l'annonce, le pari est gagné. C'est le seul
+         * cas qui ne se juge pas au moment de l'action, puisqu'il consiste précisément à n'en
+         * avoir fait aucune.
+         *
+         * Sinon elle expire. Si elle s'était réalisée pendant le tour, `fulfilProphecy` l'a
+         * déjà effacée et cette branche ne voit plus rien.
          */
         if (this.state.prophecy && this.state.prophecy.casterPlayerId !== previousPlayer.id) {
-            this.state.prophecy = undefined;
+            const passed = !previousPlayer.hasPlayedCard && !previousPlayer.hasDiscardedForEnergy;
+            if (this.state.prophecy.choice === 'pass' && passed) {
+                this.fulfilProphecy();
+            } else {
+                this.state.prophecy = undefined;
+            }
         }
 
         // Tick des effets de statut (regen, poison, durées)

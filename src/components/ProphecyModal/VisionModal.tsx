@@ -6,8 +6,15 @@ import styles from './VisionModal.module.css';
 import { SpellCard } from '@/types/cards';
 import { getReadableSpellDescription } from '@/data/spellDescriptions';
 
-/** Durée d'affichage, en secondes. Le joueur peut refermer avant. */
-const VISION_SECONDS = 3;
+/**
+ * Durée d'affichage, en secondes. Le joueur peut refermer avant.
+ *
+ * Trois secondes ne suffisaient pas : il faut lire deux noms de carte, deux coûts et deux
+ * effets, puis les RETENIR pour le reste de la partie — on ne les reverra pas. Dix secondes
+ * laissent le temps de mémoriser sans que l'adversaire attende pour rien, et le bouton reste
+ * là pour qui a déjà fini.
+ */
+const VISION_SECONDS = 10;
 
 interface VisionModalProps {
     cards: SpellCard[] | null;

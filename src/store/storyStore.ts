@@ -139,7 +139,12 @@ export const useStoryStore = create<StoryState>()(
                     progress: {
                         ...progress,
                         battleResults: updatedResults,
-                        completedEvents: [...progress.completedEvents, event.id],
+                        // Dédoublonné : le mode est rejouable, et sans ce filtre le même combat
+                        // s'ajoutait une fois de plus à chaque tentative — la liste enflait sans
+                        // fin à mesure qu'un joueur s'acharnait sur un combat difficile.
+                        completedEvents: progress.completedEvents.includes(event.id)
+                            ? progress.completedEvents
+                            : [...progress.completedEvents, event.id],
                         lastPlayedAt: new Date().toISOString()
                     },
                     currentBattleConfig: null

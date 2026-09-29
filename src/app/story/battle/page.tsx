@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -414,6 +414,27 @@ function StoryBattleContent() {
         }
     }, [gameState, phase, completeBattle, playerId, battleConfig]);
 
+    /*
+     * Minuteur de frappe des dialogues d'APRÈS-COMBAT, tenu dans une référence.
+     *
+     * Exactement le même défaut que dans DialogueBox, et corrigé de la même façon : l'appui qui
+     * accélérait le texte ne coupait pas le minuteur, qui réécrivait aussitôt une portion
+     * par-dessus — d'où le scintillement — pendant que `isTyping` était déjà repassé à faux, si
+     * bien que l'appui suivant sautait un dialogue encore en train de s'afficher.
+     *
+     * Deux composants distincts portaient la même machine à écrire ; corriger l'un laissait
+     * l'autre intact, ce qui est précisément ce qui s'est passé pour les dialogues de victoire
+     * et de défaite du chapitre 1.
+     */
+    const postTypingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const stopPostTyping = useCallback(() => {
+        if (postTypingRef.current !== null) {
+            clearInterval(postTypingRef.current);
+            postTypingRef.current = null;
+        }
+    }, []);
+
     // Effet de machine à écrire pour les dialogues post-combat
     useEffect(() => {
         if (phase !== 'post_battle_dialogue' || postBattleDialogues.length === 0) return;
@@ -427,22 +448,24 @@ function StoryBattleContent() {
         const text = dialogue.text;
         let charIndex = 0;
 
-        const typingInterval = setInterval(() => {
-            if (charIndex < text.length) {
-                setDisplayedText(text.substring(0, charIndex + 1));
-                charIndex++;
-            } else {
+        stopPostTyping();
+        postTypingRef.current = setInterval(() => {
+            charIndex++;
+            setDisplayedText(text.slice(0, charIndex));
+            if (charIndex >= text.length) {
+                stopPostTyping();
                 setIsTyping(false);
-                clearInterval(typingInterval);
             }
         }, 25);
 
-        return () => clearInterval(typingInterval);
-    }, [phase, postBattleIndex, postBattleDialogues]);
+        return stopPostTyping;
+    }, [phase, postBattleIndex, postBattleDialogues, stopPostTyping]);
 
     const handleNextPostDialogue = () => {
         if (isTyping) {
-            // Skip l'animation
+            // ARRÊTER le minuteur avant d'afficher le texte entier, sinon il le recouvre au
+            // tick suivant et l'affichage se met à osciller.
+            stopPostTyping();
             setDisplayedText(postBattleDialogues[postBattleIndex]?.text || '');
             setIsTyping(false);
             return;

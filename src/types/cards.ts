@@ -264,8 +264,18 @@ export interface GameLogEntry {
 }
 
 // État de la partie
-/** Les quatre actions qu'une prophétie de l'Oracle peut prédire. */
-export type ProphecyAction = 'generator' | 'competence' | 'utility' | 'discard';
+/**
+ * Les trois actions qu'une prophétie de l'Oracle peut prédire.
+ *
+ * Elles étaient quatre : les trois TYPES de carte, plus la défausse. Prédire un type précis
+ * demandait au joueur de deviner non seulement ce que l'autre ferait, mais avec quelle sorte de
+ * carte — un pari à une chance sur quatre, que presque personne ne gagnait.
+ *
+ * Les trois actuelles couvrent tout ce qu'un joueur peut faire de son tour, sans recouvrement :
+ * il joue une carte, il en défausse une, ou il passe. Le pari redevient une lecture de
+ * l'adversaire plutôt qu'un tirage au sort.
+ */
+export type ProphecyAction = 'play' | 'discard' | 'pass';
 
 /**
  * Prophétie en cours — le SEUL effet du jeu qui survive au tour qui l'a posé.

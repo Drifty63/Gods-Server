@@ -38,8 +38,11 @@ export const oracleDelphes = released(
         },
         {
             slot: 'skill_2', name: 'Destin contrarié',
-            desc: 'Prédit l\'action adverse. Si l\'adversaire la joue, elle est annulée : +2 boucliers sur chaque allié vivant et 1 énergie.',
-            effects: [custom('oracle_prophecy', 'Prédit l\'action adverse et l\'annule')],
+            desc: 'Prédisez ce que fera l\'adversaire à son prochain tour : jouer une carte, en défausser une, ou passer. S\'il le fait, son action est annulée, chacun de vos dieux vivants gagne 2 boucliers et vous gagnez 1 énergie.',
+            effects: [custom(
+                'oracle_prophecy',
+                'Prédit l\'action adverse : si elle se produit, elle est annulée, chaque dieu allié vivant gagne 2 boucliers et vous gagnez 1 énergie',
+            )],
         },
         {
             slot: 'utility_1', name: 'Lecture des présages',

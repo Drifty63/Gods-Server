@@ -69,19 +69,19 @@ function giveTo(e: GameEngine, playerId: string, spellId: string): string {
 describe('Prophétie de l’Oracle', () => {
     it('inscrit la prédiction dans l’état de partie sans rien faire d’autre', () => {
         const e = makeEngine();
-        castProphecy(e, 'competence');
+        castProphecy(e, 'play');
 
         const st = e.getState();
         expect(st.prophecy).toBeDefined();
         expect(st.prophecy!.casterPlayerId).toBe('p1');
-        expect(st.prophecy!.choice).toBe('competence');
+        expect(st.prophecy!.choice).toBe('play');
         // Aucune récompense tant que le pari n'est pas gagné.
         expect(st.players[0].gods.every(g => !g.statusEffects.some(s => s.type === 'shield'))).toBe(true);
     });
 
     it('annule la carte annoncée, sans effet ni gain d’énergie', () => {
         const e = makeEngine();
-        castProphecy(e, 'generator');
+        castProphecy(e, 'play');
         handOver(e);
 
         // Un générateur d'Hadès : il inflige des dégâts ET rapporte de l'énergie.
@@ -106,7 +106,7 @@ describe('Prophétie de l’Oracle', () => {
 
     it('récompense le lanceur : boucliers sur chaque dieu vivant, et une énergie', () => {
         const e = makeEngine();
-        castProphecy(e, 'competence');
+        castProphecy(e, 'play');
         handOver(e);
 
         const p1 = e.getState().players[0];
@@ -130,7 +130,7 @@ describe('Prophétie de l’Oracle', () => {
         zeus.isDead = true;
         zeus.currentHealth = 0;
 
-        castProphecy(e, 'competence');
+        castProphecy(e, 'play');
         handOver(e);
         const comp = ALL_SPELLS.find(s => s.godId === 'hades' && s.type === 'competence')!;
         const idcomp = giveTo(e, 'p2', comp.id);
@@ -141,7 +141,7 @@ describe('Prophétie de l’Oracle', () => {
 
     it('laisse passer une action qui n’était pas celle annoncée', () => {
         const e = makeEngine();
-        castProphecy(e, 'utility');
+        castProphecy(e, 'pass');
         handOver(e);
 
         const gen = ALL_SPELLS.find(s => s.godId === 'hades' && s.type === 'generator')!;
@@ -155,7 +155,7 @@ describe('Prophétie de l’Oracle', () => {
 
     it('n’annule JAMAIS les cartes de celui qui l’a lancée', () => {
         const e = makeEngine();
-        castProphecy(e, 'generator');
+        castProphecy(e, 'play');
         // Sans passer la main : l'Oracle rejoue lui-même un générateur.
         e.getState().players[0].hasPlayedCard = false;
         const gen = ALL_SPELLS.find(s => s.godId === 'zeus' && s.type === 'generator')!;
@@ -184,12 +184,47 @@ describe('Prophétie de l’Oracle', () => {
         expect(p2.hasDiscardedForEnergy).toBe(true);
     });
 
-    it('échoue si l’adversaire passe son tour sans rien faire', () => {
+    it('échoue si l’adversaire fait autre chose que l’action annoncée', () => {
         const e = makeEngine();
-        castProphecy(e, 'competence');
+        castProphecy(e, 'play');
         handOver(e);
 
         // p2 ne joue rien et rend la main.
+        e.executeAction({ type: 'end_turn', playerId: 'p2' });
+
+        expect(e.getState().prophecy).toBeUndefined();
+        expect(e.getState().players[0].gods.some(g => g.statusEffects.some(s => s.type === 'shield'))).toBe(false);
+    });
+
+    /*
+     * « Passer » est la seule des trois actions qui ne se juge pas au moment où elle est faite,
+     * puisqu'elle consiste à n'en faire aucune : elle se constate à la fin du tour. C'est aussi
+     * la seule où l'adversaire n'est pas puni — il avait déjà perdu son tour tout seul.
+     */
+    it('se réalise quand l’adversaire passe et que c’était l’annonce', () => {
+        const e = makeEngine();
+        castProphecy(e, 'pass');
+        handOver(e);
+
+        const p1 = e.getState().players[0];
+        p1.energy = 4;
+        e.executeAction({ type: 'end_turn', playerId: 'p2' });
+
+        for (const g of p1.gods) {
+            expect(g.statusEffects.find(s => s.type === 'shield')?.stacks, `${g.card.id}`).toBe(PROPHECY_SHIELD);
+        }
+        expect(p1.energy).toBe(5);
+        expect(e.getState().prophecy).toBeUndefined();
+    });
+
+    it('ne se réalise pas sur un tour où l’adversaire a agi, même s’il finit par passer', () => {
+        const e = makeEngine();
+        castProphecy(e, 'pass');
+        handOver(e);
+
+        const gen = ALL_SPELLS.find(s => s.godId === 'hades' && s.type === 'generator')!;
+        const id = giveTo(e, 'p2', gen.id);
+        e.executeAction({ type: 'play_card', playerId: 'p2', cardId: id, targetGodId: 'zeus' });
         e.executeAction({ type: 'end_turn', playerId: 'p2' });
 
         expect(e.getState().prophecy).toBeUndefined();
