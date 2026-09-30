@@ -926,7 +926,7 @@ export const CH3_BATTLE1_WIN: DialogueLine[] = [
     {
         speakerId: 'dionysos',
         speakerName: 'Dionysos',
-        text: "*regarde la flèche plantée dans le bois, puis Artémis* J'allais sauter. J'allais sauter en souriant. Ne me lâche jamais, toi.",
+        text: "*regarde la flèche plantée dans le bois, puis Artémis* Je sais que j'allais sauter. Merci, Artémis. Je te dois une fière chandelle — ne me lâche jamais, toi.",
         emotion: 'worried'
     },
     {
@@ -950,7 +950,7 @@ export const CH3_BATTLE1_WIN: DialogueLine[] = [
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "Depuis que le monde est monde, les harpies se posent quand je parle. Aujourd'hui, l'une d'elles m'a regardé comme on regarde un étranger.",
+        text: "Depuis que le monde existe, les harpies se posent quand je parle. Aujourd'hui, l'une d'elles m'a regardé comme on regarde un étranger.",
         emotion: 'sad'
     },
     {
@@ -1004,13 +1004,13 @@ export const CH3_BATTLE1_WIN: DialogueLine[] = [
     {
         speakerId: 'ulysses',
         speakerName: 'Ulysse',
-        text: "*reprend la barre* Récifs franchis. Deux jours gagnés, comme promis.",
+        text: "*reprend la barre* Récifs franchis. Trois semaines gagnées, comme promis.",
         emotion: 'determined'
     },
     {
         speakerId: 'hestia',
         speakerName: 'Hestia',
-        text: "*un pauvre sourire* Deux jours. Ils étaient chers.",
+        text: "*un pauvre sourire* Ce gain de temps a failli nous coûter la vie à tous.",
         emotion: 'sad'
     },
     {
@@ -1028,19 +1028,24 @@ export const CH3_BATTLE1_WIN: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Personne ne répond. Le navire file vers le sud, et derrière lui, sur les falaises désertes, aucun oiseau ne revient.",
+        text: "Personne ne répond. Le navire met le cap sur les îles sauvages, et derrière lui, sur les falaises désertes, aucun oiseau ne revient.",
         emotion: 'worried'
     }
 ];
 
 /** Défaite : le navire ne passe pas. Il faut recommencer. */
+/**
+ * Défaite : le navire se brise sur les récifs.
+ *
+ * Aucune échappatoire, et c'est délibéré. Une défaite dont on se relève en gémissant n'a aucun
+ * poids : le joueur comprend qu'il peut perdre sans rien risquer, et la scène suivante sonne
+ * faux. Ici, ils perdent entièrement — le navire s'échoue, les neuf tombent.
+ *
+ * Le combat reste rejouable, comme tous ceux dont la branche de défaite ne mène nulle part (voir
+ * `defeatAdvancesStory`). La scène ne promet donc aucune suite : elle donne à voir l'issue que
+ * l'histoire refuse, et c'est ce refus qui renvoie le joueur aux récifs.
+ */
 export const CH3_BATTLE1_LOSE: DialogueLine[] = [
-    {
-        speakerId: 'narrator',
-        speakerName: 'Narrateur',
-        text: "Athéna tombe un genou à terre. Artémis n'a plus de flèches. Ulysse recule jusqu'au mât, l'épée basse.",
-        emotion: 'sad'
-    },
     {
         speakerId: 'hestia',
         speakerName: 'Hestia',
@@ -1050,79 +1055,109 @@ export const CH3_BATTLE1_LOSE: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Le mur de feu s'effondre. Le chant entre sur le pont d'un seul coup, comme l'eau dans une coque ouverte.",
+        text: "Le mur de feu s'effondre. Le chant entre sur le pont d'un seul coup, et Hestia tombe en avant, le visage contre le bois.",
         emotion: 'sad'
     },
     {
         speakerId: 'athena',
         speakerName: 'Athéna',
-        text: "*crie* La barre ! Quelqu'un ! N'IMPORTE QUI À LA BARRE !",
+        text: "*crie* LA BARRE ! QUELQU'UN À LA BARRE !",
         emotion: 'angry'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Personne ne la tient. Le courant prend le navire par le flanc et le porte, doucement, presque tendrement, contre la pierre.",
+        text: "Personne ne la tient. Ulysse est à terre, une serre plantée dans l'épaule. Il rampe vers le gouvernail et n'y arrive pas.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Artémis décoche sa dernière flèche, puis se bat à mains nues. On la voit disparaître sous les ailes.",
         emotion: 'sad'
     },
     {
         speakerId: 'demeter',
         speakerName: 'Déméter',
-        text: "*hurle vers les récifs* ARRÊTEZ ! JE VOUS EN SUPPLIE ! SOUVENEZ-VOUS D'ELLE !",
+        text: "*hurle vers les falaises* ARRÊTEZ ! JE VOUS EN SUPPLIE ! SOUVENEZ-VOUS D'ELLE !",
         emotion: 'sad'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Le chant ne s'interrompt pas. Il n'y a personne, dans ces voix, pour se souvenir.",
+        text: "Le chant ne s'interrompt pas. Il n'y a personne, dans ces voix, pour se souvenir. Déméter s'affaisse contre le bastingage et ne se relève pas.",
         emotion: 'sad'
-    },
-    {
-        speakerId: 'ulysses',
-        speakerName: 'Ulysse',
-        text: "*jette son épée, saisit la barre à deux mains* Pas ici. PAS ENCORE.",
-        emotion: 'angry'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Il force la barre jusqu'à ce que le bois craque, arrache le navire à la falaise, et le ramène dans le courant sortant.",
-        emotion: 'determined'
-    },
-    {
-        speakerId: 'narrator',
-        speakerName: 'Narrateur',
-        text: "Le navire fuit les récifs en gémissant de toute sa coque. Derrière lui, les harpies se reposent sur la pierre et le regardent partir sans le poursuivre.",
+        text: "Les flèches qui retenaient Apollon, Dionysos et Aphrodite cèdent l'une après l'autre. Le tissu se déchire. Ils franchissent la rambarde en souriant, sans un cri.",
         emotion: 'sad'
-    },
-    {
-        speakerId: 'ulysses',
-        speakerName: 'Ulysse',
-        text: "*épuisé, la voix rauque* Nous avons reculé. Nous avons TOUT reculé. Il faudra recommencer.",
-        emotion: 'sad'
-    },
-    {
-        speakerId: 'athena',
-        speakerName: 'Athéna',
-        text: "*se relève, une main sur les côtes* Alors nous recommencerons. Et cette fois nous saurons qu'elles sont alliées.",
-        emotion: 'determined'
     },
     {
         speakerId: 'zeus',
         speakerName: 'Zeus',
-        text: "*toujours contre le mât, amer* Elles ne m'ont pas obéi. Rien n'ira comme prévu tant que je n'aurai pas compris pourquoi.",
+        text: "*toujours cloué au mât, hurlant* NON ! MES ENFANTS ! NON !",
         emotion: 'angry'
     },
     {
-        speakerId: 'hestia',
-        speakerName: 'Hestia',
-        text: "*doucement, la main sur son bras* Alors soigne-toi, et nous y retournons. Je tiendrai la sphère aussi longtemps qu'il faudra.",
-        emotion: 'determined'
+        speakerId: 'athena',
+        speakerName: 'Athéna',
+        text: "*un genou à terre, le bouclier fendu* Père... pardonne-moi. C'était ma route. C'était mon plan.",
+        emotion: 'sad'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Les récifs s'éloignent, intacts. Rien n'est perdu — mais rien n'est gagné, et le cap Ténare est toujours de l'autre côté.",
+        text: "Elle tombe à son tour. Il ne reste debout, sur ce pont, que le roi des dieux, retenu contre son propre mât, incapable de frapper.",
         emotion: 'sad'
+    },
+    {
+        speakerId: 'zeus',
+        speakerName: 'Zeus',
+        text: "*la voix brisée* Alors qu'il en soit ainsi. Si je dois couler ce navire pour les arracher à ce chant, je le coule.",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "La foudre part enfin. Elle fend le mât sur toute sa hauteur, la voile s'embrase, et le navire part en travers du courant.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le récif prend la coque par le flanc. Le bois ne craque pas : il éclate. La mer entre d'un seul coup.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Ce qui reste du navire glisse le long de la pierre et s'échoue en travers d'un rocher, la quille en l'air, la voile en cendres.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Le chant s'arrête. Les sirènes reprennent leur place sur les falaises. Les harpies se posent sur l'épave et replient leurs ailes.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Neuf corps sur une épave, aux îles rocheuses. Personne pour les relever, personne pour les compter. Le cap Ténare ne sera jamais atteint.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "L'Olympe restera aux ténèbres, et ce qui devait être une expédition ne sera qu'un naufrage de plus sur des récifs qui en ont vu mille.",
+        emotion: 'sad'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Voilà comment l'histoire se termine. Il faudra qu'elle se termine autrement.",
+        emotion: 'determined'
     }
 ];
