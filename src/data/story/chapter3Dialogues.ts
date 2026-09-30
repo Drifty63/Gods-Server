@@ -576,7 +576,7 @@ export const CH3_BATTLE1_NARROWS: DialogueLine[] = [
     {
         speakerId: 'athena',
         speakerName: 'Athéna',
-        text: "Pas un oiseau sur ces rochers. Pas un seul. Sur des falaises comme celles-ci, il devrait y en avoir des milliers.",
+        text: "Pas un oiseau sur ces rochers. Pas un seul. Sur des falaises comme celles-ci, il devrait y en avoir des dizaines.",
         emotion: 'worried'
     },
     {
@@ -640,13 +640,13 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "La note devient deux. Puis dix. Puis cent. Le chant tombe des falaises de tous les côtés à la fois, et l'eau autour du navire se met à bouillonner.",
+        text: "La note devient deux. Puis dix. Le chant tombe des falaises de tous les côtés à la fois, et la pierre elle-même semble le renvoyer.",
         emotion: 'worried'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Et au-dessus du chant, un autre bruit : des ailes. Des centaines d'ailes. Le ciel volé par les falaises s'emplit de silhouettes crochues.",
+        text: "Et au-dessus du chant, un autre bruit : des ailes. Des dizaines d'ailes. Le ciel volé par les falaises s'emplit de silhouettes crochues.",
         emotion: 'worried'
     },
     {
@@ -658,7 +658,7 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'athena',
         speakerName: 'Athéna',
-        text: "*lève sa lance* Sirènes dans l'eau ET harpies dans le ciel ? Ce n'est pas une rencontre. C'est un piège.",
+        text: "*lève sa lance* Sirènes dans les falaises ET harpies dans le ciel ? Ce n'est pas une rencontre. C'est un piège.",
         emotion: 'angry'
     },
     {
@@ -670,7 +670,7 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Une forme jaillit de l'eau, s'abat sur Zeus et le plaque contre le mât. Des serres se referment sur ses épaules, dans ses bras, à travers sa tunique.",
+        text: "Une forme jaillit d'un rocher isolé, s'abat sur Zeus et le plaque contre le mât. Des serres se referment sur ses épaules, dans ses bras, à travers sa tunique.",
         emotion: 'worried'
     },
     {
@@ -736,25 +736,49 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'aphrodite',
         speakerName: 'Aphrodite',
-        text: "*rit doucement, une main sur le cœur* Oh, elles sont douées. Elles sont tellement douées...",
-        emotion: 'happy'
+        text: "*se bouche les oreilles* Ne les écoutez pas ! C'est de la séduction, rien d'autre ! Je sais reconnaître un charme quand j'en entends un, je—",
+        emotion: 'determined'
     },
     {
         speakerId: 'aphrodite',
         speakerName: 'Aphrodite',
-        text: "*sa voix se brise* Moi... prise à mon propre jeu. Le charme. La séduction. C'est MON domaine, et je— je ne peux pas—",
+        text: "*ses mains retombent lentement le long de son corps* ...oh.",
         emotion: 'surprised'
+    },
+    {
+        speakerId: 'aphrodite',
+        speakerName: 'Aphrodite',
+        text: "*avance vers le bastingage, le regard fixe, en souriant* Elles sont meilleures que moi. Il faut que je l'entende encore. Il faut que je sache comment elles font.",
+        emotion: 'happy'
     },
     {
         speakerId: 'artemis',
         speakerName: 'Artémis',
-        text: "*décoche une flèche, attrape Dionysos par le col* TROIS à terre ! Aphrodite, Apollon et Dionysos sont pris !",
+        text: "*hurle* APHRODITE, NON !",
         emotion: 'angry'
     },
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Autour du navire, l'eau et le ciel sont pleins. Des dizaines de sirènes sur les récifs, des dizaines de harpies au-dessus. Elles qui vivent seules, chacune sur son rocher, sont là par hordes.",
+        text: "Artémis décoche trois flèches en trois souffles. Elles ne touchent personne : chacune traverse un vêtement et va se planter dans le bois de la rambarde.",
+        emotion: 'determined'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Dionysos, Apollon et Aphrodite sont cloués par leurs habits à un pas du vide. Ils tirent dessus sans comprendre, sans colère, comme des enfants qu'on retient par la manche.",
+        emotion: 'worried'
+    },
+    {
+        speakerId: 'artemis',
+        speakerName: 'Artémis',
+        text: "*rearme déjà* TROIS hors d'état ! Ils tiendront tant que le tissu tiendra, pas une seconde de plus !",
+        emotion: 'angry'
+    },
+    {
+        speakerId: 'narrator',
+        speakerName: 'Narrateur',
+        text: "Autour du navire, les falaises et le ciel sont pleins. Des dizaines de sirènes sur la pierre, des dizaines de harpies au-dessus. Elles qui vivent seules, chacune sur son rocher, sont là par hordes.",
         emotion: 'worried'
     },
     {
@@ -772,7 +796,7 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "Une sirène se hisse sur le bordage à deux pas d'elle. Elle la fixe. Il n'y a rien dans ses yeux : ni haine, ni reconnaissance. Rien du tout.",
+        text: "Une sirène se pose sur le bordage à deux pas d'elle, ses serres crochetant le bois. Elle la fixe. Il n'y a rien dans ses yeux : ni haine, ni reconnaissance. Rien du tout.",
         emotion: 'worried'
     },
     {
@@ -808,7 +832,7 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
     {
         speakerId: 'athena',
         speakerName: 'Athéna',
-        text: "Va à mon père. Brûle ce qui le tient et couvre-le. Puis Déméter — elle est à découvert et elle ne se défendra pas.",
+        text: "Va à mon père. Brûle ce qui le retient et couvre-le. Puis Déméter — elle est à découvert et elle ne se défendra pas.",
         emotion: 'determined'
     },
     {
@@ -872,7 +896,7 @@ export const CH3_BATTLE1_WIN: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
-        text: "La dernière sirène glisse du bordage et disparaît sous l'eau. Au-dessus, les harpies rompent leur cercle et remontent vers les falaises. Le chant s'éteint d'un coup, comme une corde qu'on coupe.",
+        text: "La dernière sirène lâche le bordage et s'enlève d'un battement d'ailes. Avec elle, les harpies rompent leur cercle et remontent vers les falaises. Le chant s'éteint d'un coup, comme une corde qu'on coupe.",
         emotion: 'determined'
     },
     {
@@ -896,13 +920,13 @@ export const CH3_BATTLE1_WIN: DialogueLine[] = [
     {
         speakerId: 'apollon',
         speakerName: 'Apollon',
-        text: "*se redresse, hagard, ramasse sa lyre* Qu'est-ce que... Pourquoi suis-je au bastingage ?",
+        text: "*arrache la flèche qui retient sa tunique à la rambarde* Qu'est-ce que... Pourquoi suis-je au bastingage ? Et qui m'a clouté là ?",
         emotion: 'surprised'
     },
     {
         speakerId: 'dionysos',
         speakerName: 'Dionysos',
-        text: "*se frotte le visage* J'allais sauter. J'allais sauter en souriant. Je n'aime pas ça du tout.",
+        text: "*regarde la flèche plantée dans le bois, puis Artémis* J'allais sauter. J'allais sauter en souriant. Ne me lâche jamais, toi.",
         emotion: 'worried'
     },
     {

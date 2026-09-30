@@ -891,7 +891,18 @@ const chapter3Battle1Events: StoryEvent[] = [
             description: "Athéna, Artémis et Ulysse — les seuls que le chant n'atteint pas — contre deux sirènes et deux harpies alliées.",
             playerTeam: ['athena', 'artemis', 'ulysses'],
             enemyTeam: ['sirenes', 'sirenes_2', 'harpies', 'harpies_2'],
-            deckMultiplier: 2,
+            /*
+             * Pas de multiplicateur : 15 cartes contre 20.
+             *
+             * Le ×2 du chapitre 2 compensait un combat à DEUX dieux contre trois. Ici les trois
+             * dieux ont 70 PV contre 72 en face : les forces sont déjà équilibrées, et 30 cartes
+             * n'auraient rien compensé — elles auraient seulement supprimé toute pression.
+             *
+             * Le déficit de cartes est même le bon levier : c'est le joueur qui recyclera sa
+             * pioche le premier, donc lui qui encaissera la fatigue. Il est poussé à conclure
+             * vite, ce que le récit demande — Hestia tient la sphère et s'épuise.
+             */
+            deckMultiplier: 1,
             enemyDeckMultiplier: 1,
             continueOnDefeat: false
         },

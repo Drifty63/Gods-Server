@@ -11,26 +11,7 @@ import { getGodById, getCardImage, ALL_GODS } from '@/data/gods';
 import { createDeck } from '@/data/spells';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { NARRATOR_PORTRAIT } from '@/components/StoryMode/DialogueBox';
-import {
-    PROLOGUE_AFTER_BATTLE_1_WIN,
-    PROLOGUE_AFTER_BATTLE_1_LOSE,
-    PROLOGUE_HADES_TAKES_THRONE,
-    PROLOGUE_BATTLE2_WIN,
-    PROLOGUE_BATTLE2_LOSE,
-    PROLOGUE_BATTLE3_WIN,
-    PROLOGUE_BATTLE3_LOSE,
-    PROLOGUE_BATTLE4_WIN,
-    PROLOGUE_BATTLE4_LOSE,
-    // Chapitre 2
-    CHAPTER2_BATTLE1_WIN,
-    CHAPTER2_BATTLE1_LOSE,
-    CHAPTER2_BATTLE2_WIN,
-    CHAPTER2_BATTLE2_LOSE,
-    CHAPTER2_BATTLE3_WIN,
-    CHAPTER2_BATTLE3_LOSE,
-    CHAPTER2_BATTLE4_WIN,
-    CHAPTER2_BATTLE4_LOSE
-} from '@/data/story/dialogues';
+import { getNextEvent } from '@/data/story/campaign';
 import styles from './page.module.css';
 import { getSpeakerColor } from '@/data/story/speakerColors';
 
@@ -361,49 +342,33 @@ function StoryBattleContent() {
         const handleBattleEnd = (won: boolean) => {
             setPlayerWon(won);
 
-            // Convertir les dialogues du format DialogueLine au format utilisé ici
-            const convertDialogues = (dialogueLines: typeof PROLOGUE_AFTER_BATTLE_1_WIN) =>
-                dialogueLines.map(d => ({
-                    speaker: d.speakerId,
-                    speakerName: d.speakerName,
-                    text: d.text,
-                    portrait: d.speakerId  // Garder l'ID du speaker pour le portrait (inclut 'narrator')
-                }));
+            /*
+             * Le dialogue d'après-combat est LU DANS LES DONNÉES.
+             *
+             * Il l'était déjà, en réalité : chaque événement de combat porte `nextEventOnWin` et
+             * `nextEventOnLose` dans campaign.ts. Mais cet écran ne les lisait pas — il tenait sa
+             * propre chaîne de `if` sur l'identifiant du combat, avec le combat 1 du chapitre 1
+             * en repli. Tout combat absent de la chaîne rejouait donc le duel Zeus-Hadès, à la
+             * victoire comme à la défaite : c'est ce qui est arrivé au Chant des Récifs.
+             *
+             * Une table de correspondance recopiée à côté de la donnée qui la contient déjà — le
+             * même défaut que les couleurs de portrait et les symboles d'élément. Ici, le repli
+             * était le pire des choix possibles : au lieu de ne rien afficher, il affichait autre
+             * chose, ce qui ressemble à un bug de scénario plutôt qu'à un oubli de câblage.
+             */
+            const outcomeEvent = getNextEvent(
+                useStoryStore.getState().progress.currentChapterId,
+                useStoryStore.getState().progress.currentEventId,
+                won,
+            );
+            const allDialogues = outcomeEvent?.dialogues ?? [];
 
-            // Déterminer quels dialogues utiliser selon le combat
-            let allDialogues;
-
-            if (battleConfig?.id === 'battle_athens_temple') {
-                // Chapitre 2 Combat 4 : Temple d'Athéna
-                allDialogues = won ? CHAPTER2_BATTLE4_WIN : CHAPTER2_BATTLE4_LOSE;
-            } else if (battleConfig?.id === 'battle_arachne') {
-                // Chapitre 2 Combat 3 : Arachné
-                allDialogues = won ? CHAPTER2_BATTLE3_WIN : CHAPTER2_BATTLE3_LOSE;
-            } else if (battleConfig?.id === 'battle_dragon_thebes') {
-                // Chapitre 2 Combat 2 : Le Dragon de Thèbes
-                allDialogues = won ? CHAPTER2_BATTLE2_WIN : CHAPTER2_BATTLE2_LOSE;
-            } else if (battleConfig?.id === 'battle_thebes_betrayal') {
-                // Chapitre 2 Combat 1 : La Trahison de Thèbes
-                allDialogues = won ? CHAPTER2_BATTLE1_WIN : CHAPTER2_BATTLE1_LOSE;
-            } else if (battleConfig?.id === 'battle_ambush_ares') {
-                // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
-                allDialogues = won ? PROLOGUE_BATTLE4_WIN : PROLOGUE_BATTLE4_LOSE;
-            } else if (battleConfig?.id === 'battle_test_of_valor') {
-                // Combat 3 : Zeus + Hestia vs Déméter + Artémis
-                allDialogues = won ? PROLOGUE_BATTLE3_WIN : PROLOGUE_BATTLE3_LOSE;
-            } else if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
-                // Combat 2 : Zeus + Hestia vs Arès
-                allDialogues = won ? PROLOGUE_BATTLE2_WIN : PROLOGUE_BATTLE2_LOSE;
-            } else {
-                // Combat 1 : Zeus vs Hadès (par défaut)
-                const battleDialogues = won
-                    ? PROLOGUE_AFTER_BATTLE_1_WIN
-                    : PROLOGUE_AFTER_BATTLE_1_LOSE;
-                // Combiner avec les dialogues de prise de trône (communs aux deux issues)
-                allDialogues = [...battleDialogues, ...PROLOGUE_HADES_TAKES_THRONE];
-            }
-
-            setPostBattleDialogues(convertDialogues(allDialogues));
+            setPostBattleDialogues(allDialogues.map(d => ({
+                speaker: d.speakerId,
+                speakerName: d.speakerName,
+                text: d.text,
+                portrait: d.speakerId  // Garder l'ID du speaker pour le portrait (inclut 'narrator')
+            })));
             setPostBattleIndex(0);
             setPhase('post_battle_dialogue');
             completeBattle(won);

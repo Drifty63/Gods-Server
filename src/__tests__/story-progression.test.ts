@@ -65,6 +65,45 @@ describe('Progression — reliage des combats', () => {
         expect(isChapterFinished(chapter3, allWon)).toBe(false);
     });
 
+    /*
+     * Ce que l'écran de combat lit désormais pour choisir son dialogue de fin.
+     *
+     * Il tenait avant sa propre chaîne de `if` sur l'identifiant du combat, avec le duel
+     * Zeus-Hadès en repli : tout combat oublié dans cette chaîne rejouait le dialogue du combat 1
+     * du chapitre 1, à la victoire comme à la défaite. Maintenant qu'il lit `nextEventOnWin` et
+     * `nextEventOnLose`, ces deux champs doivent exister partout et mener à des dialogues.
+     */
+    it('donne à CHAQUE combat un dialogue de victoire ET un de défaite', () => {
+        for (const chapter of ZEUS_CAMPAIGN.chapters) {
+            const byId = new Map(chapter.events.map(e => [e.id, e]));
+
+            for (const event of chapter.events.filter(e => e.type === 'battle')) {
+                for (const [issue, nextId] of [
+                    ['victoire', event.nextEventOnWin],
+                    ['défaite', event.nextEventOnLose],
+                ] as const) {
+                    const where = `${chapter.id} / ${event.id} / ${issue}`;
+                    expect(nextId, `${where} : aucune suite`).toBeTruthy();
+
+                    const outcome = byId.get(nextId!);
+                    expect(outcome, `${where} : « ${nextId} » n'existe pas`).toBeTruthy();
+                    expect(outcome!.dialogues?.length ?? 0, `${where} : sans dialogue`).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
+    it('ne fait pas mener deux combats au MÊME dialogue de fin', () => {
+        // Le symptôme du défaut corrigé : plusieurs combats affichaient la même scène de fin.
+        for (const chapter of ZEUS_CAMPAIGN.chapters) {
+            const outcomes = chapter.events
+                .filter(e => e.type === 'battle')
+                .flatMap(e => [e.nextEventOnWin, e.nextEventOnLose])
+                .filter(Boolean);
+            expect(new Set(outcomes).size, `${chapter.id} : dialogue de fin partagé`).toBe(outcomes.length);
+        }
+    });
+
     it('ouvre bien le premier combat du chapitre 3', () => {
         const chapter3 = ZEUS_CAMPAIGN.chapters.find(c => c.number === 3)!;
         const battle1 = chapter3.battles!.find(b => b.id === 'battle1')!;
