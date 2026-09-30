@@ -812,11 +812,7 @@ const CHAPTER_2: Chapter = {
 // ===========================================
 
 /*
- * ILLUSTRATIONS EN ATTENTE.
- *
- * Aucune scène ne porte encore de `backgroundImage` : les images du combat 1 seront fournies
- * plus tard. En leur absence, le mode Histoire retombe sur le fond du narrateur, ce qui est
- * lisible — alors qu'un chemin pointant vers un fichier absent afficherait un cadre vide.
+ * ILLUSTRATIONS.
  *
  * DIX fichiers, dans /public/story/chapter3/ — une par scène, sauf l'embuscade qui en prend
  * trois : elle couvre trois moments visuels qu'une seule image ne pourrait pas tenir.
@@ -842,6 +838,12 @@ const CHAPTER_2: Chapter = {
  *                              large ; sur le pont Hestia assise, épuisée, la sphère éteinte
  *   combat1_defeat.png       — l'épave échouée en travers d'un rocher, quille en l'air, voile en
  *                              cendres, des harpies posées dessus les ailes repliées
+ *
+ * L'événement de COMBAT reprend `combat1_ambush_deck.png` : c'est la même scène qui continue, et
+ * lui donner un autre décor donnerait l'impression d'un changement de lieu au moment de se battre.
+ *
+ * Format : 941 x 1672 px, portrait — comme tous les fonds du mode Histoire. Le jeu se joue en
+ * portrait sur téléphone ; une image carrée ou en paysage serait rognée sur les côtés.
  */
 const chapter3Battle1Events: StoryEvent[] = [
     // Scène 1 : l'embarquement au Pirée
@@ -849,6 +851,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_departure',
         type: 'cutscene',
         dialogues: CH3_BATTLE1_DEPARTURE,
+        backgroundImage: '/story/chapter3/combat1_departure.png',
         nextEventId: 'ch3_battle1_briefing'
     },
     // Scène 2 : Ulysse détaille l'itinéraire sur le pont
@@ -856,6 +859,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_briefing',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_BRIEFING,
+        backgroundImage: '/story/chapter3/combat1_briefing.png',
         nextEventId: 'ch3_battle1_evening'
     },
     // Scène 3 : transition du soir — le calme avant la tempête
@@ -863,6 +867,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_evening',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_EVENING,
+        backgroundImage: '/story/chapter3/combat1_evening.png',
         nextEventId: 'ch3_battle1_rocky_isles'
     },
     // Scène 4 : au petit matin, les îles rocheuses
@@ -870,6 +875,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_rocky_isles',
         type: 'cutscene',
         dialogues: CH3_BATTLE1_ROCKY_ISLES,
+        backgroundImage: '/story/chapter3/combat1_rocky_isles.png',
         nextEventId: 'ch3_battle1_narrows'
     },
     // Scène 5 : la navigation dans le passage étroit
@@ -877,6 +883,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_narrows',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_NARROWS,
+        backgroundImage: '/story/chapter3/combat1_narrows.png',
         nextEventId: 'ch3_battle1_ambush_trap'
     },
     /*
@@ -890,18 +897,21 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_ambush_trap',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_AMBUSH_TRAP,
+        backgroundImage: '/story/chapter3/combat1_ambush_trap.png',
         nextEventId: 'ch3_battle1_ambush_zeus'
     },
     {
         id: 'ch3_battle1_ambush_zeus',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_AMBUSH_ZEUS,
+        backgroundImage: '/story/chapter3/combat1_ambush_zeus.png',
         nextEventId: 'ch3_battle1_ambush_deck'
     },
     {
         id: 'ch3_battle1_ambush_deck',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_AMBUSH_DECK,
+        backgroundImage: '/story/chapter3/combat1_ambush_deck.png',
         nextEventId: 'ch3_battle1_fight'
     },
     /*
@@ -920,6 +930,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_fight',
         type: 'battle',
         dialogues: [],
+        backgroundImage: '/story/chapter3/combat1_ambush_deck.png',
         battle: {
             id: 'battle_rocky_isles',
             name: "Le Chant des Récifs",
@@ -949,6 +960,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_win',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_WIN,
+        backgroundImage: '/story/chapter3/combat1_victory.png',
         nextEventId: undefined
     },
     // Défaite : le navire recule, il faut recommencer
@@ -956,6 +968,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_lose',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_LOSE,
+        backgroundImage: '/story/chapter3/combat1_defeat.png',
         nextEventId: undefined
     }
 ];
