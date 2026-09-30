@@ -17,6 +17,9 @@ import { getSpeakerColor } from '@/data/story/speakerColors';
 
 type BattlePhase = 'loading' | 'team_selection' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
 
+/** Fond de repli, quand une scène n'en déclare aucun. Mieux vaut l'orage que du noir. */
+const DEFAULT_STORY_BACKGROUND = '/assets/story/olympus_storm.png';
+
 // Dialogue de fin de combat, converti depuis le format DialogueLine (voir handleBattleEnd)
 interface PostBattleDialogue {
     speaker: string;
@@ -44,6 +47,8 @@ function StoryBattleContent() {
     const [battleConfig, setBattleConfig] = useState<typeof currentBattleConfig>(null);
 
     const [postBattleDialogues, setPostBattleDialogues] = useState<PostBattleDialogue[]>([]);
+    /** Fond de l'issue, lu sur l'événement de victoire ou de défaite au moment où le combat finit. */
+    const [outcomeBackground, setOutcomeBackground] = useState(DEFAULT_STORY_BACKGROUND);
     const [postBattleIndex, setPostBattleIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -362,6 +367,19 @@ function StoryBattleContent() {
                 won,
             );
             const allDialogues = outcomeEvent?.dialogues ?? [];
+            /*
+             * Le FOND de l'issue vient du même événement que ses dialogues.
+             *
+             * Il était choisi par une deuxième cascade de `if` — en fait deux, une pour le
+             * dialogue d'après-combat et une pour l'écran de victoire/défaite — recopiant la même
+             * table que celle des dialogues. Corriger l'une laissait donc les deux autres en
+             * place : le Chant des Récifs affichait ses bonnes répliques sur l'image du duel
+             * Zeus-Hadès.
+             *
+             * Mémorisé ici plutôt que relu au rendu : `currentEventId` avance dès que le joueur
+             * quitte l'écran, et le fond changerait sous ses yeux.
+             */
+            setOutcomeBackground(outcomeEvent?.backgroundImage ?? DEFAULT_STORY_BACKGROUND);
 
             setPostBattleDialogues(allDialogues.map(d => ({
                 speaker: d.speakerId,
@@ -549,7 +567,7 @@ function StoryBattleContent() {
     // Phase: Sélection d'équipe
     if (phase === 'team_selection') {
         const currentEvent = getCurrentEvent();
-        const bgImage = currentEvent?.backgroundImage || '/assets/story/olympus_storm.png';
+        const bgImage = currentEvent?.backgroundImage || DEFAULT_STORY_BACKGROUND;
 
         return (
             <main className={styles.main}>
@@ -658,7 +676,7 @@ function StoryBattleContent() {
 
         // Récupérer l'image de fond depuis l'événement actuel (si disponible)
         const currentEvent = getCurrentEvent();
-        const introBackgroundImage = currentEvent?.backgroundImage || '/assets/story/olympus_storm.png';
+        const introBackgroundImage = currentEvent?.backgroundImage || DEFAULT_STORY_BACKGROUND;
 
         return (
             <main className={styles.main}>
@@ -740,56 +758,13 @@ function StoryBattleContent() {
 
         const glowColor = getSpeakerColor(dialogue.speaker);
 
-        // Utiliser l'image de fond appropriée selon le combat
-        let backgroundImage: string;
-        if (battleConfig?.id === 'battle_athens_temple') {
-            // Chapitre 2 Combat 4 : Temple d'Athéna
-            backgroundImage = playerWon
-                ? '/story/chapter2/combat4_victory.png'
-                : '/story/chapter2/combat4_defeat.png';
-        } else if (battleConfig?.id === 'battle_arachne') {
-            // Chapitre 2 Combat 3 : Arachné
-            backgroundImage = playerWon
-                ? '/assets/story/ch2_arachne_victory.png'
-                : '/assets/story/ch2_arachne_defeat.png';
-        } else if (battleConfig?.id === 'battle_dragon_thebes') {
-            // Chapitre 2 Combat 2 : Le Dragon de Thèbes
-            backgroundImage = playerWon
-                ? '/assets/story/ch2_dragon_victory.png'
-                : '/assets/story/ch2_dragon_defeat.png';
-        } else if (battleConfig?.id === 'battle_thebes_betrayal') {
-            // Chapitre 2 Combat 1 : La Trahison de Thèbes
-            backgroundImage = playerWon
-                ? '/assets/story/chapter2_battle1_victory.png'
-                : '/assets/story/ch2_battle1_defeat_v2.png';
-        } else if (battleConfig?.id === 'battle_ambush_ares') {
-            // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
-            backgroundImage = playerWon
-                ? '/assets/story/battle4_victory.png'
-                : '/assets/story/battle4_defeat_v2.png';
-        } else if (battleConfig?.id === 'battle_test_of_valor') {
-            // Combat 3 : Zeus + Hestia vs Déméter + Artémis
-            backgroundImage = playerWon
-                ? '/assets/story/battle3_victory.png'
-                : '/assets/story/battle3_defeat.png';
-        } else if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
-            // Combat 2 : Zeus + Hestia vs Arès
-            backgroundImage = playerWon
-                ? '/assets/story/battle2_victory.png'
-                : '/assets/story/battle2_defeat.png';
-        } else {
-            // Combat 1 : Zeus vs Hadès
-            backgroundImage = playerWon
-                ? '/assets/story/battle1_victory_v2.png'
-                : '/assets/story/battle1_defeat.png';
-        }
         const isNarrator = dialogue.speaker === 'narrator';
 
         return (
             <main className={styles.main}>
                 <div
                     className={isNarrator ? styles.storyBackgroundNarrator : styles.storyBackground}
-                    style={{ backgroundImage: `url('${backgroundImage}')` }}
+                    style={{ backgroundImage: `url('${outcomeBackground}')` }}
                 >
                     <div className={isNarrator ? styles.backgroundOverlayNarrator : styles.backgroundOverlay} />
                 </div>
@@ -865,57 +840,13 @@ function StoryBattleContent() {
     }
 
     // Fonction pour obtenir l'image de fond appropriée selon le combat
-    const getResultBackgroundImage = (isVictory: boolean): string => {
-        if (battleConfig?.id === 'battle_athens_temple') {
-            // Chapitre 2 Combat 4 : Temple d'Athéna
-            return isVictory
-                ? '/story/chapter2/combat4_victory.png'
-                : '/story/chapter2/combat4_defeat.png';
-        } else if (battleConfig?.id === 'battle_arachne') {
-            // Chapitre 2 Combat 3 : Arachné
-            return isVictory
-                ? '/assets/story/ch2_arachne_victory.png'
-                : '/assets/story/ch2_arachne_defeat.png';
-        } else if (battleConfig?.id === 'battle_dragon_thebes') {
-            // Chapitre 2 Combat 2 : Le Dragon de Thèbes
-            return isVictory
-                ? '/assets/story/ch2_dragon_victory.png'
-                : '/assets/story/ch2_dragon_defeat.png';
-        } else if (battleConfig?.id === 'battle_thebes_betrayal') {
-            // Chapitre 2 Combat 1 : La Trahison de Thèbes
-            return isVictory
-                ? '/assets/story/chapter2_battle1_victory.png'
-                : '/assets/story/ch2_battle1_defeat_v2.png';
-        } else if (battleConfig?.id === 'battle_ambush_ares') {
-            // Combat 4 : Zeus + Déméter + Artémis vs Arès + Soldats
-            return isVictory
-                ? '/assets/story/battle4_victory.png'
-                : '/assets/story/battle4_defeat_v2.png';
-        } else if (battleConfig?.id === 'battle_test_of_valor') {
-            // Combat 3 : Zeus + Hestia vs Déméter + Artémis
-            return isVictory
-                ? '/assets/story/battle3_victory.png'
-                : '/assets/story/battle3_defeat.png';
-        } else if (battleConfig?.id === 'battle_zeus_hestia_vs_ares') {
-            // Combat 2 : Zeus + Hestia vs Arès
-            return isVictory
-                ? '/assets/story/battle2_victory.png'
-                : '/assets/story/battle2_defeat.png';
-        } else {
-            // Combat 1 : Zeus vs Hadès
-            return isVictory
-                ? '/assets/story/battle1_victory_v2.png'
-                : '/assets/story/battle1_defeat.png';
-        }
-    };
-
     // Phase: Victoire
     if (phase === 'victory') {
         return (
             <main className={styles.main}>
                 <div
                     className={styles.storyBackground}
-                    style={{ backgroundImage: `url('${getResultBackgroundImage(true)}')` }}
+                    style={{ backgroundImage: `url('${outcomeBackground}')` }}
                 >
                     <div className={styles.backgroundOverlayLight} />
                 </div>
@@ -955,7 +886,7 @@ function StoryBattleContent() {
             <main className={styles.main}>
                 <div
                     className={styles.storyBackground}
-                    style={{ backgroundImage: `url('${getResultBackgroundImage(false)}')` }}
+                    style={{ backgroundImage: `url('${outcomeBackground}')` }}
                 >
                     <div className={styles.backgroundOverlayDark} />
                 </div>

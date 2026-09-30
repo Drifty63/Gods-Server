@@ -93,6 +93,26 @@ describe('Progression — reliage des combats', () => {
         }
     });
 
+    /*
+     * L'écran de fin de combat lit ce fond directement sur l'événement d'issue.
+     *
+     * Il venait avant de DEUX cascades de `if` — une pour le dialogue d'après-combat, une pour
+     * l'écran de victoire/défaite — qui recopiaient la même table que celle des dialogues.
+     * Corriger la première laissait donc les deux autres en place, et le Chant des Récifs
+     * affichait ses bonnes répliques sur l'image du duel Zeus-Hadès.
+     */
+    it('donne un FOND à chaque issue de combat', () => {
+        for (const chapter of ZEUS_CAMPAIGN.chapters) {
+            const byId = new Map(chapter.events.map(e => [e.id, e]));
+            for (const event of chapter.events.filter(e => e.type === 'battle')) {
+                for (const nextId of [event.nextEventOnWin, event.nextEventOnLose]) {
+                    const outcome = byId.get(nextId!);
+                    expect(outcome?.backgroundImage, `${chapter.id} / ${nextId} : sans fond`).toBeTruthy();
+                }
+            }
+        }
+    });
+
     it('ne fait pas mener deux combats au MÊME dialogue de fin', () => {
         // Le symptôme du défaut corrigé : plusieurs combats affichaient la même scène de fin.
         for (const chapter of ZEUS_CAMPAIGN.chapters) {
