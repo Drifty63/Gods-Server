@@ -110,6 +110,12 @@ function deadBorders(data, W, H, C) {
  * On lit donc les `imageUrl` des sources. Ce sont des littéraux : une expression régulière
  * suffit, et c'est plus sûr que le disque puisqu'une faute de frappe dans le nom du fichier est
  * maintenant détectée au lieu de créer un fichier orphelin que rien n'affichera.
+ *
+ * `backgroundImage` compte autant : c'est le champ des FONDS DE SCÈNE du mode Histoire, dans
+ * campaign.ts. Il manquait ici, si bien qu'aucun fond ne pouvait passer par ce script — les dix
+ * scènes neuves du chapitre 3 étaient toutes rejetées comme « destination inattendue », alors que
+ * le code les réclamait. Les fonds des chapitres 1 et 2 avaient donc été posés à la main, sans
+ * rognage, sans recompression et sans ce garde-fou.
  */
 function referencedDestinations() {
     const set = new Set();
@@ -119,7 +125,7 @@ function referencedDestinations() {
             if (e.isDirectory()) walk(p);
             else if (/\.tsx?$/.test(e.name)) {
                 const text = fs.readFileSync(p, 'utf8');
-                for (const m of text.matchAll(/imageUrl:\s*[`'"]([^`'"]+)[`'"]/g)) set.add(m[1]);
+                for (const m of text.matchAll(/(?:imageUrl|backgroundImage):\s*[`'"]([^`'"]+)[`'"]/g)) set.add(m[1]);
                 // Les fabriques du bestiaire composent le chemin : `/cards/gods/${u.id}.png`.
                 // On les reconstruit à partir des identifiants déclarés dans le même fichier.
                 for (const m of text.matchAll(/id:\s*'([a-z0-9_]+)'/g)) {

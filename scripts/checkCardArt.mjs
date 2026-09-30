@@ -23,8 +23,17 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const SEP = path.sep;
 const IMG = /[.](png|jpe?g|svg|webp|gif)$/i;
 
-/** Dossiers dont les fichiers sont atteints par un chemin construit à l'exécution. */
-const DYNAMIC_DIRS = ['/cards/units/', '/cards/gods/'];
+/**
+ * Dossiers dont les fichiers sont atteints par un chemin construit à l'exécution.
+ *
+ * `/cards/spells/` y manquait, et c'était exactement 95 faux orphelins — les 19 unités écrites à
+ * la main multipliées par leurs 5 sorts. La fabrique `released()` compose leur chemin
+ * (`/cards/spells/spell_${u.id}_${c.slot}.png`), qu'aucune lecture de texte ne peut résoudre.
+ *
+ * Le contrôle échouait donc en permanence, ce qui revient à ne pas l'avoir : un vrai orphelin
+ * serait passé inaperçu au milieu des 95 autres.
+ */
+const DYNAMIC_DIRS = ['/cards/units/', '/cards/gods/', '/cards/spells/'];
 
 /**
  * Dossiers d'OUTILLAGE : leurs fichiers sont des entrées de scripts de génération, pas des
