@@ -60,7 +60,9 @@ import {
     CH3_BATTLE1_EVENING,
     CH3_BATTLE1_ROCKY_ISLES,
     CH3_BATTLE1_NARROWS,
-    CH3_BATTLE1_AMBUSH,
+    CH3_BATTLE1_AMBUSH_TRAP,
+    CH3_BATTLE1_AMBUSH_ZEUS,
+    CH3_BATTLE1_AMBUSH_DECK,
     CH3_BATTLE1_WIN,
     CH3_BATTLE1_LOSE
 } from './dialogues';
@@ -816,15 +818,30 @@ const CHAPTER_2: Chapter = {
  * plus tard. En leur absence, le mode Histoire retombe sur le fond du narrateur, ce qui est
  * lisible — alors qu'un chemin pointant vers un fichier absent afficherait un cadre vide.
  *
- * Les huit fichiers attendus, dans /public/story/chapter3/ :
- *   combat1_departure.png   — le quai du Pirée à l'aube, le navire, les neuf sur le quai
- *   combat1_briefing.png    — le pont, la carte déroulée sur un tonneau
- *   combat1_evening.png     — le pont au coucher du soleil, repas et lyre
- *   combat1_rocky_isles.png — les récifs noirs au loin dans la brume du matin
- *   combat1_narrows.png     — le passage étroit entre deux falaises écrasantes
- *   combat1_ambush.png      — sirènes dans l'eau, harpies dans le ciel, Zeus contre le mât
- *   combat1_victory.png     — la mer redevenue large, la sphère de feu éteinte
- *   combat1_defeat.png      — le navire fuyant les récifs, la coque ouverte
+ * DIX fichiers, dans /public/story/chapter3/ — une par scène, sauf l'embuscade qui en prend
+ * trois : elle couvre trois moments visuels qu'une seule image ne pourrait pas tenir.
+ *
+ *   combat1_departure.png    — le quai du Pirée à l'aube, le navire aux flancs sombres et à la
+ *                              voile reprisée, les neuf silhouettes sur le quai, les mouettes
+ *   combat1_briefing.png     — sur le pont en pleine mer, la carte usée déroulée sur un tonneau,
+ *                              les neuf penchés autour, Ulysse le doigt sur la carte
+ *   combat1_evening.png      — le pont au soleil couchant, mer d'huile, pain et fromage, Apollon
+ *                              accordant sa lyre, Déméter seule contre le bastingage
+ *   combat1_rocky_isles.png  — vu de la proue : brume basse, et au loin des rochers noirs
+ *                              dressés à la verticale par dizaines, comme des dents
+ *   combat1_narrows.png      — le navire minuscule dans un couloir de falaises qui volent le
+ *                              ciel, jour gris, la coque frôlant la pierre
+ *   combat1_ambush_trap.png  — le piège se referme : des sirènes femmes-oiseaux perchées sur les
+ *                              falaises des deux côtés, des harpies plein le ciel étroit
+ *   combat1_ambush_zeus.png  — Zeus plaqué contre le mât, des serres dans les épaules, une harpie
+ *                              hurlant sur la vergue au-dessus de lui, la foudre qui s'éteint
+ *   combat1_ambush_deck.png  — le pont partagé : Apollon, Dionysos et Aphrodite cloués à la
+ *                              rambarde par trois flèches, Déméter à genoux, Hestia les mains
+ *                              levées sous un dôme de feu, Athéna et Artémis dos à dos
+ *   combat1_victory.png      — les falaises s'écartent, la brume se déchire, la mer redevient
+ *                              large ; sur le pont Hestia assise, épuisée, la sphère éteinte
+ *   combat1_defeat.png       — l'épave échouée en travers d'un rocher, quille en l'air, voile en
+ *                              cendres, des harpies posées dessus les ailes repliées
  */
 const chapter3Battle1Events: StoryEvent[] = [
     // Scène 1 : l'embarquement au Pirée
@@ -860,13 +877,31 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_narrows',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_NARROWS,
-        nextEventId: 'ch3_battle1_ambush'
+        nextEventId: 'ch3_battle1_ambush_trap'
     },
-    // Scène 6 : l'embuscade
+    /*
+     * Scène 6 : l'embuscade, en trois événements.
+     *
+     * Trois moments visuels, donc trois fonds : le piège qui se referme, Zeus cloué au mât, le
+     * pont partagé. Le joueur ne voit aucune coupure — les dialogues s'enchaînent — mais l'image
+     * suit l'action au lieu d'essayer de tenir les trois à la fois.
+     */
     {
-        id: 'ch3_battle1_ambush',
+        id: 'ch3_battle1_ambush_trap',
         type: 'dialogue',
-        dialogues: CH3_BATTLE1_AMBUSH,
+        dialogues: CH3_BATTLE1_AMBUSH_TRAP,
+        nextEventId: 'ch3_battle1_ambush_zeus'
+    },
+    {
+        id: 'ch3_battle1_ambush_zeus',
+        type: 'dialogue',
+        dialogues: CH3_BATTLE1_AMBUSH_ZEUS,
+        nextEventId: 'ch3_battle1_ambush_deck'
+    },
+    {
+        id: 'ch3_battle1_ambush_deck',
+        type: 'dialogue',
+        dialogues: CH3_BATTLE1_AMBUSH_DECK,
         nextEventId: 'ch3_battle1_fight'
     },
     /*

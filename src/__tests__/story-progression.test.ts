@@ -104,6 +104,35 @@ describe('Progression — reliage des combats', () => {
         }
     });
 
+    /*
+     * Une chaîne d'événements se rompt sur une faute de frappe, et le symptôme est muet :
+     * `getNextEvent` renvoie `undefined`, et le mode Histoire conclut « fin de séquence » au
+     * milieu d'une scène. Le combat 1 du chapitre 3 en enchaîne dix, dont trois pour la seule
+     * embuscade.
+     */
+    it('ne laisse aucun enchaînement pointer dans le vide', () => {
+        for (const chapter of ZEUS_CAMPAIGN.chapters) {
+            const ids = new Set(chapter.events.map(e => e.id));
+            for (const event of chapter.events) {
+                if (!event.nextEventId) continue;
+                expect(ids.has(event.nextEventId), `${chapter.id} / ${event.id} → « ${event.nextEventId} » n'existe pas`).toBe(true);
+            }
+        }
+    });
+
+    it('n’attribue pas deux fois le même identifiant d’événement', () => {
+        for (const chapter of ZEUS_CAMPAIGN.chapters) {
+            const ids = chapter.events.map(e => e.id);
+            expect(new Set(ids).size, `${chapter.id} : identifiant en double`).toBe(ids.length);
+        }
+    });
+
+    it('mène la séquence du combat 1 du chapitre 3 jusqu’au combat', () => {
+        const chapter3 = ZEUS_CAMPAIGN.chapters.find(c => c.number === 3)!;
+        const battle1 = chapter3.battles!.find(b => b.id === 'battle1')!;
+        expect(findBattleEvent(chapter3, battle1)?.id).toBe('ch3_battle1_fight');
+    });
+
     it('ouvre bien le premier combat du chapitre 3', () => {
         const chapter3 = ZEUS_CAMPAIGN.chapters.find(c => c.number === 3)!;
         const battle1 = chapter3.battles!.find(b => b.id === 'battle1')!;

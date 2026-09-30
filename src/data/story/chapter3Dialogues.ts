@@ -635,8 +635,19 @@ export const CH3_BATTLE1_NARROWS: DialogueLine[] = [
     }
 ];
 
-/** Scène 6 : l'embuscade. Sirènes et harpies attaquent ensemble. */
-export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
+/**
+ * Scène 6 : l'embuscade, en TROIS temps.
+ *
+ * Découpée pour l'illustration : la scène couvre trois moments visuels distincts — le piège qui
+ * se referme, Zeus cloué au mât, puis le pont partagé entre les charmés et ceux qui résistent.
+ * Une seule image aurait dû tenir les trois, donc n'en aurait montré aucun.
+ *
+ * Le joueur ne voit aucune coupure : les trois événements s'enchaînent comme un seul dialogue,
+ * seul le fond change.
+ */
+
+/** 6a : le piège se referme. Sirènes dans les falaises, harpies dans le ciel. */
+export const CH3_BATTLE1_AMBUSH_TRAP: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
@@ -666,7 +677,11 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
         speakerName: 'Ulysse',
         text: "*crie par-dessus le vacarme* Elles se sont ALLIÉES ! Sirènes et harpies ! Ça n'est jamais arrivé ! Jamais !",
         emotion: 'angry'
-    },
+    }
+];
+
+/** 6b : Zeus cloué au mât, la foudre qu'il ne peut pas lâcher, la harpie qui n'obéit plus. */
+export const CH3_BATTLE1_AMBUSH_ZEUS: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
@@ -714,7 +729,11 @@ export const CH3_BATTLE1_AMBUSH: DialogueLine[] = [
         speakerName: 'Zeus',
         text: "*stupéfait* ...Elle ne m'obéit pas. Elle ne m'obéit PAS.",
         emotion: 'surprised'
-    },
+    }
+];
+
+/** 6c : le pont partagé — trois charmés, trois flèches, et ceux que le chant n'atteint pas. */
+export const CH3_BATTLE1_AMBUSH_DECK: DialogueLine[] = [
     {
         speakerId: 'narrator',
         speakerName: 'Narrateur',
