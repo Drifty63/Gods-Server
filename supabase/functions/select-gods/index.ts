@@ -27,7 +27,20 @@ Deno.serve(async (req: Request) => {
 
         const bothSelected = !!game.host_gods && !!game.guest_gods;
         if (bothSelected) {
-            const { error: transitionErr } = await admin
+            /*
+             * LA TRANSITION NE SE FAIT QUE DEPUIS `selecting`.
+             *
+             * Elle était inconditionnelle, et elle est destructrice : elle remet le statut à
+             * `rps`, efface le résultat ET le vainqueur du pierre-feuille-ciseaux, et vide les
+             * deux choix. Un appel tardif ou répété de `select-gods` rembobinait donc une partie
+             * déjà avancée — le vainqueur avait son écran « Premier / Second » sous les yeux, le
+             * serveur venait de redevenir `rps`, et son clic se faisait répondre « Ce n'est pas
+             * le moment de décider ». Sa partie ne démarrait jamais.
+             *
+             * Le `eq('status', 'selecting')` rend l'opération idempotente : une partie qui a
+             * dépassé la sélection ne peut plus y être ramenée, quel que soit l'appelant.
+             */
+            const { data: transitioned, error: transitionErr } = await admin
                 .from('games')
                 .update({
                     status: 'rps',
@@ -36,13 +49,21 @@ Deno.serve(async (req: Request) => {
                     rps_result: null,
                     rps_winner: null,
                 })
-                .eq('id', gameId);
+                .eq('id', gameId)
+                .eq('status', 'selecting')
+                .select('id');
             if (transitionErr) console.error('select-gods: rps transition (games) failed:', transitionErr.message, gameId);
-            const { error: resetErr } = await admin
-                .from('game_tokens')
-                .update({ rps_host_choice: null, rps_guest_choice: null })
-                .eq('game_id', gameId);
-            if (resetErr) console.error('select-gods: rps choice reset (game_tokens) failed:', resetErr.message, gameId);
+
+            // Le vidage des choix suit la transition et ne s'en détache pas : effacé seul, il
+            // empêcherait une manche déjà engagée de se résoudre, les deux joueurs attendant un
+            // choix adverse que le serveur vient de jeter.
+            if (transitioned && transitioned.length > 0) {
+                const { error: resetErr } = await admin
+                    .from('game_tokens')
+                    .update({ rps_host_choice: null, rps_guest_choice: null })
+                    .eq('game_id', gameId);
+                if (resetErr) console.error('select-gods: rps choice reset (game_tokens) failed:', resetErr.message, gameId);
+            }
         }
 
         return jsonResponse({ ok: true, bothSelected });

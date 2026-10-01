@@ -20,7 +20,12 @@ Deno.serve(async (req: Request) => {
             .eq('id', gameId)
             .single();
         if (gameErr || !game) return jsonResponse({ error: 'Partie introuvable' }, 404);
-        if (game.status !== 'rps_deciding') return jsonResponse({ error: "Ce n'est pas le moment de décider" }, 400);
+        // Le statut réel figure dans le message : « ce n'est pas le moment » ne dit pas quel
+        // moment c'est, et la différence entre `rps` (la partie a été rembobinée) et `playing`
+        // (la décision est déjà passée) mène à deux corrections opposées.
+        if (game.status !== 'rps_deciding') {
+            return jsonResponse({ error: `Ce n'est pas le moment de décider (partie en « ${game.status} »)` }, 400);
+        }
         if (game.rps_winner !== side) return jsonResponse({ error: 'Seul le gagnant peut décider' }, 403);
 
         const otherSide = side === 'host' ? 'guest' : 'host';
