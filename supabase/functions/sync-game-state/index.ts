@@ -85,7 +85,15 @@ Deno.serve(async (req: Request) => {
             }
         }
 
-        const { error: updateErr } = await admin.from('games').update({ game_state: gameState }).eq('id', gameId);
+        /*
+         * `last_actor` dit QUI vient d'agir, et c'est la seule chose qui rende une victoire par
+         * abandon vérifiable : couplée à `updated_at`, elle permet au serveur de constater que
+         * c'est à l'adversaire d'agir et qu'il n'agit plus. Voir claim_abandon_victory().
+         */
+        const { error: updateErr } = await admin
+            .from('games')
+            .update({ game_state: gameState, last_actor: side })
+            .eq('id', gameId);
         if (updateErr) return jsonResponse({ error: updateErr.message }, 500);
 
         return jsonResponse({ ok: true });

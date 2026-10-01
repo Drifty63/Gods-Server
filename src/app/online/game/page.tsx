@@ -10,6 +10,14 @@ import GameBoard from '@/components/GameBoard/GameBoard';
 import { clearMultiplayerSession, RESUMED_KEY } from '@/lib/multiplayerSession';
 import styles from './page.module.css';
 
+/**
+ * Sursis accordé à un adversaire déconnecté, en secondes.
+ *
+ * Doit rester aligné sur `abandon_delay_seconds()` en base, qui est l'autorité : si l'affichage
+ * était plus court, le joueur verrait un décompte atteindre zéro sans que rien ne se passe.
+ */
+const ABANDON_DELAY_S = 90;
+
 export default function OnlineGamePage() {
     const router = useRouter();
     const {
@@ -23,6 +31,7 @@ export default function OnlineGamePage() {
         reportMatchResult,
         leaveGame,
         resumeGame,
+        claimAbandonVictory,
     } = useMultiplayer();
 
     const {
@@ -31,11 +40,54 @@ export default function OnlineGamePage() {
         initGame,
     } = useGameStore();
 
+    /**
+     * Décompte d'abandon : une minute trente, remise à zéro dès que l'adversaire revient.
+     *
+     * Le décompte n'est qu'un MINUTEUR d'affichage. C'est le serveur qui accorde ou refuse la
+     * victoire, et il refuse tant que l'adversaire a joué récemment — on peut donc demander sans
+     * risque, y compris si l'horloge de ce téléphone est fausse.
+     */
     const [isInitialized, setIsInitialized] = useState(false);
     const [isHost, setIsHost] = useState(false);
     const [multiplayerData, setMultiplayerData] = useState<GameStartData | null>(null);
     const [hasResumed, setHasResumed] = useState(false);
     const hasReportedResultRef = useRef(false);
+
+    /*
+     * Un seul minuteur, piloté par la présence de l'adversaire.
+     *
+     * Il repart de zéro à chaque retour : quelqu'un qui perd le réseau trois fois de suite ne
+     * doit pas voir son sursis fondre, sinon une mauvaise connexion devient une défaite.
+     */
+    const [abandonSeconds, setAbandonSeconds] = useState(ABANDON_DELAY_S);
+    const abandonClaimedRef = useRef(false);
+
+    useEffect(() => {
+        if (!opponentDisconnected || gameState?.status === 'finished') {
+            abandonClaimedRef.current = false;
+            return;
+        }
+
+        // L'échéance est une DATE et non un compteur décrémenté : le décompte reste juste même
+        // si l'onglet passe en arrière-plan et que le navigateur espace ses minuteurs.
+        const deadline = Date.now() + ABANDON_DELAY_S * 1000;
+
+        const tick = () => {
+            setAbandonSeconds(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+            if (abandonClaimedRef.current || Date.now() < deadline) return;
+            // Délai écoulé : on demande, le serveur tranche. Un refus laisse l'écran en l'état —
+            // l'adversaire est revenu. Une seule demande, pas une par seconde.
+            abandonClaimedRef.current = true;
+            claimAbandonVictory();
+        };
+
+        // Premier affichage différé d'un tick : écrire l'état dans le corps de l'effet
+        // déclencherait un rendu en cascade.
+        const first = setTimeout(tick, 0);
+        const timer = setInterval(tick, 1000);
+
+        return () => { clearTimeout(first); clearInterval(timer); };
+    }, [opponentDisconnected, gameState?.status, claimAbandonVictory]);
 
     // Charger les données de session
     useEffect(() => {
@@ -186,11 +238,18 @@ export default function OnlineGamePage() {
                 <div className={styles.disconnectedModal}>
                     <h2>😢 Adversaire déconnecté</h2>
                     <p>Votre adversaire a quitté la partie ou a été déconnecté.</p>
+                    {/* Le décompte dit ce qui va se passer et quand. Sans lui, le joueur ne sait
+                        pas s'il doit attendre dix secondes ou dix minutes, et il quitte. */}
+                    <p className={styles.abandonCountdown}>
+                        {abandonSeconds > 0
+                            ? `Victoire par abandon dans ${abandonSeconds} s`
+                            : 'Clôture de la partie…'}
+                    </p>
                     <p style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '1rem' }}>
-                        Attendez qu&apos;il se reconnecte ou quittez la partie.
+                        S&apos;il revient avant la fin du décompte, la partie reprend.
                     </p>
                     <button onClick={handleLeaveGame}>
-                        Retour au lobby
+                        Quitter maintenant
                     </button>
                 </div>
             </div>

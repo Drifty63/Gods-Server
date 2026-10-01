@@ -454,6 +454,26 @@ export function useMultiplayer() {
         });
     }, []);
 
+    /**
+     * Réclame la victoire après l'absence prolongée de l'adversaire.
+     *
+     * Le serveur décide seul (voir `claim_abandon_victory`) : ici on ne fait que demander. Un
+     * refus est le cas NORMAL — l'adversaire est revenu, ou c'est à nous d'agir — donc rien
+     * n'est signalé au joueur, et l'écran d'attente reste tel quel.
+     */
+    const claimAbandonVictory = useCallback(async (): Promise<boolean> => {
+        if (!gameIdRef.current || !tokenRef.current) return false;
+        try {
+            const supabase = getSupabaseClient();
+            const { data } = await supabase.functions.invoke('claim-abandon-victory', {
+                body: { gameId: gameIdRef.current, token: tokenRef.current },
+            });
+            return !!(data as { success?: boolean } | null)?.success;
+        } catch {
+            return false;
+        }
+    }, []);
+
     const leaveGame = useCallback(async () => {
         const supabase = getSupabaseClient();
         if (gameIdRef.current && tokenRef.current) {
@@ -546,6 +566,7 @@ export function useMultiplayer() {
         sendAction,
         syncState,
         reportMatchResult,
+        claimAbandonVictory,
         leaveGame,
     };
 }

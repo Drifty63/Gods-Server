@@ -272,3 +272,16 @@
         margin: 1rem;
     }
 }
+/*
+ * Décompte d'abandon.
+ *
+ * Mis en avant parce que c'est la seule information utile de cet écran : le joueur veut savoir
+ * s'il doit attendre ou partir. Chiffres tabulaires pour que le décompte ne tressaute pas.
+ */
+.abandonCountdown {
+    font-variant-numeric: tabular-nums;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--gold-divine, #d4af37);
+    margin: 4px 0 8px;
+}
