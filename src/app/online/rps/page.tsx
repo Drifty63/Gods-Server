@@ -27,6 +27,7 @@ export default function OnlineRpsPage() {
         sendRpsChoice,
         sendRpsDecision,
         resumeGame,
+        refreshGame,
     } = useMultiplayer();
 
     const [hasChosen, setHasChosen] = useState(false);
@@ -69,6 +70,23 @@ export default function OnlineRpsPage() {
             return () => clearTimeout(t);
         }
     }, [gameStartData, router, currentGame?.isHost, isRedirecting]);
+
+    /*
+     * La partie a démarré mais `gameStartData` n'est pas arrivé.
+     *
+     * C'est exactement ce qui te bloquait : `rps-decide` avait réussi, le serveur était passé en
+     * `playing`, et cet écran continuait d'afficher « Premier / Second » parce qu'il n'attendait
+     * QUE `gameStartData`. Chaque clic reposait alors une question déjà tranchée, d'où « Ce
+     * n'est pas le moment de décider ».
+     *
+     * Le statut suffit à savoir qu'il faut partir ; s'il manque les données de départ, on relit
+     * la partie plutôt que d'attendre une notification qui ne reviendra pas.
+     */
+    useEffect(() => {
+        if (currentGame?.status !== 'playing' || gameStartData) return;
+        const retry = setInterval(() => { refreshGame(); }, 1500);
+        return () => clearInterval(retry);
+    }, [currentGame?.status, gameStartData, refreshGame]);
 
     /*
      * Filet de sécurité : la partie s'est terminée pendant le pierre-feuille-ciseaux.

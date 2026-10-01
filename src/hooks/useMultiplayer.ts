@@ -389,9 +389,17 @@ export function useMultiplayer() {
         await attachToGame(gameId, token, isHost);
     }, [attachToGame]);
 
+
     // =====================================
     // GAMEPLAY
     // =====================================
+
+    /**
+     * Référence vers refreshGame, pour que callFunction puisse l'appeler sans dépendre d'elle :
+     * refreshGame a besoin de session(), que callFunction utilise aussi, et se déclarer
+     * mutuellement créerait un cycle que TypeScript refuse.
+     */
+    const refreshGameRef = useRef<(() => void) | null>(null);
 
     /**
      * La session courante, avec repli sur `sessionStorage`.
@@ -466,8 +474,38 @@ export function useMultiplayer() {
         // Le nom de la fonction reste affiché : c'est ce qui permet de dire au premier coup d'œil
         // QUELLE étape a refusé, sans avoir à reproduire le scénario.
         setError(`${name} : ${reason}`);
+
+        // Un refus signale presque toujours que l'écran est en retard sur la partie : on relit.
+        refreshGameRef.current?.();
         return { ok: false, data: data ?? undefined };
     }, [session]);
+
+    /**
+     * Relit la partie et se recale dessus.
+     *
+     * Appelée après tout refus du serveur. Un refus veut presque toujours dire la même chose :
+     * la partie a avancé sans que cet écran s'en aperçoive — une notification Realtime manquée,
+     * un onglet réveillé, une page montée au mauvais moment. « Ce n'est pas le moment de
+     * décider » signifie littéralement que le serveur n'est plus à l'étape que l'écran affiche.
+     *
+     * Sans ce rattrapage, le joueur restait devant des boutons périmés et pouvait cliquer
+     * indéfiniment : chaque clic reposait la même question à un serveur qui avait déjà répondu.
+     */
+    const refreshGame = useCallback(async () => {
+        const current = session();
+        if (!current) return;
+        const supabase = getSupabaseClient();
+        const { data } = await supabase
+            .from('games')
+            .select('*')
+            .eq('id', current.gameId)
+            .single();
+        if (data) applyGameRow(data as GameRow);
+    }, [session, applyGameRow]);
+
+    // Affectation dans un effet et non pendant le rendu : écrire une référence pendant le rendu
+    // est interdit en rendu concurrent, et la règle de lint le signale à juste titre.
+    useEffect(() => { refreshGameRef.current = refreshGame; }, [refreshGame]);
 
     const selectGods = useCallback(
         (gods: GodCard[]) => callFunction('select-gods', { gods }).then(r => r.ok),
@@ -631,6 +669,7 @@ export function useMultiplayer() {
         syncState,
         reportMatchResult,
         claimAbandonVictory,
+        refreshGame,
         leaveGame,
     };
 }
