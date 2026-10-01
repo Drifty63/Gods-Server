@@ -62,13 +62,23 @@ export default function OnlineRpsPage() {
             }
             sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
 
-            // Délai pour laisser le socket se synchroniser avant la redirection
-            console.log('Game start received, redirecting in 1s...');
-            setTimeout(() => {
-                router.push('/online/game');
-            }, 1000);
+            // Délai pour laisser le socket se synchroniser avant la redirection. Nettoyé au
+            // démontage : sans ça, un joueur qui quitte l'écran entre-temps était ramené de force
+            // sur le plateau une seconde plus tard.
+            const t = setTimeout(() => router.push('/online/game'), 1000);
+            return () => clearTimeout(t);
         }
     }, [gameStartData, router, currentGame?.isHost, isRedirecting]);
+
+    /*
+     * Filet de sécurité : la partie s'est terminée pendant le pierre-feuille-ciseaux.
+     *
+     * Sans cela, un joueur dont l'adversaire abandonne à ce moment précis attend indéfiniment un
+     * choix qui ne viendra jamais — l'écran n'a aucun autre moyen d'en sortir.
+     */
+    useEffect(() => {
+        if (currentGame?.status === 'finished') router.push('/online');
+    }, [currentGame?.status, router]);
 
     // Réinitialiser après une égalité
     useEffect(() => {

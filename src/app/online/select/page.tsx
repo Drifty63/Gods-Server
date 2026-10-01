@@ -12,7 +12,7 @@ import styles from './page.module.css';
 
 export default function OnlineSelectPage() {
     const router = useRouter();
-    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName, rpsPhase } = useMultiplayer();
+    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName } = useMultiplayer();
     const { profile } = useAuth();
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -43,50 +43,69 @@ export default function OnlineSelectPage() {
         }
     }, [isConnected, hasRejoined, resumeGame, router]);
 
-    // Rediriger vers RPS quand les deux joueurs ont sélectionné
-    useEffect(() => {
-        if (rpsPhase && hasSubmitted) {
-            console.log('Both players selected, moving to RPS');
-            // Sauvegarder isHost avant la redirection
-            if (currentGame?.isHost !== undefined) {
-                sessionStorage.setItem('isHost', String(currentGame.isHost));
-            }
-            router.push('/online/rps');
-        }
-    }, [rpsPhase, hasSubmitted, router, currentGame?.isHost]);
+    /*
+     * LA NAVIGATION SUIT LE STATUT DE LA PARTIE, PAS L'ÉTAT LOCAL DE CETTE PAGE.
+     *
+     * Les deux redirections étaient conditionnées à `hasSubmitted`, un état React qui ne vit que
+     * dans cette page. Dès qu'il restait faux alors que la partie avançait — et en Duel il le
+     * restait dès que l'équipe pré-composée manquait — le joueur demeurait planté sur cet écran
+     * pendant que son adversaire passait au pierre-feuille-ciseaux puis au combat. Pire : comme
+     * `hasSubmitted` était faux, la page affichait la grille de sélection manuelle, celle de
+     * l'Entraînement, alors que l'équipe était déjà composée et confirmée.
+     *
+     * `currentGame.status` vient de Postgres et décrit la partie telle qu'elle est réellement.
+     * Un client qui arrive en retard, se reconnecte ou rate une notification s'y raccroche ; un
+     * client qui n'a rien soumis la suit quand même, au lieu de rester seul derrière.
+     */
+    const status = currentGame?.status;
 
-    // Mode DUEL : auto-confirmer avec les dieux pré-sélectionnés
     useEffect(() => {
-        const gameMode = sessionStorage.getItem('gameMode');
-        if (gameMode === 'duel' && hasRejoined && !hasSubmitted && currentGame) {
-            const savedGodsJson = sessionStorage.getItem('selectedGods');
-            if (savedGodsJson) {
-                const savedGodIds: string[] = JSON.parse(savedGodsJson);
-                const gods = savedGodIds
-                    .map(id => getGodById(id))
-                    .filter((g): g is GodCard => g !== undefined);
-
-                if (gods.length >= 2) {
-                    console.log('Duel mode: auto-confirming with pre-selected gods', gods);
-                    setSelectedGods(gods);
-                    selectGods(gods);
-                    setHasSubmitted(true);
-                }
-            }
+        if (status !== 'rps' && status !== 'rps_deciding') return;
+        if (currentGame?.isHost !== undefined) {
+            sessionStorage.setItem('isHost', String(currentGame.isHost));
         }
-    }, [hasRejoined, hasSubmitted, currentGame, selectGods]);
+        router.push('/online/rps');
+    }, [status, currentGame?.isHost, router]);
 
-    // Rediriger vers le jeu si gameStartData arrive (fallback ou reconnexion)
     useEffect(() => {
-        if (gameStartData && hasSubmitted) {
-            sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
-            sessionStorage.setItem('isHost', String(currentGame?.isHost ?? false));
-            if (currentGame?.gameId) {
-                sessionStorage.setItem('gameId', currentGame.gameId);
-            }
-            router.push('/online/game');
+        if (!gameStartData) return;
+        sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
+        sessionStorage.setItem('isHost', String(currentGame?.isHost ?? false));
+        if (currentGame?.gameId) sessionStorage.setItem('gameId', currentGame.gameId);
+        router.push('/online/game');
+    }, [gameStartData, currentGame?.isHost, currentGame?.gameId, router]);
+
+    // La partie s'est terminée avant d'avoir commencé (abandon de l'adversaire) : retour au salon.
+    useEffect(() => {
+        if (status === 'finished') router.push('/online');
+    }, [status, router]);
+
+    /*
+     * Mode DUEL : l'équipe est déjà composée et payée en points, cet écran ne fait que la
+     * confirmer. S'il ne la retrouve pas, il ne faut SURTOUT pas retomber sur la grille manuelle
+     * — elle ignore le budget du Duel et laisserait composer n'importe quoi. On le dit, et on
+     * renvoie le joueur recomposer.
+     */
+    const isDuel = typeof window !== 'undefined' && sessionStorage.getItem('gameMode') === 'duel';
+    const [duelTeamMissing, setDuelTeamMissing] = useState(false);
+
+    useEffect(() => {
+        if (!isDuel || !hasRejoined || hasSubmitted || !currentGame) return;
+
+        let gods: GodCard[] = [];
+        try {
+            const saved = JSON.parse(sessionStorage.getItem('selectedGods') || '[]') as string[];
+            gods = saved.map(id => getGodById(id)).filter((g): g is GodCard => g !== undefined);
+        } catch {
+            gods = [];
         }
-    }, [gameStartData, currentGame, router, hasSubmitted]);
+
+        if (gods.length < 2) { setDuelTeamMissing(true); return; }
+
+        setSelectedGods(gods);
+        selectGods(gods);
+        setHasSubmitted(true);
+    }, [isDuel, hasRejoined, hasSubmitted, currentGame, selectGods]);
 
     const handleSelectGod = (god: GodCard) => {
         if (hasSubmitted) return;
@@ -108,6 +127,51 @@ export default function OnlineSelectPage() {
 
     const savedOpponentName = typeof window !== 'undefined' ? sessionStorage.getItem('opponentName') : null;
     const displayOpponentName = opponentName || savedOpponentName || 'Adversaire';
+
+    // Équipe de Duel introuvable : on ne propose pas de la recomposer ici, le budget ne s'y
+    // applique pas. On renvoie à l'écran qui sait le faire.
+    if (isDuel && duelTeamMissing) {
+        return (
+            <div className={styles.container}>
+                <header className={styles.header}>
+                    <h1>⚔️ Équipe introuvable</h1>
+                    <p className={styles.subtitle}>
+                        Votre équipe de Duel n&apos;a pas été retrouvée — elle a pu être perdue en
+                        rechargeant la page.
+                    </p>
+                </header>
+                <div className={styles.actions}>
+                    <button className={styles.confirmButton} onClick={() => router.push('/duel')}>
+                        Recomposer mon équipe
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Duel, équipe retrouvée : rien à choisir, on attend l'adversaire.
+    if (isDuel) {
+        return (
+            <div className={styles.container}>
+                <header className={styles.header}>
+                    <h1>⚔️ Duel</h1>
+                    <p className={styles.subtitle}>
+                        Partie contre <span className={styles.opponentName}>{displayOpponentName}</span>
+                    </p>
+                </header>
+                <div className={styles.actions}>
+                    <div className={styles.waitingSpinner}>
+                        <div className={styles.spinner}></div>
+                        <p>
+                            {hasSubmitted
+                                ? `Équipe confirmée. En attente de ${displayOpponentName}...`
+                                : 'Confirmation de votre équipe...'}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>

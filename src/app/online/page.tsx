@@ -67,9 +67,19 @@ function OnlineContent() {
         return () => clearInterval(interval);
     }, [isInQueue]);
 
-    // Redirection quand un match est trouvé
+    /*
+     * Redirection quand un match est trouvé.
+     *
+     * Le test portait sur le seul statut « selecting ». Si ce client lisait la partie alors
+     * qu'elle était DÉJÀ passée au pierre-feuille-ciseaux — une notification ratée, un
+     * réabonnement un peu lent, un appariement résolu pendant que l'écran se montait — la
+     * condition n'était plus jamais vraie et le joueur restait sur l'écran de recherche pendant
+     * que son adversaire jouait. On quitte donc le salon dès que la partie a commencé, quel que
+     * soit l'avancement : les écrans suivants savent se replacer tout seuls.
+     */
     useEffect(() => {
-        if (currentGame && currentGame.status === 'selecting') {
+        const s = currentGame?.status;
+        if (s === 'selecting' || s === 'rps' || s === 'rps_deciding' || s === 'playing') {
             // Sauvegarder les données de session : gameId+token+isHost permettent de reprendre
             // la session (resumeGame) sur chaque page suivante sans nouvelle poignée de main
             // serveur — l'état vit dans Postgres, pas dans la mémoire d'un process.
