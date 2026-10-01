@@ -1,5 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { getAdminClient, resolveSide } from '../_shared/admin-client.ts';
+import { outcomeFromState } from '../_shared/outcome.ts';
 
 Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -15,7 +16,34 @@ Deno.serve(async (req: Request) => {
         const side = await resolveSide(admin, gameId, token);
         if (!side) return jsonResponse({ error: 'Jeton invalide' }, 401);
 
-        const winnerSide = didIWin ? side : (side === 'host' ? 'guest' : 'host');
+        /*
+         * LE VAINQUEUR EST CONSTATÉ, PAS DÉCLARÉ.
+         *
+         * `didIWin` vient du client. Le jeton prouve qu'on participe à la partie, pas qu'on l'a
+         * gagnée — et comme la garde anti-doublon ci-dessous retient le PREMIER appel, il
+         * suffisait d'appeler cette fonction au premier tour en se déclarant vainqueur pour
+         * remporter une partie classée sans avoir joué une carte.
+         *
+         * On relit donc l'état stocké et on regarde qui a encore des dieux debout. Quand cet
+         * état est illisible — une partie d'une version antérieure, une forme inattendue — on
+         * retombe sur la déclaration du client PLUTÔT que de refuser : bloquer la fin d'une
+         * partie honnête serait pire que le risque résiduel, et ce cas disparaît de lui-même à
+         * mesure que les anciennes parties s'effacent.
+         */
+        const { data: stored } = await admin
+            .from('games')
+            .select('game_state')
+            .eq('id', gameId)
+            .single();
+
+        const outcome = outcomeFromState(stored?.game_state);
+        const declaredSide = didIWin ? side : (side === 'host' ? 'guest' : 'host');
+
+        if (outcome.kind === 'winner' && outcome.side !== declaredSide) {
+            return jsonResponse({ error: 'Résultat contredit par l\'état de la partie' }, 409);
+        }
+
+        const winnerSide = outcome.kind === 'winner' ? outcome.side : declaredSide;
 
         // Garde anti-doublon : les DEUX clients détectent la fin de partie indépendamment et
         // appellent cette fonction -- seul le premier à arriver ici doit écrire le résultat
