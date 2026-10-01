@@ -88,15 +88,31 @@ export default function OnlineRpsPage() {
         }
     }, [rpsPhase, hasChosen]);
 
-    const handleChoice = (choice: RpsChoice) => {
-        if (hasChosen) return;
+    /*
+     * Le choix n'est marqué que si le SERVEUR l'accepte.
+     *
+     * `hasChosen` était posé avant la réponse : un refus laissait donc le joueur sur l'écran
+     * d'attente définitivement, alors que son choix n'était jamais parti. Et comme l'erreur était
+     * avalée, il n'avait aucun moyen de le savoir. Désormais un refus rouvre les boutons, et la
+     * bannière dit pourquoi.
+     */
+    const [busy, setBusy] = useState(false);
+
+    const handleChoice = async (choice: RpsChoice) => {
+        if (hasChosen || busy) return;
+        setBusy(true);
         setMyChoice(choice);
-        setHasChosen(true);
-        sendRpsChoice(choice);
+        const ok = await sendRpsChoice(choice);
+        setBusy(false);
+        if (ok) setHasChosen(true);
+        else setMyChoice(null);
     };
 
-    const handleDecision = (goFirst: boolean) => {
-        sendRpsDecision(goFirst);
+    const handleDecision = async (goFirst: boolean) => {
+        if (busy) return;
+        setBusy(true);
+        await sendRpsDecision(goFirst);
+        setBusy(false);
     };
 
     const getChoiceEmoji = (choice: RpsChoice | null | undefined) => {
@@ -236,6 +252,7 @@ export default function OnlineRpsPage() {
                             <button
                                 className={`${styles.decideButton} ${styles.first}`}
                                 onClick={() => handleDecision(true)}
+                                disabled={busy}
                             >
                                 <span className={styles.decideIcon}>1️⃣</span>
                                 <span>Premier</span>
@@ -243,6 +260,7 @@ export default function OnlineRpsPage() {
                             <button
                                 className={`${styles.decideButton} ${styles.second}`}
                                 onClick={() => handleDecision(false)}
+                                disabled={busy}
                             >
                                 <span className={styles.decideIcon}>2️⃣</span>
                                 <span>Second</span>

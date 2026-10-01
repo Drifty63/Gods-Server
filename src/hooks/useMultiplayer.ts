@@ -435,9 +435,38 @@ export function useMultiplayer() {
             body: { ...body, gameId: current.gameId, token: current.token },
         });
 
-        const message = (data as { error?: string } | null)?.error ?? fnErr?.message;
-        if (message) { setError(message); return { ok: false, data: data ?? undefined }; }
-        return { ok: true, data: data ?? undefined };
+        if (!fnErr) {
+            const inBody = (data as { error?: string } | null)?.error;
+            if (inBody) { setError(inBody); return { ok: false, data: data ?? undefined }; }
+            return { ok: true, data: data ?? undefined };
+        }
+
+        /*
+         * « Edge Function returned a non-2xx status code » ne dit rien.
+         *
+         * C'est le message générique de supabase-js : sur une réponse non-2xx, il n'ouvre pas le
+         * corps, où se trouve pourtant la raison écrite par la fonction (« Jeton invalide », « Ce
+         * n'est pas le moment de décider »…). Sans elle, le joueur voit une phrase anglaise
+         * inutile et moi je n'ai rien pour diagnostiquer. On va donc la chercher.
+         */
+        let reason = fnErr.message;
+        const response = (fnErr as { context?: unknown }).context;
+        if (response instanceof Response) {
+            try {
+                const body = await response.clone().json();
+                if (body?.error) reason = String(body.error);
+            } catch {
+                try {
+                    const text = (await response.clone().text()).trim();
+                    if (text) reason = text.slice(0, 200);
+                } catch { /* corps illisible : on garde le message générique */ }
+            }
+        }
+
+        // Le nom de la fonction reste affiché : c'est ce qui permet de dire au premier coup d'œil
+        // QUELLE étape a refusé, sans avoir à reproduire le scénario.
+        setError(`${name} : ${reason}`);
+        return { ok: false, data: data ?? undefined };
     }, [session]);
 
     const selectGods = useCallback(
