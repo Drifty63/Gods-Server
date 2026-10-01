@@ -170,6 +170,8 @@ interface GameStore {
     revealBlindCard: (cardId: string) => SpellCard | null;  // Révèle une carte cachée et retourne la carte
     discardBlindCard: (cardId: string, loseEnergy: boolean) => void;  // Défausse une carte cachée
     surrender: () => void; // Abandonner la partie
+    /** Clôt la partie sur décision du serveur (victoire par abandon). */
+    finishFromServer: (winnerPlayerId: string | null) => void;
 
     // Actions pour confirmation optionnelle (Perséphone - optional_mill_boost)
     startOptionalChoice: (title: string, description: string, effectId: string, targetGodIds: string[]) => void;
@@ -1130,6 +1132,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // Copie PROFONDE, comme partout ailleurs dans ce store : un simple `{ ...state }` garde
         // les mêmes références de joueurs/dieux, donc React ne voit aucun changement dans les
         // sous-objets et l'écran de fin pouvait rester sur l'état précédent.
+        set({ gameState: cloneGameState(state) });
+    },
+
+    /**
+     * Clôt la partie sur décision du SERVEUR, sans qu'aucune carte ne l'ait produite.
+     *
+     * Une victoire par abandon n'existe que dans la table `games` : le serveur y inscrit le
+     * statut et le vainqueur, mais ne touche pas à `game_state`, qui est le seul canal par lequel
+     * le plateau apprend quelque chose. Le joueur resté voyait donc sa partie se terminer côté
+     * serveur pendant que son écran continuait d'afficher le combat et sa modale d'attente.
+     *
+     * `abandon` comme raison : l'écran de fin distingue déjà l'abandon des points de vie à zéro,
+     * et annoncer « victoire » sans dire pourquoi laisserait croire à un bug.
+     */
+    finishFromServer: (winnerPlayerId: string | null) => {
+        const { engine } = get();
+        if (!engine) return;
+
+        const state = engine.getState();
+        if (state.status === 'finished') return;   // déjà conclue localement : on ne réécrit pas
+
+        state.status = 'finished';
+        state.winnerId = winnerPlayerId ?? undefined;
+        state.winReason = 'surrender';
+
         set({ gameState: cloneGameState(state) });
     },
 

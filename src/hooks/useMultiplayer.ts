@@ -12,6 +12,9 @@ export interface MultiplayerGame {
     guestName?: string;
     status: 'waiting' | 'selecting' | 'rps' | 'rps_deciding' | 'playing' | 'finished';
     isHost: boolean;
+    /** Camp vainqueur tel que le SERVEUR l'a inscrit — y compris sur un abandon, que l'état de
+     *  partie local ne peut pas deviner puisqu'aucune carte n'a été jouée pour le produire. */
+    winnerSide?: 'host' | 'guest' | null;
 }
 
 export interface QueueStatus {
@@ -54,6 +57,8 @@ interface GameRow {
     rps_winner: 'host' | 'guest' | null;
     first_player: 'host' | 'guest' | null;
     game_state: Record<string, unknown> | null;
+    /** Camp vainqueur ('host' ou 'guest'), écrit par le serveur — y compris sur un abandon. */
+    winner_id: 'host' | 'guest' | null;
 }
 
 const QUEUE_HEARTBEAT_MS = 15000;
@@ -114,6 +119,7 @@ export function useMultiplayer() {
             guestName: row.guest_name || undefined,
             status: row.status,
             isHost,
+            winnerSide: (row.winner_id as 'host' | 'guest' | null) ?? null,
         });
 
         if (row.host_name && row.guest_name) {

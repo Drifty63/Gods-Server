@@ -32,6 +32,7 @@ export default function OnlineGamePage() {
         leaveGame,
         resumeGame,
         claimAbandonVictory,
+        currentGame,
     } = useMultiplayer();
 
     const {
@@ -52,6 +53,25 @@ export default function OnlineGamePage() {
     const [multiplayerData, setMultiplayerData] = useState<GameStartData | null>(null);
     const [hasResumed, setHasResumed] = useState(false);
     const hasReportedResultRef = useRef(false);
+
+    /*
+     * Le SERVEUR a conclu la partie : l'écran doit suivre.
+     *
+     * Une victoire par abandon ne vit que dans la table `games` — le serveur y inscrit le statut
+     * et le vainqueur sans toucher à `game_state`, qui est pourtant le seul canal par lequel le
+     * plateau apprend quoi que ce soit. Le joueur resté voyait donc le décompte atteindre zéro,
+     * lisait « Clôture de la partie… », et restait devant son combat et sa modale d'attente, sans
+     * rien qui se ferme ni ne se rafraîchisse.
+     */
+    useEffect(() => {
+        if (currentGame?.status !== 'finished') return;
+        if (gameState?.status === 'finished') return;
+        // Le camp est traduit en identifiant local : l'hôte est toujours player1.
+        const winner = currentGame.winnerSide
+            ? (currentGame.winnerSide === 'host' ? 'player1' : 'player2')
+            : null;
+        useGameStore.getState().finishFromServer(winner);
+    }, [currentGame?.status, currentGame?.winnerSide, gameState?.status]);
 
     /*
      * Un seul minuteur, piloté par la présence de l'adversaire.

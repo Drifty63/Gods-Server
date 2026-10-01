@@ -21,6 +21,8 @@ Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
     try {
+        const { claim } = await req.json().catch(() => ({ claim: false }));
+
         const user = await getRequestUser(req);
         if (!user) return jsonResponse({ error: 'Non authentifié' }, 401);
 
@@ -49,6 +51,65 @@ Deno.serve(async (req: Request) => {
             .eq('game_id', game.id)
             .maybeSingle();
         if (tokenErr) return jsonResponse({ error: tokenErr.message }, 500);
+
+        /*
+         * FENÊTRE DE QUATRE-VINGT-DIX SECONDES, alignée sur la règle d'abandon.
+         *
+         * Elle était de trente minutes, héritée du ménage automatique. C'était incohérent : au
+         * bout de quatre-vingt-dix secondes l'adversaire resté a déjà remporté la partie, donc
+         * la bannière promettait de reprendre quelque chose qui n'existait plus — et le joueur
+         * qui cliquait attendait un chargement sans fin.
+         *
+         * Le filtre est ici et pas seulement dans le cron : celui-ci tourne toutes les deux
+         * minutes, et une ligne encore présente ne veut pas dire une partie encore jouable.
+         */
+        const idleMs = Date.now() - new Date(game.updated_at).getTime();
+        if (idleMs > 90_000) return jsonResponse({ resumable: false, reason: 'expired' });
+
+        /*
+         * DEUX MODES : regarder, ou revenir.
+         *
+         * L'accueil interroge cette fonction à chaque ouverture pour savoir s'il doit afficher la
+         * bannière. Compter une reprise à ce moment-là reviendrait à faire perdre la partie à
+         * quelqu'un qui passe trois fois par l'accueil sans jamais y toucher. Le jeton et le
+         * décompte ne sont donc servis que si l'appelant dit explicitement qu'il revient.
+         */
+        if (!claim) {
+            return jsonResponse({
+                resumable: true,
+                gameId: game.id,
+                isHost,
+                opponentName: isHost ? game.guest_name : game.host_name,
+                mode: game.mode ?? 'ranked',
+                isRanked: game.is_ranked,
+                updatedAt: game.updated_at,
+            });
+        }
+
+        /*
+         * TROISIÈME RETOUR = FORFAIT.
+         *
+         * Le décompte d'abandon repart de quatre-vingt-dix secondes à chaque retour : sans
+         * plafond, quelqu'un qui part et revient indéfiniment tient son adversaire en otage sans
+         * jamais perdre. Seul le RETOUR est observable par le serveur — le partant n'est plus là
+         * pour être compté, et laisser l'adversaire le compter offrirait un bouton « fais perdre
+         * l'autre ».
+         */
+        const { data: resumeRows, error: resumeErr } = await admin.rpc('register_resume', {
+            p_game_id: game.id,
+            p_side: isHost ? 'host' : 'guest',
+        });
+        if (resumeErr) return jsonResponse({ error: resumeErr.message }, 500);
+
+        const verdict = (Array.isArray(resumeRows) ? resumeRows[0] : resumeRows) as
+            { allowed: boolean; used: number; forfeited: boolean } | null;
+        if (!verdict?.allowed) {
+            return jsonResponse({
+                resumable: false,
+                reason: verdict?.forfeited ? 'forfeited' : 'expired',
+                resumesUsed: verdict?.used ?? 0,
+            });
+        }
 
         const token = isHost ? tokens?.host_token : tokens?.guest_token;
         // No token means the row was cleaned up between the two queries, or the guest never

@@ -345,6 +345,9 @@ export interface ResumableGame {
     /** Dernière écriture sur la partie : sert à afficher le temps restant avant expiration. */
     updatedAt?: string;
     startData?: unknown;
+    /** Pourquoi il n'y a rien à reprendre : `expired` (délai dépassé) ou `forfeited` (trop de retours). */
+    reason?: 'expired' | 'forfeited';
+    resumesUsed?: number;
 }
 
 /**
@@ -357,6 +360,22 @@ export interface ResumableGame {
 export async function getResumableGame(): Promise<ResumableGame> {
     try {
         return await invokeFn<ResumableGame>('resume-game', {});
+    } catch {
+        return { resumable: false };
+    }
+}
+
+/**
+ * Revient RÉELLEMENT dans la partie, et consomme l'un des retours autorisés.
+ *
+ * Séparé de la simple vérification ci-dessus : l'accueil interroge le serveur à chaque ouverture
+ * pour savoir s'il affiche la bannière, et compter un retour à ce moment-là ferait perdre sa
+ * partie à quelqu'un qui passe trois fois par l'accueil sans jamais y toucher. Le jeton n'est
+ * servi que par cet appel-ci.
+ */
+export async function claimResumableGame(): Promise<ResumableGame> {
+    try {
+        return await invokeFn<ResumableGame>('resume-game', { claim: true });
     } catch {
         return { resumable: false };
     }

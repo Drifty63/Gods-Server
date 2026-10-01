@@ -7,7 +7,8 @@ import Image from 'next/image';
 import styles from './page.module.css';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPendingRequests, countUnclaimedRewards, getResumableGame, type ResumableGame } from '@/services/supabase-profile';
+import { getPendingRequests, countUnclaimedRewards, getResumableGame, claimResumableGame, type ResumableGame } from '@/services/supabase-profile';
+import { toast } from '@/lib/toast';
 import { restoreMultiplayerSession } from '@/lib/multiplayerSession';
 import { TUTORIAL_DONE_KEY } from '@/data/tutorial';
 import { NEWS_ITEMS } from '@/data/news';
@@ -21,20 +22,24 @@ export default function Home() {
 }
 
 /**
- * Fenêtre de reprise, en minutes.
+ * Fenêtre de reprise, en SECONDES.
  *
- * Ce n'est pas un réglage : `cleanup_stale_multiplayer_data` supprime les parties `playing`
- * inactives depuis 30 minutes (init_multiplayer.sql). Au-delà, la ligne n'existe plus et il n'y
- * a rien à reprendre. On l'annonce au joueur plutôt que de le laisser espérer.
+ * Alignée sur la règle d'abandon : au bout de quatre-vingt-dix secondes, l'adversaire resté a
+ * déjà remporté la partie. Elle était de trente minutes, héritée du ménage automatique, et
+ * promettait donc de reprendre des parties perdues depuis longtemps.
+ *
+ * L'autorité reste le serveur, qui applique le même délai dans `resume-game` : ce compte à
+ * rebours n'est qu'un affichage, et un téléphone à l'heure fausse ne décide de rien.
  */
-const RESUME_WINDOW_MIN = 30;
+const RESUME_WINDOW_S = 90;
 
 function HomeContent() {
   const { profile } = useAuth();
   const router = useRouter();
   const [resumable, setResumable] = useState<ResumableGame | null>(null);
   /** Minutes restantes, figées à la lecture : `Date.now()` pendant le rendu n'est pas pur. */
-  const [minutesLeft, setMinutesLeft] = useState(0);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [resuming, setResuming] = useState(false);
 
   // Utiliser l'ambroisie du profil ou 0 par défaut
   const userAmbroisie = profile?.ambroisie ?? 0;
@@ -103,21 +108,59 @@ function HomeContent() {
     getResumableGame().then(r => {
       if (cancelled || !r.resumable) return;
       setResumable(r);
-      setMinutesLeft(r.updatedAt
-        ? RESUME_WINDOW_MIN - Math.floor((Date.now() - new Date(r.updatedAt).getTime()) / 60000)
+      setSecondsLeft(r.updatedAt
+        ? RESUME_WINDOW_S - Math.floor((Date.now() - new Date(r.updatedAt).getTime()) / 1000)
         : 0);
     });
     return () => { cancelled = true; };
   }, [profile]);
 
-  const handleResume = () => {
-    if (!resumable?.gameId || !resumable.token) return;
+  /*
+   * Le décompte défile, et la bannière s'efface à zéro.
+   *
+   * Il était figé sur une valeur calculée une seule fois. Sur trente minutes ça passait
+   * inaperçu ; sur quatre-vingt-dix secondes, la bannière restait affichée bien après la fin de
+   * la partie, et le joueur qui la touchait attendait un chargement sans fin. Elle disparaît
+   * maintenant d'elle-même, comme la partie qu'elle désigne.
+   */
+  useEffect(() => {
+    if (!resumable?.resumable) return;
+    const tick = setInterval(() => {
+      setSecondsLeft(s => (s > 1 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [resumable?.resumable]);
+
+  /*
+   * Le jeton est demandé AU CLIC, pas à l'affichage de la bannière.
+   *
+   * Deux raisons. D'abord, revenir consomme l'un des trois retours autorisés : le compter à
+   * l'ouverture de l'accueil ferait perdre sa partie à quelqu'un qui ne fait que passer.
+   * Ensuite, entre le moment où la bannière s'affiche et celui où on la touche, la partie a pu
+   * se terminer — c'est même le cas le plus fréquent, puisque l'adversaire gagne au bout de
+   * quatre-vingt-dix secondes. Le serveur a le dernier mot, et on le dit au lieu de charger
+   * indéfiniment une partie qui n'existe plus.
+   */
+  const handleResume = async () => {
+    if (!resumable?.gameId || resuming) return;
+    setResuming(true);
+    const claimed = await claimResumableGame();
+    setResuming(false);
+
+    if (!claimed.resumable || !claimed.gameId || !claimed.token) {
+      setResumable(null);
+      toast.error(claimed.reason === 'forfeited'
+        ? 'Trop de déconnexions : la partie est perdue.'
+        : "Cette partie est terminée, elle ne peut plus être reprise.");
+      return;
+    }
+
     restoreMultiplayerSession({
-      gameId: resumable.gameId,
-      token: resumable.token,
-      isHost: !!resumable.isHost,
-      opponentName: resumable.opponentName ?? null,
-      startData: resumable.startData,
+      gameId: claimed.gameId,
+      token: claimed.token,
+      isHost: !!claimed.isHost,
+      opponentName: claimed.opponentName ?? null,
+      startData: claimed.startData,
     });
     router.push('/online/game');
   };
@@ -212,14 +255,14 @@ function HomeContent() {
           l'attend. La durée restante est affichée parce qu'elle est réelle — passé 30 minutes
           sans activité, la partie est supprimée côté serveur.
         */}
-        {resumable?.resumable && minutesLeft > 0 && (
+        {resumable?.resumable && secondsLeft > 0 && (
           <button className={styles.resumeBanner} onClick={handleResume}>
             <span className={styles.resumeIcon}>⚔️</span>
             <span className={styles.resumeText}>
               <span className={styles.resumeTitle}>Reprendre votre partie</span>
               <span className={styles.resumeSubtitle}>
                 {resumable.opponentName ? `Contre ${resumable.opponentName} · ` : ''}
-                {minutesLeft} min pour la reprendre
+                {resuming ? 'Reprise…' : `${secondsLeft} s pour la reprendre`}
               </span>
             </span>
             <span className={styles.resumeArrow}>›</span>
