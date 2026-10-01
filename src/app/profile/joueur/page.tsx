@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { RequireAuth } from '@/components/Auth/RequireAuth';
@@ -11,17 +11,45 @@ import { ACHIEVEMENTS } from '@/data/achievements';
 import { ALL_GODS } from '@/data/gods';
 import styles from './page.module.css';
 
+/*
+ * Le joueur consulté est désigné par `?id=`, et non par un segment d'URL.
+ *
+ * `/profile/[userId]` était la SEULE route du site encore rendue par le serveur : un segment
+ * dynamique exige soit un serveur, soit la liste exhaustive des valeurs à la compilation — et
+ * cette liste, ce sont tous les comptes du jeu. C'est elle, et elle seule, qui empêchait
+ * l'export statique dont la coquille native a besoin.
+ *
+ * Un paramètre de requête se lit entièrement côté navigateur. La page redevient un fichier
+ * statique comme les vingt-deux autres, sans rien changer à ce qu'elle affiche.
+ */
 export default function PublicProfilePage() {
     return (
         <RequireAuth>
-            <PublicProfileContent />
+            {/*
+              * `useSearchParams` impose une frontière de suspense : sans elle, Next bascule
+              * toute la page en rendu serveur, c'est-à-dire exactement ce qu'on vient de retirer.
+              */}
+            <Suspense fallback={<ProfileLoading />}>
+                <PublicProfileContent />
+            </Suspense>
         </RequireAuth>
     );
 }
 
+function ProfileLoading() {
+    return (
+        <main className={styles.main}>
+            <div className={styles.loadingContainer}>
+                <div className={styles.spinner}>⏳</div>
+                <p>Chargement...</p>
+            </div>
+        </main>
+    );
+}
+
 function PublicProfileContent() {
-    const params = useParams();
-    const userId = typeof params.userId === 'string' ? params.userId : Array.isArray(params.userId) ? params.userId[0] : undefined;
+    const searchParams = useSearchParams();
+    const userId = searchParams.get('id') ?? undefined;
 
     const [profile, setProfile] = useState<PublicProfile | null>(null);
     const [loading, setLoading] = useState(true);
@@ -38,16 +66,7 @@ function PublicProfileContent() {
             .finally(() => setLoading(false));
     }, [userId]);
 
-    if (loading) {
-        return (
-            <main className={styles.main}>
-                <div className={styles.loadingContainer}>
-                    <div className={styles.spinner}>⏳</div>
-                    <p>Chargement...</p>
-                </div>
-            </main>
-        );
-    }
+    if (loading) return <ProfileLoading />;
 
     if (notFound || !profile) {
         return (

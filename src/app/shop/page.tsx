@@ -33,6 +33,49 @@ const COFFRETS = Object.values(STARTER_PACKS).map(pack => ({
     price: COFFRET_PRICE,
 }));
 
+/*
+ * Les deux Pass Divins.
+ *
+ * Les totaux sont CALCULÉS et non écrits à la main : une offre dont le total annoncé ne
+ * correspond pas à ce que le serveur versera est une promesse qu'on ne tient pas, et c'est le
+ * genre d'écart qui se découvre après le premier achat.
+ *
+ * L'annuel reste la meilleure affaire sans avoir à le dire : 1 419 ambroisies par euro contre
+ * 1 102 pour le mensuel, et 39,99 € au lieu des 59,88 € que coûteraient douze mensuels.
+ */
+const PASS_DAILY = 150;
+
+const passBenefits = (days: number, welcome: number) => {
+    const total = PASS_DAILY * days + welcome;
+    return [
+        { icon: '📅', text: `${PASS_DAILY} Ambroisie par jour pendant ${days} jours` },
+        { icon: '🎁', text: `${welcome.toLocaleString('fr-FR')} Ambroisie offertes immédiatement` },
+        { icon: '💰', text: `Total : ${total.toLocaleString('fr-FR')} Ambroisie !` },
+    ];
+};
+
+const DIVINE_PASSES = [
+    {
+        id: 'mensuel',
+        name: 'Pass Divin Mensuel',
+        badge: 'Abonnement',
+        price: 4.99,
+        best: false,
+        benefits: passBenefits(30, 1000),
+    },
+    {
+        id: 'annuel',
+        name: 'Pass Divin Annuel',
+        badge: 'Le meilleur choix',
+        price: 39.99,
+        best: true,
+        benefits: [
+            ...passBenefits(365, 2000),
+            { icon: '👑', text: 'Contenu, cadeaux et récompenses exclusifs réservés aux membres' },
+        ],
+    },
+];
+
 // Packs d'Ambroisie
 const AMBROISIE_PACKS = [
     { id: 1, amount: 500, bonus: 0, price: 0.99 },
@@ -245,32 +288,35 @@ export default function ShopPage() {
                     </div>
                 </div>
 
-                {/* Section Offre - Abonnement */}
+                {/* Section Offre - Abonnements */}
                 <section id="section-offre" className={styles.section}>
-                    <h2 className={styles.sectionTitle}>⭐ Offre Spéciale</h2>
-                    <div className={styles.subscriptionCard}>
-                        <div className={styles.subscriptionBadge}>Abonnement</div>
-                        <h3 className={styles.subscriptionTitle}>Pass Divin Mensuel</h3>
-                        <div className={styles.subscriptionBenefits}>
-                            <div className={styles.benefitItem}>
-                                <span className={styles.benefitIcon}>📅</span>
-                                <span>150 Ambroisie par jour pendant 30 jours</span>
+                    <h2 className={styles.sectionTitle}>⭐ Pass Divin</h2>
+                    <div className={styles.subscriptionGrid}>
+                        {DIVINE_PASSES.map(pass => (
+                            <div
+                                key={pass.id}
+                                className={`${styles.subscriptionCard} ${pass.best ? styles.subscriptionBest : ''}`}
+                            >
+                                <div className={styles.subscriptionBadge}>{pass.badge}</div>
+                                <h3 className={styles.subscriptionTitle}>{pass.name}</h3>
+                                <div className={styles.subscriptionBenefits}>
+                                    {pass.benefits.map((b, i) => (
+                                        <div key={i} className={styles.benefitItem}>
+                                            <span className={styles.benefitIcon}>{b.icon}</span>
+                                            <span>{b.text}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className={styles.subscriptionPrice}>
+                                    <span className={styles.priceValue}>
+                                        {pass.price.toFixed(2).replace('.', ',')} €
+                                    </span>
+                                </div>
+                                <button className={`${styles.buyButton} ${styles.disabledButton}`} disabled>
+                                    Bientôt disponible
+                                </button>
                             </div>
-                            <div className={styles.benefitItem}>
-                                <span className={styles.benefitIcon}>🎁</span>
-                                <span>1 000 Ambroisie offerts immédiatement</span>
-                            </div>
-                            <div className={styles.benefitItem}>
-                                <span className={styles.benefitIcon}>💰</span>
-                                <span>Total : 5 500 Ambroisie !</span>
-                            </div>
-                        </div>
-                        <div className={styles.subscriptionPrice}>
-                            <span className={styles.priceValue}>4,99 €</span>
-                        </div>
-                        <button className={`${styles.buyButton} ${styles.disabledButton}`} disabled>
-                            Bientôt disponible
-                        </button>
+                        ))}
                     </div>
                 </section>
 
@@ -450,8 +496,17 @@ export default function ShopPage() {
                     <h2 className={styles.sectionTitle}>
                         <Ambroisie size={20} /> Acheter de l&apos;Ambroisie
                     </h2>
+                    {/*
+                      * Aucune mention d'un MOYEN de paiement ici.
+                      *
+                      * Le texte annonçait « le paiement par carte arrive bientôt ». Sur iOS et
+                      * Android, tout achat de bien numérique doit passer par l'achat intégré de
+                      * la plateforme, et annoncer un paiement extérieur suffit à faire rejeter
+                      * l'application. Les boutons restent « Bientôt disponible », ce qui est vrai
+                      * et ne nomme aucun moyen de paiement.
+                      */}
                     <p className={styles.comingSoonSubtext} style={{ marginTop: '-8px', marginBottom: '16px' }}>
-                        Le paiement par carte arrive bientôt. En attendant, gagnez de l&apos;ambroisie via les quêtes journalières !
+                        Les achats arrivent bientôt. En attendant, gagnez de l&apos;ambroisie via les quêtes journalières !
                     </p>
                     <div className={styles.ambroisieGrid}>
                         {AMBROISIE_PACKS.map((pack) => (

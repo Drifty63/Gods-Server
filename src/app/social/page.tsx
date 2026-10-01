@@ -411,7 +411,7 @@ function SocialContent() {
                                                     ⚔️
                                                 </button>
                                                 <Link
-                                                    href={`/profile/${friend.id}`}
+                                                    href={`/profile/joueur?id=${friend.id}`}
                                                     className={`${styles.actionButton} ${styles.profileButton}`}
                                                     title="Profil"
                                                 >
@@ -681,7 +681,7 @@ function SocialContent() {
                                             </div>
                                         </div>
                                         <div className={styles.requestActions}>
-                                            <Link href={`/profile/${request.id}`} className={styles.requestProfileButton}>👤</Link>
+                                            <Link href={`/profile/joueur?id=${request.id}`} className={styles.requestProfileButton}>👤</Link>
                                             <button className={styles.acceptButton} onClick={() => handleAccept(request.friendship_id)}>✓</button>
                                             <button className={styles.rejectButton} onClick={() => handleReject(request.friendship_id)}>✕</button>
                                         </div>
