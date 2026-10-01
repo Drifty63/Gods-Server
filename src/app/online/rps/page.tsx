@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiplayer, RpsChoice } from '@/hooks/useMultiplayer';
 import styles from './page.module.css';
@@ -50,26 +50,39 @@ export default function OnlineRpsPage() {
         }
     }, [isConnected, hasRejoined, resumeGame, router]);
 
-    const [isRedirecting, setIsRedirecting] = useState(false);
+    /*
+     * Le garde-fou « on ne redirige qu'une fois » est une RÉFÉRENCE, pas un état.
+     *
+     * C'était un `useState` listé dans les dépendances de l'effet qui le posait. Tant qu'il n'y
+     * avait pas de nettoyage, ça passait. Mais j'ai ajouté `return () => clearTimeout(t)` pour
+     * qu'un joueur quittant l'écran ne soit pas ramené de force sur le plateau — et cet ajout a
+     * fermé le piège : poser l'état changeait les dépendances, React exécutait le nettoyage du
+     * passage précédent, donc ANNULAIT le minuteur de navigation, puis relançait l'effet qui
+     * sortait aussitôt puisque le drapeau était désormais levé.
+     *
+     * Résultat : la décision partait bien, le serveur démarrait la partie, et l'écran du
+     * pierre-feuille-ciseaux ne bougeait plus jamais. Une référence ne déclenche pas de rendu,
+     * donc l'effet ne se rejoue pas et le minuteur va à son terme.
+     */
+    const hasRedirectedRef = useRef(false);
 
     // Rediriger vers le jeu quand la partie commence
     useEffect(() => {
-        if (gameStartData && !isRedirecting) {
-            setIsRedirecting(true);
+        if (!gameStartData || hasRedirectedRef.current) return;
+        hasRedirectedRef.current = true;
 
-            // S'assurer que isHost est bien sauvegardé avant la redirection
-            if (currentGame?.isHost !== undefined) {
-                sessionStorage.setItem('isHost', String(currentGame.isHost));
-            }
-            sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
-
-            // Délai pour laisser le socket se synchroniser avant la redirection. Nettoyé au
-            // démontage : sans ça, un joueur qui quitte l'écran entre-temps était ramené de force
-            // sur le plateau une seconde plus tard.
-            const t = setTimeout(() => router.push('/online/game'), 1000);
-            return () => clearTimeout(t);
+        // S'assurer que isHost est bien sauvegardé avant la redirection
+        if (currentGame?.isHost !== undefined) {
+            sessionStorage.setItem('isHost', String(currentGame.isHost));
         }
-    }, [gameStartData, router, currentGame?.isHost, isRedirecting]);
+        sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
+
+        // Délai pour laisser le socket se synchroniser avant la redirection. Nettoyé au
+        // démontage : sans ça, un joueur qui quitte l'écran entre-temps était ramené de force
+        // sur le plateau une seconde plus tard.
+        const t = setTimeout(() => router.push('/online/game'), 1000);
+        return () => clearTimeout(t);
+    }, [gameStartData, router, currentGame?.isHost]);
 
     /*
      * La partie a démarré mais `gameStartData` n'est pas arrivé.
