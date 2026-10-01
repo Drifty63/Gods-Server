@@ -12,10 +12,11 @@ import styles from './page.module.css';
 
 export default function OnlineSelectPage() {
     const router = useRouter();
-    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName } = useMultiplayer();
+    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName, error, clearError } = useMultiplayer();
     const { profile } = useAuth();
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [hasRejoined, setHasRejoined] = useState(false);
 
     const isCreator = profile?.is_creator || false;
@@ -117,11 +118,19 @@ export default function OnlineSelectPage() {
         }
     };
 
-    const handleConfirm = () => {
-        if (selectedGods.length === 4) {
-            selectGods(selectedGods);
-            setHasSubmitted(true);
-        }
+    /*
+     * `hasSubmitted` ne passe à vrai QUE si le serveur a accepté.
+     *
+     * Il était posé sans attendre la réponse : un refus laissait donc le joueur sur l'écran
+     * « En attente de l'adversaire… » pour toujours, alors que son équipe n'était jamais partie.
+     * Avec le refus désormais visible, il peut réessayer.
+     */
+    const handleConfirm = async () => {
+        if (selectedGods.length !== 4 || submitting) return;
+        setSubmitting(true);
+        const ok = await selectGods(selectedGods);
+        setSubmitting(false);
+        if (ok) setHasSubmitted(true);
     };
 
 
@@ -159,6 +168,14 @@ export default function OnlineSelectPage() {
                         Partie contre <span className={styles.opponentName}>{displayOpponentName}</span>
                     </p>
                 </header>
+                {/* L'auto-confirmation du Duel est silencieuse par nature : si le serveur la
+                    refuse, c'est le SEUL endroit où le joueur peut l'apprendre. */}
+                {error && (
+                    <div className={styles.errorBanner}>
+                        <span>⚠️ {error}</span>
+                        <button onClick={clearError}>✕</button>
+                    </div>
+                )}
                 <div className={styles.actions}>
                     <div className={styles.waitingSpinner}>
                         <div className={styles.spinner}></div>
@@ -181,6 +198,15 @@ export default function OnlineSelectPage() {
                     Partie contre <span className={styles.opponentName}>{displayOpponentName}</span>
                 </p>
             </header>
+
+            {/* Un refus du serveur doit se VOIR. Sans cette bannière, un « Confirmer » refusé
+                ne produisait rien d'autre que le son du bouton. */}
+            {error && (
+                <div className={styles.errorBanner}>
+                    <span>⚠️ {error}</span>
+                    <button onClick={clearError}>✕</button>
+                </div>
+            )}
 
             <div className={styles.statusBar}>
                 <span className={styles.counter}>
@@ -240,9 +266,9 @@ export default function OnlineSelectPage() {
                     <button
                         className={styles.confirmButton}
                         onClick={handleConfirm}
-                        disabled={selectedGods.length !== 4 || !isConnected || !hasRejoined}
+                        disabled={selectedGods.length !== 4 || !isConnected || !hasRejoined || submitting}
                     >
-                        ✅ Confirmer la sélection
+                        {submitting ? 'Confirmation...' : '✅ Confirmer la sélection'}
                     </button>
                 ) : (
                     <div className={styles.waitingSpinner}>

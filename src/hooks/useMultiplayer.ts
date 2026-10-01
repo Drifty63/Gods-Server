@@ -393,29 +393,72 @@ export function useMultiplayer() {
     // GAMEPLAY
     // =====================================
 
-    const selectGods = useCallback(async (gods: GodCard[]) => {
-        if (!gameIdRef.current || !tokenRef.current) return;
-        const supabase = getSupabaseClient();
-        const { data, error: fnErr } = await supabase.functions.invoke('select-gods', {
-            body: { gameId: gameIdRef.current, token: tokenRef.current, gods },
-        });
-        if (fnErr || data?.error) setError(data?.error ?? fnErr?.message ?? 'Erreur');
+    /**
+     * La session courante, avec repli sur `sessionStorage`.
+     *
+     * Les cinq actions qui parlent au serveur commençaient toutes par un `return` MUET quand les
+     * références étaient vides. Or elles le sont tant que `resumeGame` n'a pas tourné — c'est-à-
+     * dire pendant les premiers instants de chaque page, et à chaque reconnexion du canal. Le
+     * joueur appuyait, entendait le son du bouton, et rien ne partait. Il réappuyait, toujours
+     * rien, parce que les références étaient toujours vides : c'est ce qui bloquait la
+     * confirmation d'équipe et le choix « je joue en premier ».
+     *
+     * Les identifiants sont pourtant là, dans `sessionStorage`, écrits par la page précédente.
+     * Les références ne sont qu'un cache ; quand il est froid, on lit la source.
+     */
+    const session = useCallback((): { gameId: string; token: string } | null => {
+        const gameId = gameIdRef.current ?? (typeof window !== 'undefined' ? sessionStorage.getItem('gameId') : null);
+        const token = tokenRef.current ?? (typeof window !== 'undefined' ? sessionStorage.getItem('multiplayerToken') : null);
+        return gameId && token ? { gameId, token } : null;
     }, []);
+
+    /**
+     * Appelle une fonction serveur et fait REMONTER l'échec.
+     *
+     * `functions.invoke` range une réponse non-2xx dans `error`, pas dans `data` : les appels qui
+     * ne regardaient que `data.error` avalaient donc tous les refus du serveur. Un joueur à qui
+     * `rps-decide` répondait « ce n'est pas le moment de décider » ne voyait strictement rien, et
+     * sa partie ne démarrait jamais.
+     */
+    const callFunction = useCallback(async (
+        name: string,
+        body: Record<string, unknown>,
+    ): Promise<{ ok: boolean; data?: Record<string, unknown> }> => {
+        const current = session();
+        if (!current) {
+            setError('Session de partie introuvable. Revenez au salon et relancez une recherche.');
+            return { ok: false };
+        }
+
+        const supabase = getSupabaseClient();
+        const { data, error: fnErr } = await supabase.functions.invoke(name, {
+            body: { ...body, gameId: current.gameId, token: current.token },
+        });
+
+        const message = (data as { error?: string } | null)?.error ?? fnErr?.message;
+        if (message) { setError(message); return { ok: false, data: data ?? undefined }; }
+        return { ok: true, data: data ?? undefined };
+    }, [session]);
+
+    const selectGods = useCallback(
+        (gods: GodCard[]) => callFunction('select-gods', { gods }).then(r => r.ok),
+        [callFunction],
+    );
 
     const sendAction = useCallback((action: GameAction) => {
         pendingActionRef.current = action;
     }, []);
 
     const syncState = useCallback(async (gameState: Record<string, unknown>) => {
-        if (!gameIdRef.current || !tokenRef.current) return;
+        const current = session();
+        if (!current) { setError('Session de partie introuvable.'); return; }
 
         // L'action est prélevée TOUT DE SUITE, pas au moment où la requête partira : entre-temps
         // une autre action aurait pu écraser la référence, et on enverrait alors l'état d'une
         // action avec l'étiquette d'une autre.
         const action = pendingActionRef.current;
         pendingActionRef.current = null;
-        const gameId = gameIdRef.current;
-        const token = tokenRef.current;
+        const { gameId, token } = current;
 
         const run = async () => {
             const supabase = getSupabaseClient();
@@ -441,18 +484,16 @@ export function useMultiplayer() {
         // l'ordre d'arrivée côté serveur soit l'ordre d'émission.
         syncQueueRef.current = syncQueueRef.current.then(run, run);
         return syncQueueRef.current;
-    }, [applyGameRow]);
+    }, [applyGameRow, session]);
 
     // Signale la fin de partie (déclenchée localement dès que le moteur passe en 'finished') pour
     // que le résultat soit persisté (Ferveur/stats/historique) côté serveur. Les deux clients le
     // détectent indépendamment et appellent ceci -- l'Edge Function ne traite que le premier appel.
-    const reportMatchResult = useCallback(async (didIWin: boolean, godsUsed: string[] = []) => {
-        if (!gameIdRef.current || !tokenRef.current) return;
-        const supabase = getSupabaseClient();
-        await supabase.functions.invoke('report-match-result', {
-            body: { gameId: gameIdRef.current, token: tokenRef.current, didIWin, godsUsed },
-        });
-    }, []);
+    const reportMatchResult = useCallback(
+        (didIWin: boolean, godsUsed: string[] = []) =>
+            callFunction('report-match-result', { didIWin, godsUsed }).then(r => r.ok),
+        [callFunction],
+    );
 
     /**
      * Réclame la victoire après l'absence prolongée de l'adversaire.
@@ -506,26 +547,20 @@ export function useMultiplayer() {
         isHost: isHostRef.current,
     }), []);
 
+
     // =====================================
     // PIERRE-FEUILLE-CISEAUX
     // =====================================
 
-    const sendRpsChoice = useCallback(async (choice: RpsChoice) => {
-        if (!gameIdRef.current || !tokenRef.current) return;
-        const supabase = getSupabaseClient();
-        await supabase.functions.invoke('rps-choice', {
-            body: { gameId: gameIdRef.current, token: tokenRef.current, choice },
-        });
-    }, []);
+    const sendRpsChoice = useCallback(
+        (choice: RpsChoice) => callFunction('rps-choice', { choice }).then(r => r.ok),
+        [callFunction],
+    );
 
-    const sendRpsDecision = useCallback(async (goFirst: boolean) => {
-        if (!gameIdRef.current || !tokenRef.current) return;
-        const supabase = getSupabaseClient();
-        const { data } = await supabase.functions.invoke('rps-decide', {
-            body: { gameId: gameIdRef.current, token: tokenRef.current, goFirst },
-        });
-        if (data?.error) setError(data.error);
-    }, []);
+    const sendRpsDecision = useCallback(
+        (goFirst: boolean) => callFunction('rps-decide', { goFirst }).then(r => r.ok),
+        [callFunction],
+    );
 
     return {
         // États de connexion
