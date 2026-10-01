@@ -36,7 +36,7 @@
             rgba(10, 10, 26, 0.82) 0%,
             rgba(20, 20, 50, 0.72) 55%,
             rgba(10, 10, 26, 0.88) 100%),
-        url('/assets/tutorial_background.png') center / cover no-repeat;
+        url('/assets/tutorial_background.webp') center / cover no-repeat;
 }
 
 .main > * {

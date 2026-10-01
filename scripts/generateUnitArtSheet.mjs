@@ -96,7 +96,7 @@ MISSING.forEach((unit, index) => {
     // doivent ensuite lui ressembler.
     rows.push([
         '',
-        `/cards/gods/${unit.id}.png`,
+        `/cards/gods/${unit.id}.webp`,
         'Portrait',
         `${name} — ${stat.label} de ${unit.god}`,
         `Le visage de l'unité. ${hp} PV, ${cost} points en Duel${element}${weakness}.`,
@@ -109,7 +109,7 @@ MISSING.forEach((unit, index) => {
         if (m?.spellName) known++;
         rows.push([
             '',
-            `/cards/spells/spell_${unit.id}_${role.slug}.png`,
+            `/cards/spells/spell_${unit.id}_${role.slug}.webp`,
             'Sort',
             `${name} · ${role.label}${named}`,
             m?.effect || role.hint,

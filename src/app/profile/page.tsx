@@ -11,6 +11,7 @@ import { ACHIEVEMENTS, FAMILY_LABELS, newlyUnlocked, type Achievement, type Achi
 import { toast } from '@/lib/toast';
 import { ALL_GODS, getOwnedGods, getReleasedUnits, ownsCard } from '@/data/gods';
 import { getRankByFerveur, getRankProgress, getLadder, getBestLadder, RANKS } from '@/data/ranks';
+import { isAvatarImage, resolveAvatarUrl } from '@/lib/avatar';
 import styles from './page.module.css';
 
 function formatMatchDate(iso: string): string {
@@ -263,9 +264,9 @@ export default function ProfilePage() {
                 {/* Carte de profil */}
                 <section className={styles.profileCard}>
                     <div className={styles.avatarContainer} onClick={() => setShowAvatarModal(true)}>
-                        {profile.avatar.startsWith('/') ? (
+                        {isAvatarImage(profile.avatar) ? (
                             <Image
-                                src={profile.avatar}
+                                src={resolveAvatarUrl(profile.avatar)}
                                 alt="Avatar"
                                 width={80}
                                 height={80}

@@ -23,7 +23,7 @@
     pointer-events: none;
     background:
         linear-gradient(135deg, rgba(15, 15, 35, 0.88) 0%, rgba(26, 26, 62, 0.85) 50%, rgba(45, 27, 78, 0.88) 100%),
-        url('/assets/duel_background.png') center / cover no-repeat;
+        url('/assets/duel_background.webp') center / cover no-repeat;
 }
 
 /**

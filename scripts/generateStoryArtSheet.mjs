@@ -56,21 +56,21 @@ function add(file, kind, context, details, size) {
  */
 const OUTCOMES = [
     ['battle_athens_temple', 'Chapitre 2, combat 4 — Temple d’Athéna',
-        '/story/chapter2/combat4_victory.png', '/story/chapter2/combat4_defeat.png'],
+        '/story/chapter2/combat4_victory.webp', '/story/chapter2/combat4_defeat.webp'],
     ['battle_arachne', 'Chapitre 2, combat 3 — Arachné',
-        '/assets/story/ch2_arachne_victory.png', '/assets/story/ch2_arachne_defeat.png'],
+        '/assets/story/ch2_arachne_victory.webp', '/assets/story/ch2_arachne_defeat.webp'],
     ['battle_dragon_thebes', 'Chapitre 2, combat 2 — Le Dragon de Thèbes',
-        '/assets/story/ch2_dragon_victory.png', '/assets/story/ch2_dragon_defeat.png'],
+        '/assets/story/ch2_dragon_victory.webp', '/assets/story/ch2_dragon_defeat.webp'],
     ['battle_thebes_betrayal', 'Chapitre 2, combat 1 — La Trahison de Thèbes',
-        '/assets/story/chapter2_battle1_victory.png', '/assets/story/ch2_battle1_defeat_v2.png'],
+        '/assets/story/chapter2_battle1_victory.webp', '/assets/story/ch2_battle1_defeat_v2.webp'],
     ['battle_ambush_ares', 'Chapitre 1, combat 4 — Zeus + Déméter + Artémis contre Arès et ses soldats',
-        '/assets/story/battle4_victory.png', '/assets/story/battle4_defeat_v2.png'],
+        '/assets/story/battle4_victory.webp', '/assets/story/battle4_defeat_v2.webp'],
     ['battle_test_of_valor', 'Chapitre 1, combat 3 — Zeus + Hestia contre Déméter et Artémis',
-        '/assets/story/battle3_victory.png', '/assets/story/battle3_defeat.png'],
+        '/assets/story/battle3_victory.webp', '/assets/story/battle3_defeat.webp'],
     ['battle_zeus_hestia_vs_ares', 'Chapitre 1, combat 2 — Zeus + Hestia contre Arès',
-        '/assets/story/battle2_victory.png', '/assets/story/battle2_defeat.png'],
+        '/assets/story/battle2_victory.webp', '/assets/story/battle2_defeat.webp'],
     ['battle_zeus_vs_hades', 'Chapitre 1, combat 1 — Zeus contre Hadès (cas par défaut)',
-        '/assets/story/battle1_victory_v2.png', '/assets/story/battle1_defeat.png'],
+        '/assets/story/battle1_victory_v2.webp', '/assets/story/battle1_defeat.webp'],
 ];
 
 for (const [, label, victory, defeat] of OUTCOMES) {
@@ -116,7 +116,7 @@ for (const line of campaign) {
 }
 
 // ── 3. Portrait du narrateur ─────────────────────────────────────────────────
-add('/cards/gods/narrator.png', 'Portrait', 'Narrateur',
+add('/cards/gods/narrator.webp', 'Portrait', 'Narrateur',
     'Visage affiché quand le récit parle sans interlocuteur', '640 x 640 px');
 
 // ── 4. Fonds de page demandés ────────────────────────────────────────────────
@@ -132,16 +132,16 @@ add('/cards/gods/narrator.png', 'Portrait', 'Narrateur',
  * Une étiquette fausse est pire qu'une étiquette absente : elle fait fournir la mauvaise image.
  */
 const PAGE_BACKGROUNDS = [
-    ['/backgrounds/shop_bg.png', 'Fond de page',
+    ['/backgrounds/shop_bg.webp', 'Fond de page',
         'Boutique', 'Fond plein écran de la boutique'],
-    ['/assets/profile_background.png', 'Fond de page',
+    ['/assets/profile_background.webp', 'Fond de page',
         'Profil', 'Fond plein écran de la page de profil'],
-    ['/assets/story/library_background.png', 'Fond de page',
+    ['/assets/story/library_background.webp', 'Fond de page',
         'Accueil du mode Histoire', 'Fond plein écran de la page qui liste les chapitres'],
-    ['/assets/story/olympus_storm.png', 'Décor PAR DÉFAUT',
+    ['/assets/story/olympus_storm.webp', 'Décor PAR DÉFAUT',
         'Scènes sans illustration dédiée',
         'Affiché dès qu’une scène n’a pas d’image à elle — c’est le décor le plus vu du mode'],
-    ['/assets/story/narrator_backdrop.png', 'Décor PAR DÉFAUT',
+    ['/assets/story/narrator_backdrop.webp', 'Décor PAR DÉFAUT',
         'Scènes du narrateur sans illustration dédiée',
         'Affiché quand le récit parle et que la scène n’a pas d’image à elle'],
 ];

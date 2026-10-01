@@ -22,7 +22,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_poseidon_trident.png',
+        imageUrl: '/cards/spells/spell_poseidon_trident.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -38,7 +38,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'mill', value: 2 }
         ],
-        imageUrl: '/cards/spells/spell_poseidon_colere.png',
+        imageUrl: '/cards/spells/spell_poseidon_colere.webp',
         description: '1🩸 → ⚔️⚔️ | 2📤',
     },
 
@@ -56,7 +56,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'discard', value: 2 } // Cible implicite : adversaire (via la logique discard)
         ],
-        imageUrl: '/cards/spells/spell_poseidon_vague.png',
+        imageUrl: '/cards/spells/spell_poseidon_vague.webp',
         description: '2🩸 → ⚔️⚔️ | 2🎴🃏⚔️ → 🗑️',
     },
     {
@@ -71,7 +71,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'mill', value: 5, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'tsunami_damage', description: 'Inflige 3 dégâts par carte du dieu ciblé meulée' }
         ],
-        imageUrl: '/cards/spells/spell_poseidon_tsunami.png',
+        imageUrl: '/cards/spells/spell_poseidon_tsunami.webp',
         description: '5📤 → ⚔️ | 3🩸 ✖️ 🎴📤',
     },
 
@@ -88,7 +88,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'prison_mill', description: 'Meule du nombre d\'ennemis touchés' }
         ],
-        imageUrl: '/cards/spells/spell_poseidon_prison.png',
+        imageUrl: '/cards/spells/spell_poseidon_prison.webp',
         description: '1🩸 → 👊 | 📤 ✖️ ⚔️',
     },
 
@@ -109,7 +109,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_zeus_eclair.png',
+        imageUrl: '/cards/spells/spell_zeus_eclair.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -124,7 +124,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'conductive_lightning', value: 1, target: 'enemy_god', description: 'Inflige 1 dégât et applique 1 marque de foudre' },
             { type: 'custom', customEffectId: 'conductive_lightning', value: 1, target: 'enemy_god', description: 'Inflige 1 dégât et applique 1 marque de foudre' }
         ],
-        imageUrl: '/cards/spells/spell_zeus_conductrice.png',
+        imageUrl: '/cards/spells/spell_zeus_conductrice.webp',
         description: '1🩸 +1⚡ → ⚔️⚔️',
     },
 
@@ -141,7 +141,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 5, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'lightning_toggle', description: 'Applique ou enlève ⚡ de la cible. +2 dégâts par ⚡ enlevée' }
         ],
-        imageUrl: '/cards/spells/spell_zeus_foudroyant.png',
+        imageUrl: '/cards/spells/spell_zeus_foudroyant.webp',
         description: '5🩸 → ⚔️ | ❓+⚡/-⚡ | -⚡ ✖️ 2🩸',
     },
     {
@@ -156,7 +156,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'lightning_toggle_all', description: 'Applique ou enlève ⚡ de toutes les cibles. +2 dégâts par ⚡ enlevée' }
         ],
-        imageUrl: '/cards/spells/spell_zeus_foudroiement.png',
+        imageUrl: '/cards/spells/spell_zeus_foudroiement.webp',
         description: '3🩸 → 👊 | ❓+⚡/-⚡ | -⚡ ✖️ 2🩸',
     },
 
@@ -174,7 +174,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'lightning_toggle_multi', description: 'Applique ou enlève ⚡ des cibles. +2 dégâts par ⚡ enlevée' }
         ],
-        imageUrl: '/cards/spells/spell_zeus_chaine.png',
+        imageUrl: '/cards/spells/spell_zeus_chaine.webp',
         description: '2🩸 → ⚔️⚔️ | ❓+⚡/-⚡ | -⚡ ✖️ 2🩸',
     },
 
@@ -195,7 +195,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_nyx_zonevide.png',
+        imageUrl: '/cards/spells/spell_nyx_zonevide.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -210,7 +210,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'shuffle_hand_draw_blind', description: 'Mélange 1 carte adverse dans son deck, pioche 1 à l\'envers' }
         ],
-        imageUrl: '/cards/spells/spell_nyx_ombres.png',
+        imageUrl: '/cards/spells/spell_nyx_ombres.webp',
         description: '2🩸 → ⚔️ | 1🎴🃏⚔️ → 🔀📚 | +1🎴👁️',
     },
 
@@ -227,7 +227,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'shuffle_hand_draw_blind_2', description: 'Mélange 2 cartes adverses dans son deck, pioche 2 à l\'envers' }
         ],
-        imageUrl: '/cards/spells/spell_nyx_malediction.png',
+        imageUrl: '/cards/spells/spell_nyx_malediction.webp',
         description: '3🩸 → ⚔️ | 2🎴🃏⚔️ → 🔀📚 | +2🎴👁️',
     },
     {
@@ -241,7 +241,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'shuffle_all_hand_draw_blind', description: 'L\'adversaire mélange sa main dans son deck et pioche 5 à l\'envers' }
         ],
-        imageUrl: '/cards/spells/spell_nyx_nuitsansfin.png',
+        imageUrl: '/cards/spells/spell_nyx_nuitsansfin.webp',
         description: '🃏⚔️ → 🔀📚 | +5🎴👁️',
     },
 
@@ -258,7 +258,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'draw', value: 3 },
             { type: 'custom', customEffectId: 'put_cards_bottom', description: 'Placez 3 cartes en dessous de votre deck' }
         ],
-        imageUrl: '/cards/spells/spell_nyx_prophetie.png',
+        imageUrl: '/cards/spells/spell_nyx_prophetie.webp',
         description: '+3🎴 | 3🎴 → 📚⬇️ | +1⚡',
     },
 
@@ -279,7 +279,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_hestia_flammes.png',
+        imageUrl: '/cards/spells/spell_hestia_flammes.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -294,7 +294,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'remove_weakness_1_turn', target: 'ally_god', description: 'Retire la faiblesse d\'un allié pendant 1 tour' }
         ],
-        imageUrl: '/cards/spells/spell_hestia_fumee.png',
+        imageUrl: '/cards/spells/spell_hestia_fumee.webp',
         description: '1🩸 → 👊 | ➖🌊1⏳ → 👤',
     },
 
@@ -310,7 +310,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'heal_by_energy', target: 'ally_god', description: 'Soigne un allié de la valeur totale de votre énergie' }
         ],
-        imageUrl: '/cards/spells/spell_hestia_repas.png',
+        imageUrl: '/cards/spells/spell_hestia_repas.webp',
         description: '+2⚡ | ⚡🔗💚 → 👤',
     },
     {
@@ -324,7 +324,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'remove_all_weakness_3_turns', description: 'Tous les alliés perdent leurs faiblesses pendant 3 tours' }
         ],
-        imageUrl: '/cards/spells/spell_hestia_foyer.png',
+        imageUrl: '/cards/spells/spell_hestia_foyer.webp',
         description: '➖🌊3⏳ → 👥',
     },
 
@@ -340,7 +340,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'recycle_from_discard', description: 'Choisissez 2 cartes de la défausse et remettez-les dans le deck' }
         ],
-        imageUrl: '/cards/spells/spell_hestia_repos.png',
+        imageUrl: '/cards/spells/spell_hestia_repos.webp',
         description: '2🎴🗑️ → 🔀📚',
     },
 
@@ -361,7 +361,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_athena_serres.png',
+        imageUrl: '/cards/spells/spell_athena_serres.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -376,7 +376,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 1, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_athena_nova.png',
+        imageUrl: '/cards/spells/spell_athena_nova.webp',
         description: '1🩸 → 👊 | +🗡️1⏳ → 🔄',
     },
 
@@ -393,7 +393,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_athena_provocation.png',
+        imageUrl: '/cards/spells/spell_athena_provocation.webp',
         description: '+3🛡️🔄 | +🗡️3⏳🔄',
     },
     {
@@ -407,7 +407,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'shield', value: 5, target: 'all_allies' }
         ],
-        imageUrl: '/cards/spells/spell_athena_rempart.png',
+        imageUrl: '/cards/spells/spell_athena_rempart.webp',
         description: '+5🛡️ → 👥',
     },
 
@@ -424,7 +424,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'shield', value: 3, target: 'ally_god' }
         ],
-        imageUrl: '/cards/spells/spell_athena_faveur.png',
+        imageUrl: '/cards/spells/spell_athena_faveur.webp',
         description: '+3🛡️🔄 | +3🛡️ → 👤',
     },
 
@@ -445,7 +445,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_demeter_moisson.png',
+        imageUrl: '/cards/spells/spell_demeter_moisson.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -460,7 +460,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'heal', value: 2, target: 'any_god' }
         ],
-        imageUrl: '/cards/spells/spell_demeter_secheresse.png',
+        imageUrl: '/cards/spells/spell_demeter_secheresse.webp',
         description: '1🩸 → 👊 | 2💚 → 👤',
     },
 
@@ -476,7 +476,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'distribute_heal_5', description: 'Répartit 5 soins entre vos alliés' }
         ],
-        imageUrl: '/cards/spells/spell_demeter_fertilisation.png',
+        imageUrl: '/cards/spells/spell_demeter_fertilisation.webp',
         description: '5💚 → 👥 (répartir)',
     },
     {
@@ -490,7 +490,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'revive_god', target: 'dead_ally_god', description: 'Fait revenir un personnage d\'entre les morts avec 8 PV' }
         ],
-        imageUrl: '/cards/spells/spell_demeter_graine.png',
+        imageUrl: '/cards/spells/spell_demeter_graine.webp',
         description: '❤️‍🩹 8PV → ☠️',
     },
 
@@ -507,7 +507,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'heal', value: 4, target: 'any_god' },
             { type: 'energy', value: 1 }
         ],
-        imageUrl: '/cards/spells/spell_demeter_recolte.png',
+        imageUrl: '/cards/spells/spell_demeter_recolte.webp',
         description: '4💚 → 👤 | +1⚡',
     },
 
@@ -528,7 +528,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_dionysos_gueule.png',
+        imageUrl: '/cards/spells/spell_dionysos_gueule.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -545,7 +545,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 1, target: 'same' }  // 1 poison sur la 2ème cible
         ],
-        imageUrl: '/cards/spells/spell_dionysos_ivresse.png',
+        imageUrl: '/cards/spells/spell_dionysos_ivresse.webp',
         description: '1🩸 +1💀 → ⚔️⚔️',
     },
 
@@ -562,7 +562,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 2 } // S'applique à la même cible
         ],
-        imageUrl: '/cards/spells/spell_dionysos_folie.png',
+        imageUrl: '/cards/spells/spell_dionysos_folie.webp',
         description: '2🩸 +2💀 → ⚔️',
     },
     {
@@ -576,7 +576,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'poison', value: 2, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_dionysos_tournee.png',
+        imageUrl: '/cards/spells/spell_dionysos_tournee.webp',
         description: '+2💀 → 👊',
     },
 
@@ -592,7 +592,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'heal_by_poison', target: 'ally_god', description: 'Soigne un personnage du nombre total de poisons sur les ennemis' }
         ],
-        imageUrl: '/cards/spells/spell_dionysos_ambroisie.png',
+        imageUrl: '/cards/spells/spell_dionysos_ambroisie.webp',
         description: '💀🔗💚 → 👤',
     },
 
@@ -613,7 +613,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_hades_terrebrulee.png',
+        imageUrl: '/cards/spells/spell_hades_terrebrulee.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -628,7 +628,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'heal', value: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_hades_purgatoire.png',
+        imageUrl: '/cards/spells/spell_hades_purgatoire.webp',
         description: '2🩸 → ⚔️ | +2💚🔄',
     },
 
@@ -644,7 +644,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 6, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_hades_flammes.png',
+        imageUrl: '/cards/spells/spell_hades_flammes.webp',
         description: '6🩸 → ⚔️',
     },
     {
@@ -659,7 +659,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'lifesteal_damage', description: 'Soigne du nombre de dégâts infligés' }
         ],
-        imageUrl: '/cards/spells/spell_hades_syphon.png',
+        imageUrl: '/cards/spells/spell_hades_syphon.webp',
         description: '3🩸 → ⚔️ | 🩸🔗💚🔄',
     },
 
@@ -676,7 +676,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 8, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'heal_if_kill_8', description: 'Si la cible meurt, gagne 8 PV' }
         ],
-        imageUrl: '/cards/spells/spell_hades_chemin.png',
+        imageUrl: '/cards/spells/spell_hades_chemin.webp',
         description: '8🩸 → ⚔️ | ☠️ → +8💚🔄',
     },
 
@@ -697,7 +697,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_apollon_cacophonie.png',
+        imageUrl: '/cards/spells/spell_apollon_cacophonie.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -712,7 +712,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'remove_energy_1', description: 'Enlève 1 énergie à l\'adversaire' }
         ],
-        imageUrl: '/cards/spells/spell_apollon_notes.png',
+        imageUrl: '/cards/spells/spell_apollon_notes.webp',
         description: '1🩸 → ⚔️ | -1⚡⚔️',
     },
 
@@ -729,7 +729,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'remove_energy_1', description: 'Fait perdre 1 énergie à l\'adversaire' }
         ],
-        imageUrl: '/cards/spells/spell_apollon_recital.png',
+        imageUrl: '/cards/spells/spell_apollon_recital.webp',
         description: '1🩸 → 👊 | -1⚡⚔️',
     },
     {
@@ -743,7 +743,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'stun', value: 1, statusDuration: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_apollon_concerto.png',
+        imageUrl: '/cards/spells/spell_apollon_concerto.webp',
         description: '+3⚡ | +😵 3⏳🔄',
     },
 
@@ -759,7 +759,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'remove_energy_2', description: 'Fait perdre 2 énergies à l\'adversaire' }
         ],
-        imageUrl: '/cards/spells/spell_apollon_envole.png',
+        imageUrl: '/cards/spells/spell_apollon_envole.webp',
         description: '+1⚡ | -2⚡⚔️',
     },
 
@@ -780,7 +780,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_ares_brisee.png',
+        imageUrl: '/cards/spells/spell_ares_brisee.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -794,7 +794,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_ares_entrainement.png',
+        imageUrl: '/cards/spells/spell_ares_entrainement.webp',
         description: '+3⚡ | 3🩸 → 🔄',
     },
 
@@ -811,7 +811,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 4, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_ares_saut.png',
+        imageUrl: '/cards/spells/spell_ares_saut.webp',
         description: '4🩸 → ⚔️ | 2🩸 → 🔄',
     },
     {
@@ -826,7 +826,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 5, target: 'enemy_god' },
             { type: 'damage', value: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_ares_frappe.png',
+        imageUrl: '/cards/spells/spell_ares_frappe.webp',
         description: '5🩸 → ⚔️ | 3🩸 → 🔄',
     },
 
@@ -843,7 +843,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'damage_equal_lost_health', target: 'enemy_god', description: 'Inflige des dégâts égaux aux points de vie perdus' },
             { type: 'damage', value: 5, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_ares_dernier.png',
+        imageUrl: '/cards/spells/spell_ares_dernier.webp',
         description: 'PV➖🔗🩸 → ⚔️ | 5🩸 → 🔄',
     },
 
@@ -864,7 +864,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_artemis_fleches_multiples.png',
+        imageUrl: '/cards/spells/spell_artemis_fleches_multiples.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -879,7 +879,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_artemis_tir_bestial.png',
+        imageUrl: '/cards/spells/spell_artemis_tir_bestial.webp',
         description: '2🩸 → ⚔️⚔️',
     },
 
@@ -896,7 +896,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_artemis_fleches_tracantes.png',
+        imageUrl: '/cards/spells/spell_artemis_fleches_tracantes.webp',
         description: '3🩸 → ⚔️⚔️',
     },
     {
@@ -911,7 +911,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'apply_weakness', description: 'Applique une faiblesse d\'un élément voulu' }
         ],
-        imageUrl: '/cards/spells/spell_artemis_coup_critique.png',
+        imageUrl: '/cards/spells/spell_artemis_coup_critique.webp',
         description: '3🩸 +🌊 → ⚔️',
     },
 
@@ -927,7 +927,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 10, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_artemis_execution.png',
+        imageUrl: '/cards/spells/spell_artemis_execution.webp',
         description: '10🩸 → ⚔️',
     },
 
@@ -948,7 +948,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_aphrodite_etreinte.png',
+        imageUrl: '/cards/spells/spell_aphrodite_etreinte.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -963,7 +963,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same', description: 'Stun pendant 1 tour' }
         ],
-        imageUrl: '/cards/spells/spell_aphrodite_coeur_brise.png',
+        imageUrl: '/cards/spells/spell_aphrodite_coeur_brise.webp',
         description: '2🩸 +😵1⏳ → ⚔️',
     },
 
@@ -986,7 +986,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'cleanse', description: 'Enlève tous les effets négatifs' },
             { type: 'heal', value: 4, target: 'ally_god' }
         ],
-        imageUrl: '/cards/spells/spell_aphrodite_toucher.png',
+        imageUrl: '/cards/spells/spell_aphrodite_toucher.webp',
         description: '➖🟠 +4💚 → 👤',
     },
     {
@@ -1000,7 +1000,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'enemy_god', description: 'Stun pendant 2 tours' }
         ],
-        imageUrl: '/cards/spells/spell_aphrodite_charme.png',
+        imageUrl: '/cards/spells/spell_aphrodite_charme.webp',
         description: '+😵2⏳ → ⚔️',
     },
 
@@ -1017,7 +1017,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'cleanse_all_allies', description: 'Enlève tous les effets négatifs des alliés' },
             { type: 'heal', value: 3, target: 'all_allies' }
         ],
-        imageUrl: '/cards/spells/spell_aphrodite_desir.png',
+        imageUrl: '/cards/spells/spell_aphrodite_desir.webp',
         description: '➖🟠 +3💚 → 👥',
     },
 
@@ -1038,7 +1038,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_persephone_gifle.png',
+        imageUrl: '/cards/spells/spell_persephone_gifle.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -1053,7 +1053,7 @@ export const ALL_SPELLS: SpellCard[] = [
             // Effet custom unifié : inflige 1 dégât à 2 cibles, avec choix optionnel de +1 dégât
             { type: 'custom', customEffectId: 'vision_tartare', description: '1 dégât à 2 cibles, +1 si défausse 2 cartes' }
         ],
-        imageUrl: '/cards/spells/spell_persephone_vision.png',
+        imageUrl: '/cards/spells/spell_persephone_vision.webp',
         description: '1🩸 → ⚔️⚔️ | 2📤 → +1🩸',
     },
 
@@ -1070,7 +1070,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'custom', customEffectId: 'retrieve_discard', description: 'Récupérez une carte de la défausse' },
             { type: 'mill', value: 3, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_persephone_echange.png',
+        imageUrl: '/cards/spells/spell_persephone_echange.webp',
         description: '🗑️ → 🖐️ | 3📤',
     },
     {
@@ -1084,7 +1084,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'temp_resurrect', description: 'Invoque un zombie (5 PV) à partir d\'un dieu mort, inflige 1 dégât chaque tour' }
         ],
-        imageUrl: '/cards/spells/spell_persephone_brulure.png',
+        imageUrl: '/cards/spells/spell_persephone_brulure.webp',
         description: '☠️ → 💀5💚 | 1🩸⏳',
     },
 
@@ -1100,7 +1100,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'copy_discard_spell', description: 'Copie un sort de la défausse en ténèbres' }
         ],
-        imageUrl: '/cards/spells/spell_persephone_ames.png',
+        imageUrl: '/cards/spells/spell_persephone_ames.webp',
         description: '🗑️🎴 → 📋💀',
     },
 
@@ -1122,7 +1122,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'shield', value: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_hephaistos_martellement.png',
+        imageUrl: '/cards/spells/spell_hephaistos_martellement.webp',
         description: '2🩸 → ⚔️ | +2🛡️',
     },
     {
@@ -1136,7 +1136,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_hephaistos_etincelle.png',
+        imageUrl: '/cards/spells/spell_hephaistos_etincelle.webp',
         description: '1🩸 → 👊',
     },
 
@@ -1152,7 +1152,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'shield', value: 6, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_hephaistos_forge.png',
+        imageUrl: '/cards/spells/spell_hephaistos_forge.webp',
         description: '+6🛡️',
     },
     {
@@ -1167,7 +1167,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'gain_current_shield', description: 'Gagne en bouclier le nombre de boucliers actuels' }
         ],
-        imageUrl: '/cards/spells/spell_hephaistos_absorption.png',
+        imageUrl: '/cards/spells/spell_hephaistos_absorption.webp',
         description: '2🩸 → ⚔️ | +🛡️=🛡️',
     },
 
@@ -1183,7 +1183,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'damage_plus_shield', target: 'enemy_god', description: 'Inflige 3 + nombre de boucliers' }
         ],
-        imageUrl: '/cards/spells/spell_hephaistos_destruction.png',
+        imageUrl: '/cards/spells/spell_hephaistos_destruction.webp',
         description: '3+🛡️🩸 → ⚔️',
     },
 
@@ -1204,7 +1204,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'damage_plus_dead_allies', target: 'enemy_god', description: 'Inflige 2 + 1 par allié mort' }
         ],
-        imageUrl: '/cards/spells/spell_thanatos_coup.png',
+        imageUrl: '/cards/spells/spell_thanatos_coup.webp',
         description: '2+☠️🩸 → ⚔️',
     },
     {
@@ -1218,7 +1218,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_thanatos_nova.png',
+        imageUrl: '/cards/spells/spell_thanatos_nova.webp',
         description: '1🩸 → 👊',
     },
 
@@ -1234,7 +1234,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'damage_plus_2x_dead_allies', target: 'enemy_god', description: 'Inflige 2 + 2 par allié mort' }
         ],
-        imageUrl: '/cards/spells/spell_thanatos_decharge.png',
+        imageUrl: '/cards/spells/spell_thanatos_decharge.webp',
         description: '2+2☠️🩸 → ⚔️',
     },
     {
@@ -1248,7 +1248,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'aoe_damage_plus_dead_allies', description: 'Inflige 1 + 1 par allié mort à tous' }
         ],
-        imageUrl: '/cards/spells/spell_thanatos_happement.png',
+        imageUrl: '/cards/spells/spell_thanatos_happement.webp',
         description: '1+☠️🩸 → 👊',
     },
 
@@ -1264,7 +1264,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'damage_5x_dead_allies', target: 'enemy_god', description: 'Inflige 5 × nombre d\'alliés morts' }
         ],
-        imageUrl: '/cards/spells/spell_thanatos_faucheuse.png',
+        imageUrl: '/cards/spells/spell_thanatos_faucheuse.webp',
         description: '5×☠️🩸 → ⚔️',
     },
 
@@ -1286,7 +1286,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
         ],
-        imageUrl: '/cards/spells/spell_hermes_frappe.png',
+        imageUrl: '/cards/spells/spell_hermes_frappe.webp',
         description: '1🩸 → ⚔️ | 🔄',
     },
     {
@@ -1300,7 +1300,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_hermes_balayage.png',
+        imageUrl: '/cards/spells/spell_hermes_balayage.webp',
         description: '1🩸 → 👊',
     },
 
@@ -1317,7 +1317,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
         ],
-        imageUrl: '/cards/spells/spell_hermes_bim.png',
+        imageUrl: '/cards/spells/spell_hermes_bim.webp',
         description: '2🩸 → ⚔️ | 🔄',
     },
     {
@@ -1332,7 +1332,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
         ],
-        imageUrl: '/cards/spells/spell_hermes_bam.png',
+        imageUrl: '/cards/spells/spell_hermes_bam.webp',
         description: '1🩸 → 👊 | 🔄',
     },
 
@@ -1350,7 +1350,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'energy', value: 2 },
             { type: 'custom', customEffectId: 'replay_action', description: 'Rejoue une action' }
         ],
-        imageUrl: '/cards/spells/spell_hermes_boom.png',
+        imageUrl: '/cards/spells/spell_hermes_boom.webp',
         description: '3🩸 → ⚔️ | +2⚡ | 🔄',
     },
 
@@ -1371,7 +1371,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_selene_rayon.png',
+        imageUrl: '/cards/spells/spell_selene_rayon.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -1387,7 +1387,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'heal', value: 1, target: 'all_allies' }
         ],
-        imageUrl: '/cards/spells/spell_selene_riviere.png',
+        imageUrl: '/cards/spells/spell_selene_riviere.webp',
         description: '1🩸 → ⚔️⚔️ | +1💚 → 👥',
     },
 
@@ -1403,7 +1403,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'regen', value: 1, statusDuration: 2, target: 'all_allies' }
         ],
-        imageUrl: '/cards/spells/spell_selene_pluie.png',
+        imageUrl: '/cards/spells/spell_selene_pluie.webp',
         description: '+1💚2⏳ → 👥',
     },
     {
@@ -1417,7 +1417,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'cascade_heal_choice', description: 'Choisissez la direction du soin (3/2/1 ou 1/2/3)' }
         ],
-        imageUrl: '/cards/spells/spell_selene_maree.png',
+        imageUrl: '/cards/spells/spell_selene_maree.webp',
         description: '⬅️➡️ +3/2/1💚 → 👥',
     },
 
@@ -1433,7 +1433,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'resurrect_two', description: 'Ressuscite 2 alliés avec 3 PV' }
         ],
-        imageUrl: '/cards/spells/spell_selene_renaissance.png',
+        imageUrl: '/cards/spells/spell_selene_renaissance.webp',
         description: '☠️☠️ → 3💚',
     },
 
@@ -1454,7 +1454,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_zephyr_envol.png',
+        imageUrl: '/cards/spells/spell_zephyr_envol.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -1469,7 +1469,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'all_enemies' },
             { type: 'custom', customEffectId: 'choose_discard_enemy', description: 'Défaussez 1 carte de la main adverse (au choix)' }
         ],
-        imageUrl: '/cards/spells/spell_zephyr_vent.png',
+        imageUrl: '/cards/spells/spell_zephyr_vent.webp',
         description: '1🩸 → 👊 | 1🃏⚔️ → 🗑️',
     },
 
@@ -1485,7 +1485,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'shuffle_god_cards', description: 'Replace les cartes d\'un dieu dans le deck' }
         ],
-        imageUrl: '/cards/spells/spell_zephyr_face.png',
+        imageUrl: '/cards/spells/spell_zephyr_face.webp',
         description: '⚔️🎴 → 🔀📚',
     },
     {
@@ -1500,7 +1500,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'discard', value: 2, target: 'enemy_hand' }
         ],
-        imageUrl: '/cards/spells/spell_zephyr_lame.png',
+        imageUrl: '/cards/spells/spell_zephyr_lame.webp',
         description: '3🩸 → ⚔️ | 2🎴🃏⚔️ → 🗑️',
     },
 
@@ -1516,7 +1516,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'free_recycle', description: 'Mélange défausse et deck sans fatigue' }
         ],
-        imageUrl: '/cards/spells/spell_zephyr_bourrasque.png',
+        imageUrl: '/cards/spells/spell_zephyr_bourrasque.webp',
         description: '🔀📚 (pas de fatigue)',
     },
 
@@ -1537,7 +1537,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_nike_frappe.png',
+        imageUrl: '/cards/spells/spell_nike_frappe.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -1551,7 +1551,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'damage_plus_dead_enemies', target: 'enemy_god', description: 'Inflige 1 + 1 par ennemi mort' }
         ],
-        imageUrl: '/cards/spells/spell_nike_succes.png',
+        imageUrl: '/cards/spells/spell_nike_succes.webp',
         description: '1+💀🩸 → ⚔️⚔️',
     },
 
@@ -1567,7 +1567,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'damage_plus_2x_dead_enemies', target: 'enemy_god', description: 'Inflige 2 + 2 par ennemi mort' }
         ],
-        imageUrl: '/cards/spells/spell_nike_coup.png',
+        imageUrl: '/cards/spells/spell_nike_coup.webp',
         description: '2+2💀🩸 → ⚔️',
     },
     {
@@ -1581,7 +1581,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'aoe_damage_plus_dead_enemies', description: 'Inflige 1 + 1 par ennemi mort à tous' }
         ],
-        imageUrl: '/cards/spells/spell_nike_consecration.png',
+        imageUrl: '/cards/spells/spell_nike_consecration.webp',
         description: '1+💀🩸 → 👊',
     },
 
@@ -1597,7 +1597,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'custom', customEffectId: 'aoe_damage_plus_2x_dead_enemies', description: 'Inflige 2 + 2 par ennemi mort à tous' }
         ],
-        imageUrl: '/cards/spells/spell_nike_apotheose.png',
+        imageUrl: '/cards/spells/spell_nike_apotheose.webp',
         description: '2+2💀🩸 → 👊',
     },
 
@@ -1619,7 +1619,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_chione_toucher.png',
+        imageUrl: '/cards/spells/spell_chione_toucher.webp',
         description: '2🩸 → ⚔️ | +❄️1⏳',
     },
     {
@@ -1633,7 +1633,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_chione_tempete.png',
+        imageUrl: '/cards/spells/spell_chione_tempete.webp',
         description: '1🩸 → 👊',
     },
 
@@ -1650,7 +1650,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 4, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_chione_lance.png',
+        imageUrl: '/cards/spells/spell_chione_lance.webp',
         description: '4🩸 → ⚔️ | +❄️1⏳',
     },
     {
@@ -1669,7 +1669,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_chione_cone.png',
+        imageUrl: '/cards/spells/spell_chione_cone.webp',
         description: '2🩸 → ⚔️⚔️ | +❄️1⏳',
     },
 
@@ -1686,7 +1686,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 8, target: 'enemy_god' },
             { type: 'custom', customEffectId: 'splash_damage', description: 'Inflige 2 aux cibles adjacentes' }
         ],
-        imageUrl: '/cards/spells/spell_chione_age.png',
+        imageUrl: '/cards/spells/spell_chione_age.webp',
         description: '8🩸 → ⚔️ | 2🩸 → ⚔️↔️',
     },
 
@@ -1707,7 +1707,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/soldier_rain_of_spears.png',
+        imageUrl: '/cards/spells/soldier_rain_of_spears.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -1721,7 +1721,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_precise_thrust.png',
+        imageUrl: '/cards/spells/soldier_precise_thrust.webp',
         description: '3🩸 → ⚔️',
     },
 
@@ -1738,7 +1738,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_double_strike.png',
+        imageUrl: '/cards/spells/soldier_double_strike.webp',
         description: '2🩸 → ⚔️⚔️',
     },
     {
@@ -1752,7 +1752,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 5, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_heavy_blow.png',
+        imageUrl: '/cards/spells/soldier_heavy_blow.webp',
         description: '5🩸 → ⚔️',
     },
 
@@ -1769,7 +1769,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/soldier_shield_wall.png',
+        imageUrl: '/cards/spells/soldier_shield_wall.webp',
         description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
@@ -1790,7 +1790,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/soldier_rain_of_spears.png',
+        imageUrl: '/cards/spells/soldier_rain_of_spears.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -1804,7 +1804,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_precise_thrust.png',
+        imageUrl: '/cards/spells/soldier_precise_thrust.webp',
         description: '3🩸 → ⚔️',
     },
 
@@ -1821,7 +1821,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_double_strike.png',
+        imageUrl: '/cards/spells/soldier_double_strike.webp',
         description: '2🩸 → ⚔️⚔️',
     },
     {
@@ -1835,7 +1835,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 5, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_heavy_blow.png',
+        imageUrl: '/cards/spells/soldier_heavy_blow.webp',
         description: '5🩸 → ⚔️',
     },
 
@@ -1852,7 +1852,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/soldier_shield_wall.png',
+        imageUrl: '/cards/spells/soldier_shield_wall.webp',
         description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
@@ -1873,7 +1873,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/soldier_rain_of_spears.png',
+        imageUrl: '/cards/spells/soldier_rain_of_spears.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -1887,7 +1887,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_precise_thrust.png',
+        imageUrl: '/cards/spells/soldier_precise_thrust.webp',
         description: '3🩸 → ⚔️',
     },
 
@@ -1904,7 +1904,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_double_strike.png',
+        imageUrl: '/cards/spells/soldier_double_strike.webp',
         description: '2🩸 → ⚔️⚔️',
     },
     {
@@ -1918,7 +1918,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 5, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/soldier_heavy_blow.png',
+        imageUrl: '/cards/spells/soldier_heavy_blow.webp',
         description: '5🩸 → ⚔️',
     },
 
@@ -1935,7 +1935,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/soldier_shield_wall.png',
+        imageUrl: '/cards/spells/soldier_shield_wall.webp',
         description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
@@ -1957,7 +1957,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_dragon_souffle.png',
+        imageUrl: '/cards/spells/spell_dragon_souffle.webp',
         description: '1🩸 → 👊',
     },
     // Générateur 2 : 3 dégâts à une cible, génère 1 énergie
@@ -1972,7 +1972,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_dragon_morsure.png',
+        imageUrl: '/cards/spells/spell_dragon_morsure.webp',
         description: '3🩸 → ⚔️',
     },
 
@@ -1995,7 +1995,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_dragon_griffes.png',
+        imageUrl: '/cards/spells/spell_dragon_griffes.webp',
         description: '2🩸 → ⚔️⚔️ | +❄️1⏳',
     },
     // Compétence 2 (Ultime) : 2 dégâts à tous + 3 bouclier
@@ -2011,7 +2011,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'all_enemies' },
             { type: 'shield', value: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_dragon_tempete.png',
+        imageUrl: '/cards/spells/spell_dragon_tempete.webp',
         description: '2🩸 → 👊 | +2🛡️🔄',
     },
 
@@ -2029,7 +2029,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_dragon_ecailles.png',
+        imageUrl: '/cards/spells/spell_dragon_ecailles.webp',
         description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
@@ -2048,7 +2048,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_arachne_toile.png',
+        imageUrl: '/cards/spells/spell_arachne_toile.webp',
         description: '1🩸 → 👊',
     },
     // Générateur 2 : 3 dégâts à une cible, génère 1 énergie
@@ -2063,7 +2063,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_arachne_morsure.png',
+        imageUrl: '/cards/spells/spell_arachne_morsure.webp',
         description: '3🩸 → ⚔️',
     },
     // Utilitaire : 1 poison à 2 cibles
@@ -2079,7 +2079,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'status', status: 'poison', value: 1, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 1, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_arachne_venin.png',
+        imageUrl: '/cards/spells/spell_arachne_venin.webp',
         description: '+1💀 → ⚔️⚔️',
     },
     // Compétence 1 : 2 dégâts à 2 cibles + stun 1 tour
@@ -2097,7 +2097,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_arachne_fils.png',
+        imageUrl: '/cards/spells/spell_arachne_fils.webp',
         description: '2🩸 +❄️1⏳ → ⚔️⚔️',
     },
     // Ultime : 1 poison à tous les ennemis
@@ -2112,7 +2112,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'poison', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_arachne_nuee.png',
+        imageUrl: '/cards/spells/spell_arachne_nuee.webp',
         description: '+1💀 → 👊',
     },
 
@@ -2131,7 +2131,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_spider_toile.png',
+        imageUrl: '/cards/spells/spell_spider_toile.webp',
         description: '1🩸 → 👊',
     },
     // Générateur 2 : 3 dégâts à une cible, génère 1 énergie
@@ -2146,7 +2146,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_spider_crocs.png',
+        imageUrl: '/cards/spells/spell_spider_crocs.webp',
         description: '3🩸 → ⚔️',
     },
     // Utilitaire : 3 bouclier + provocation 1 tour
@@ -2162,7 +2162,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_spider_carapace.png',
+        imageUrl: '/cards/spells/spell_spider_carapace.webp',
         description: '+3🛡️🔄 | +🗡️1⏳🔄',
     },
     // Compétence 1 : 2 dégâts à 2 cibles
@@ -2178,7 +2178,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_spider_attaque.png',
+        imageUrl: '/cards/spells/spell_spider_attaque.webp',
         description: '2🩸 → ⚔️⚔️',
     },
     // Ultime : 4 dégâts + 2 poison à 1 cible
@@ -2194,7 +2194,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 4, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 2, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_spider_injection.png',
+        imageUrl: '/cards/spells/spell_spider_injection.webp',
         description: '4🩸 +2💀 → ⚔️',
     },
 
@@ -2212,7 +2212,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_spider_toile.png',
+        imageUrl: '/cards/spells/spell_spider_toile.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -2226,7 +2226,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_spider_crocs.png',
+        imageUrl: '/cards/spells/spell_spider_crocs.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -2241,7 +2241,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_spider_carapace.png',
+        imageUrl: '/cards/spells/spell_spider_carapace.webp',
         description: '+3🛡️🔄 | +🗡️1⏳🔄',
     },
     {
@@ -2256,7 +2256,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_spider_attaque.png',
+        imageUrl: '/cards/spells/spell_spider_attaque.webp',
         description: '2🩸 → ⚔️⚔️',
     },
     {
@@ -2271,7 +2271,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 4, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 2, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_spider_injection.png',
+        imageUrl: '/cards/spells/spell_spider_injection.webp',
         description: '4🩸 +2💀 → ⚔️',
     },
 
@@ -2289,7 +2289,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_spider_toile.png',
+        imageUrl: '/cards/spells/spell_spider_toile.webp',
         description: '1🩸 → 👊',
     },
     {
@@ -2303,7 +2303,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_spider_crocs.png',
+        imageUrl: '/cards/spells/spell_spider_crocs.webp',
         description: '3🩸 → ⚔️',
     },
     {
@@ -2318,7 +2318,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_spider_carapace.png',
+        imageUrl: '/cards/spells/spell_spider_carapace.webp',
         description: '+3🛡️🔄 | +🗡️1⏳🔄',
     },
     {
@@ -2333,7 +2333,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 2, target: 'enemy_god' },
             { type: 'damage', value: 2, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_spider_attaque.png',
+        imageUrl: '/cards/spells/spell_spider_attaque.webp',
         description: '2🩸 → ⚔️⚔️',
     },
     {
@@ -2348,7 +2348,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 4, target: 'enemy_god' },
             { type: 'status', status: 'poison', value: 2, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_spider_injection.png',
+        imageUrl: '/cards/spells/spell_spider_injection.webp',
         description: '4🩸 +2💀 → ⚔️',
     },
 
@@ -2369,7 +2369,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_wave_strike.png',
+        imageUrl: '/cards/spells/spell_ulysses_wave_strike.webp',
         description: '1🩸 → ALL⚔️',
     },
     {
@@ -2383,7 +2383,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_arrow_shot.png',
+        imageUrl: '/cards/spells/spell_ulysses_arrow_shot.webp',
         description: '3🩸 → ⚔️',
     },
 
@@ -2399,7 +2399,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'status', status: 'untargetable', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_cunning.png',
+        imageUrl: '/cards/spells/spell_ulysses_cunning.webp',
         description: '+🚫2⏳🔄',
     },
 
@@ -2416,7 +2416,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 3, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 2, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_stunning_blow.png',
+        imageUrl: '/cards/spells/spell_ulysses_stunning_blow.webp',
         description: '3🩸 +💫2⏳ → ⚔️',
     },
     {
@@ -2435,7 +2435,7 @@ export const ALL_SPELLS: SpellCard[] = [
             // couvrent deux tours adverses au lieu d'un, ce qui double réellement l'abri.
             { type: 'status', status: 'untargetable', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_ulysses_tidal_wave.png',
+        imageUrl: '/cards/spells/spell_ulysses_tidal_wave.webp',
         description: '2🩸 → ALL⚔️ | +🚫2⏳🔄',
     },
 
@@ -2456,7 +2456,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 1, target: 'all_enemies' }
         ],
-        imageUrl: '/cards/spells/spell_knight_light_sweep.png',
+        imageUrl: '/cards/spells/spell_knight_light_sweep.webp',
         description: '1🩸 → ALL⚔️',
     },
     {
@@ -2470,7 +2470,7 @@ export const ALL_SPELLS: SpellCard[] = [
         effects: [
             { type: 'damage', value: 3, target: 'enemy_god' }
         ],
-        imageUrl: '/cards/spells/spell_knight_spear_thrust.png',
+        imageUrl: '/cards/spells/spell_knight_spear_thrust.webp',
         description: '3🩸 → ⚔️',
     },
 
@@ -2487,7 +2487,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'shield', value: 3, target: 'self' },
             { type: 'status', status: 'provocation', value: 1, statusDuration: 2, target: 'self' }
         ],
-        imageUrl: '/cards/spells/spell_knight_shield_wall.png',
+        imageUrl: '/cards/spells/spell_knight_shield_wall.webp',
         description: '+3🛡️🔄 | +🗡️2⏳🔄',
     },
 
@@ -2506,7 +2506,7 @@ export const ALL_SPELLS: SpellCard[] = [
             { type: 'damage', value: 1, target: 'enemy_god' },
             { type: 'status', status: 'stun', value: 1, statusDuration: 1, target: 'same' }
         ],
-        imageUrl: '/cards/spells/spell_knight_double_thrust.png',
+        imageUrl: '/cards/spells/spell_knight_double_thrust.webp',
         description: '1🩸 +💫1⏳ → ⚔️⚔️',
     },
     {
@@ -2523,7 +2523,7 @@ export const ALL_SPELLS: SpellCard[] = [
         ],
         // L'illustration dédiée existait déjà dans public/ mais n'était branchée nulle part :
         // la carte réutilisait par erreur celle de Frappe de Lance.
-        imageUrl: '/cards/spells/spell_knight_divine_rally.png',
+        imageUrl: '/cards/spells/spell_knight_divine_rally.webp',
         description: '1🩸 → ALL⚔️ | +1🛡️ → ALL👥',
     },
 

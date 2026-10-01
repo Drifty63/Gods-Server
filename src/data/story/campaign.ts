@@ -87,7 +87,7 @@ const chapter1Battle1Events: StoryEvent[] = [
         id: 'ch1_intro',
         type: 'dialogue',
         dialogues: PROLOGUE_INTRO,
-        backgroundImage: '/assets/story/battle1_intro.png',
+        backgroundImage: '/assets/story/battle1_intro.webp',
         nextEventId: 'ch1_battle1'
     },
     // Combat 1v1 : Zeus vs Hadès
@@ -100,7 +100,7 @@ const chapter1Battle1Events: StoryEvent[] = [
         // chacune recoive son illustration ; il ne s'affichait plus nulle part. Le dialogue
         // qui precede garde battle1_intro.png, si bien que les deux ecrans cessent aussi de
         // montrer la meme image coup sur coup.
-        backgroundImage: '/assets/story/olympus_storm.png',
+        backgroundImage: '/assets/story/olympus_storm.webp',
         battle: {
             id: 'battle_zeus_vs_hades',
             name: "Duel des Frères",
@@ -132,7 +132,7 @@ const chapter1Battle1Events: StoryEvent[] = [
         // Symétrique de la défaite ci-dessous, qui avait son image alors que la victoire n'en
         // avait aucune : la scène retombait sur le fond générique. Le joueur qui gagnait voyait
         // donc un décor plus pauvre que celui qui perdait.
-        backgroundImage: '/assets/story/battle1_victory_v2.png',
+        backgroundImage: '/assets/story/battle1_victory_v2.webp',
         nextEventId: 'ch1_hades_throne'
     },
     // Après combat - Défaite
@@ -140,7 +140,7 @@ const chapter1Battle1Events: StoryEvent[] = [
         id: 'ch1_after_battle_lose',
         type: 'dialogue',
         dialogues: PROLOGUE_AFTER_BATTLE_1_LOSE,
-        backgroundImage: '/assets/story/battle1_defeat.png',
+        backgroundImage: '/assets/story/battle1_defeat.webp',
         nextEventId: 'ch1_hades_throne'
     },
     // Hadès prend le trône (commun)
@@ -166,7 +166,7 @@ const chapter1Battle2Events: StoryEvent[] = [
         id: 'ch1_battle2_narrator',
         type: 'cutscene',
         dialogues: PROLOGUE_BATTLE2_NARRATOR,
-        backgroundImage: '/assets/story/earth_view.png',
+        backgroundImage: '/assets/story/earth_view.webp',
         nextEventId: 'ch1_battle2_intro'
     },
     // Dialogue Zeus et Hestia dans la cabane tranquille
@@ -174,7 +174,7 @@ const chapter1Battle2Events: StoryEvent[] = [
         id: 'ch1_battle2_intro',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE2_INTRO_CABIN,
-        backgroundImage: '/assets/story/hestia_cabin.png',
+        backgroundImage: '/assets/story/hestia_cabin.webp',
         nextEventId: 'ch1_battle2_ares'
     },
     // Arès débarque et défonce la porte
@@ -182,14 +182,14 @@ const chapter1Battle2Events: StoryEvent[] = [
         id: 'ch1_battle2_ares',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE2_ARES_ENTRANCE,
-        backgroundImage: '/assets/story/battle2_ares_entrance.png',
+        backgroundImage: '/assets/story/battle2_ares_entrance.webp',
         nextEventId: 'ch1_battle2'
     },
     // Combat 2v1 : Zeus + Hestia vs Arès
     {
         id: 'ch1_battle2',
         type: 'battle',
-        backgroundImage: '/assets/story/battle2_ares_entrance.png',  // Même image que l'entrée d'Arès
+        backgroundImage: '/assets/story/battle2_ares_entrance.webp',  // Même image que l'entrée d'Arès
         battle: {
             id: 'battle_zeus_hestia_vs_ares',
             name: "L'Attaque d'Arès",
@@ -220,7 +220,7 @@ const chapter1Battle2Events: StoryEvent[] = [
         id: 'ch1_battle2_win',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE2_WIN,
-        backgroundImage: '/assets/story/battle2_victory.png',
+        backgroundImage: '/assets/story/battle2_victory.webp',
         nextEventId: undefined  // Fin du combat 2, déblocage du combat 3
     },
     // Après combat - Défaite
@@ -228,7 +228,7 @@ const chapter1Battle2Events: StoryEvent[] = [
         id: 'ch1_battle2_lose',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE2_LOSE,
-        backgroundImage: '/assets/story/battle2_defeat.png',
+        backgroundImage: '/assets/story/battle2_defeat.webp',
         nextEventId: undefined  // Doit réessayer
     }
 ];
@@ -242,7 +242,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_narrator',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_NARRATOR,
-        backgroundImage: '/assets/story/forest_path_journey.png',
+        backgroundImage: '/assets/story/forest_path_journey.webp',
         nextEventId: 'ch1_battle3_artemis'
     },
     // Rencontre avec Artémis dans sa grotte
@@ -250,7 +250,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_artemis',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_ARTEMIS_INTRO,
-        backgroundImage: '/assets/story/artemis_meeting_v2.png',
+        backgroundImage: '/assets/story/artemis_meeting_v2.webp',
         nextEventId: 'ch1_battle3_after_rest'
     },
     // Après le repos - Artémis réveille Zeus et Hestia
@@ -258,7 +258,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_after_rest',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_AFTER_REST,
-        backgroundImage: '/assets/story/artemis_wakeup_v2.png',
+        backgroundImage: '/assets/story/artemis_wakeup_v2.webp',
         nextEventId: 'ch1_battle3_demeter_intro'
     },
     // Arrivée chez Déméter
@@ -266,14 +266,14 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_demeter_intro',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_DEMETER_INTRO,
-        backgroundImage: '/assets/story/confrontation_wheat_field.png',
+        backgroundImage: '/assets/story/confrontation_wheat_field.webp',
         nextEventId: 'ch1_battle3'
     },
     // Combat contre Déméter et Artémis
     {
         id: 'ch1_battle3',
         type: 'battle',
-        backgroundImage: '/assets/story/confrontation_wheat_field.png',  // Garder l'image de la confrontation
+        backgroundImage: '/assets/story/confrontation_wheat_field.webp',  // Garder l'image de la confrontation
         battle: {
             id: 'battle_test_of_valor',
             name: "Test de Bravoure",
@@ -305,7 +305,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_win',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_WIN,
-        backgroundImage: '/assets/story/battle3_victory.png',
+        backgroundImage: '/assets/story/battle3_victory.webp',
         nextEventId: undefined  // Fin du prologue
     },
     // Après combat - Défaite
@@ -313,7 +313,7 @@ const chapter1Battle3Events: StoryEvent[] = [
         id: 'ch1_battle3_lose',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE3_LOSE,
-        backgroundImage: '/assets/story/battle3_defeat.png',
+        backgroundImage: '/assets/story/battle3_defeat.webp',
         nextEventId: undefined  // Doit réessayer
     }
 ];
@@ -327,7 +327,7 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_narrator',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_NARRATOR,
-        backgroundImage: '/assets/story/farm_night_exterior.png',
+        backgroundImage: '/assets/story/farm_night_exterior.webp',
         nextEventId: 'ch1_battle4_council'
     },
     // Conseil des 4 dieux autour de la table
@@ -335,7 +335,7 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_council',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_COUNCIL,
-        backgroundImage: '/assets/story/gods_council_table.png',
+        backgroundImage: '/assets/story/gods_council_table.webp',
         nextEventId: 'ch1_battle4_ambush'
     },
     // L'attaque nocturne d'Arès
@@ -343,14 +343,14 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_ambush',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_AMBUSH,
-        backgroundImage: '/assets/story/battle4_ambush_v2.png',
+        backgroundImage: '/assets/story/battle4_ambush_v2.webp',
         nextEventId: 'ch1_battle4'
     },
     // Combat 3v4 : Zeus + Déméter + Artémis vs Arès + 3 Soldats
     {
         id: 'ch1_battle4',
         type: 'battle',
-        backgroundImage: '/assets/story/battle4_ambush_v2.png',
+        backgroundImage: '/assets/story/battle4_ambush_v2.webp',
         battle: {
             id: 'battle_ambush_ares',
             name: "L'Embuscade d'Arès",
@@ -376,7 +376,7 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_win',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_WIN,
-        backgroundImage: '/assets/story/battle4_victory.png',
+        backgroundImage: '/assets/story/battle4_victory.webp',
         nextEventId: undefined  // Fin du prologue
     },
     // Après combat - Défaite
@@ -384,7 +384,7 @@ const chapter1Battle4Events: StoryEvent[] = [
         id: 'ch1_battle4_lose',
         type: 'dialogue',
         dialogues: PROLOGUE_BATTLE4_LOSE,
-        backgroundImage: '/assets/story/battle4_defeat_v2.png',
+        backgroundImage: '/assets/story/battle4_defeat_v2.webp',
         nextEventId: undefined  // Doit réessayer
     }
 ];
@@ -455,7 +455,7 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_narrator',
         type: 'cutscene',
         dialogues: CHAPTER2_BATTLE1_NARRATOR,
-        backgroundImage: '/assets/story/thebes_journey.png',
+        backgroundImage: '/assets/story/thebes_journey.webp',
         nextEventId: 'ch2_battle1_thebes_arrival'
     },
     // Arrivée à Thèbes - Le satyre
@@ -463,7 +463,7 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_thebes_arrival',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_THEBES_ARRIVAL,
-        backgroundImage: '/assets/story/thebes_street_satyr.png',
+        backgroundImage: '/assets/story/thebes_street_satyr.webp',
         nextEventId: 'ch2_battle1_banquet'
     },
     // Arrivée au banquet de Dionysos
@@ -471,7 +471,7 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_banquet',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_BANQUET,
-        backgroundImage: '/assets/story/dionysos_banquet.png',
+        backgroundImage: '/assets/story/dionysos_banquet.webp',
         nextEventId: 'ch2_battle1_betrayal'
     },
     // La trahison - Le vin empoisonné
@@ -479,14 +479,14 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_betrayal',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_BETRAYAL,
-        backgroundImage: '/assets/story/ch2_betrayal_v2.png',
+        backgroundImage: '/assets/story/ch2_betrayal_v2.webp',
         nextEventId: 'ch2_battle1'
     },
     // Combat 4v3 : Zeus + Hestia + Déméter + Artémis vs Dionysos + Apollon + Aphrodite
     {
         id: 'ch2_battle1',
         type: 'battle',
-        backgroundImage: '/assets/story/ch2_betrayal_v2.png',
+        backgroundImage: '/assets/story/ch2_betrayal_v2.webp',
         battle: {
             id: 'battle_thebes_betrayal',
             name: "La Trahison de Thèbes",
@@ -510,7 +510,7 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_win',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_WIN,
-        backgroundImage: '/assets/story/chapter2_battle1_victory.png',
+        backgroundImage: '/assets/story/chapter2_battle1_victory.webp',
         nextEventId: 'ch2_battle2_narrator'  // Continue vers combat 2
     },
     // Après combat - Défaite
@@ -518,7 +518,7 @@ const chapter2Battle1Events: StoryEvent[] = [
         id: 'ch2_battle1_lose',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE1_LOSE,
-        backgroundImage: '/assets/story/ch2_battle1_defeat_v2.png',
+        backgroundImage: '/assets/story/ch2_battle1_defeat_v2.webp',
         nextEventId: undefined  // Doit réessayer
     }
 ];
@@ -534,7 +534,7 @@ const chapter2Battle2Events: StoryEvent[] = [
         id: 'ch2_battle2_narrator',
         type: 'cutscene',
         dialogues: CHAPTER2_BATTLE2_NARRATOR,
-        backgroundImage: '/assets/story/ch2_villa_morning.png',
+        backgroundImage: '/assets/story/ch2_villa_morning.webp',
         nextEventId: 'ch2_battle2_departure'
     },
     // Départ de Thèbes
@@ -542,7 +542,7 @@ const chapter2Battle2Events: StoryEvent[] = [
         id: 'ch2_battle2_departure',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE2_DEPARTURE,
-        backgroundImage: '/assets/story/ch2_leaving_thebes.png',
+        backgroundImage: '/assets/story/ch2_leaving_thebes.webp',
         nextEventId: 'ch2_battle2_dragon_attack'
     },
     // Attaque du Dragon
@@ -550,14 +550,14 @@ const chapter2Battle2Events: StoryEvent[] = [
         id: 'ch2_battle2_dragon_attack',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE2_DRAGON_ATTACK,
-        backgroundImage: '/assets/story/ch2_dragon_attack.png',
+        backgroundImage: '/assets/story/ch2_dragon_attack.webp',
         nextEventId: 'ch2_battle2'
     },
     // Combat 4v1 : Zeus + Aphrodite + Apollon + Dionysos vs Dragon de Thèbes
     {
         id: 'ch2_battle2',
         type: 'battle',
-        backgroundImage: '/assets/story/ch2_dragon_attack.png',
+        backgroundImage: '/assets/story/ch2_dragon_attack.webp',
         battle: {
             id: 'battle_dragon_thebes',
             name: "Le Dragon de Thèbes",
@@ -577,7 +577,7 @@ const chapter2Battle2Events: StoryEvent[] = [
         id: 'ch2_battle2_win',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE2_WIN,
-        backgroundImage: '/assets/story/ch2_dragon_victory.png',
+        backgroundImage: '/assets/story/ch2_dragon_victory.webp',
         nextEventId: 'ch2_battle3_campfire'  // Continue vers combat 3
     },
     // Après combat - Défaite
@@ -585,7 +585,7 @@ const chapter2Battle2Events: StoryEvent[] = [
         id: 'ch2_battle2_lose',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE2_LOSE,
-        backgroundImage: '/assets/story/ch2_dragon_defeat.png',
+        backgroundImage: '/assets/story/ch2_dragon_defeat.webp',
         nextEventId: undefined  // Doit réessayer
     }
 ];
@@ -599,7 +599,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         id: 'ch2_battle3_campfire',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE3_CAMPFIRE,
-        backgroundImage: '/assets/story/ch2_campfire.png',
+        backgroundImage: '/assets/story/ch2_campfire.webp',
         nextEventId: 'ch2_battle3_colonus_entrance'
     },
     // Scène 2 : Arrivée devant le Bois de Colone
@@ -607,7 +607,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         id: 'ch2_battle3_colonus_entrance',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE3_COLONUS_ENTRANCE,
-        backgroundImage: '/assets/story/ch2_colonus_entrance.png',
+        backgroundImage: '/assets/story/ch2_colonus_entrance.webp',
         nextEventId: 'ch2_battle3_colonus_traverse'
     },
     // Scène 3 : Traversée du bois
@@ -615,7 +615,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         id: 'ch2_battle3_colonus_traverse',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE3_COLONUS_TRAVERSE,
-        backgroundImage: '/assets/story/ch2_colonus_traverse.png',
+        backgroundImage: '/assets/story/ch2_colonus_traverse.webp',
         nextEventId: 'ch2_battle3_ambush'
     },
     // Scène 4 : Embuscade d'Arachné
@@ -623,7 +623,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         id: 'ch2_battle3_ambush',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE3_ARACHNE_AMBUSH,
-        backgroundImage: '/assets/story/ch2_arachne_ambush.png',
+        backgroundImage: '/assets/story/ch2_arachne_ambush.webp',
         nextEventId: 'ch2_battle3_fight'
     },
     // Combat contre Arachné
@@ -631,7 +631,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         id: 'ch2_battle3_fight',
         type: 'battle',
         dialogues: [],
-        backgroundImage: '/assets/story/ch2_arachne_ambush.png',
+        backgroundImage: '/assets/story/ch2_arachne_ambush.webp',
         battle: {
             id: 'battle_arachne',
             name: "L'Embuscade d'Arachné",
@@ -655,7 +655,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         id: 'ch2_battle3_win',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE3_WIN,
-        backgroundImage: '/assets/story/ch2_arachne_victory.png',
+        backgroundImage: '/assets/story/ch2_arachne_victory.webp',
         nextEventId: 'ch2_battle4_narrative'  // Continue vers combat 4
     },
     // Défaite
@@ -663,7 +663,7 @@ const chapter2Battle3Events: StoryEvent[] = [
         id: 'ch2_battle3_lose',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE3_LOSE,
-        backgroundImage: '/assets/story/ch2_arachne_defeat.png',
+        backgroundImage: '/assets/story/ch2_arachne_defeat.webp',
         nextEventId: undefined  // Doit réessayer
     }
 ];
@@ -678,7 +678,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_narrative',
         type: 'cutscene',
         dialogues: CHAPTER2_BATTLE4_NARRATIVE,
-        backgroundImage: '/story/chapter2/combat4_athens_arrival.png',
+        backgroundImage: '/story/chapter2/combat4_athens_arrival.webp',
         nextEventId: 'ch2_battle4_arrival'
     },
     // Scène 2 : Arrivée à Athènes
@@ -686,7 +686,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_arrival',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE4_ARRIVAL,
-        backgroundImage: '/story/chapter2/combat4_athens_arrival.png',
+        backgroundImage: '/story/chapter2/combat4_athens_arrival.webp',
         nextEventId: 'ch2_battle4_intercept'
     },
     // Scène 3 : Les chevaliers interceptent les dieux
@@ -694,7 +694,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_intercept',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE4_INTERCEPT,
-        backgroundImage: '/story/chapter2/combat4_knights_intercept.png',
+        backgroundImage: '/story/chapter2/combat4_knights_intercept.webp',
         nextEventId: 'ch2_battle4_temple'
     },
     // Scène 4 : Le Temple d'Athéna - Rencontre avec Athéna et Ulysse
@@ -702,7 +702,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_temple',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE4_TEMPLE,
-        backgroundImage: '/story/chapter2/combat4_temple_meeting.png',
+        backgroundImage: '/story/chapter2/combat4_temple_meeting.webp',
         nextEventId: 'ch2_battle4_confrontation'
     },
     // Scène 5 : Confrontation Zeus vs Athéna
@@ -710,7 +710,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_confrontation',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE4_CONFRONTATION,
-        backgroundImage: '/story/chapter2/combat4_confrontation.png',
+        backgroundImage: '/story/chapter2/combat4_confrontation.webp',
         nextEventId: 'ch2_battle4_fight'
     },
     // Combat : Zeus + Artémis vs Athéna + Ulysse + Chevalier d'Athéna
@@ -718,7 +718,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_fight',
         type: 'battle',
         dialogues: [],
-        backgroundImage: '/story/chapter2/combat4_confrontation.png',
+        backgroundImage: '/story/chapter2/combat4_confrontation.webp',
         battle: {
             id: 'battle_athens_temple',
             name: "Le Défi d'Athéna",
@@ -737,7 +737,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_win',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE4_WIN,
-        backgroundImage: '/story/chapter2/combat4_victory.png',
+        backgroundImage: '/story/chapter2/combat4_victory.webp',
         nextEventId: undefined  // Fin du chapitre 2
     },
     // Défaite
@@ -745,7 +745,7 @@ const chapter2Battle4Events: StoryEvent[] = [
         id: 'ch2_battle4_lose',
         type: 'dialogue',
         dialogues: CHAPTER2_BATTLE4_LOSE,
-        backgroundImage: '/story/chapter2/combat4_defeat.png',
+        backgroundImage: '/story/chapter2/combat4_defeat.webp',
         nextEventId: undefined  // Doit réessayer
     }
 ];
@@ -851,7 +851,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_departure',
         type: 'cutscene',
         dialogues: CH3_BATTLE1_DEPARTURE,
-        backgroundImage: '/story/chapter3/combat1_departure.png',
+        backgroundImage: '/story/chapter3/combat1_departure.webp',
         nextEventId: 'ch3_battle1_briefing'
     },
     // Scène 2 : Ulysse détaille l'itinéraire sur le pont
@@ -859,7 +859,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_briefing',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_BRIEFING,
-        backgroundImage: '/story/chapter3/combat1_briefing.png',
+        backgroundImage: '/story/chapter3/combat1_briefing.webp',
         nextEventId: 'ch3_battle1_evening'
     },
     // Scène 3 : transition du soir — le calme avant la tempête
@@ -867,7 +867,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_evening',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_EVENING,
-        backgroundImage: '/story/chapter3/combat1_evening.png',
+        backgroundImage: '/story/chapter3/combat1_evening.webp',
         nextEventId: 'ch3_battle1_rocky_isles'
     },
     // Scène 4 : au petit matin, les îles rocheuses
@@ -875,7 +875,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_rocky_isles',
         type: 'cutscene',
         dialogues: CH3_BATTLE1_ROCKY_ISLES,
-        backgroundImage: '/story/chapter3/combat1_rocky_isles.png',
+        backgroundImage: '/story/chapter3/combat1_rocky_isles.webp',
         nextEventId: 'ch3_battle1_narrows'
     },
     // Scène 5 : la navigation dans le passage étroit
@@ -883,7 +883,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_narrows',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_NARROWS,
-        backgroundImage: '/story/chapter3/combat1_narrows.png',
+        backgroundImage: '/story/chapter3/combat1_narrows.webp',
         nextEventId: 'ch3_battle1_ambush_trap'
     },
     /*
@@ -897,21 +897,21 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_ambush_trap',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_AMBUSH_TRAP,
-        backgroundImage: '/story/chapter3/combat1_ambush_trap.png',
+        backgroundImage: '/story/chapter3/combat1_ambush_trap.webp',
         nextEventId: 'ch3_battle1_ambush_zeus'
     },
     {
         id: 'ch3_battle1_ambush_zeus',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_AMBUSH_ZEUS,
-        backgroundImage: '/story/chapter3/combat1_ambush_zeus.png',
+        backgroundImage: '/story/chapter3/combat1_ambush_zeus.webp',
         nextEventId: 'ch3_battle1_ambush_deck'
     },
     {
         id: 'ch3_battle1_ambush_deck',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_AMBUSH_DECK,
-        backgroundImage: '/story/chapter3/combat1_ambush_deck.png',
+        backgroundImage: '/story/chapter3/combat1_ambush_deck.webp',
         nextEventId: 'ch3_battle1_fight'
     },
     /*
@@ -930,7 +930,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_fight',
         type: 'battle',
         dialogues: [],
-        backgroundImage: '/story/chapter3/combat1_ambush_deck.png',
+        backgroundImage: '/story/chapter3/combat1_ambush_deck.webp',
         battle: {
             id: 'battle_rocky_isles',
             name: "Le Chant des Récifs",
@@ -960,7 +960,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_win',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_WIN,
-        backgroundImage: '/story/chapter3/combat1_victory.png',
+        backgroundImage: '/story/chapter3/combat1_victory.webp',
         nextEventId: undefined
     },
     // Défaite : le navire recule, il faut recommencer
@@ -968,7 +968,7 @@ const chapter3Battle1Events: StoryEvent[] = [
         id: 'ch3_battle1_lose',
         type: 'dialogue',
         dialogues: CH3_BATTLE1_LOSE,
-        backgroundImage: '/story/chapter3/combat1_defeat.png',
+        backgroundImage: '/story/chapter3/combat1_defeat.webp',
         nextEventId: undefined
     }
 ];

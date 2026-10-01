@@ -13,7 +13,7 @@
             rgba(10, 10, 26, 0.4) 0%,
             rgba(10, 10, 26, 0.7) 50%,
             rgba(10, 10, 26, 0.95) 100%),
-        url('/backgrounds/home_bg.jpg');
+        url('/backgrounds/home_bg.webp');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

@@ -23,7 +23,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'water',
         weakness: 'lightning',
         maxHealth: 25,
-        imageUrl: '/cards/gods/poseidon.png',
+        imageUrl: '/cards/gods/poseidon.webp',
         flavorText: "« Vos routes m'appartiennent. C'est moi qui décide de la marée. » — Noie la pioche adverse et appauvrit chaque tour : on ne le bat pas, on s'épuise contre lui.",
     },
 
@@ -36,7 +36,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'lightning',
         weakness: 'earth',
         maxHealth: 25,
-        imageUrl: '/cards/gods/zeus.png',
+        imageUrl: '/cards/gods/zeus.webp',
         archetype: 'glass_cannon',
         flavorText: "« Je n'avertis jamais deux fois. » — Marque ses cibles, puis fait tout détoner d'un coup. Frappe très fort, encaisse très mal.",
     },
@@ -50,7 +50,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 26,
-        imageUrl: '/cards/gods/nyx.png',
+        imageUrl: '/cards/gods/nyx.webp',
         flavorText: "« Regarde bien ta main. Es-tu certain de savoir ce que tu tiens ? » — Glisse des cartes aveugles chez l'adversaire et transforme son tour en pari.",
     },
 
@@ -63,7 +63,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'fire',
         weakness: 'water',
         maxHealth: 24,
-        imageUrl: '/cards/gods/hestia.png',
+        imageUrl: '/cards/gods/hestia.webp',
         flavorText: "« Tant que le foyer brûle, personne ne tombe. » — Soigne, ravive, efface les faiblesses : elle ne gagne pas les échanges, elle les fait durer.",
     },
 
@@ -76,7 +76,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'light',
         weakness: 'darkness',
         maxHealth: 30,
-        imageUrl: '/cards/gods/athena.png',
+        imageUrl: '/cards/gods/athena.webp',
         archetype: 'tank',
         flavorText: "« Frappe-moi. C'est exactement ce que je veux. » — Le plus gros réservoir de points de vie du jeu ; sa provocation dicte à l'adversaire ce qu'il a le droit de viser.",
     },
@@ -90,7 +90,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 24,
-        imageUrl: '/cards/gods/demeter.png',
+        imageUrl: '/cards/gods/demeter.webp',
         archetype: 'support',
         flavorText: "« Ce que l'on coupe, je le fais repousser. » — Soins répartis et renforts : elle rend l'échange de dégâts intenable pour l'adversaire.",
     },
@@ -104,7 +104,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 22,
-        imageUrl: '/cards/gods/dionysos.png',
+        imageUrl: '/cards/gods/dionysos.webp',
         flavorText: "« Bois donc. Tu verras, tout devient beaucoup plus simple. » — Empoisonne et désorganise : chaque sort lancé en face finit par coûter cher.",
     },
 
@@ -117,7 +117,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'fire',
         weakness: 'water',
         maxHealth: 20,
-        imageUrl: '/cards/gods/hades.png',
+        imageUrl: '/cards/gods/hades.webp',
         archetype: 'glass_cannon',
         flavorText: "« Tout ce qui meurt finit par m'appartenir. » — Peu de points de vie, mais il se soigne de ce qu'il détruit : le laisser conclure un échange, c'est le relancer.",
     },
@@ -131,7 +131,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'air',
         weakness: 'fire',
         maxHealth: 22,
-        imageUrl: '/cards/gods/apollon.png',
+        imageUrl: '/cards/gods/apollon.webp',
         flavorText: "« Je vois la flèche arriver avant même de l'avoir tirée. » — Assèche l'énergie adverse et étourdit : en face, on a les cartes, jamais le tour pour les jouer.",
     },
 
@@ -144,7 +144,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 28,
-        imageUrl: '/cards/gods/ares.png',
+        imageUrl: '/cards/gods/ares.webp',
         archetype: 'glass_cannon',
         flavorText: "« La douleur ? C'est le prix, et je le paie d'avance. » — Ses sorts les plus violents lui coûtent ses propres points de vie : une réserve à dépenser comme des munitions.",
     },
@@ -158,7 +158,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'air',
         weakness: 'fire',
         maxHealth: 20,
-        imageUrl: '/cards/gods/artemis.png',
+        imageUrl: '/cards/gods/artemis.webp',
         archetype: 'glass_cannon',
         flavorText: "« Je ne rate pas. Je choisis simplement où ça fait le plus mal. » — Impose des faiblesses puis frappe plusieurs cibles à la fois : la reine du doublement de dégâts.",
     },
@@ -172,7 +172,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'light',
         weakness: 'darkness',
         maxHealth: 25,
-        imageUrl: '/cards/gods/aphrodite.png',
+        imageUrl: '/cards/gods/aphrodite.webp',
         archetype: 'support',
         flavorText: "« Personne ne se bat vraiment contre moi. » — Purifie son camp, charme et fige celui d'en face : la partie se joue à son rythme, pas au vôtre.",
     },
@@ -188,7 +188,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 26,
-        imageUrl: '/cards/gods/persephone.png',
+        imageUrl: '/cards/gods/persephone.webp',
         flavorText: '"Je suis celle qui règne sur les morts et guide les âmes. Mon royaume est éternel."',
         hidden: true,
     },
@@ -200,7 +200,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'fire',
         weakness: 'water',
         maxHealth: 25,
-        imageUrl: '/cards/gods/hephaistos.png',
+        imageUrl: '/cards/gods/hephaistos.webp',
         archetype: 'tank',
         flavorText: '"Dans ma forge brûlent les flammes de la création. Mes armures sont invincibles."',
         hidden: true,
@@ -213,7 +213,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 26,
-        imageUrl: '/cards/gods/thanatos.png',
+        imageUrl: '/cards/gods/thanatos.webp',
         flavorText: '"Je suis la fin inévitable. Chaque mort me rend plus puissant."',
         hidden: true,
     },
@@ -225,7 +225,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'lightning',
         weakness: 'earth',
         maxHealth: 24,
-        imageUrl: '/cards/gods/hermes.png',
+        imageUrl: '/cards/gods/hermes.webp',
         flavorText: '"Plus rapide que la pensée, je frappe avant même que tu ne me voies venir."',
         hidden: true,
     },
@@ -237,7 +237,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'water',
         weakness: 'lightning',
         maxHealth: 30,
-        imageUrl: '/cards/gods/selene.png',
+        imageUrl: '/cards/gods/selene.webp',
         archetype: 'support',
         flavorText: '"Ma lumière argentée apaise les blessures et ranime les âmes perdues."',
         hidden: true,
@@ -250,7 +250,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'air',
         weakness: 'fire',
         maxHealth: 24,
-        imageUrl: '/cards/gods/zephyr.png',
+        imageUrl: '/cards/gods/zephyr.webp',
         flavorText: '"Mon souffle disperse tes plans comme des feuilles dans la tempête."',
         hidden: true,
     },
@@ -262,7 +262,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'light',
         weakness: 'darkness',
         maxHealth: 22,
-        imageUrl: '/cards/gods/nike.png',
+        imageUrl: '/cards/gods/nike.webp',
         flavorText: '"La victoire couronne ceux qui triomphent de leurs ennemis. Je suis leur récompense."',
         hidden: true,
     },
@@ -274,7 +274,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'water',
         weakness: 'lightning',
         maxHealth: 22,
-        imageUrl: '/cards/gods/chione.png',
+        imageUrl: '/cards/gods/chione.webp',
         archetype: 'glass_cannon',
         flavorText: '"Mon froid gèle le temps lui-même. Tes actions seront figées dans la glace."',
         hidden: true,
@@ -291,7 +291,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 16,
-        imageUrl: '/cards/gods/soldier_ares_1.png',
+        imageUrl: '/cards/gods/soldier_ares_1.webp',
         archetype: 'glass_cannon',
         flavorText: "« Pour Arès ! Pour la gloire et la guerre ! » — 16 points de vie pour 5 dégâts d'un seul coup : une munition bon marché, qu'on dépense sans regret.",
         hidden: false,  // Disponible en mode Duel
@@ -307,7 +307,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 16,
-        imageUrl: '/cards/gods/soldier_ares_2.png',
+        imageUrl: '/cards/gods/soldier_ares_2.webp',
         archetype: 'glass_cannon',
         flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
         hidden: true,  // Dupliqué pour l'histoire uniquement
@@ -323,7 +323,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'earth',
         weakness: 'air',
         maxHealth: 16,
-        imageUrl: '/cards/gods/soldier_ares_3.png',
+        imageUrl: '/cards/gods/soldier_ares_3.webp',
         archetype: 'glass_cannon',
         flavorText: '"Pour Arès ! Pour la gloire et la guerre !"',
         hidden: true,  // Dupliqué pour l'histoire uniquement
@@ -339,7 +339,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'air',
         weakness: 'fire',
         maxHealth: 26,  // 26 PV en mode Duel, 75 PV override en mode Histoire
-        imageUrl: '/cards/gods/dragon_thebes.png',
+        imageUrl: '/cards/gods/dragon_thebes.webp',
         archetype: 'tank',
         flavorText: "« Né du sang d'Arès lui-même, je suis la terreur des cieux. Plus grand, plus puissant que mon ancêtre, je règne sur les vents de la mort. » — Le plus résistant du bestiaire : sa provocation force l'adversaire à le viser pendant que son souffle ronge toute l'équipe d'en face.",
         hidden: false,  // Disponible en mode Duel
@@ -355,7 +355,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 22,  // 22 PV en mode Duel, 50 PV override en mode Histoire
-        imageUrl: '/cards/gods/arachne.png',
+        imageUrl: '/cards/gods/arachne.webp',
         flavorText: "« Athéna m'a maudite, mais ma vengeance sera tissée de leurs propres entrailles. Partout où rampe une araignée, je peux apparaître ! » — Ni bouclier ni soin : elle empoisonne l'équipe entière et fige deux cibles pendant deux tours. On ne la tue jamais assez vite.",
         hidden: false,  // Disponible en mode Duel
         category: 'creature',
@@ -387,7 +387,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 16,
-        imageUrl: '/cards/gods/giant_spider_1.png',
+        imageUrl: '/cards/gods/giant_spider_1.webp',
         flavorText: "« Nous sommes les enfants d'Arachné. Nous tissons la mort. » — Moins retorse que sa mère, plus brutale : elle plante quatre dégâts et un poison lourd sur une seule cible, puis se retranche derrière son bouclier.",
         category: 'servant',
         affiliatedTo: 'arachne',
@@ -401,7 +401,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 12,
-        imageUrl: '/cards/gods/giant_spider_2.png',
+        imageUrl: '/cards/gods/giant_spider_2.webp',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         hidden: true,  // Exclusif mode Histoire
         category: 'servant',
@@ -416,7 +416,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'darkness',
         weakness: 'light',
         maxHealth: 12,
-        imageUrl: '/cards/gods/giant_spider_3.png',
+        imageUrl: '/cards/gods/giant_spider_3.webp',
         flavorText: '"Nous sommes les enfants d\'Arachné. Nous tissons la mort."',
         hidden: true,  // Exclusif mode Histoire
         category: 'servant',
@@ -433,7 +433,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'water',
         weakness: 'lightning',
         maxHealth: 20,
-        imageUrl: '/cards/gods/card_ulysses.png',
+        imageUrl: '/cards/gods/card_ulysses.webp',
         flavorText: "« Je suis Ulysse, le rusé, celui que tous les dieux connaissent pour ses ruses infinies. » — Vingt points de vie et aucune armure : il ne survit pas en encaissant, il devient impossible à cibler. Il frappe, disparaît, revient.",
         // Validé pour la v1.0 (illustration et sorts repris à la main) : jouable en Duel et
         // opposable en Ascension, plus seulement réservé au mode Histoire.
@@ -451,7 +451,7 @@ export const ALL_GODS: GodCard[] = [
         element: 'light',
         weakness: 'darkness',
         maxHealth: 16,
-        imageUrl: '/cards/gods/card_athena_knight.png',
+        imageUrl: '/cards/gods/card_athena_knight.webp',
         archetype: 'tank',
         flavorText: "« Pour la gloire d'Athéna, nous ne fléchirons jamais ! » — Il ne tue personne : il provoque, il encaisse, et il couvre TOUT son camp de boucliers. Athéna en version deux points.",
         // Intégration au Duel effectuée : serviteur validé pour la v1.0.
@@ -468,7 +468,7 @@ export const ALL_GODS: GodCard[] = [
 /**
  * Illustration d'une carte, par identifiant.
  *
- * À utiliser partout plutôt que de fabriquer `/cards/gods/${id}.png` : deux cartes ne suivent
+ * À utiliser partout plutôt que de fabriquer `/cards/gods/${id}.webp` : deux cartes ne suivent
  * pas cette convention — les fichiers d'Ulysse et du Chevalier d'Athéna sont préfixés `card_`.
  * Leurs portraits étaient donc cassés en mode Histoire, aux deux endroits qui construisaient le
  * chemin à la main.

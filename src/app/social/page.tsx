@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { isAvatarImage, resolveAvatarUrl } from '@/lib/avatar';
 import styles from './page.module.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
@@ -43,8 +44,8 @@ type FriendStatus = 'online' | 'ingame' | 'offline';
  * sauf lui, puisque son propre profil, lui, sait afficher les emojis.
  */
 function AvatarImage({ src, alt, size }: { src: string; alt: string; size: number }) {
-    if (src && src.startsWith('/')) {
-        return <Image src={src} alt={alt} width={size} height={size} className={styles.avatarImg} />;
+    if (isAvatarImage(src)) {
+        return <Image src={resolveAvatarUrl(src)} alt={alt} width={size} height={size} className={styles.avatarImg} />;
     }
     if (src) {
         return (

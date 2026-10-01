@@ -9,6 +9,7 @@ import { getPublicProfile, getMostPlayedGod, type PublicProfile } from '@/servic
 import { getRankByFerveur, getRankProgress, getBestLadder, RANKS } from '@/data/ranks';
 import { ACHIEVEMENTS } from '@/data/achievements';
 import { ALL_GODS } from '@/data/gods';
+import { isAvatarImage, resolveAvatarUrl } from '@/lib/avatar';
 import styles from './page.module.css';
 
 /*
@@ -116,7 +117,7 @@ function PublicProfileContent() {
 
     // Un avatar est soit un chemin d'image, soit un emoji (choisi à l'inscription) : les deux
     // doivent s'afficher, sinon les joueurs à emoji apparaissent tous en avatar par défaut.
-    const avatarIsImage = !!profile.avatar && profile.avatar.startsWith('/');
+    const avatarIsImage = isAvatarImage(profile.avatar);
 
     return (
         <main className={styles.main}>
@@ -131,7 +132,7 @@ function PublicProfileContent() {
                 <section className={styles.profileCard}>
                     <div className={styles.avatarContainer}>
                         {avatarIsImage ? (
-                            <Image src={profile.avatar} alt={profile.username} width={80} height={80} className={styles.avatarImage} />
+                            <Image src={resolveAvatarUrl(profile.avatar)} alt={profile.username} width={80} height={80} className={styles.avatarImage} />
                         ) : (
                             <span className={styles.avatarEmoji} role="img" aria-label={profile.username}>
                                 {profile.avatar || '👤'}

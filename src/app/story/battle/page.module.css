@@ -463,7 +463,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('/assets/story/olympus_storm.png') center/cover no-repeat;
+    background: url('/assets/story/olympus_storm.webp') center/cover no-repeat;
     background-size: cover;
     z-index: 0;
 }
@@ -525,7 +525,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('/assets/story/olympus_storm.png') center/cover no-repeat;
+    background: url('/assets/story/olympus_storm.webp') center/cover no-repeat;
     background-size: cover;
     z-index: 0;
     /* Le voile suffit : ce filtre s'y ajoutait et écrasait l'illustration deux fois. */

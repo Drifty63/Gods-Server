@@ -11,7 +11,7 @@ import { getSpeakerColor } from '@/data/story/speakerColors';
  * Le narrateur n'est pas une carte : son portrait n'existe que pour le mode Histoire, et sert
  * aussi de repli quand un interlocuteur n'a pas d'illustration.
  */
-export const NARRATOR_PORTRAIT = '/cards/gods/narrator.png';
+export const NARRATOR_PORTRAIT = '/cards/gods/narrator.webp';
 
 interface DialogueBoxProps {
     dialogues: DialogueLine[];

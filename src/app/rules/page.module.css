@@ -41,7 +41,7 @@
             rgba(8, 10, 24, 0.55) 0%,
             rgba(10, 13, 32, 0.82) 45%,
             rgba(8, 10, 24, 0.94) 100%),
-        url('/backgrounds/rules_bg.jpg') 36% center / cover no-repeat;
+        url('/backgrounds/rules_bg.webp') 36% center / cover no-repeat;
 }
 
 /* ================================

@@ -32,7 +32,7 @@
     pointer-events: none;
     background:
         linear-gradient(180deg, rgba(15, 15, 35, 0.85) 0%, rgba(26, 26, 46, 0.8) 50%, rgba(22, 33, 62, 0.85) 100%),
-        url('/assets/ascension_background.png') center / cover no-repeat;
+        url('/assets/ascension_background.webp') center / cover no-repeat;
 }
 
 /* Le contenu passe au-dessus du calque : un élément positionné à z-index 0 est peint APRÈS les

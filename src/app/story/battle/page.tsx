@@ -18,7 +18,7 @@ import { getSpeakerColor } from '@/data/story/speakerColors';
 type BattlePhase = 'loading' | 'team_selection' | 'intro' | 'playing' | 'post_battle_dialogue' | 'victory' | 'defeat';
 
 /** Fond de repli, quand une scène n'en déclare aucun. Mieux vaut l'orage que du noir. */
-const DEFAULT_STORY_BACKGROUND = '/assets/story/olympus_storm.png';
+const DEFAULT_STORY_BACKGROUND = '/assets/story/olympus_storm.webp';
 
 // Dialogue de fin de combat, converti depuis le format DialogueLine (voir handleBattleEnd)
 interface PostBattleDialogue {

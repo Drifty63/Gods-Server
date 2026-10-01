@@ -47,7 +47,7 @@ const SKIP = new Set(
     (process.argv.find(a => a.startsWith('--skip=')) ?? '').replace('--skip=', '')
         .split(',').map(s => s.trim()).filter(Boolean),
 );
-const QUALITY = 86;
+const QUALITY = 80;
 
 /** Seuils de détection d'une bande morte : en dessous = noir, au-dessus = blanc. */
 const DARK = 24;
@@ -126,12 +126,12 @@ function referencedDestinations() {
             else if (/\.tsx?$/.test(e.name)) {
                 const text = fs.readFileSync(p, 'utf8');
                 for (const m of text.matchAll(/(?:imageUrl|backgroundImage):\s*[`'"]([^`'"]+)[`'"]/g)) set.add(m[1]);
-                // Les fabriques du bestiaire composent le chemin : `/cards/gods/${u.id}.png`.
+                // Les fabriques du bestiaire composent le chemin : `/cards/gods/${u.id}.webp`.
                 // On les reconstruit à partir des identifiants déclarés dans le même fichier.
                 for (const m of text.matchAll(/id:\s*'([a-z0-9_]+)'/g)) {
-                    set.add(`/cards/gods/${m[1]}.png`);
+                    set.add(`/cards/gods/${m[1]}.webp`);
                     for (const slot of ['generator_1', 'generator_2', 'skill_1', 'skill_2', 'utility_1']) {
-                        set.add(`/cards/spells/spell_${m[1]}_${slot}.png`);
+                        set.add(`/cards/spells/spell_${m[1]}_${slot}.webp`);
                     }
                 }
             }
@@ -173,12 +173,17 @@ for (const r of rows) {
         });
     }
 
-    // `jpeg` et non `png` : ce sont des illustrations photographiques sans transparence, où le
-    // PNG pèse plusieurs fois plus pour un résultat identique à l'œil. L'extension reste `.png`
-    // parce que c'est elle que le code référence — le navigateur lit le contenu, pas le nom.
+    /*
+     * WebP, et l'extension le dit.
+     *
+     * Les illustrations étaient écrites en JPEG dans des fichiers nommés `.png` — le navigateur
+     * lit le contenu et pas le nom, donc ça marchait, mais tout le projet mentait sur le format
+     * de ses images. Le WebP gagne encore 23 % sur ce JPEG déjà optimisé, et cette fois le nom
+     * correspond : plus personne n'aura à découvrir la supercherie en inspectant un fichier.
+     */
     const out = await pipeline
         .resize({ width: widthFor(r.size), withoutEnlargement: true })
-        .jpeg({ quality: QUALITY, mozjpeg: true })
+        .webp({ quality: QUALITY })
         .toBuffer();
 
     bytesOut += out.length;

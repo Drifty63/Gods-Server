@@ -12,7 +12,7 @@
  *  - ORPHELIN  : un fichier que rien n'affiche. Sans ce contrôle, ces fichiers s'accumulent et
  *                deviennent des destinations crédibles où déposer une illustration par erreur.
  *
- * Les chemins construits dynamiquement (`/cards/units/${id}.png`) ne peuvent pas être résolus
+ * Les chemins construits dynamiquement (`/cards/units/${id}.webp`) ne peuvent pas être résolus
  * par une lecture de texte : les dossiers concernés sont déclarés dans DYNAMIC_DIRS, et leur
  * contenu est considéré comme utilisé dès que le dossier est cité dans le code.
  */
@@ -28,7 +28,7 @@ const IMG = /[.](png|jpe?g|svg|webp|gif)$/i;
  *
  * `/cards/spells/` y manquait, et c'était exactement 95 faux orphelins — les 19 unités écrites à
  * la main multipliées par leurs 5 sorts. La fabrique `released()` compose leur chemin
- * (`/cards/spells/spell_${u.id}_${c.slot}.png`), qu'aucune lecture de texte ne peut résoudre.
+ * (`/cards/spells/spell_${u.id}_${c.slot}.webp`), qu'aucune lecture de texte ne peut résoudre.
  *
  * Le contrôle échouait donc en permanence, ce qui revient à ne pas l'avoir : un vrai orphelin
  * serait passé inaperçu au milieu des 95 autres.

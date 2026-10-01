@@ -13,7 +13,7 @@
             rgba(8, 8, 20, 0.68) 0%,
             rgba(12, 10, 24, 0.76) 40%,
             rgba(6, 6, 16, 0.88) 100%),
-        url('/backgrounds/collection_bg.jpg');
+        url('/backgrounds/collection_bg.webp');
     background-size: cover;
     /* Cadrage décalé vers la GAUCHE : le sujet fort (la porte du coffre) est à gauche de
        l'image, et un cadrage centré le poussait hors champ en portrait. */

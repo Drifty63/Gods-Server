@@ -44,8 +44,8 @@ check('BOM retiré',
     parseCsv('\ufeff"a";"b"'), [['a', 'b']]);
 
 check('chemin Windows avec antislashs',
-    parseCsv('C:\\Users\\beber\\img.png;/cards/gods/meduse.png'),
-    [['C:\\Users\\beber\\img.png', '/cards/gods/meduse.png']]);
+    parseCsv('C:\\Users\\beber\\img.png;/cards/gods/meduse.webp'),
+    [['C:\\Users\\beber\\img.png', '/cards/gods/meduse.webp']]);
 
 check('détection d\'un mauvais encodage', looksMisencoded('PÃ©trification'), true);
 check('UTF-8 correct non signalé', looksMisencoded('Pétrification'), false);

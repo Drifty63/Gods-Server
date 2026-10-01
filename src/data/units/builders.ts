@@ -64,7 +64,7 @@ function unit(kind: 'servant' | 'creature', u: UnitInput): GodCard {
         element: u.element,
         weakness: u.weakness ?? getWeakness(u.element),
         maxHealth: u.hp,
-        imageUrl: `/cards/units/${u.id}.png`,
+        imageUrl: `/cards/units/${u.id}.webp`,
         flavorText: u.flavor,
         hidden: u.hidden ?? false,
         category: kind,
@@ -196,7 +196,7 @@ export function spell(s: SpellInput): SpellCard {
         // Les sorts du bestiaire réutilisent le portrait de leur unité : 48 illustrations à
         // générer au lieu de 240, et surtout aucune image manquante (HeroCard/SpellCardUI
         // affichent l'image telle quelle, un chemin absent donnerait une icône cassée).
-        imageUrl: `/cards/units/${s.unit}.png`,
+        imageUrl: `/cards/units/${s.unit}.webp`,
         description: s.desc,
     };
 }
@@ -218,9 +218,9 @@ export interface Bestiary {
  * Trois choses les séparent, et aucune n'est cosmétique :
  *
  *  1. LES CHEMINS D'IMAGES. Une unité brouillon réutilise son portrait pour ses cinq sorts
- *     (`/cards/units/<id>.png` partout) : 48 illustrations au lieu de 240. Une unité publiée
+ *     (`/cards/units/<id>.webp` partout) : 48 illustrations au lieu de 240. Une unité publiée
  *     suit la convention du roster — portrait dans `/cards/gods/`, une image par sort dans
- *     `/cards/spells/spell_<id>_<emplacement>.png`. C'est cette convention que produit la
+ *     `/cards/spells/spell_<id>_<emplacement>.webp`. C'est cette convention que produit la
  *     feuille d'illustrations, et c'est l'emplacement, jamais le nom du sort, qui nomme le
  *     fichier : un sort peut être renommé sans relivrer son image.
  *
@@ -287,7 +287,7 @@ export function released(
         element: u.element,
         weakness: u.weakness ?? getWeakness(u.element),
         maxHealth: u.hp,
-        imageUrl: `/cards/gods/${u.id}.png`,
+        imageUrl: `/cards/gods/${u.id}.webp`,
         flavorText: u.flavor,
         hidden: u.hidden ?? false,
         category: u.kind,
@@ -314,7 +314,7 @@ export function released(
                 energyCost: cost,
                 energyGain: c.gain ?? 0,
                 effects: c.effects,
-                imageUrl: `/cards/spells/spell_${u.id}_${c.slot}.png`,
+                imageUrl: `/cards/spells/spell_${u.id}_${c.slot}.webp`,
                 description: c.desc,
             };
         }),
