@@ -228,6 +228,16 @@ export default function OnlineSelectPage() {
 
     return (
         <div className={styles.container}>
+            {/* Pendant l'envoi de l'équipe, plus rien n'est touchable : sans ce voile, on pouvait
+                encore changer sa sélection ou retaper « Confirmer » pendant que la première
+                équipe était en route vers le serveur. */}
+            {submitting && (
+                <div className={styles.blockingOverlay} role="status" aria-live="polite">
+                    <div className={styles.blockingSpinner} />
+                    <p>Envoi de votre équipe…</p>
+                </div>
+            )}
+
             <header className={styles.header}>
                 <h1>⚔️ Sélection des Dieux</h1>
                 <p className={styles.subtitle}>

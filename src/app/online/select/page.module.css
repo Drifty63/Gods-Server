@@ -580,3 +580,44 @@
 }
 
 
+
+/*
+ * Voile de blocage, posé dès le premier clic.
+ *
+ * Il couvre tout l'écran et intercepte toutes les tapes jusqu'à la réponse du serveur : sans lui,
+ * l'écran restait vivant après un clic, on pouvait taper partout, et rien ne disait d'attendre.
+ * Assez sombre pour qu'on comprenne que l'écran est momentanément indisponible, assez transparent
+ * pour qu'on voie encore ce qu'on vient de choisir.
+ */
+.blockingOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: rgba(6, 4, 14, 0.62);
+    color: #f4e2b0;
+    font-size: 1rem;
+    font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.blockingSpinner {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 3px solid rgba(244, 226, 176, 0.25);
+    border-top-color: #d4af37;
+    animation: blockingSpin 0.8s linear infinite;
+}
+
+@keyframes blockingSpin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .blockingSpinner { animation-duration: 2.4s; }
+}

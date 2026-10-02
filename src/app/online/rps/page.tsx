@@ -161,6 +161,8 @@ export default function OnlineRpsPage() {
      * bannière dit pourquoi.
      */
     const [busy, setBusy] = useState(false);
+    /** Décision Premier/Second acceptée par le serveur : l'écran reste gelé jusqu'au plateau. */
+    const [decided, setDecided] = useState(false);
 
     /*
      * Verrous SYNCHRONES des deux gestes de cet écran.
@@ -196,9 +198,22 @@ export default function OnlineRpsPage() {
         setBusy(true);
         const ok = await sendRpsDecision(goFirst);
         setBusy(false);
-        // Accepté, la décision est DÉFINITIVE : le verrou reste fermé. Refusé, on le rouvre.
-        if (!ok) decisionLockRef.current = false;
+        // Accepté, la décision est DÉFINITIVE : le verrou reste fermé, et l'écran reste gelé
+        // jusqu'au départ vers le plateau. Refusé, on rouvre.
+        if (ok) setDecided(true);
+        else decisionLockRef.current = false;
     };
+
+    /*
+     * Après le premier clic, PLUS RIEN n'est touchable.
+     *
+     * Les verrous empêchaient déjà le second envoi, mais l'écran restait vivant : les boutons
+     * réagissaient, on pouvait taper partout, et rien n'indiquait qu'il fallait attendre. Un voile
+     * couvre désormais tout l'écran pendant l'envoi, et après une décision acceptée jusqu'au
+     * départ vers le plateau. Il intercepte toutes les tapes et dit ce qui se passe.
+     */
+    const blocking = busy || decided;
+    const blockingLabel = decided ? 'La partie commence…' : 'Envoi en cours…';
 
     const getChoiceEmoji = (choice: RpsChoice | null | undefined) => {
         return CHOICES.find(c => c.id === choice)?.emoji || '❓';
@@ -226,6 +241,13 @@ export default function OnlineRpsPage() {
                 <div className={styles.orb}></div>
             </div>
 
+            {blocking && (
+                <div className={styles.blockingOverlay} role="status" aria-live="polite">
+                    <div className={styles.blockingSpinner} />
+                    <p>{blockingLabel}</p>
+                </div>
+            )}
+
             <div className={styles.content}>
                 <h1 className={styles.title}>⚔️ Qui commence ?</h1>
 
@@ -245,6 +267,7 @@ export default function OnlineRpsPage() {
                                     key={choice.id}
                                     className={styles.choiceButton}
                                     onClick={() => handleChoice(choice.id)}
+                                    disabled={busy}
                                 >
                                     <span className={styles.choiceEmoji}>{choice.emoji}</span>
                                     <span className={styles.choiceName}>{choice.name}</span>
