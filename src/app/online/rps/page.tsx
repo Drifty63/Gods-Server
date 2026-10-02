@@ -65,6 +65,8 @@ export default function OnlineRpsPage() {
      * donc l'effet ne se rejoue pas et le minuteur va à son terme.
      */
     const hasRedirectedRef = useRef(false);
+    /** Navigation programmée vers le plateau, annulée seulement au démontage (voir plus bas). */
+    const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Rediriger vers le jeu quand la partie commence
     useEffect(() => {
@@ -77,12 +79,22 @@ export default function OnlineRpsPage() {
         }
         sessionStorage.setItem('multiplayerData', JSON.stringify(gameStartData));
 
-        // Délai pour laisser le socket se synchroniser avant la redirection. Nettoyé au
-        // démontage : sans ça, un joueur qui quitte l'écran entre-temps était ramené de force
-        // sur le plateau une seconde plus tard.
-        const t = setTimeout(() => router.push('/online/game'), 1000);
-        return () => clearTimeout(t);
+        // Délai pour laisser le socket se synchroniser avant la redirection.
+        redirectTimerRef.current = setTimeout(() => router.push('/online/game'), 1000);
     }, [gameStartData, router, currentGame?.isHost]);
+
+    /*
+     * La redirection n'est annulée QUE si l'on quitte l'écran.
+     *
+     * Son nettoyage vivait dans l'effet ci-dessus, et s'exécutait donc à chaque changement de
+     * ses dépendances — pas seulement au démontage. Une simple mise à jour de la partie suffisait
+     * à annuler la navigation programmée, que le drapeau « déjà redirigé » empêchait ensuite de
+     * reprogrammer. C'est le défaut que j'avais cru corriger en passant ce drapeau en référence :
+     * j'avais traité le drapeau, pas le nettoyage qui le contournait.
+     */
+    useEffect(() => () => {
+        if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
+    }, []);
 
     /*
      * La partie a démarré mais `gameStartData` n'est pas arrivé.

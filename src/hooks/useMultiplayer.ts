@@ -162,14 +162,28 @@ export function useMultiplayer() {
         }
 
         if (row.status === 'playing' && row.host_gods && row.guest_gods && row.first_player) {
-            setGameStartData({
+            /*
+             * Posé UNE fois par partie, jamais remplacé.
+             *
+             * Chaque écriture sur la ligne — la synchronisation initiale de l'adversaire, chacun
+             * de ses coups, chaque relecture de secours — fabriquait un nouvel objet identique.
+             * Pour React c'était un changement, et l'écran du pierre-feuille-ciseaux annulait sa
+             * redirection en cours pour la reprogrammer… ce qu'il ne faisait plus, une
+             * redirection étant déjà marquée comme faite. Le joueur dont l'adversaire arrivait
+             * le premier sur le plateau restait planté. Ces données ne changent pas une fois la
+             * partie lancée : les remplacer n'apportait rien.
+             */
+            // Construit HORS du rappel : TypeScript perd dans une fonction le rétrécissement des
+            // propriétés que le `if` ci-dessus vient d'établir (non nulles).
+            const startData: GameStartData = {
                 hostGods: row.host_gods,
                 guestGods: row.guest_gods,
                 hostName: row.host_name,
                 guestName: row.guest_name || '',
                 firstPlayer: row.first_player,
                 rpsWinner: row.rps_winner || undefined,
-            });
+            };
+            setGameStartData(prev => prev ?? startData);
         }
 
         if (row.game_state) {
