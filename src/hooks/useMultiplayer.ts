@@ -604,9 +604,24 @@ export function useMultiplayer() {
     // Signale la fin de partie (déclenchée localement dès que le moteur passe en 'finished') pour
     // que le résultat soit persisté (Ferveur/stats/historique) côté serveur. Les deux clients le
     // détectent indépendamment et appellent ceci -- l'Edge Function ne traite que le premier appel.
+    /*
+     * La déclaration attend que l'état FINAL soit écrit.
+     *
+     * Le serveur ne croit plus le client : il vérifie dans l'état stocké qu'un camp n'a plus de
+     * dieu debout. Or le joueur qui porte le coup fatal détecte la fin localement, avant que sa
+     * dernière synchronisation soit arrivée — sa déclaration aurait été jugée sur l'avant-dernier
+     * état, où tout le monde est encore vivant, et refusée. On la place donc derrière la file des
+     * synchronisations, qui garantit déjà l'ordre d'arrivée.
+     *
+     * Si elle est refusée quand même (réseau capricieux), l'adversaire déclare de son côté en
+     * recevant l'état final, et la garde anti-doublon du serveur retient la première valide.
+     */
     const reportMatchResult = useCallback(
-        (didIWin: boolean, godsUsed: string[] = []) =>
-            callFunction('report-match-result', { didIWin, godsUsed }).then(r => r.ok),
+        async (didIWin: boolean, godsUsed: string[] = []) => {
+            await syncQueueRef.current.catch(() => undefined);
+            const r = await callFunction('report-match-result', { didIWin, godsUsed });
+            return r.ok;
+        },
         [callFunction],
     );
 

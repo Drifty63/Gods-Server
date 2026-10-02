@@ -24,11 +24,18 @@ Deno.serve(async (req: Request) => {
          * suffisait d'appeler cette fonction au premier tour en se déclarant vainqueur pour
          * remporter une partie classée sans avoir joué une carte.
          *
-         * On relit donc l'état stocké et on regarde qui a encore des dieux debout. Quand cet
-         * état est illisible — une partie d'une version antérieure, une forme inattendue — on
-         * retombe sur la déclaration du client PLUTÔT que de refuser : bloquer la fin d'une
-         * partie honnête serait pire que le risque résiduel, et ce cas disparaît de lui-même à
-         * mesure que les anciennes parties s'effacent.
+         * On relit donc l'état stocké et on regarde qui a encore des dieux debout.
+         *
+         * ET ON NE CROIT PLUS LE CLIENT QUAND L'ÉTAT NE TRANCHE PAS. La version précédente
+         * retombait sur sa déclaration dès que l'état ne désignait pas de vainqueur — y compris
+         * quand les deux camps étaient simplement encore debout. Une page qui n'avait pas encore
+         * chargé sa nouvelle partie envoyait le résultat de la PRÉCÉDENTE sous le nouvel
+         * identifiant, et le serveur close la nouvelle partie avec l'ancien vainqueur dès la fin
+         * du pierre-feuille-ciseaux. Plus aucune partie ne pouvait se jouer.
+         *
+         * Cette fonction ne sert qu'aux fins NATURELLES (points de vie à zéro), et celles-là sont
+         * toujours écrites dans l'état. L'abandon, le forfait et la reprise refusée passent par
+         * leurs propres fonctions. Exiger la preuve ne bloque donc aucune fin légitime.
          */
         const { data: stored } = await admin
             .from('games')
@@ -39,10 +46,19 @@ Deno.serve(async (req: Request) => {
         const outcome = outcomeFromState(stored?.game_state);
         const declaredSide = didIWin ? side : (side === 'host' ? 'guest' : 'host');
 
+        if (outcome.kind === 'ongoing') {
+            // Le cas qui a bloqué les parties : un résultat pour une partie qui n'est pas finie.
+            return jsonResponse({ error: 'La partie n\'est pas terminée' }, 409);
+        }
+        if (outcome.kind === 'unknown') {
+            return jsonResponse({ error: 'État de partie illisible, résultat refusé' }, 409);
+        }
         if (outcome.kind === 'winner' && outcome.side !== declaredSide) {
             return jsonResponse({ error: 'Résultat contredit par l\'état de la partie' }, 409);
         }
 
+        // Le match nul garde le comportement d'avant (la déclaration sert de `winner_id`). Il
+        // n'a pas été retouché ici : c'est un cas à part, sans rapport avec le défaut corrigé.
         const winnerSide = outcome.kind === 'winner' ? outcome.side : declaredSide;
 
         // Garde anti-doublon : les DEUX clients détectent la fin de partie indépendamment et

@@ -55,6 +55,8 @@ export default function OnlineGamePage() {
     const [multiplayerData, setMultiplayerData] = useState<GameStartData | null>(null);
     const [hasResumed, setHasResumed] = useState(false);
     const hasReportedResultRef = useRef(false);
+    /** Identifiant de la partie installée par CETTE page — seule partie dont on déclare l'issue. */
+    const initializedGameIdRef = useRef<string | null>(null);
 
     /*
      * Le SERVEUR a conclu la partie : l'écran doit suivre.
@@ -217,6 +219,7 @@ export default function OnlineGamePage() {
                 syncedState as unknown as GameState,
                 isHost ? 'player1' : 'player2',
             );
+            initializedGameIdRef.current = useGameStore.getState().gameState?.id ?? null;
             setIsInitialized(true);
             sessionStorage.removeItem(RESUMED_KEY);
             return;
@@ -232,6 +235,7 @@ export default function OnlineGamePage() {
             const imFirst = multiplayerData.firstPlayer === 'host';
 
             initGame(myGods, myDeck, opponentGods, opponentDeck, imFirst, false, { isOnlineGame: true });
+            initializedGameIdRef.current = useGameStore.getState().gameState?.id ?? null;
             setIsInitialized(true);
 
             const state = useGameStore.getState().gameState;
@@ -239,6 +243,7 @@ export default function OnlineGamePage() {
             syncState(state as unknown as Record<string, unknown>);
         } else if (syncedState) {
             useGameStore.getState().initWithState(syncedState as unknown as GameState, 'player2');
+            initializedGameIdRef.current = useGameStore.getState().gameState?.id ?? null;
             setIsInitialized(true);
         }
     }, [multiplayerData, isHost, isInitialized, initGame, sendAction, syncState, syncedState]);
@@ -254,13 +259,27 @@ export default function OnlineGamePage() {
     // serveur, voir apply_match_result). Les deux clients détectent 'finished' indépendamment
     // via l'état synchronisé -- le ref local évite un double appel depuis CE client, et
     // report-match-result gère lui-même la course entre les deux clients.
+    /*
+     * ON NE DÉCLARE QUE LA PARTIE QUE CETTE PAGE A CHARGÉE.
+     *
+     * Le store est global : à l'ouverture de la page, il contient encore la partie PRÉCÉDENTE,
+     * terminée, tant que l'initialisation n'a pas installé la nouvelle. Cet effet la voyait
+     * « finie », et envoyait son résultat au serveur sous l'identifiant de la NOUVELLE partie —
+     * qui se retrouvait close avec l'ancien vainqueur dès la fin du pierre-feuille-ciseaux. Les
+     * deux joueurs voyaient le score du match d'avant et plus rien ne pouvait se jouer.
+     *
+     * `isInitialized` ne passe à vrai qu'une fois la nouvelle partie installée, et l'identifiant
+     * mémorisé à ce moment-là doit être celui de l'état qu'on s'apprête à déclarer.
+     */
     useEffect(() => {
-        if (gameState?.status === 'finished' && !hasReportedResultRef.current) {
+        if (!isInitialized || !gameState) return;
+        if (gameState.id !== initializedGameIdRef.current) return;
+        if (gameState.status === 'finished' && !hasReportedResultRef.current) {
             hasReportedResultRef.current = true;
             const myGodsCast = gameState.players.find(p => p.id === playerId)?.godsCastThisMatch ?? [];
             reportMatchResult(gameState.winnerId === playerId, myGodsCast);
         }
-    }, [gameState?.status, gameState?.winnerId, playerId, reportMatchResult]);
+    }, [isInitialized, gameState, playerId, reportMatchResult]);
 
     /** Abandon EN COURS de partie : déclare forfait, puis nettoie. */
     /**

@@ -34,11 +34,13 @@ describe('issue d’une partie, lue dans son état', () => {
         expect(outcomeFromState(state([god(5)], [god(5, true)]))).toEqual({ kind: 'winner', side: 'host' });
     });
 
-    it('ne tranche pas tant que les deux camps tiennent debout', () => {
-        // LE cas qui compte : c'est exactement l'état d'une partie au premier tour, celui depuis
-        // lequel un tricheur se déclarait vainqueur.
+    it('dit « en cours » tant que les deux camps tiennent debout — pas « illisible »', () => {
+        // LE cas qui compte, et deux fois. C'est l'état d'une partie au premier tour, d'où un
+        // tricheur se déclarait vainqueur. Et c'est l'état d'une partie qui vient de commencer,
+        // que le résultat PÉRIMÉ de la précédente venait clore. Le confondre avec un état
+        // illisible faisait retomber le serveur sur la déclaration du client.
         expect(outcomeFromState(state([god(25), god(30)], [god(20), god(22)])))
-            .toEqual({ kind: 'unknown' });
+            .toEqual({ kind: 'ongoing' });
     });
 
     it('reconnaît un match nul quand les deux camps tombent', () => {
@@ -76,5 +78,34 @@ describe('états que le serveur ne sait pas lire', () => {
         // partiellement sérialisé déclarerait un camp vaincu.
         expect(outcomeFromState({ players: [{ gods: [{}] }, { gods: [god(0)] }] }))
             .toEqual({ kind: 'winner', side: 'host' });
+    });
+});
+
+describe('fins qui ne passent pas par des points de vie à zéro', () => {
+    /*
+     * À la limite de tours, le moteur termine la partie et désigne vainqueur le camp au plus fort
+     * total de PV : les deux équipes sont encore debout. Sans lire le verdict de l'état, ces
+     * parties paraissaient « en cours » à jamais et leur résultat était refusé par le serveur.
+     */
+    const finished = (winnerId?: string) => ({
+        status: 'finished',
+        winnerId,
+        players: [
+            { id: 'player1', gods: [god(12)] },
+            { id: 'player2', gods: [god(4)] },
+        ],
+    });
+
+    it('lit le vainqueur désigné à la limite de tours', () => {
+        expect(outcomeFromState(finished('player1'))).toEqual({ kind: 'winner', side: 'host' });
+        expect(outcomeFromState(finished('player2'))).toEqual({ kind: 'winner', side: 'guest' });
+    });
+
+    it('lit un nul à égalité de PV', () => {
+        expect(outcomeFromState(finished(undefined))).toEqual({ kind: 'draw' });
+    });
+
+    it('refuse un vainqueur qui ne désigne aucun des deux camps', () => {
+        expect(outcomeFromState(finished('quelqu-un-d-autre'))).toEqual({ kind: 'unknown' });
     });
 });
