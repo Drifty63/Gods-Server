@@ -44,6 +44,8 @@ export interface ResumePayload {
     isHost: boolean;
     opponentName: string | null;
     startData: unknown;
+    /** Classement de la partie (`ranked`, `duel13`, `duel_open`), tel que la ligne le porte. */
+    mode?: string;
 }
 
 /**
@@ -63,5 +65,15 @@ export function restoreMultiplayerSession(p: ResumePayload): void {
     sessionStorage.setItem('isHost', String(p.isHost));
     sessionStorage.setItem('multiplayerData', JSON.stringify(p.startData));
     if (p.opponentName) sessionStorage.setItem('opponentName', p.opponentName);
+    /*
+     * Le MODE survit à la reprise.
+     *
+     * L'effacement ci-dessus emportait `gameMode`, que rien ne réécrivait : une partie de Duel
+     * reprise devenait, pour le client, une partie en ligne ordinaire. À la sortie, le joueur
+     * était renvoyé au mauvais salon, et sa recherche suivante partait dans la mauvaise file —
+     * c'est l'asymétrie observée en test, où un joueur relançait sans refaire son équipe pendant
+     * que l'autre devait la refaire. La ligne de partie porte le mode : on le relit.
+     */
+    if (p.mode?.startsWith('duel')) sessionStorage.setItem('gameMode', 'duel');
     sessionStorage.setItem(RESUMED_KEY, 'true');
 }

@@ -192,8 +192,18 @@ function DuelContent() {
     }, [isInQueue]);
 
     // Redirection quand un match est trouvé
+    /*
+     * Partie trouvée : on part dès qu'elle a COMMENCÉ, à n'importe quel stade.
+     *
+     * Le test portait sur le seul statut « selecting ». C'est la copie exacte de la redirection
+     * du salon en ligne, corrigée là-bas et restée fautive ici : en Duel les deux équipes sont
+     * déjà composées et se confirment d'elles-mêmes, donc la partie peut quitter « selecting »
+     * en une fraction de seconde. Un joueur qui manquait cet instant restait sur l'écran de
+     * recherche pendant que son adversaire jouait.
+     */
     useEffect(() => {
-        if (currentGame && currentGame.status === 'selecting') {
+        const s = currentGame?.status;
+        if (currentGame && (s === 'selecting' || s === 'rps' || s === 'rps_deciding' || s === 'playing')) {
             // Le JETON est indispensable, et il manquait ici.
             //
             // `/online/select` exige `gameId` ET `multiplayerToken`, faute de quoi il renvoie

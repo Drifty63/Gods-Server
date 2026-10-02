@@ -97,6 +97,8 @@ export function useMultiplayer() {
     const queueIdRef = useRef<string | null>(null);
     const queueChannelRef = useRef<RealtimeChannel | null>(null);
     const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    /** Relecture périodique de sa propre entrée de file, en secours de la notification Realtime. */
+    const queuePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const pendingActionRef = useRef<GameAction | null>(null);
     /**
      * File d'attente des poussées d'état : chacune attend que la précédente ait abouti.
@@ -239,13 +241,26 @@ export function useMultiplayer() {
         const supabase = getSupabaseClient();
         const channel = supabase.channel(`queue:${queueId}`);
 
+        // La notification ET la relecture périodique peuvent annoncer le même appariement à
+        // quelques millisecondes d'écart : on ne réclame le jeton qu'une fois.
+        let claiming = false;
+        let done = false;
+
         const handleQueueRow = async (row: { matched_game_id: string | null }) => {
-            if (!row.matched_game_id) return;
+            if (!row.matched_game_id || claiming || done) return;
+            claiming = true;
 
             const { data } = await supabase.functions.invoke('claim-queue-token', {
                 body: { queueId },
             });
+            claiming = false;
             if (!data?.token) return;
+            done = true;
+
+            if (queuePollRef.current) {
+                clearInterval(queuePollRef.current);
+                queuePollRef.current = null;
+            }
 
             if (heartbeatRef.current) {
                 clearInterval(heartbeatRef.current);
@@ -283,6 +298,26 @@ export function useMultiplayer() {
                 }
             });
         queueChannelRef.current = channel;
+
+        /*
+         * Rattrapage périodique de l'appariement.
+         *
+         * L'appariement d'un joueur qui attend est déclenché par l'INSERTION de l'autre, et lui
+         * parvient par une notification Realtime. Si elle se perd — et c'est arrivé à chaque
+         * étape du mode en ligne pendant ces tests — le joueur reste sur « Recherche… » pour
+         * toujours, alors que sa partie existe déjà. Il fallait fermer l'application pour s'en
+         * sortir. On relit donc sa propre entrée toutes les trois secondes : coût négligeable, et
+         * un appariement ne peut plus passer inaperçu.
+         */
+        if (queuePollRef.current) clearInterval(queuePollRef.current);
+        queuePollRef.current = setInterval(async () => {
+            const { data: row } = await supabase
+                .from('matchmaking_queue')
+                .select('matched_game_id')
+                .eq('id', queueId)
+                .maybeSingle();
+            if (row) await handleQueueRow(row);
+        }, 3000);
     }, [attachToGame]);
 
     useEffect(() => {
@@ -292,6 +327,7 @@ export function useMultiplayer() {
             if (gameChannelRef.current) supabase.removeChannel(gameChannelRef.current);
             if (queueChannelRef.current) supabase.removeChannel(queueChannelRef.current);
             if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+            if (queuePollRef.current) clearInterval(queuePollRef.current);
         };
     }, []);
 
@@ -342,6 +378,12 @@ export function useMultiplayer() {
         if (heartbeatRef.current) {
             clearInterval(heartbeatRef.current);
             heartbeatRef.current = null;
+        }
+        // Arrêté AVANT de supprimer l'entrée : sans quoi une relecture déjà en vol pouvait trouver
+        // l'appariement et rattacher le joueur à une partie qu'il venait justement d'annuler.
+        if (queuePollRef.current) {
+            clearInterval(queuePollRef.current);
+            queuePollRef.current = null;
         }
         if (queueChannelRef.current) {
             supabase.removeChannel(queueChannelRef.current);

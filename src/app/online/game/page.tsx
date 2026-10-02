@@ -85,11 +85,36 @@ export default function OnlineGamePage() {
      * doit pas voir son sursis fondre, sinon une mauvaise connexion devient une défaite.
      */
     const [abandonSeconds, setAbandonSeconds] = useState(ABANDON_DELAY_S);
-    const abandonClaimedRef = useRef(false);
+    const lastClaimAtRef = useRef(0);
+
+    /*
+     * Le décompte ne tourne que pendant le TOUR DE L'ADVERSAIRE.
+     *
+     * Pendant le mien, l'absent n'a rien à faire et le serveur refuse — à raison — toute
+     * réclamation : sinon on gagnerait en restant immobile pendant son propre tour. Le plateau
+     * reste donc jouable ; une fois ma carte posée, la main passe à l'absent et le décompte
+     * démarre. C'était tout le défaut : l'écran d'attente masquait le plateau même pendant mon
+     * tour, si bien qu'un adversaire parti juste après avoir joué laissait le joueur resté sans
+     * aucun moyen ni de jouer ni de gagner.
+     */
+    const myTurn = !!gameState && gameState.currentPlayerId === playerId;
+    const waitingForAbsentOpponent = opponentDisconnected && !myTurn && gameState?.status !== 'finished';
+
+    /*
+     * Pendant MON tour, l'adversaire absent peut quand même perdre : en revenant une troisième
+     * fois, il est déclaré forfait. Le décompte ci-dessous ne tourne pas sur mon tour, donc rien
+     * d'autre ne relirait la partie — on la relit ici, sans rien réclamer.
+     */
+    const absentDuringMyTurn = opponentDisconnected && myTurn && gameState?.status !== 'finished';
+    useEffect(() => {
+        if (!absentDuringMyTurn) return;
+        const poll = setInterval(() => { refreshGame(); }, 2000);
+        return () => clearInterval(poll);
+    }, [absentDuringMyTurn, refreshGame]);
 
     useEffect(() => {
-        if (!opponentDisconnected || gameState?.status === 'finished') {
-            abandonClaimedRef.current = false;
+        if (!waitingForAbsentOpponent) {
+            lastClaimAtRef.current = 0;
             return;
         }
 
@@ -112,13 +137,22 @@ export default function OnlineGamePage() {
              */
             refreshGame();
 
-            if (abandonClaimedRef.current || Date.now() < deadline) return;
-            // Délai écoulé : on demande, le serveur tranche. Un refus laisse l'écran en l'état —
-            // l'adversaire est revenu. Une seule demande, pas une par seconde.
-            abandonClaimedRef.current = true;
+            if (Date.now() < deadline) return;
+
+            /*
+             * Délai écoulé : on DEMANDE, et on redemande tant que le serveur refuse.
+             *
+             * Une seule tentative ne suffisait pas : notre horloge et celle du serveur ne partent
+             * pas exactement du même instant — la sienne compte depuis la dernière écriture sur
+             * la partie, la nôtre depuis l'apparition de cet écran. Un refus « délai non écoulé »
+             * de quelques secondes laissait le joueur bloqué pour toujours. On réessaie toutes
+             * les trois secondes ; le serveur reste seul juge.
+             */
+            if (Date.now() - lastClaimAtRef.current < 3000) return;
+            lastClaimAtRef.current = Date.now();
             await claimAbandonVictory();
-            // La victoire vient d'être inscrite côté serveur : on la relit tout de suite plutôt
-            // que d'attendre le tick suivant, pour que l'écran de fin s'affiche sans délai.
+            // Si la victoire vient d'être inscrite, on la relit tout de suite plutôt que
+            // d'attendre le tick suivant, pour que l'écran de fin s'affiche sans délai.
             refreshGame();
         };
 
@@ -128,7 +162,7 @@ export default function OnlineGamePage() {
         const timer = setInterval(tick, 1000);
 
         return () => { clearTimeout(first); clearInterval(timer); };
-    }, [opponentDisconnected, gameState?.status, claimAbandonVictory, refreshGame]);
+    }, [waitingForAbsentOpponent, claimAbandonVictory, refreshGame]);
 
     // Charger les données de session
     useEffect(() => {
@@ -229,10 +263,23 @@ export default function OnlineGamePage() {
     }, [gameState?.status, gameState?.winnerId, playerId, reportMatchResult]);
 
     /** Abandon EN COURS de partie : déclare forfait, puis nettoie. */
+    /**
+     * Le salon d'où vient la partie, à lire AVANT de nettoyer la session.
+     *
+     * Les deux sorties de cet écran avaient chacune leur destination : celle d'après une fin de
+     * partie renvoyait au Duel pour un duel, celle de l'abandon renvoyait TOUJOURS au salon en
+     * ligne générique. Un joueur qui abandonnait un duel atterrissait donc là, et toute recherche
+     * lancée de cet écran partait dans la file « classé » pendant que son adversaire attendait
+     * dans la file « Duel 13 » : ils ne pouvaient plus se trouver.
+     */
+    const homeLobby = () =>
+        sessionStorage.getItem('gameMode') === 'duel' ? '/duel' : '/online';
+
     const handleLeaveGame = () => {
+        const lobby = homeLobby();
         leaveGame();
         clearMultiplayerSession();
-        router.push('/online');
+        router.push(lobby);
     };
 
     /**
@@ -243,9 +290,9 @@ export default function OnlineGamePage() {
      * lirait effacé et on renverrait tout le monde au même endroit.
      */
     const handleExitFinished = () => {
-        const wasDuel = sessionStorage.getItem('gameMode') === 'duel';
+        const lobby = homeLobby();
         clearMultiplayerSession();
-        router.push(wasDuel ? '/duel' : '/online');
+        router.push(lobby);
     };
 
     // Overlay d'erreur (partie introuvable — expirée, ou nettoyée après une trop longue coupure)
@@ -273,27 +320,54 @@ export default function OnlineGamePage() {
     // Cette garde remplaçait l'écran de victoire/défaite au bout d'une poignée de secondes,
     // le temps que la présence de l'autre client retombe — le joueur n'avait pas le temps de
     // voir son propre résultat.
-    if (opponentDisconnected && gameState?.status !== 'finished') {
-        return (
-            <div className={styles.disconnectedOverlay}>
-                <div className={styles.disconnectedModal}>
-                    <h2>😢 Adversaire déconnecté</h2>
-                    <p>Votre adversaire a quitté la partie ou a été déconnecté.</p>
-                    {/* Le décompte dit ce qui va se passer et quand. Sans lui, le joueur ne sait
-                        pas s'il doit attendre dix secondes ou dix minutes, et il quitte. */}
-                    <p className={styles.abandonCountdown}>
-                        {abandonSeconds > 0
-                            ? `Victoire par abandon dans ${abandonSeconds} s`
-                            : 'Clôture de la partie…'}
-                    </p>
-                    <p style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '1rem' }}>
-                        S&apos;il revient avant la fin du décompte, la partie reprend.
-                    </p>
-                    <button onClick={handleLeaveGame}>
-                        Quitter maintenant
+    // Une partie perdue ne se rattrape pas : on demande confirmation. Le texte dit ce qui se passe
+    // vraiment, y compris pour le classement. Rendu dans les DEUX écrans — le plateau et l'attente
+    // d'un absent — puisque les deux proposent d'abandonner.
+    const forfeitModal = confirmForfeit && (
+        <div className={styles.disconnectedOverlay}>
+            <div className={styles.disconnectedModal}>
+                <h2>🏳️ Abandonner la partie ?</h2>
+                <p>Votre adversaire sera déclaré vainqueur et la partie comptera comme une défaite.</p>
+                <div className={styles.forfeitActions}>
+                    <button onClick={() => setConfirmForfeit(false)}>Continuer</button>
+                    <button
+                        className={styles.forfeitConfirm}
+                        onClick={() => { setConfirmForfeit(false); handleLeaveGame(); }}
+                    >
+                        Abandonner
                     </button>
                 </div>
             </div>
+        </div>
+    );
+
+    if (waitingForAbsentOpponent) {
+        return (
+            <>
+                <div className={styles.disconnectedOverlay}>
+                    <div className={styles.disconnectedModal}>
+                        <h2>😢 Adversaire déconnecté</h2>
+                        <p>Votre adversaire a quitté la partie ou a été déconnecté.</p>
+                        {/* Le décompte dit ce qui va se passer et quand. Sans lui, le joueur ne sait
+                            pas s'il doit attendre dix secondes ou dix minutes, et il quitte. */}
+                        <p className={styles.abandonCountdown}>
+                            {abandonSeconds > 0
+                                ? `Victoire par abandon dans ${abandonSeconds} s`
+                                : 'Confirmation de la victoire…'}
+                        </p>
+                        <p style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '1rem' }}>
+                            S&apos;il revient avant la fin du décompte, la partie reprend.
+                        </p>
+                        {/* Ce bouton disait « Quitter maintenant » et appelait directement
+                            leave-game — c'est-à-dire qu'il donnait la victoire à l'ABSENT, sans
+                            prévenir, au joueur qui attendait justement de la recevoir. */}
+                        <button onClick={() => setConfirmForfeit(true)}>
+                            🏳️ Abandonner
+                        </button>
+                    </div>
+                </div>
+                {forfeitModal}
+            </>
         );
     }
 
@@ -311,23 +385,14 @@ export default function OnlineGamePage() {
 
     return (
         <div className={styles.container}>
-            {/* Une partie perdue ne se rattrape pas : on demande confirmation. Le texte dit ce
-                qui se passe vraiment, y compris pour le classement. */}
-            {confirmForfeit && (
-                <div className={styles.disconnectedOverlay}>
-                    <div className={styles.disconnectedModal}>
-                        <h2>🏳️ Abandonner la partie ?</h2>
-                        <p>Votre adversaire sera déclaré vainqueur et la partie comptera comme une défaite.</p>
-                        <div className={styles.forfeitActions}>
-                            <button onClick={() => setConfirmForfeit(false)}>Continuer à jouer</button>
-                            <button
-                                className={styles.forfeitConfirm}
-                                onClick={() => { setConfirmForfeit(false); handleLeaveGame(); }}
-                            >
-                                Abandonner
-                            </button>
-                        </div>
-                    </div>
+            {forfeitModal}
+
+            {/* L'adversaire est parti pendant MON tour : on ne masque pas le plateau, on prévient.
+                Jouer ma carte fait passer la main à l'absent, et c'est là que démarre le décompte. */}
+            {opponentDisconnected && myTurn && gameState.status !== 'finished' && (
+                <div className={styles.absentBanner}>
+                    Votre adversaire s&apos;est déconnecté. Jouez votre tour : s&apos;il ne revient
+                    pas, la victoire vous sera accordée.
                 </div>
             )}
 

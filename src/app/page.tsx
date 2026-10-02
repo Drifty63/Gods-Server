@@ -161,6 +161,7 @@ function HomeContent() {
       isHost: !!claimed.isHost,
       opponentName: claimed.opponentName ?? null,
       startData: claimed.startData,
+      mode: claimed.mode,
     });
     router.push('/online/game');
   };
