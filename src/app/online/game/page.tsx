@@ -68,12 +68,15 @@ export default function OnlineGamePage() {
     useEffect(() => {
         if (currentGame?.status !== 'finished') return;
         if (gameState?.status === 'finished') return;
+        // La ligne doit désigner la partie actuellement chargée : celle du match précédent, encore
+        // en mémoire du hook, conclurait la nouvelle avec l'ancien vainqueur.
+        if (currentGame.gameId !== sessionStorage.getItem('gameId')) return;
         // Le camp est traduit en identifiant local : l'hôte est toujours player1.
         const winner = currentGame.winnerSide
             ? (currentGame.winnerSide === 'host' ? 'player1' : 'player2')
             : null;
         useGameStore.getState().finishFromServer(winner);
-    }, [currentGame?.status, currentGame?.winnerSide, gameState?.status]);
+    }, [currentGame?.status, currentGame?.winnerSide, currentGame?.gameId, gameState?.status]);
 
     /*
      * Un seul minuteur, piloté par la présence de l'adversaire.

@@ -258,3 +258,40 @@ describe('fin de partie inscrite par le serveur', () => {
         expect(useGameStore.getState().gameState!.winnerId).toBe('player1');
     });
 });
+
+/**
+ * La garde ci-dessus ne doit protéger QUE la partie terminée, pas la suivante.
+ *
+ * Observé en test réel, et bien plus grave que le défaut qu'elle corrigeait : après une première
+ * partie close par abandon, plus aucune autre ne pouvait commencer. Le store garde la partie
+ * précédente tant qu'une nouvelle n'est pas installée, donc le premier état synchronisé du match
+ * suivant arrivait sur un local encore « terminé » et se faisait rejeter — les deux joueurs
+ * voyaient le résultat du match d'avant, indéfiniment.
+ */
+describe('une nouvelle partie passe toujours', () => {
+    beforeEach(() => { setupStore(['zeus'], ['hades']); });
+
+    it('accepte l’état d’une AUTRE partie, même après une fin inscrite par le serveur', () => {
+        useGameStore.getState().finishFromServer('player1');
+
+        const next = JSON.parse(JSON.stringify(useGameStore.getState().gameState)) as GameState;
+        next.id = 'partie-suivante';
+        next.status = 'playing';
+        next.winnerId = undefined;
+
+        useGameStore.getState().syncGameState(next);
+
+        const s = useGameStore.getState().gameState!;
+        expect(s.id, 'la partie suivante a été rejetée').toBe('partie-suivante');
+        expect(s.status).toBe('playing');
+    });
+
+    it('continue de protéger la partie terminée elle-même', () => {
+        useGameStore.getState().finishFromServer('player1');
+        const sameGame = JSON.parse(JSON.stringify(useGameStore.getState().gameState)) as GameState;
+        sameGame.status = 'playing';
+
+        useGameStore.getState().syncGameState(sameGame);
+        expect(useGameStore.getState().gameState!.status).toBe('finished');
+    });
+});

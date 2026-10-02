@@ -594,7 +594,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
          * PÉRIMÉ, il est simplement muet sur une fin décidée ailleurs, et porte le même
          * `turnSequence` que le nôtre.
          */
-        if (local?.status === 'finished' && state.status !== 'finished') return;
+        /*
+         * ...MAIS SEULEMENT LA MÊME PARTIE.
+         *
+         * Sans la comparaison d'identifiant, cette garde refusait l'état de la partie SUIVANTE :
+         * le store garde la précédente tant qu'une nouvelle n'est pas installée, donc le premier
+         * état synchronisé d'un nouveau match arrivait sur un local encore « terminé » et se
+         * faisait rejeter. Les deux joueurs voyaient alors le résultat du match précédent, et
+         * plus aucune partie ne pouvait commencer.
+         */
+        if (local?.status === 'finished' && state.status !== 'finished' && state.id === local.id) return;
 
         if (local) {
             const remoteSeq = state.turnSequence ?? 0;
