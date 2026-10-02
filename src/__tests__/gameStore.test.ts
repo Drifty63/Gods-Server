@@ -202,3 +202,59 @@ describe('gameStore - pas de gain d\'énergie passif en fin de tour', () => {
         expect(player2After.energy).toBe(3);
     });
 });
+
+/**
+ * Fin de partie décidée par le SERVEUR, et synchronisation qui ne la défait pas.
+ *
+ * Un abandon ou un forfait ne vit que dans la ligne `games` : aucune carte jouée ne les produit,
+ * donc `game_state` — l'état répliqué entre les deux clients — reste muet dessus. Il n'est pas
+ * PÉRIMÉ pour autant, et porte le même `turnSequence` : le garde-fou de fraîcheur le laissait
+ * donc passer, et chaque synchronisation effaçait la conclusion inscrite par le serveur.
+ *
+ * Observé en test réel : l'écran de victoire disparaissait aussitôt qu'il apparaissait, et le
+ * joueur resté voyait son décompte repartir comme si de rien n'était.
+ */
+describe('fin de partie inscrite par le serveur', () => {
+    beforeEach(() => { setupStore(['zeus'], ['hades']); });
+
+    it('clôt la partie et désigne le vainqueur', () => {
+        useGameStore.getState().finishFromServer('player1');
+        const s = useGameStore.getState().gameState!;
+        expect(s.status).toBe('finished');
+        expect(s.winnerId).toBe('player1');
+    });
+
+    it('ne se laisse pas défaire par un état distant encore « en cours »', () => {
+        useGameStore.getState().finishFromServer('player1');
+
+        // Exactement ce que livre le serveur : l'état de jeu d'avant la décision, au même tour.
+        const remote = JSON.parse(JSON.stringify(useGameStore.getState().gameState)) as GameState;
+        remote.status = 'playing';
+        remote.winnerId = undefined;
+
+        useGameStore.getState().syncGameState(remote);
+
+        const s = useGameStore.getState().gameState!;
+        expect(s.status, 'la partie a été rouverte').toBe('finished');
+        expect(s.winnerId).toBe('player1');
+    });
+
+    it('accepte en revanche un état distant lui aussi terminé', () => {
+        useGameStore.getState().finishFromServer('player1');
+
+        const remote = JSON.parse(JSON.stringify(useGameStore.getState().gameState)) as GameState;
+        remote.status = 'finished';
+        remote.winnerId = 'player2';
+
+        useGameStore.getState().syncGameState(remote);
+        expect(useGameStore.getState().gameState!.winnerId).toBe('player2');
+    });
+
+    it('ne réécrit pas une partie déjà conclue localement', () => {
+        // Les points de vie à zéro ont déjà tranché : une victoire par abandon arrivant après
+        // coup ne doit pas changer le vainqueur.
+        useGameStore.getState().finishFromServer('player1');
+        useGameStore.getState().finishFromServer('player2');
+        expect(useGameStore.getState().gameState!.winnerId).toBe('player1');
+    });
+});

@@ -580,6 +580,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
      */
     syncGameState: (state: GameState) => {
         const local = get().gameState;
+
+        /*
+         * UNE PARTIE TERMINÉE NE SE ROUVRE PAS.
+         *
+         * L'autorité sur la fin d'une partie, c'est la ligne `games` — c'est elle qui porte un
+         * abandon ou un forfait, décisions qu'aucune carte jouée ne produit et que `game_state`
+         * ne reflète donc jamais. Sans cette garde, chaque synchronisation d'un état distant
+         * resté « en cours » effaçait la conclusion inscrite par le serveur, et l'écran de fin
+         * disparaissait aussitôt qu'il apparaissait.
+         *
+         * Le garde-fou de fraîcheur ci-dessous n'y pouvait rien : l'état distant n'est pas
+         * PÉRIMÉ, il est simplement muet sur une fin décidée ailleurs, et porte le même
+         * `turnSequence` que le nôtre.
+         */
+        if (local?.status === 'finished' && state.status !== 'finished') return;
+
         if (local) {
             const remoteSeq = state.turnSequence ?? 0;
             const localSeq = local.turnSequence ?? 0;
