@@ -33,6 +33,7 @@ export default function OnlineGamePage() {
         resumeGame,
         claimAbandonVictory,
         currentGame,
+        refreshGame,
     } = useMultiplayer();
 
     const {
@@ -48,6 +49,7 @@ export default function OnlineGamePage() {
      * victoire, et il refuse tant que l'adversaire a joué récemment — on peut donc demander sans
      * risque, y compris si l'horloge de ce téléphone est fausse.
      */
+    const [confirmForfeit, setConfirmForfeit] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
     const [isHost, setIsHost] = useState(false);
     const [multiplayerData, setMultiplayerData] = useState<GameStartData | null>(null);
@@ -92,13 +94,29 @@ export default function OnlineGamePage() {
         // si l'onglet passe en arrière-plan et que le navigateur espace ses minuteurs.
         const deadline = Date.now() + ABANDON_DELAY_S * 1000;
 
-        const tick = () => {
+        const tick = async () => {
             setAbandonSeconds(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+
+            /*
+             * On relit la partie à CHAQUE seconde d'attente.
+             *
+             * Pendant que cet écran attend, la partie peut se terminer sans qu'aucune action n'y
+             * mène : victoire par abandon accordée, ou adversaire forfait pour être revenu trois
+             * fois. Ces décisions ne vivent que dans la table `games`, et le seul canal qui les
+             * portait était une notification Realtime — celle-là même qui nous a déjà fait défaut
+             * tout au long de ce débogage. C'est précisément l'écran où ne rien recevoir laisse
+             * le joueur devant un décompte qui ne mène nulle part.
+             */
+            refreshGame();
+
             if (abandonClaimedRef.current || Date.now() < deadline) return;
             // Délai écoulé : on demande, le serveur tranche. Un refus laisse l'écran en l'état —
             // l'adversaire est revenu. Une seule demande, pas une par seconde.
             abandonClaimedRef.current = true;
-            claimAbandonVictory();
+            await claimAbandonVictory();
+            // La victoire vient d'être inscrite côté serveur : on la relit tout de suite plutôt
+            // que d'attendre le tick suivant, pour que l'écran de fin s'affiche sans délai.
+            refreshGame();
         };
 
         // Premier affichage différé d'un tick : écrire l'état dans le corps de l'effet
@@ -107,7 +125,7 @@ export default function OnlineGamePage() {
         const timer = setInterval(tick, 1000);
 
         return () => { clearTimeout(first); clearInterval(timer); };
-    }, [opponentDisconnected, gameState?.status, claimAbandonVictory]);
+    }, [opponentDisconnected, gameState?.status, claimAbandonVictory, refreshGame]);
 
     // Charger les données de session
     useEffect(() => {
@@ -290,6 +308,26 @@ export default function OnlineGamePage() {
 
     return (
         <div className={styles.container}>
+            {/* Une partie perdue ne se rattrape pas : on demande confirmation. Le texte dit ce
+                qui se passe vraiment, y compris pour le classement. */}
+            {confirmForfeit && (
+                <div className={styles.disconnectedOverlay}>
+                    <div className={styles.disconnectedModal}>
+                        <h2>🏳️ Abandonner la partie ?</h2>
+                        <p>Votre adversaire sera déclaré vainqueur et la partie comptera comme une défaite.</p>
+                        <div className={styles.forfeitActions}>
+                            <button onClick={() => setConfirmForfeit(false)}>Continuer à jouer</button>
+                            <button
+                                className={styles.forfeitConfirm}
+                                onClick={() => { setConfirmForfeit(false); handleLeaveGame(); }}
+                            >
+                                Abandonner
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className={styles.multiplayerHeader}>
                 <span className={styles.connectionIndicator}>
                     <span className={`${styles.dot} ${isConnected ? styles.connected : styles.disconnected}`} />
@@ -298,8 +336,11 @@ export default function OnlineGamePage() {
                 <span className={styles.playerInfo}>
                     🌐 {isHost ? multiplayerData?.hostName : multiplayerData?.guestName} vs {isHost ? multiplayerData?.guestName : multiplayerData?.hostName}
                 </span>
-                <button className={styles.leaveButton} onClick={handleLeaveGame}>
-                    ❌ Quitter
+                {/* « Abandonner » et non « Quitter » : ce bouton déclare l'adversaire vainqueur
+                    (voir leave-game) et la partie est perdue, classement compris. Il disait
+                    « quitter », comme s'il s'agissait de fermer une fenêtre. */}
+                <button className={styles.leaveButton} onClick={() => setConfirmForfeit(true)}>
+                    🏳️ Abandonner
                 </button>
             </div>
 
