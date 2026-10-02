@@ -95,6 +95,20 @@ export default function OnlineRpsPage() {
      * Le statut suffit à savoir qu'il faut partir ; s'il manque les données de départ, on relit
      * la partie plutôt que d'attendre une notification qui ne reviendra pas.
      */
+    /*
+     * Pendant le pierre-feuille-ciseaux, cet écran attend le choix adverse puis la décision.
+     * Comme l'écran de sélection, il ne s'en remet plus au seul canal temps réel — qu'une page
+     * voisine peut lui retirer en se démontant — et relit la partie toutes les deux secondes.
+     * Le dédoublonnage de la révélation (clé de révélation dans applyGameRow) empêche une
+     * relecture de rejouer l'animation du résultat.
+     */
+    const rpsWaiting = currentGame?.status === 'rps' || currentGame?.status === 'rps_deciding';
+    useEffect(() => {
+        if (!rpsWaiting) return;
+        const poll = setInterval(() => { refreshGame(); }, 2000);
+        return () => clearInterval(poll);
+    }, [rpsWaiting, refreshGame]);
+
     useEffect(() => {
         if (currentGame?.status !== 'playing' || gameStartData) return;
         const retry = setInterval(() => { refreshGame(); }, 1500);

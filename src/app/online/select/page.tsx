@@ -12,7 +12,7 @@ import styles from './page.module.css';
 
 export default function OnlineSelectPage() {
     const router = useRouter();
-    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName, error, clearError } = useMultiplayer();
+    const { selectGods, opponentReady, gameStartData, currentGame, isConnected, resumeGame, opponentName, error, clearError, refreshGame } = useMultiplayer();
     const { profile } = useAuth();
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -59,6 +59,25 @@ export default function OnlineSelectPage() {
      * client qui n'a rien soumis la suit quand même, au lieu de rester seul derrière.
      */
     const status = currentGame?.status;
+
+    /*
+     * Cet écran relit lui-même la partie toutes les deux secondes.
+     *
+     * Toutes les pages du mode en ligne ouvrent leur canal temps réel sous le MÊME nom
+     * (`game:<id>`) — c'est indispensable à la présence, qui fait se voir les deux joueurs. Mais
+     * en passant d'une page à l'autre, la page qu'on quitte peut, en se démontant, retirer le canal
+     * que la nouvelle vient de reprendre. L'ordre de montage et de démontage varie d'une navigation
+     * à l'autre : d'où un enchaînement qui marchait parfois et se figeait parfois sur « En attente
+     * de … », alors que le serveur était déjà passé au pierre-feuille-ciseaux.
+     *
+     * Une relecture ne dépend d'aucun canal. Elle s'arrête d'elle-même quand l'écran se démonte,
+     * c'est-à-dire dès que la navigation qu'elle déclenche a eu lieu.
+     */
+    useEffect(() => {
+        if (!hasRejoined) return;
+        const poll = setInterval(() => { refreshGame(); }, 2000);
+        return () => clearInterval(poll);
+    }, [hasRejoined, refreshGame]);
 
     useEffect(() => {
         if (status !== 'rps' && status !== 'rps_deciding') return;
