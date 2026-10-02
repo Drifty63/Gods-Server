@@ -226,6 +226,28 @@ export default function OnlineGamePage() {
         }
 
         if (isHost) {
+            /*
+             * L'HÔTE NE FABRIQUE UNE PARTIE QUE SI LA BASE N'EN A PAS.
+             *
+             * `initGame` crée un état neuf, avec un nouvel identifiant, et l'hôte l'écrit en base.
+             * Si cette page s'initialise une seconde fois — c'est ce que provoquaient les tapes
+             * répétées sur Premier/Second — elle écrasait le combat en cours par une partie
+             * toute neuve, pour les DEUX joueurs. Le code s'en protégeait déjà pour la reprise
+             * après fermeture de l'appli, mais seulement dans ce cas-là.
+             *
+             * On attend donc la première lecture de la partie (`currentGame` n'existe qu'après
+             * elle). Si elle contient déjà un état, on l'ADOPTE ; sinon, et seulement sinon, on
+             * en crée un. Le serveur refuse de toute façon un second état de départ — ceci évite
+             * simplement d'en arriver là.
+             */
+            if (!currentGame) return;
+            if (syncedState) {
+                useGameStore.getState().initWithState(syncedState as unknown as GameState, 'player1');
+                initializedGameIdRef.current = useGameStore.getState().gameState?.id ?? null;
+                setIsInitialized(true);
+                return;
+            }
+
             const myGods = multiplayerData.hostGods;
             const opponentGods = multiplayerData.guestGods;
 
@@ -246,7 +268,7 @@ export default function OnlineGamePage() {
             initializedGameIdRef.current = useGameStore.getState().gameState?.id ?? null;
             setIsInitialized(true);
         }
-    }, [multiplayerData, isHost, isInitialized, initGame, sendAction, syncState, syncedState]);
+    }, [multiplayerData, isHost, isInitialized, initGame, sendAction, syncState, syncedState, currentGame]);
 
     // Appliquer les mises à jour d'état reçues après l'initialisation.
     useEffect(() => {

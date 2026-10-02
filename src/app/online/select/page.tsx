@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { getOwnedGods, getGodById } from '@/data/gods';
@@ -17,6 +17,15 @@ export default function OnlineSelectPage() {
     const [selectedGods, setSelectedGods] = useState<GodCard[]>([]);
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    /*
+     * Verrou SYNCHRONE de l'envoi de l'équipe.
+     *
+     * `submitting` est un état React : il ne change qu'à l'affichage suivant. Deux tapes dans la
+     * même fraction de seconde passaient donc toutes deux le contrôle, et l'équipe partait deux
+     * fois au serveur. Une référence, elle, se ferme à l'instant même où on la pose. L'état reste
+     * pour l'affichage (« Confirmation… »), la référence décide.
+     */
+    const submitLockRef = useRef(false);
     const [hasRejoined, setHasRejoined] = useState(false);
 
     const isCreator = profile?.is_creator || false;
@@ -122,6 +131,11 @@ export default function OnlineSelectPage() {
 
         if (gods.length < 2) { setDuelTeamMissing(true); return; }
 
+        // Même verrou que la confirmation manuelle : en développement, React exécute les effets
+        // deux fois au montage, et cette auto-confirmation enverrait l'équipe en double.
+        if (submitLockRef.current) return;
+        submitLockRef.current = true;
+
         setSelectedGods(gods);
         selectGods(gods);
         setHasSubmitted(true);
@@ -145,11 +159,14 @@ export default function OnlineSelectPage() {
      * Avec le refus désormais visible, il peut réessayer.
      */
     const handleConfirm = async () => {
-        if (selectedGods.length !== 4 || submitting) return;
+        if (selectedGods.length !== 4 || submitLockRef.current) return;
+        submitLockRef.current = true;
         setSubmitting(true);
         const ok = await selectGods(selectedGods);
         setSubmitting(false);
         if (ok) setHasSubmitted(true);
+        // Refusé : on rouvre le verrou pour que le joueur puisse réessayer.
+        else submitLockRef.current = false;
     };
 
 

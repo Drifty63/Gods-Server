@@ -137,11 +137,18 @@ export default function OnlineRpsPage() {
         if (currentGame?.status === 'finished') router.push('/online');
     }, [currentGame?.status, router]);
 
+    /** Verrous synchrones du choix et de la décision — voir handleChoice plus bas. */
+    const choiceLockRef = useRef(false);
+    const decisionLockRef = useRef(false);
+
     // Réinitialiser après une égalité
     useEffect(() => {
         if (rpsPhase === 'choosing' && hasChosen) {
             setHasChosen(false);
             setMyChoice(null);
+            // Nouvelle manche : le verrou du choix se rouvre avec elle, sinon le joueur ne
+            // pourrait plus rien choisir après une égalité.
+            choiceLockRef.current = false;
         }
     }, [rpsPhase, hasChosen]);
 
@@ -155,21 +162,42 @@ export default function OnlineRpsPage() {
      */
     const [busy, setBusy] = useState(false);
 
+    /*
+     * Verrous SYNCHRONES des deux gestes de cet écran.
+     *
+     * `busy` et `hasChosen` sont des états React : ils ne changent qu'à l'affichage suivant. Des
+     * tapes répétées dans la même fraction de seconde passaient donc toutes le contrôle, et le
+     * même choix — ou la même décision « Premier / Second » — partait plusieurs fois au serveur.
+     * Une référence se ferme à l'instant où on la pose. Les états restent pour l'affichage.
+     *
+     * Deux verrous et non un : le choix et la décision sont deux phases distinctes, et rouvrir
+     * l'un ne doit pas rouvrir l'autre.
+     */
+
     const handleChoice = async (choice: RpsChoice) => {
-        if (hasChosen || busy) return;
+        if (choiceLockRef.current) return;
+        choiceLockRef.current = true;
         setBusy(true);
         setMyChoice(choice);
         const ok = await sendRpsChoice(choice);
         setBusy(false);
-        if (ok) setHasChosen(true);
-        else setMyChoice(null);
+        if (ok) {
+            setHasChosen(true);
+        } else {
+            // Refusé : on rouvre pour permettre un nouvel essai.
+            setMyChoice(null);
+            choiceLockRef.current = false;
+        }
     };
 
     const handleDecision = async (goFirst: boolean) => {
-        if (busy) return;
+        if (decisionLockRef.current) return;
+        decisionLockRef.current = true;
         setBusy(true);
-        await sendRpsDecision(goFirst);
+        const ok = await sendRpsDecision(goFirst);
         setBusy(false);
+        // Accepté, la décision est DÉFINITIVE : le verrou reste fermé. Refusé, on le rouvre.
+        if (!ok) decisionLockRef.current = false;
     };
 
     const getChoiceEmoji = (choice: RpsChoice | null | undefined) => {

@@ -68,6 +68,32 @@ Deno.serve(async (req: Request) => {
         const side = await resolveSide(admin, gameId, token);
         if (!side) return jsonResponse({ error: 'Jeton invalide' }, 401);
 
+        /*
+         * UN SEUL ÉTAT DE DÉPART PAR PARTIE.
+         *
+         * `sync_initial_state` est envoyé par l'hôte quand il fabrique la partie. S'il le
+         * renvoyait une seconde fois — page initialisée deux fois après des tapes répétées sur
+         * Premier/Second — il écrasait le combat en cours par une partie toute neuve, avec un
+         * autre identifiant, pour les deux joueurs. L'écran se protège désormais lui-même, mais
+         * c'est ici que la règle doit être garantie : quoi que fasse un client, une partie qui a
+         * déjà commencé ne peut plus être remplacée.
+         */
+        if (action?.type === 'sync_initial_state') {
+            const { data: existing, error: existingErr } = await admin
+                .from('games')
+                .select('game_state')
+                .eq('id', gameId)
+                .single();
+            if (existingErr) return jsonResponse({ error: existingErr.message }, 500);
+            if (existing?.game_state) {
+                // En 200 et non 409, volontairement : côté client, une réponse non-2xx est
+                // traitée comme une erreur réseau et s'arrête là. Un 200 avec `ok: false`
+                // déclenche au contraire le rechargement de la partie RÉELLE — exactement ce
+                // qu'il faut à un client qui croyait en fabriquer une nouvelle.
+                return jsonResponse({ ok: false, reason: 'La partie a déjà commencé' }, 200);
+            }
+        }
+
         // Pas d'action (ou sync initiale) : aucune précondition à vérifier, comme avant.
         const skipValidation = !action || action.type === 'sync_initial_state' || action.type === 'ask_initial_state';
 
