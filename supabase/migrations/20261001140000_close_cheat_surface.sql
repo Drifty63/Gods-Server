@@ -129,6 +129,9 @@ grant execute on function public.report_ascension_run(uuid, int, int) to service
 -- ─────────────────────────────────────────────────────────────
 
 drop policy if exists games_select_all on public.games;
+-- Rejouable : une première tentative de cette migration a pu créer cette politique avant
+-- d'échouer plus loin.
+drop policy if exists games_select_participant on public.games;
 
 create policy games_select_participant on public.games
     for select to authenticated
@@ -144,31 +147,14 @@ with (security_invoker = off) as
 grant select on public.games_public to anon, authenticated;
 
 
+
 -- ─────────────────────────────────────────────────────────────
--- 3. LA FILE D'ATTENTE N'EST PLUS À LA MERCI DE TOUS
+-- 3. LA FILE D'ATTENTE — rien à faire, et c'était une erreur de l'audit
 --
--- Insertion, modification et suppression étaient ouvertes à anon avec `using (true)` : on pouvait
--- retirer les autres joueurs de la file, ou l'inonder de fausses entrées — et un déclencheur
--- d'appariement s'exécute à chaque insertion.
+-- L'audit affirmait la file ouverte à tous. C'était faux : 20260805090000_security_fixes.sql
+-- l'avait déjà verrouillée le 5 août (queue_select_own, queue_insert_own, queue_update_own,
+-- queue_delete_own). J'avais lu la migration d'origine sans vérifier celles qui l'ont suivie.
 --
--- La lecture reste ouverte : l'écran de recherche affiche le nombre de joueurs en attente, et
--- cette information n'a rien de sensible.
+-- Cette section recréait des politiques portant les MÊMES noms, et a fait échouer la migration
+-- (« policy queue_insert_own already exists »). Elle est retirée : celles d'août suffisent.
 -- ─────────────────────────────────────────────────────────────
-
-drop policy if exists queue_insert_all on public.matchmaking_queue;
-drop policy if exists queue_update_all on public.matchmaking_queue;
-drop policy if exists queue_delete_all on public.matchmaking_queue;
-
-create policy queue_insert_own on public.matchmaking_queue
-    for insert to authenticated with check (auth.uid() = user_id);
-
-create policy queue_delete_own on public.matchmaking_queue
-    for delete to authenticated using (auth.uid() = user_id);
-
--- L'UPDATE reste nécessaire : le client rafraîchit `last_seen` toutes les quelques secondes, et
--- c'est ce battement qui permet au ménage automatique de distinguer une file vivante d'une file
--- abandonnée. Restreint à sa propre entrée, il ne permet plus de toucher à celle des autres.
-create policy queue_update_own on public.matchmaking_queue
-    for update to authenticated
-    using (auth.uid() = user_id)
-    with check (auth.uid() = user_id);
